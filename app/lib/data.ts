@@ -8,6 +8,7 @@ import {
   Revenue,
 } from './definitions';
 import { formatCurrency } from './utils';
+import { User } from './definitions';
 
 export async function fetchRevenue() {
   try {
@@ -213,5 +214,25 @@ export async function fetchFilteredCustomers(query: string) {
   } catch (err) {
     console.error('Database Error:', err);
     throw new Error('Failed to fetch customer table.');
+  }
+}
+
+export async function fetchUsers() {
+  try {
+    const data = await sql<User>`
+      SELECT
+        id,
+        name,
+        email,
+        password
+      FROM users
+      ORDER BY name ASC
+    `;
+
+    const users = data.rows;
+    return users;
+  } catch (err) {
+    console.error('Database Error:', err);
+    throw new Error('Failed to fetch all users.');
   }
 }
