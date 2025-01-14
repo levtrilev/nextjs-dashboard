@@ -6,6 +6,7 @@ import {
   InvoicesTable,
   LatestInvoiceRaw,
   Revenue,
+  Tenant,
 } from './definitions';
 import { formatCurrency } from './utils';
 import { User } from './definitions';
@@ -221,18 +222,38 @@ export async function fetchUsers() {
   try {
     const data = await sql<User>`
       SELECT
-        id,
-        name,
-        email,
-        password
-      FROM users
+        u.id as id,
+        u.name as name,
+        u.email as email,
+        u.password as password,
+        u.is_admin as is_admin,
+        t.name as tenant_id
+      FROM users u JOIN tenants t ON u.tenant_id = t.id
       ORDER BY name ASC
     `;
-
+    // select u.name, t.name from users u join tenants t on u.tenant_id = t.id
     const users = data.rows;
     return users;
   } catch (err) {
     console.error('Database Error:', err);
     throw new Error('Failed to fetch all users.');
+  }
+}
+
+export async function fetchTenants() {
+  try {
+    const data = await sql<Tenant>`
+      SELECT
+        id,
+        name
+      FROM tenants
+      ORDER BY name ASC
+    `;
+
+    const tenants = data.rows;
+    return tenants;
+  } catch (err) {
+    console.error('Database Error:', err);
+    throw new Error('Failed to fetch all tenants.');
   }
 }

@@ -2,12 +2,6 @@ import { formatDateToLocal } from "@/app/lib/utils";
 import { fetchUsers } from "@/app/lib/data";
 
 export default async function UsersTable() {
-    // const users = [
-    //     { id: "111", name: "name1", email: "email1", password: "123456", date: "01.01.2025" },
-    //     { id: "222", name: "name2", email: "email2", password: "123456", date: "01.01.2025" },
-    //     { id: "333", name: "name3", email: "email3", password: "123456", date: "01.01.2025" },
-    //     { id: "444", name: "name4", email: "email4", password: "123456", date: "01.01.2025" },
-    // ];
     const datePlaceHolder = "01.01.2025";
     const users = await fetchUsers();
     return (
@@ -24,7 +18,7 @@ export default async function UsersTable() {
                                     <div>
                                         <div className="mb-2 flex items-center">
 
-                                            <p>{user.id}</p>
+                                            <p>{user.tenant_id}</p>
                                         </div>
                                         <p className="text-sm text-gray-500">{user.email}</p>
                                     </div>
@@ -32,7 +26,7 @@ export default async function UsersTable() {
                                 <div className="flex w-full items-center justify-between pt-4">
                                     <div>
                                         <p className="text-xl font-medium">
-                                            {user.password}
+                                            {user.is_admin.toString()}
                                         </p>
                                     </div>
                                     <div className="flex justify-end gap-2">
@@ -49,13 +43,13 @@ export default async function UsersTable() {
                         <thead className="rounded-lg text-left text-sm font-normal">
                             <tr>
                                 <th scope="col" className="px-4 py-5 font-medium sm:pl-6">
-                                    id
+                                    tenant
                                 </th>
                                 <th scope="col" className="px-3 py-5 font-medium">
                                     Email
                                 </th>
                                 <th scope="col" className="px-3 py-5 font-medium">
-                                    Password
+                                    Is admin
                                 </th>
                                 <th scope="col" className="px-3 py-5 font-medium">
                                     Date
@@ -76,14 +70,14 @@ export default async function UsersTable() {
                                 >
                                     <td className="whitespace-nowrap py-3 pl-6 pr-3">
                                         <div className="flex items-center gap-3">
-                                            <p>{user.id}</p>
+                                            <p>{user.tenant_id}</p>
                                         </div>
                                     </td>
                                     <td className="whitespace-nowrap px-3 py-3">
                                         {user.email}
                                     </td>
                                     <td className="whitespace-nowrap px-3 py-3">
-                                        {user.password}
+                                        {user.is_admin.toString()}
                                     </td>
                                     <td className="whitespace-nowrap px-3 py-3">
                                         {formatDateToLocal(datePlaceHolder)}

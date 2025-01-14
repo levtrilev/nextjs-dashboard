@@ -7,6 +7,13 @@ export type User = {
   name: string;
   email: string;
   password: string;
+  is_admin: boolean;
+  tenant_id: string;
+};
+
+export type Tenant = {
+  id: string;
+  name: string;
 };
 
 export type Customer = {
