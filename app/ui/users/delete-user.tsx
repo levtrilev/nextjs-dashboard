@@ -17,7 +17,7 @@ export function DeleteUser() {
         <div className="flex-2">
           <input
             id="delete-email" onChange={(e) => handleChangeEmail(e)} defaultValue={emailToDelete} type="text"
-            className=" w-full rounded-md border p-2 hover:bg-gray-100" placeholder='email'
+            className=" w-full rounded-md border p-2 hover:bg-gray-100" placeholder='Email'
           />
         </div>
         <div className="flex-2">

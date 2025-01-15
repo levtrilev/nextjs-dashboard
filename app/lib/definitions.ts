@@ -14,6 +14,13 @@ export type User = {
 export type Tenant = {
   id: string;
   name: string;
+  tenant_id: string;
+};
+
+export type Section = {
+  id: string;
+  name: string;
+  tenant_id: string;
 };
 
 export type Customer = {

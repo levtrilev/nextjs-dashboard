@@ -26,13 +26,13 @@ export const NewUser: React.FC<INewUserProps> = (props: INewUserProps) => {
         <div className="flex-1">
           <input
             id="create-email" onChange={(e) => handleChangeEmail(e)} defaultValue={email} type="text"
-            className="w-full rounded-md border p-2 hover:bg-gray-100" placeholder='email'
+            className="w-full rounded-md border p-2 hover:bg-gray-100" placeholder='Email'
           />
         </div>
         <div className="flex-1">
           <input
             id="create-password" onChange={(e) => handleChangePassword(e)} defaultValue={password} type="text"
-            className="w-full rounded-md border p-2 hover:bg-gray-100" placeholder='password'
+            className="w-full rounded-md border p-2 hover:bg-gray-100" placeholder='Password'
           />
         </div>
         <div className="flex-1">
@@ -54,7 +54,9 @@ export const NewUser: React.FC<INewUserProps> = (props: INewUserProps) => {
           </select>
         </div>
         <div className="flex-2">
-          <button className="bg-blue-400 text-white w-full rounded-md border p-2 hover:bg-blue-100 hover:text-gray-500">
+          <button
+            className="bg-blue-400 text-white w-full rounded-md border p-2 hover:bg-blue-100 hover:text-gray-500"
+          >
             Create User
           </button>
         </div>
