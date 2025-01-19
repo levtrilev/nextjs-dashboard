@@ -6,6 +6,9 @@ import { DeleteUser } from "@/app/ui/users/delete-user";
 import UsersTable from "@/app/ui/users/table";
 import { Tenant, User, Section } from '@/app/lib/definitions';
 import SectionsTable from "@/app/ui/sections/table";
+import { NewSection } from "@/app/ui/sections/new-section";
+import TenantsTable from "@/app/ui/tenants/table";
+import { NewTenant } from "@/app/ui/tenants/new-tenant";
 
 interface ITabsPageProps {
     tenants: Tenant[],
@@ -23,15 +26,25 @@ export const TabsPage: React.FC<ITabsPageProps> = (props: ITabsPageProps) => {
     return (
         <>
             <TabsSection onClick={handleSetTab} activeTab={tab} />
-            {tab === "tenants" && <h2>tenants</h2>}
-            {tab === 'users' &&
+            {tab === "tenants" &&
+                <>
+                    <NewTenant />
+                    <TenantsTable tenants={props.tenants} />
+                </>
+            }
+            {(tab === null || tab === 'users') &&
                 <>
                     <NewUser tenants={props.tenants} />
                     <DeleteUser />
                     <UsersTable users={props.users} />
                 </>
             }
-            {tab === 'sections' && <SectionsTable sections={props.sections} />}
+            {tab === 'sections' &&
+                <>
+                    <NewSection tenants={props.tenants} />
+                    <SectionsTable sections={props.sections} />
+                </>
+            }
         </>
     );
 }

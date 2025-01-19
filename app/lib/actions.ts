@@ -6,7 +6,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { signIn } from "@/auth";
 import { AuthError } from "next-auth";
-import type { User } from "@/app/lib/definitions";
+import type { Section, User, Tenant } from "@/app/lib/definitions";
 import bcrypt from "bcrypt";
 
 export type State = {
@@ -193,4 +193,51 @@ export async function deleteUser(email: string) {
   }
   revalidatePath("/dashboard/admin");
   redirect("/dashboard/admin");
+}
+
+export async function createSection(
+  name: string,
+  tenant_id: string,
+) {
+
+  const newSection: Section = {
+    id: "",
+    name: name,
+    tenant_id: tenant_id,
+  };
+  try {
+    await sql`
+      INSERT INTO sections (name, tenant_id)
+      VALUES (${newSection.name}, ${newSection.tenant_id})
+    `;
+  } catch (error) {
+    console.error("Failed to create section:", error);
+    throw new Error("Failed to create section.");
+  }
+  revalidatePath("/dashboard/admin");
+  // redirect("/dashboard/admin");
+}
+
+export async function createTenant(
+  name: string,
+  description: string,
+) {
+
+  const newTenant: Tenant = {
+    id: "",
+    active: true,
+    name: name,
+    description: description,
+  };
+  try {
+    await sql`
+      INSERT INTO tenants (name, description)
+      VALUES (${newTenant.name}, ${newTenant.description})
+    `;
+  } catch (error) {
+    console.error("Failed to create tenant:", error);
+    throw new Error("Failed to create tenant.");
+  }
+  revalidatePath("/dashboard/admin");
+  // redirect("/dashboard/admin");
 }

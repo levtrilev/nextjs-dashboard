@@ -14,7 +14,8 @@ export type User = {
 export type Tenant = {
   id: string;
   name: string;
-  tenant_id: string;
+  active: boolean;
+  description: string;
 };
 
 export type Section = {

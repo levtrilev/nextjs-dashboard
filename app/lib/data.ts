@@ -232,7 +232,7 @@ export async function fetchUsers() {
         u.is_admin as is_admin,
         t.name as tenant_id
       FROM users u JOIN tenants t ON u.tenant_id = t.id
-      ORDER BY name ASC
+      ORDER BY tenant_id ASC
     `;
     // select u.name, t.name from users u join tenants t on u.tenant_id = t.id
     const users = data.rows;
@@ -248,10 +248,13 @@ export async function fetchTenants() {
     const data = await sql<Tenant>`
       SELECT
         id,
-        name
+        name,
+        active,
+        description
       FROM tenants
       ORDER BY name ASC
     `;
+    // WHERE active
 
     const tenants = data.rows;
     return tenants;
@@ -271,7 +274,7 @@ export async function fetchSections() {
         s.name as name,
         t.name as tenant_id
       FROM sections s JOIN tenants t ON s.tenant_id = t.id
-      ORDER BY name ASC
+      ORDER BY tenant_id ASC
     `;
 
     const sections = data.rows;
