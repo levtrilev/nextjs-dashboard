@@ -218,6 +218,18 @@ export async function createSection(
   // redirect("/dashboard/admin");
 }
 
+export async function deleteSection(name: string, tenantId: string) {
+  // const id = '5bce9a5e-73b8-40e1-b8e5-c681b0ef2c2b';
+  try {
+    await sql`DELETE FROM sections WHERE name = ${name} AND tenant_id = ${tenantId}`;
+  } catch (error) {
+    console.error("Database Error, Failed to Delete Section:", error);
+    throw new Error("Database Error: Failed to Delete Section");
+  }
+  revalidatePath("/dashboard/admin");
+  // redirect("/dashboard/admin");
+}
+
 export async function createTenant(
   name: string,
   description: string,
@@ -237,6 +249,18 @@ export async function createTenant(
   } catch (error) {
     console.error("Failed to create tenant:", error);
     throw new Error("Failed to create tenant.");
+  }
+  revalidatePath("/dashboard/admin");
+  // redirect("/dashboard/admin");
+}
+
+export async function deleteTenant(name: string) {
+  // const id = '5bce9a5e-73b8-40e1-b8e5-c681b0ef2c2b';
+  try {
+    await sql`DELETE FROM tenants WHERE name = ${name}`;
+  } catch (error) {
+    console.error("Database Error, Failed to Delete Tenant:", error);
+    throw new Error("Database Error: Failed to Delete Tenant");
   }
   revalidatePath("/dashboard/admin");
   // redirect("/dashboard/admin");
