@@ -1,12 +1,13 @@
 import { formatDateToLocal } from "@/app/lib/utils";
 import { User } from '@/app/lib/definitions';
+import { BtnDeleteUser } from "./buttons";
 
 interface IUsersTableProps {
-  users: User[],
+    users: User[],
 }
 export const UsersTable: React.FC<IUsersTableProps> = (props: IUsersTableProps) => {
 
-// export default async function UsersTable() {
+    // export default async function UsersTable() {
     const datePlaceHolder = "01.01.2025";
     // const users = await fetchUsers();
     const users = props.users;
@@ -90,10 +91,8 @@ export const UsersTable: React.FC<IUsersTableProps> = (props: IUsersTableProps) 
                                     </td>
                                     <td className="whitespace-nowrap py-3 pl-6 pr-3">
                                         <div className="flex justify-end gap-3">
-                                            {/* <DeleteInvoice id={invoice.id} /> */}
-                                            <p className="text-m font-medium">
-                                                Delete
-                                            </p>                    </div>
+                                            <BtnDeleteUser id={user.id} />
+                                        </div>
                                     </td>
                                 </tr>
                             ))}

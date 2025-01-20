@@ -1,5 +1,6 @@
 import { formatDateToLocal } from "@/app/lib/utils";
 import { Tenant } from '@/app/lib/definitions';
+import { BtnDeleteTenant } from "./buttons";
 
 interface ITenantsTableProps {
     tenants: Tenant[],
@@ -89,9 +90,9 @@ export const TenantsTable: React.FC<ITenantsTableProps> = (props: ITenantsTableP
                                     <td className="whitespace-nowrap py-3 pl-6 pr-3">
                                         <div className="flex justify-end gap-3">
                                             {/* <DeleteInvoice id={invoice.id} /> */}
-                                            <p className="text-m font-medium">
-                                                Delete
-                                            </p>
+                                            {/* <p className="text-m font-medium"> */}
+                                                <BtnDeleteTenant name={tenant.name}/>
+                                            {/* </p> */}
                                         </div>
                                     </td>
                                 </tr>

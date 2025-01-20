@@ -195,6 +195,17 @@ export async function deleteUser(email: string) {
   redirect("/dashboard/admin");
 }
 
+export async function deleteUserById(id: string) {
+  try {
+    await sql`DELETE FROM users WHERE id = ${id}`;
+  } catch (error) {
+    console.error("Database Error, Failed to Delete User by id:", error);
+    throw new Error("Database Error: Failed to Delete User by id");
+  }
+  revalidatePath("/dashboard/admin");
+  redirect("/dashboard/admin");
+}
+
 export async function createSection(
   name: string,
   tenant_id: string,
@@ -225,6 +236,17 @@ export async function deleteSection(name: string, tenantId: string) {
   } catch (error) {
     console.error("Database Error, Failed to Delete Section:", error);
     throw new Error("Database Error: Failed to Delete Section");
+  }
+  revalidatePath("/dashboard/admin");
+  // redirect("/dashboard/admin");
+}
+
+export async function deleteSectionById(id: string) {
+  try {
+    await sql`DELETE FROM sections WHERE id = ${id}`;
+  } catch (error) {
+    console.error("Database Error, Failed to Delete Section by id:", error);
+    throw new Error("Database Error: Failed to Delete Section by id");
   }
   revalidatePath("/dashboard/admin");
   // redirect("/dashboard/admin");

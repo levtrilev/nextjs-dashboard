@@ -1,5 +1,6 @@
 import { formatDateToLocal } from "@/app/lib/utils";
 import { Section } from '@/app/lib/definitions';
+import { BtnDeleteSection } from "./buttons";
 
 interface ISectionsTableProps {
     sections: Section[],
@@ -83,10 +84,7 @@ export const SectionsTable: React.FC<ISectionsTableProps> = (props: ISectionsTab
                                     </td>
                                     <td className="whitespace-nowrap py-3 pl-6 pr-3">
                                         <div className="flex justify-end gap-3">
-                                            {/* <DeleteInvoice id={invoice.id} /> */}
-                                            <p className="text-m font-medium">
-                                                Delete
-                                            </p>
+                                            <BtnDeleteSection id={sec.id} />
                                         </div>
                                     </td>
                                 </tr>

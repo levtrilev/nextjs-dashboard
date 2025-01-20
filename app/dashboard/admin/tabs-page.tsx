@@ -18,12 +18,9 @@ interface ITabsPageProps {
     sections: Section[],
 }
 export const TabsPage: React.FC<ITabsPageProps> = (props: ITabsPageProps) => {
-    // export default function TabsPage() {
     const [tab, setTab] = useState<string>('users');
     const handleSetTab = (value: string) => {
         setTab(value);
-        // alert('Tab:' + value);
-        // console.log('Tab:' + value);
     };
     return (
         <>
@@ -35,7 +32,7 @@ export const TabsPage: React.FC<ITabsPageProps> = (props: ITabsPageProps) => {
                     <TenantsTable tenants={props.tenants} />
                 </>
             }
-            {(tab === null || tab === 'users') &&
+            {(tab === 'users') &&
                 <>
                     <NewUser tenants={props.tenants} />
                     <DeleteUser />
