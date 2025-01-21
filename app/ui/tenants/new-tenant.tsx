@@ -33,7 +33,7 @@ export const NewTenant = () => {
         </div>
         <div className="flex-2">
           <button
-            className="bg-blue-400 text-white w-full rounded-md border p-2 hover:bg-blue-100 hover:text-gray-500"
+            className="bg-blue-400 text-white w-full rounded-md border p-2 hover:bg-blue-500"
           >
             Create Tenant
           </button>
