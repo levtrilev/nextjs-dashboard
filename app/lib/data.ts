@@ -263,6 +263,25 @@ export async function fetchTenants() {
     throw new Error("Failed to fetch all tenants.");
   }
 }
+export async function fetchTenantById(id:string) {
+  try {
+    const data = await sql<Tenant>`
+      SELECT
+        id,
+        name,
+        active,
+        description
+      FROM tenants
+      WHERE id = ${id}
+    `;
+
+    const tenant = data.rows[0];
+    return tenant;
+  } catch (err) {
+    console.error("Database Error:", err);
+    throw new Error("Failed to fetch tenant by id.");
+  }
+}
 
 export async function fetchSections() {
   try {

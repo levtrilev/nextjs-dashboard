@@ -2,10 +2,10 @@
 
 import { TrashIcon } from '@heroicons/react/24/outline';
 import { FaceSmileIcon } from '@heroicons/react/20/solid';
-import { deleteTenant } from '../../lib/actions';
+import { deleteTenant } from '../../../lib/actions';
 import { useState } from 'react';
 
-export function DeleteTenant() {
+export default function DeleteTenant() {
   const [tenantToDelete, changeTenantToDelete] = useState<string>("");
   function handleChangeName(event: any) {
     changeTenantToDelete(event.target.value);

@@ -1,21 +1,37 @@
+'use client';
 import { formatDateToLocal } from "@/app/lib/utils";
 import { Tenant } from '@/app/lib/definitions';
 import { BtnDeleteTenant } from "./buttons";
+import BtnEditTenantModal from "./btnEditTenantModal";
+import { BtnEditTenantLink } from "./buttons";
+import { useEffect, useState } from "react";
+import { fetchTenants } from "@/app/lib/data";
 
 interface ITenantsTableProps {
     tenants: Tenant[],
 }
 export const TenantsTable: React.FC<ITenantsTableProps> = (props: ITenantsTableProps) => {
+    //   const [tenants, setTenants] = useState<Tenant[]>([]);
+
+    //     useEffect(() => {
+    //     async function getTenants() {
+    //         const tnnts = await fetchTenants();
+    //         // console.log(id);
+    //         setTenants(tnnts);
+    //     }
+    //       getTenants();
+    //   }, []);
 
     const datePlaceHolder = "01.01.2025";
-    // const users = await fetchUsers();
-    const tenants = props.tenants;
+    
+    const tenants = props.tenants.length !== 0 ? props.tenants : [];
+
     return (
         <div className="mt-6 flow-root">
             <div className="inline-block min-w-full align-middle">
                 <div className="rounded-lg bg-gray-50 p-2 md:pt-0">
                     <div className="md:hidden">
-                        {tenants?.map((tenant) => (
+                        {tenants.length > 0 && tenants.map((tenant) => (
                             <div
                                 key={tenant.id}
                                 className="mb-2 w-full rounded-md bg-white p-4"
@@ -68,7 +84,7 @@ export const TenantsTable: React.FC<ITenantsTableProps> = (props: ITenantsTableP
                             </tr>
                         </thead>
                         <tbody className="bg-white">
-                            {tenants.map((tenant) => (
+                            {tenants?.map((tenant) => (
                                 <tr
                                     key={tenant.id}
                                     className="w-full border-b py-3 text-sm last-of-type:border-none [&:first-child>td:first-child]:rounded-tl-lg [&:first-child>td:last-child]:rounded-tr-lg [&:last-child>td:first-child]:rounded-bl-lg [&:last-child>td:last-child]:rounded-br-lg"
@@ -91,7 +107,9 @@ export const TenantsTable: React.FC<ITenantsTableProps> = (props: ITenantsTableP
                                         <div className="flex justify-end gap-3">
                                             {/* <DeleteInvoice id={invoice.id} /> */}
                                             {/* <p className="text-m font-medium"> */}
-                                                <BtnDeleteTenant name={tenant.name}/>
+                                            <BtnEditTenantModal tenant={tenant} />
+                                            <BtnDeleteTenant name={tenant.name} />
+                                            <BtnEditTenantLink id={tenant.id} />
                                             {/* </p> */}
                                         </div>
                                     </td>

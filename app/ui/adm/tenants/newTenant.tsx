@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { createTenant } from '../../lib/actions';
+import { createTenant } from '../../../lib/actions';
 import { Tenant } from '@/app/lib/definitions';
 
 // interface INewSectionProps {

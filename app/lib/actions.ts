@@ -35,6 +35,7 @@ const FormSchema = z.object({
 const CreateInvoice = FormSchema.omit({ id: true, date: true });
 const UpdateInvoice = FormSchema.omit({ id: true, date: true });
 
+//#region Invoice
 export async function createInvoice(prevState: State, formData: FormData) {
   // const { customerId, amount, status } = CreateInvoice.parse({
   const validatedFields = CreateInvoice.safeParse({
@@ -127,7 +128,9 @@ export async function deleteInvoice(id: string) {
     throw new Error("Database Error: Failed to Delete Invoice");
   }
 }
+//#endregion
 
+//#region authenticate
 export async function authenticate(
   prevState: string | undefined,
   formData: FormData
@@ -146,7 +149,9 @@ export async function authenticate(
     throw error;
   }
 }
+//#endregion
 
+//#region Users
 // async function createUser(newUser: User) {
 export async function createUser(
   email: string,
@@ -205,7 +210,9 @@ export async function deleteUserById(id: string) {
   revalidatePath("/dashboard/admin");
   redirect("/dashboard/admin");
 }
+//#endregion
 
+//#region Section
 export async function createSection(
   name: string,
   tenant_id: string,
@@ -251,7 +258,9 @@ export async function deleteSectionById(id: string) {
   revalidatePath("/dashboard/admin");
   // redirect("/dashboard/admin");
 }
+//#endregion
 
+//#region Tenants
 export async function createTenant(
   name: string,
   description: string,
@@ -276,6 +285,22 @@ export async function createTenant(
   // redirect("/dashboard/admin");
 }
 
+export async function updateTenant( tenant: Tenant ) {
+  try {
+    await sql`
+      UPDATE tenants
+      SET name = ${tenant.name}, active = ${tenant.active}, description = ${tenant.description}
+      WHERE id = ${tenant.id}
+    `;
+
+  } catch (error) {
+    console.error("Failed to update tenant:", error);
+    throw new Error("Failed to update tenant.");
+  }
+  revalidatePath("/dashboard/admin");
+  // redirect("/dashboard/admin");
+}
+
 export async function deleteTenant(name: string) {
   // const id = '5bce9a5e-73b8-40e1-b8e5-c681b0ef2c2b';
   try {
@@ -287,3 +312,4 @@ export async function deleteTenant(name: string) {
   revalidatePath("/dashboard/admin");
   // redirect("/dashboard/admin");
 }
+//#endregion
