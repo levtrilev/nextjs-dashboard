@@ -2,7 +2,7 @@
 
 import { TrashIcon } from '@heroicons/react/24/outline';
 import { FaceSmileIcon } from '@heroicons/react/20/solid';
-import { deleteSection } from '../../lib/actions';
+import { deleteSection } from '../../../lib/actions';
 import { useState } from 'react';
 import { Tenant } from '@/app/lib/definitions';
 
@@ -62,3 +62,4 @@ export const DeleteSection: React.FC<IDeleteSectionProps> = (props: IDeleteSecti
     </div>
   );
 }
+export default DeleteSection;

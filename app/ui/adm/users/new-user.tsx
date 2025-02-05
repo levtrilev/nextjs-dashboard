@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { createUser } from '../../lib/actions';
+import { createUser } from '../../../lib/actions';
 import { Tenant } from '@/app/lib/definitions';
 
 interface INewUserProps {
