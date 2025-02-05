@@ -4,9 +4,14 @@ import { fetchTenants } from "@/app/lib/data";
 
 async function Page() {
     const tenants:Tenant[] = await fetchTenants();
-    return (
+
+    if (!tenants) {
+        return (<h2>Loading ...</h2>);
+      }
+      return (
         <TenantsTable tenants={tenants}/>
     );
+
 }
 
 export default Page;
