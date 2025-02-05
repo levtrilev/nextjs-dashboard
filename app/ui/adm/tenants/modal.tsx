@@ -1,29 +1,31 @@
 import { createPortal } from "react-dom";
-
-// import "./Modal.css";
-import { useRef, useEffect, ReactNode } from "react";
+import { useRef, useEffect, useState, ReactNode, ReactPortal } from "react";
 
 export default function Modal({ children, open }: { children: ReactNode, open: boolean }) {
-  const modalDomElement = document.getElementById("modal") as Element;
+  // const modalDomElement = document.getElementById("modal") as Element;
   const dialog = useRef<any>(null);
-
-  // useEffect(() => {
-  //   const handleCancel = (event: KeyboardEvent) => {
-  //     if (event.key === "Escape") {
-  //       // if (event.key === 'Escape' && preventClosing)
-  //       event.preventDefault(); // event.stopPropagation();
-  //     }
-  //   };
-  //   if (dialog.current) {
-  //     // console.log(dialog.current?"есть диалог":"нет диалога");
-  //     dialog.current.addEventListener("keydown", handleCancel);
-  //   }
-  // }, [dialog.current]);
+  const [portal, setPortal] = useState<ReactPortal>();
 
   useEffect(() => {
-    // if (dialog.current && !open) {
-    //   dialog.current.removeEventListener("keydown", handleCancel);
-    // }
+    const modalDomElement = document.getElementById("modal") as Element;
+      if (modalDomElement) {
+        setPortal(
+            createPortal(
+              <dialog
+                ref={dialog}
+                className="w-[400px] mx-auto my-[10rem] p-4 border border-gray-300 rounded-[10px] z-[100]"
+              >
+                {children}
+              </dialog>,
+              modalDomElement
+            )
+          );
+      }
+  }, []);
+
+
+  useEffect(() => {
+
     if (dialog.current) {
       if (open) {
         dialog.current.showModal();
@@ -34,20 +36,22 @@ export default function Modal({ children, open }: { children: ReactNode, open: b
     }
   }, [dialog.current, open]);
 
+  
 
-  const modalElement = document.getElementById("modal");
-  if (modalElement) {
-    return createPortal(
-      <dialog
-        ref={dialog}
-        // onKeyDown={handleCancel ? handleCancel : null}
-        className="w-[400px] mx-auto my-[10rem] p-4 border border-gray-300 rounded-[10px] z-[100]"
-      >
-        {children}
-      </dialog>,
-      modalDomElement
-    );
-  } else {
-    return undefined;
-  }
+  // const modalElement = document.getElementById("modal");
+  // if (modalElement) {
+    return portal;
+    // return createPortal(
+    //   <dialog
+    //     ref={dialog}
+    //     // onKeyDown={handleCancel ? handleCancel : null}
+    //     className="w-[400px] mx-auto my-[10rem] p-4 border border-gray-300 rounded-[10px] z-[100]"
+    //   >
+    //     {children}
+    //   </dialog>,
+    //   modalDomElement
+    // );
+  // } else {
+  //   return undefined;
+  // }
 }
