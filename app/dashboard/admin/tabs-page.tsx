@@ -28,21 +28,21 @@ export const TabsPage: React.FC<ITabsPageProps> = (props: ITabsPageProps) => {
             {tab === "tenants" &&
                 <>
                     <NewTenant />
-                    <DeleteTenant />
+                    {/* <DeleteTenant /> */}
                     <TenantsTable tenants={props.tenants} />
                 </>
             }
             {(tab === 'users') &&
                 <>
                     <NewUser tenants={props.tenants} />
-                    <DeleteUser />
+                    {/* <DeleteUser /> */}
                     <UsersTable users={props.users} />
                 </>
             }
             {tab === 'sections' &&
                 <>
                     <NewSection tenants={props.tenants} />
-                    <DeleteSection tenants={props.tenants} />
+                    {/* <DeleteSection tenants={props.tenants} /> */}
                     <SectionsTable sections={props.sections} />
                 </>
             }

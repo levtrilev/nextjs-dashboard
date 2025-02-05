@@ -11,19 +11,8 @@ interface ITenantsTableProps {
     tenants: Tenant[],
 }
 export const TenantsTable: React.FC<ITenantsTableProps> = (props: ITenantsTableProps) => {
-    //   const [tenants, setTenants] = useState<Tenant[]>([]);
-
-    //     useEffect(() => {
-    //     async function getTenants() {
-    //         const tnnts = await fetchTenants();
-    //         // console.log(id);
-    //         setTenants(tnnts);
-    //     }
-    //       getTenants();
-    //   }, []);
 
     const datePlaceHolder = "01.01.2025";
-    
     const tenants = props.tenants.length !== 0 ? props.tenants : [];
 
     return (

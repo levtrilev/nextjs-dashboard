@@ -232,10 +232,23 @@ export async function createSection(
     console.error("Failed to create section:", error);
     throw new Error("Failed to create section.");
   }
-  revalidatePath("/dashboard/admin");
-  // redirect("/dashboard/admin");
+  revalidatePath("/dashboard/admin/sections");
 }
 
+export async function updateSection( section: Section ) {
+  try {
+    await sql`
+      UPDATE sections
+      SET name = ${section.name}, tenant_id = ${section.tenant_id}
+      WHERE id = ${section.id}
+    `;
+
+  } catch (error) {
+    console.error("Failed to update section:", error);
+    throw new Error("Failed to update section.");
+  }
+  revalidatePath("/dashboard/admin/sections");
+}
 export async function deleteSection(name: string, tenantId: string) {
   // const id = '5bce9a5e-73b8-40e1-b8e5-c681b0ef2c2b';
   try {
@@ -298,7 +311,6 @@ export async function updateTenant( tenant: Tenant ) {
     throw new Error("Failed to update tenant.");
   }
   revalidatePath("/dashboard/admin");
-  // redirect("/dashboard/admin");
 }
 
 export async function deleteTenant(name: string) {

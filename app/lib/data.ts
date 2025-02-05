@@ -8,6 +8,7 @@ import {
   Revenue,
   Tenant,
   Section,
+  SectionForm,
 } from "./definitions";
 import { formatCurrency } from "./utils";
 import { User } from "./definitions";
@@ -301,5 +302,25 @@ export async function fetchSections() {
   } catch (err) {
     console.error("Database Error:", err);
     throw new Error("Failed to fetch all sections.");
+  }
+}
+
+export async function fetchSectionById(id:string) {
+  try {
+    const data = await sql<SectionForm>`
+      SELECT
+        s.id as id,
+        s.name as name,
+        s.tenant_id as tenant_id,
+        t.name as tenant_name
+      FROM sections s JOIN tenants t ON s.tenant_id = t.id
+      WHERE s.id = ${id}
+    `;
+
+    const section = data.rows[0];
+    return section;
+  } catch (err) {
+    console.error("Database Error:", err);
+    throw new Error("Failed to fetch section by id.");
   }
 }

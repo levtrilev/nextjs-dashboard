@@ -23,6 +23,12 @@ export type Section = {
   name: string;
   tenant_id: string;
 };
+export type SectionForm = {
+  id: string;
+  name: string;
+  tenant_id: string;
+  tenant_name: string;
+};
 
 export type Customer = {
   id: string;
