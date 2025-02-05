@@ -1,11 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { createTenant } from '../../../lib/actions';
-import { Tenant } from '@/app/lib/definitions';
 
-// interface INewSectionProps {
-//   tenants: Tenant[],
-// }
 export const NewTenant = () => {
 
   const [name, setName] = useState<string>("");
