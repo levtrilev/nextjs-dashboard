@@ -1,7 +1,7 @@
 import { Tenant } from "@/app/lib/definitions";
 import Modal from "./modal";
 import { useState, useEffect } from "react";
-import { PencilIcon } from "@heroicons/react/24/outline";
+import { PencilIcon, EyeIcon, BookOpenIcon, BriefcaseIcon, BookmarkIcon } from "@heroicons/react/24/outline";
 import { updateTenant } from "@/app/lib/actions";
 
 interface ITenantProps {
@@ -51,7 +51,7 @@ export const BtnEditTenantModal: React.FC<ITenantProps> = (props: ITenantProps) 
       <button
         onClick={openModal}
         className="rounded-md border p-2 hover:bg-gray-100">
-        <PencilIcon className="w-5" />
+        <BookOpenIcon className="w-5" />
       </button>
       <Modal open={modal} >
         <h2>Edit Tenant. id : {tenant.id}</h2>

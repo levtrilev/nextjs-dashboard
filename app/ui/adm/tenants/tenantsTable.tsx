@@ -2,10 +2,9 @@
 import { formatDateToLocal } from "@/app/lib/utils";
 import { Tenant } from '@/app/lib/definitions';
 import { BtnDeleteTenant } from "./buttons";
-import BtnEditTenantModal from "./btnEditTenantModal";
 import { BtnEditTenantLink } from "./buttons";
-import { useEffect, useState } from "react";
-import { fetchTenants } from "@/app/lib/data";
+import dynamic from 'next/dynamic';
+const BtnEditTenantModal = dynamic(() => import('./btnEditTenantModal'), { ssr: false });
 
 interface ITenantsTableProps {
     tenants: Tenant[],
@@ -40,7 +39,6 @@ export const TenantsTable: React.FC<ITenantsTableProps> = (props: ITenantsTableP
                                         </p>
                                     </div>
                                     <div className="flex justify-end gap-2">
-                                        {/* <DeleteInvoice id={invoice.id} /> */}
                                         <p className="text-xl font-medium">
                                             Delete
                                         </p>
@@ -94,12 +92,9 @@ export const TenantsTable: React.FC<ITenantsTableProps> = (props: ITenantsTableP
                                     </td>
                                     <td className="whitespace-nowrap py-3 pl-6 pr-3">
                                         <div className="flex justify-end gap-3">
-                                            {/* <DeleteInvoice id={invoice.id} /> */}
-                                            {/* <p className="text-m font-medium"> */}
                                             <BtnEditTenantModal tenant={tenant} />
                                             <BtnDeleteTenant name={tenant.name} />
                                             <BtnEditTenantLink id={tenant.id} />
-                                            {/* </p> */}
                                         </div>
                                     </td>
                                 </tr>

@@ -9,6 +9,7 @@ import {
   Tenant,
   Section,
   SectionForm,
+  UserForm,
 } from "./definitions";
 import { formatCurrency } from "./utils";
 import { User } from "./definitions";
@@ -244,6 +245,29 @@ export async function fetchUsers() {
   }
 }
 
+export async function fetchUserById(id: string) {
+  try {
+    const data = await sql<UserForm>`
+      SELECT
+        u.id as id,
+        u.name as name,
+        u.email as email,
+        u.password as password,
+        u.is_admin as is_admin,
+        u.tenant_id as tenant_id,
+        t.name as tenant_name
+      FROM users u JOIN tenants t ON u.tenant_id = t.id
+      WHERE u.id = ${id}
+    `;
+
+    const section = data.rows[0];
+    return section;
+  } catch (err) {
+    console.error("Database Error:", err);
+    throw new Error("Failed to fetch user by id.");
+  }
+}
+
 export async function fetchTenants() {
   try {
     const data = await sql<Tenant>`
@@ -264,7 +288,8 @@ export async function fetchTenants() {
     throw new Error("Failed to fetch all tenants.");
   }
 }
-export async function fetchTenantById(id:string) {
+
+export async function fetchTenantById(id: string) {
   try {
     const data = await sql<Tenant>`
       SELECT
@@ -305,7 +330,7 @@ export async function fetchSections() {
   }
 }
 
-export async function fetchSectionById(id:string) {
+export async function fetchSectionById(id: string) {
   try {
     const data = await sql<SectionForm>`
       SELECT

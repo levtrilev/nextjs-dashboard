@@ -1,6 +1,6 @@
 import { formatDateToLocal } from "@/app/lib/utils";
 import { User } from '@/app/lib/definitions';
-import { BtnDeleteUser } from "./buttons";
+import { BtnDeleteUser, BtnEditUserLink } from "./buttons";
 
 interface IUsersTableProps {
     users: User[],
@@ -92,6 +92,7 @@ export const UsersTable: React.FC<IUsersTableProps> = (props: IUsersTableProps) 
                                     <td className="whitespace-nowrap py-3 pl-6 pr-3">
                                         <div className="flex justify-end gap-3">
                                             <BtnDeleteUser id={user.id} />
+                                            <BtnEditUserLink id={user.id} />
                                         </div>
                                     </td>
                                 </tr>

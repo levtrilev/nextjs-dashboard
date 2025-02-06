@@ -185,6 +185,25 @@ export async function createUser(
   redirect("/dashboard/admin");
 }
 
+export async function updateUser( user: User ) {
+  // password = ${user.password}, 
+  try {
+    await sql`
+      UPDATE users
+      SET name = ${user.name}, 
+      email = ${user.email}, 
+      is_admin = ${user.is_admin}, 
+      tenant_id = ${user.tenant_id}
+      WHERE id = ${user.id}
+    `;
+
+  } catch (error) {
+    console.error("Failed to update user:", error);
+    throw new Error("Failed to update user.");
+  }
+  revalidatePath("/dashboard/admin/users");
+}
+
 export async function deleteUser(email: string) {
   // const id = '5bce9a5e-73b8-40e1-b8e5-c681b0ef2c2b';
   try {
@@ -249,6 +268,7 @@ export async function updateSection( section: Section ) {
   }
   revalidatePath("/dashboard/admin/sections");
 }
+
 export async function deleteSection(name: string, tenantId: string) {
   // const id = '5bce9a5e-73b8-40e1-b8e5-c681b0ef2c2b';
   try {

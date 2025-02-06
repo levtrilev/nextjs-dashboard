@@ -11,6 +11,16 @@ export type User = {
   tenant_id: string;
 };
 
+export type UserForm = {
+  id: string;
+  name: string;
+  email: string;
+  password: string;
+  is_admin: boolean;
+  tenant_id: string;
+  tenant_name: string;
+};
+
 export type Tenant = {
   id: string;
   name: string;
