@@ -18,7 +18,9 @@ export const NewSection: React.FC<INewSectionProps> = (props: INewSectionProps) 
   }
   return (
     <div className="flex items-center p-4">
-      <form action={() => createSection(name, tenantId)} className="flex space-x-2">
+      <form 
+      action={() => { createSection(name, tenantId); setName(''); setTenantId('') }} 
+      className="flex space-x-2">
         <div className="flex-1">
           <input
             id="section-name" onChange={(e) => handleChangeName(e)} defaultValue={name} type="text"

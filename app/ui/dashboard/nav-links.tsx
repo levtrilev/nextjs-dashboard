@@ -20,12 +20,12 @@ const links = [
     icon: DocumentDuplicateIcon,
   },
   { name: 'Customers', href: '/dashboard/customers', icon: UserGroupIcon },
-  { name: 'Admin', href: '', icon: UserGroupIcon },
+  { name: 'Admin', href: '/dashboard/admin', icon: UserGroupIcon },
   // { name: 'Lesson', href: '/dashboard/lesson', icon: HomeIcon },
 ];
 const subMenu = [
   { mainItem: 'Admin', name: 'Tenants', href: '/dashboard/admin/tenants' },
-  { mainItem: 'Admin', name: 'Users', href: '/dashboard/admin' },
+  { mainItem: 'Admin', name: 'Users', href: '/dashboard/admin/users' },
   { mainItem: 'Admin', name: 'Sections', href: '/dashboard/admin/sections' },
   // { mainItem: 'Home', name: 'About', href: '/dashboard' },
   // { mainItem: 'Home', name: 'Contacts', href: '/dashboard' },

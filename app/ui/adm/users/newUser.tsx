@@ -22,7 +22,12 @@ export const NewUser: React.FC<INewUserProps> = (props: INewUserProps) => {
   }
   return (
     <div className="flex items-center p-4">
-      <form action={() => createUser(email, password, tenantId, false)} className="flex space-x-2">
+      <form
+        action={() => {
+          createUser(email, password, tenantId, false);
+          setEmail(''); setPassword(''); setTenantId('');
+        }}
+        className="flex space-x-2">
         <div className="flex-1">
           <input
             id="create-email" onChange={(e) => handleChangeEmail(e)} defaultValue={email} type="text"

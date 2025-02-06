@@ -9,12 +9,14 @@ export const NewTenant = () => {
   function handleChangeName(event: any) {
     setName(event.target.value);
   }
-    function handleChangeDescription(event: any) {
-      setDescription(event.target.value);
+  function handleChangeDescription(event: any) {
+    setDescription(event.target.value);
   }
   return (
     <div className="flex items-center p-4">
-      <form action={() => createTenant(name, description)} className="flex space-x-2">
+      <form
+        action={() => { createTenant(name, description); setName(''); setDescription('') }}
+        className="flex space-x-2">
         <div className="flex-2">
           <input
             id="tenant-name" onChange={(e) => handleChangeName(e)} defaultValue={name} type="text"
