@@ -13,20 +13,21 @@ import { useEffect, useRef, useState } from 'react';
 // Map of links to display in the side navigation.
 // Depending on the size of the application, this would be stored in a database.
 const links = [
-  { name: 'Home', href: '/dashboard', icon: HomeIcon },
+  { name: 'Home', href: '/home', icon: HomeIcon },
+  { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
   {
     name: 'Invoices',
     href: '/dashboard/invoices',
     icon: DocumentDuplicateIcon,
   },
   { name: 'Customers', href: '/dashboard/customers', icon: UserGroupIcon },
-  { name: 'Admin', href: '/dashboard/admin', icon: UserGroupIcon },
+  { name: 'Admin', href: '/home/admin', icon: UserGroupIcon },
   // { name: 'Lesson', href: '/dashboard/lesson', icon: HomeIcon },
 ];
 const subMenu = [
-  { mainItem: 'Admin', name: 'Tenants', href: '/dashboard/admin/tenants' },
-  { mainItem: 'Admin', name: 'Users', href: '/dashboard/admin/users' },
-  { mainItem: 'Admin', name: 'Sections', href: '/dashboard/admin/sections' },
+  { mainItem: 'Admin', name: 'Tenants', href: '/home/admin/tenants' },
+  { mainItem: 'Admin', name: 'Users', href: '/home/admin/users' },
+  { mainItem: 'Admin', name: 'Sections', href: '/home/admin/sections' },
   // { mainItem: 'Home', name: 'About', href: '/dashboard' },
   // { mainItem: 'Home', name: 'Contacts', href: '/dashboard' },
   // { mainItem: 'Home', name: 'Support', href: '/dashboard' },

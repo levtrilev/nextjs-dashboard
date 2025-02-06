@@ -52,13 +52,6 @@ export default function Page() {
 
 // npm i next@latest (next@15.0.3)
 // npm warn ERESOLVE overriding peer dependency
-// npm warn ERESOLVE overriding peer dependency
-// npm warn ERESOLVE overriding peer dependency
-// npm warn ERESOLVE overriding peer dependency
-// npm warn ERESOLVE overriding peer dependency
-// npm warn ERESOLVE overriding peer dependency
-// npm warn ERESOLVE overriding peer dependency
-// npm warn ERESOLVE overriding peer dependency
 // npm warn While resolving: babel-eslint@11.0.0-beta.2
 // npm warn Found: eslint@5.16.0
 // npm warn node_modules/.pnpm/cross-spawn@7.0.6/node_modules/eslint
