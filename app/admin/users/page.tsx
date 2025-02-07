@@ -12,7 +12,7 @@ async function Page() {
     return (
         <div className="w-full">
             <div className="flex w-full items-center justify-between">
-                <h1 className={`${lusitana.className} text-2xl`}>Users</h1>
+                <h1 className={`${lusitana.className} text-2xl`}>Пользователи</h1>
             </div>
             <NewUser tenants={tenants} />
             <UsersTable users={users} />

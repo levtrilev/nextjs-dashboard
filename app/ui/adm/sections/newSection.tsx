@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { createSection } from '../../../lib/actions';
 import { Section, Tenant } from '@/app/lib/definitions';
+import { PlusIcon } from '@heroicons/react/24/outline';
 
 interface INewSectionProps {
   tenants: Tenant[],
@@ -13,18 +14,18 @@ export const NewSection: React.FC<INewSectionProps> = (props: INewSectionProps) 
   function handleChangeName(event: any) {
     setName(event.target.value);
   }
-    function handleSelectTenant(event: any) {
+  function handleSelectTenant(event: any) {
     setTenantId(event.target.value);
   }
   return (
     <div className="flex items-center p-4">
-      <form 
-      action={() => { createSection(name, tenantId); setName(''); setTenantId('') }} 
-      className="flex space-x-2">
+      <form
+        action={() => { createSection(name, tenantId); setName(''); setTenantId('') }}
+        className="flex space-x-2">
         <div className="flex-1">
           <input
             id="section-name" onChange={(e) => handleChangeName(e)} defaultValue={name} type="text"
-            className="w-full rounded-md border p-2 hover:bg-gray-100" placeholder='Section name'
+            className="w-full rounded-md border p-2 hover:bg-gray-100" placeholder='Название'
           />
         </div>
         <div className="flex-1">
@@ -36,7 +37,7 @@ export const NewSection: React.FC<INewSectionProps> = (props: INewSectionProps) 
             onChange={(e) => handleSelectTenant(e)}
           >
             <option value="" disabled>
-              Member of
+              Организация
             </option>
             {props.tenants.map((tenant) => (
               <option key={tenant.id} value={tenant.id}>
@@ -49,7 +50,10 @@ export const NewSection: React.FC<INewSectionProps> = (props: INewSectionProps) 
           <button
             className="bg-blue-400 text-white w-full rounded-md border p-2 hover:bg-blue-500"
           >
-            Create Section
+            <div className="flex items-center">
+              <span className="hidden md:block">Создать раздел</span>{' '}
+              <PlusIcon className="h-5 md:ml-4" />
+            </div>
           </button>
         </div>
       </form>

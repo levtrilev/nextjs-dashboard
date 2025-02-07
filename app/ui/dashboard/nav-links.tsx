@@ -13,21 +13,21 @@ import { useEffect, useRef, useState } from 'react';
 // Map of links to display in the side navigation.
 // Depending on the size of the application, this would be stored in a database.
 const links = [
-  { name: 'Home', href: '/home', icon: HomeIcon },
-  { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
+  { name: 'Главное', href: '/erp', icon: HomeIcon },
+  { name: 'Руководителю', href: '/dashboard', icon: HomeIcon },
   {
-    name: 'Invoices',
-    href: '/dashboard/invoices',
+    name: 'Счета к получению',
+    href: '/erp/invoices',
     icon: DocumentDuplicateIcon,
   },
-  { name: 'Customers', href: '/dashboard/customers', icon: UserGroupIcon },
-  { name: 'Admin', href: '/home/admin', icon: UserGroupIcon },
+  { name: 'Покупатели', href: '/erp/customers', icon: UserGroupIcon },
+  { name: 'Администрирование', href: '/admin', icon: UserGroupIcon },
   // { name: 'Lesson', href: '/dashboard/lesson', icon: HomeIcon },
 ];
 const subMenu = [
-  { mainItem: 'Admin', name: 'Tenants', href: '/home/admin/tenants' },
-  { mainItem: 'Admin', name: 'Users', href: '/home/admin/users' },
-  { mainItem: 'Admin', name: 'Sections', href: '/home/admin/sections' },
+  { mainItem: 'Администрирование', name: 'Пользователи', href: '/admin/users' },
+  { mainItem: 'Администрирование', name: 'Организации', href: '/admin/tenants' },
+  { mainItem: 'Администрирование', name: 'Разделы', href: '/admin/sections' },
   // { mainItem: 'Home', name: 'About', href: '/dashboard' },
   // { mainItem: 'Home', name: 'Contacts', href: '/dashboard' },
   // { mainItem: 'Home', name: 'Support', href: '/dashboard' },

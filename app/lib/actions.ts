@@ -181,8 +181,8 @@ export async function createUser(
     console.error("Failed to create user:", error);
     throw new Error("Failed to create user.");
   }
-  revalidatePath("/dashboard/admin");
-  redirect("/dashboard/admin");
+  revalidatePath("/admin");
+  redirect("/admin");
 }
 
 export async function updateUser( user: User ) {
@@ -201,7 +201,7 @@ export async function updateUser( user: User ) {
     console.error("Failed to update user:", error);
     throw new Error("Failed to update user.");
   }
-  revalidatePath("/dashboard/admin/users");
+  revalidatePath("/admin/users");
 }
 
 export async function deleteUser(email: string) {
@@ -215,8 +215,8 @@ export async function deleteUser(email: string) {
     console.error("Database Error, Failed to Delete User:", error);
     throw new Error("Database Error: Failed to Delete User");
   }
-  revalidatePath("/dashboard/admin");
-  redirect("/dashboard/admin");
+  revalidatePath("/admin");
+  redirect("/admin");
 }
 
 export async function deleteUserById(id: string) {
@@ -226,8 +226,8 @@ export async function deleteUserById(id: string) {
     console.error("Database Error, Failed to Delete User by id:", error);
     throw new Error("Database Error: Failed to Delete User by id");
   }
-  revalidatePath("/dashboard/admin");
-  redirect("/dashboard/admin");
+  revalidatePath("/admin");
+  redirect("/admin");
 }
 //#endregion
 
@@ -266,7 +266,7 @@ export async function updateSection( section: Section ) {
     console.error("Failed to update section:", error);
     throw new Error("Failed to update section.");
   }
-  revalidatePath("/dashboard/admin/sections");
+  revalidatePath("/admin/sections");
 }
 
 export async function deleteSection(name: string, tenantId: string) {
@@ -277,8 +277,8 @@ export async function deleteSection(name: string, tenantId: string) {
     console.error("Database Error, Failed to Delete Section:", error);
     throw new Error("Database Error: Failed to Delete Section");
   }
-  revalidatePath("/dashboard/admin");
-  // redirect("/dashboard/admin");
+  revalidatePath("/admin");
+  // redirect("/admin");
 }
 
 export async function deleteSectionById(id: string) {
@@ -288,8 +288,8 @@ export async function deleteSectionById(id: string) {
     console.error("Database Error, Failed to Delete Section by id:", error);
     throw new Error("Database Error: Failed to Delete Section by id");
   }
-  revalidatePath("/dashboard/admin");
-  // redirect("/dashboard/admin");
+  revalidatePath("/admin");
+  // redirect("/admin");
 }
 //#endregion
 
@@ -314,8 +314,8 @@ export async function createTenant(
     console.error("Failed to create tenant:", error);
     throw new Error("Failed to create tenant.");
   }
-  revalidatePath("/dashboard/admin");
-  // redirect("/dashboard/admin");
+  revalidatePath("/admin");
+  // redirect("/admin");
 }
 
 export async function updateTenant( tenant: Tenant ) {
@@ -330,18 +330,17 @@ export async function updateTenant( tenant: Tenant ) {
     console.error("Failed to update tenant:", error);
     throw new Error("Failed to update tenant.");
   }
-  revalidatePath("/dashboard/admin");
+  revalidatePath("/admin");
 }
 
 export async function deleteTenant(name: string) {
-  // const id = '5bce9a5e-73b8-40e1-b8e5-c681b0ef2c2b';
   try {
     await sql`DELETE FROM tenants WHERE name = ${name}`;
   } catch (error) {
     console.error("Database Error, Failed to Delete Tenant:", error);
     throw new Error("Database Error: Failed to Delete Tenant");
   }
-  revalidatePath("/dashboard/admin");
-  // redirect("/dashboard/admin");
+  revalidatePath("/admin");
+  // redirect("/admin");
 }
 //#endregion

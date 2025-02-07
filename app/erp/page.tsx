@@ -1,7 +1,7 @@
 export default function Page() {
   return (
     <>
-      <h2>Home page</h2>
+      <h2>ERP main page</h2>
     </>
   );
 }

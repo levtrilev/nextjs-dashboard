@@ -51,19 +51,19 @@ export const TenantsTable: React.FC<ITenantsTableProps> = (props: ITenantsTableP
                         <thead className="rounded-lg text-left text-sm font-normal">
                             <tr>
                                 <th scope="col" className="px-4 py-5 font-medium sm:pl-6">
-                                    Tenant
+                                    Организация
                                 </th>
                                 <th scope="col" className="px-3 py-5 font-medium">
-                                    Description
+                                    Описание
                                 </th>
                                 <th scope="col" className="px-3 py-5 font-medium">
-                                    Active
+                                    Активно
                                 </th>
                                 <th scope="col" className="px-3 py-5 font-medium">
-                                    Date created
+                                    Дата создания
                                 </th>
                                 <th scope="col" className="px-3 py-5 font-medium">
-                                    Action
+                                    Действия
                                 </th>
                                 <th scope="col" className="relative py-3 pl-6 pr-3">
                                     <span className="sr-only">Edit</span>

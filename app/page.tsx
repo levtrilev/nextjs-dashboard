@@ -3,8 +3,14 @@ import { ArrowRightIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { lusitana } from '@/app/ui/fonts';
 import Image from 'next/image';
+import { auth } from '@/auth';
+import LoginButton from './loginButton';
+// import { useSession } from 'next-auth/react';
 
 export default function Page() {
+  // const isLoggedIn = !!auth?.user;
+  // const { data: session, status } = useSession();
+
   return (
     <main className="flex min-h-screen flex-col p-6">
       <div className="flex h-20 shrink-0 items-end rounded-lg bg-blue-500 p-4 md:h-52">
@@ -22,12 +28,7 @@ export default function Page() {
             </a>
             , brought to you by Vercel.
           </p>
-          <Link
-            href="/login"
-            className="flex items-center gap-5 self-start rounded-lg bg-blue-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-400 md:text-base"
-          >
-            <span>Log in</span> <ArrowRightIcon className="w-5 md:w-6" />
-          </Link>
+          <LoginButton />
         </div>
         <div className="flex items-center justify-center p-6 md:w-3/5 md:px-28 md:py-12">
           <Image
@@ -49,6 +50,18 @@ export default function Page() {
     </main>
   );
 }
+
+{/* <form
+action={async () => {
+  'use server';
+  await signOut();
+}}
+>
+<button className="flex h-[48px] w-full grow items-center justify-center gap-2 rounded-md bg-gray-50 p-3 text-sm font-medium hover:bg-sky-100 hover:text-blue-600 md:flex-none md:justify-start md:p-2 md:px-3">
+  <PowerIcon className="w-6" />
+  <div className="hidden md:block">Sign Out</div>
+</button>
+</form> */}
 
 // npm i next@latest (next@15.0.3)
 // npm warn ERESOLVE overriding peer dependency
