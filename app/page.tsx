@@ -13,7 +13,7 @@ export default function Page() {
 
   return (
     <main className="flex min-h-screen flex-col p-6">
-      <div className="flex h-20 shrink-0 items-end rounded-lg bg-blue-500 p-4 md:h-52">
+      <div className="flex h-16 shrink-0 items-end rounded-lg bg-blue-500 p-4 md:h-52">
         <AcmeLogo />
       </div>
       <div className="mt-4 flex grow flex-col gap-4 md:flex-row">
@@ -21,20 +21,32 @@ export default function Page() {
           <div
             className="relative w-0 h-0 border-l-[15px] border-r-[15px] border-b-[26px] border-l-transparent border-r-transparent border-b-black"
           />
-          <p className={`${lusitana.className} text-xl text-gray-800 md:text-3xl md:leading-normal`}>
-            <strong>Welcome to Acme.</strong> This is the example for the{' '}
-            <a href="https://nextjs.org/learn/" className="text-blue-500">
-              Next.js Learn Course
+          <p className={`${lusitana.className} text-xl text-gray-800 md:text-2xl md:leading-normal`}>
+            <strong>Welcome to Next JS ERP</strong>
+            <br />
+            Это демо-приложение для проекта{' '}
+            <a href="https://github.com/levtrilev/nextjs-dashboard" className="text-blue-500">
+              {"ERP-система с использованием React Server Components  "}
             </a>
-            , brought to you by Vercel.
+            <br />
+          </p>
+          <p className={`${lusitana.className} text-xl text-gray-800 md:text-xl md:leading-normal`}>
+            by levtrishankov@yandex.ru
           </p>
           <LoginButton />
         </div>
-        <div className="flex items-center justify-center p-6 md:w-3/5 md:px-28 md:py-12">
-          <Image
+        <div className="flex items-center justify-center p-3 md:w-4/5 md:px-7 md:py-3">
+          {/* <Image
             src="/hero-desktop.png"
             width={1000}
             height={760}
+            className="hidden md:block"
+            alt="Screenshots of the dashboard project showing desktop version"
+          /> */}
+          <Image
+            src="/nexterp-desktop.png"
+            width={1200}
+            height={912}
             className="hidden md:block"
             alt="Screenshots of the dashboard project showing desktop version"
           />
