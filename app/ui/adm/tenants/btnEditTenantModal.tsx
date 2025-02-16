@@ -50,8 +50,8 @@ export const BtnEditTenantModal: React.FC<ITenantProps> = (props: ITenantProps) 
     <>
       <button
         onClick={openModal}
-        className="rounded-md border p-2 hover:bg-gray-100">
-        <BookOpenIcon className="w-5" />
+        className="rounded-md border border-gray-200 p-2 h-10 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <BookOpenIcon className="w-5 h-5 text-gray-800" />
       </button>
       <Modal open={modal} >
         <h2>Edit Tenant. id : {tenant.id}</h2>

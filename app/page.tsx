@@ -75,18 +75,3 @@ action={async () => {
 </button>
 </form> */}
 
-// npm i next@latest (next@15.0.3)
-// npm warn ERESOLVE overriding peer dependency
-// npm warn While resolving: babel-eslint@11.0.0-beta.2
-// npm warn Found: eslint@5.16.0
-// npm warn node_modules/.pnpm/cross-spawn@7.0.6/node_modules/eslint
-// npm warn   dev eslint@"^5.16.0" from cross-spawn@7.0.6
-// npm warn   4 more (eslint-config-moxy, eslint-plugin-babel, ...)
-// npm warn
-// npm warn Could not resolve dependency:
-// npm warn peer eslint@">= 6.0.0" from babel-eslint@11.0.0-beta.2
-// npm warn node_modules/.pnpm/cross-spawn@7.0.6/node_modules/babel-eslint
-// npm warn   babel-eslint@"^11.0.0-beta.0" from eslint-config-moxy@7.1.0
-// npm warn   node_modules/.pnpm/cross-spawn@7.0.6/node_modules/eslint-config-moxy
-// npm error Cannot read properties of null (reading 'matches')
-// npm error A complete log of this run can be found in: C:\Users\Lev\AppData\Local\npm-cache\_logs\2025-01-28T12_58_05_459Z-debug-0.log       

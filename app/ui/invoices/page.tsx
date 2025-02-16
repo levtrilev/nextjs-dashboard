@@ -1,3 +1,5 @@
+// этот модуль не используется
+
 // import Pagination from '@/app/ui/invoices/pagination';
 import Search from '@/app/ui/search';
 // import Table from '@/app/ui/invoices/table';
@@ -10,7 +12,7 @@ export default async function Page() {
     return (
         <div className="w-full">
             <div className="flex w-full items-center justify-between">
-                <h1 className={`${lusitana.className} text-2xl`}>Счета к получению</h1>
+                <h1 className={`${lusitana.className} text-2xl`}>Счета к ===получению</h1>
             </div>
             <div className="mt-4 flex items-center justify-between gap-2 md:mt-8">
                 <Suspense>

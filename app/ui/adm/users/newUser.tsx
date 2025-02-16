@@ -28,24 +28,32 @@ export const NewUser: React.FC<INewUserProps> = (props: INewUserProps) => {
           createUser(email, password, tenantId, false);
           setEmail(''); setPassword(''); setTenantId('');
         }}
-        className="flex space-x-2">
-        <div className="flex-1">
+        className="flex gap-2">
+        <div className="flex-1 flex items-center">
           <input
-            id="create-email" onChange={(e) => handleChangeEmail(e)} defaultValue={email} type="text"
-            className="w-full rounded-md border p-2 hover:bg-gray-100" placeholder='Email'
+            id="create-email"
+            onChange={(e) => handleChangeEmail(e)}
+            defaultValue={email}
+            type="text"
+            className="w-full h-10 rounded-md border border-gray-300 px-3 py-2 hover:bg-gray-50 focus:outline-none focus:ring focus:ring-blue-300"
+            placeholder='Email'
           />
         </div>
-        <div className="flex-1">
+        <div className="flex-1 flex items-center">
           <input
-            id="create-password" onChange={(e) => handleChangePassword(e)} defaultValue={password} type="text"
-            className="w-full rounded-md border p-2 hover:bg-gray-100" placeholder='Пароль'
+            id="create-password" 
+            onChange={(e) => handleChangePassword(e)} 
+            defaultValue={password} 
+            type="text"
+            className="w-full h-10 rounded-md border border-gray-300 px-3 py-2 hover:bg-gray-50 focus:outline-none focus:ring focus:ring-blue-300"
+            placeholder='Пароль'
           />
         </div>
         <div className="flex-1">
           <select
             id="selectTenant"
             name="tenantId"
-            className="w-full cursor-pointer rounded-md border p-2 hover:bg-gray-100"
+            className="w-full h-10 cursor-pointer rounded-md border border-gray-300 px-3 py-2 hover:bg-gray-50 focus:outline-none focus:ring focus:ring-blue-300"
             defaultValue=""
             onChange={(e) => handleSelectTenant(e)}
           >
@@ -59,11 +67,11 @@ export const NewUser: React.FC<INewUserProps> = (props: INewUserProps) => {
             ))}
           </select>
         </div>
-        <div className="flex-2">
+        <div className="flex-2 flex items-center">
           <button
-            className="bg-blue-400 text-white w-full rounded-md border p-2 hover:bg-blue-500"
-          >
-            <div className="flex items-center">
+            className="bg-blue-500 text-white w-full h-10 rounded-md border border-transparent px-3 py-2 hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300"
+            >
+            <div className="flex items-center justify-center h-full">
               <span className="hidden md:block">Создать пользователя</span>{' '}
               <PlusIcon className="h-5 md:ml-4" />
             </div>

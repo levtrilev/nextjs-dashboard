@@ -56,10 +56,10 @@ export const TenantsTable: React.FC<ITenantsTableProps> = (props: ITenantsTableP
                                 <th scope="col" className="px-3 py-5 font-medium">
                                     Описание
                                 </th>
-                                <th scope="col" className="px-3 py-5 font-medium">
+                                <th scope="col" className="px-2 py-5 font-medium">
                                     Активно
                                 </th>
-                                <th scope="col" className="px-3 py-5 font-medium">
+                                <th scope="col" className="px-4 py-5 font-medium">
                                     Дата создания
                                 </th>
                                 <th scope="col" className="px-3 py-5 font-medium">
@@ -74,7 +74,7 @@ export const TenantsTable: React.FC<ITenantsTableProps> = (props: ITenantsTableP
                             {tenants?.map((tenant) => (
                                 <tr
                                     key={tenant.id}
-                                    className="w-full border-b py-3 text-sm last-of-type:border-none [&:first-child>td:first-child]:rounded-tl-lg [&:first-child>td:last-child]:rounded-tr-lg [&:last-child>td:first-child]:rounded-bl-lg [&:last-child>td:last-child]:rounded-br-lg"
+                                    className="w-full border-b border-gray-200 py-3 text-sm last-of-type:border-none [&:first-child>td:first-child]:rounded-tl-lg [&:first-child>td:last-child]:rounded-tr-lg [&:last-child>td:first-child]:rounded-bl-lg [&:last-child>td:last-child]:rounded-br-lg"
                                 >
                                     <td className="whitespace-nowrap py-3 pl-6 pr-3">
                                         <div className="flex items-center gap-3">

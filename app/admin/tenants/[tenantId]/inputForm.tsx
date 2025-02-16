@@ -81,7 +81,7 @@ export default function InputForm(props: IInputFormProps) {
         >
           Save
         </button>
-        <Link href={"/dashboard/admin/tenants/"} className="w-full">
+        <Link href={"/admin/tenants/"} className="w-full">
           <button
             className="bg-blue-400 text-white w-full rounded-md border p-2 hover:bg-blue-100 hover:text-gray-500"
           >

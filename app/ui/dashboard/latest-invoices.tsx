@@ -13,8 +13,6 @@ export default async function LatestInvoices() {
         Выставлены счета
       </h2>
       <div className="flex grow flex-col justify-between rounded-xl bg-gray-50 p-4">
-        {/* NOTE: Uncomment this code in Chapter 7 */}
-
         <div className="bg-white px-6">
           {latestInvoices.map((invoice, i) => {
             return (
@@ -23,7 +21,7 @@ export default async function LatestInvoices() {
                 className={clsx(
                   'flex flex-row items-center justify-between py-4',
                   {
-                    'border-t': i !== 0,
+                    'border-t border-gray-200': i !== 0,
                   },
                 )}
               >
