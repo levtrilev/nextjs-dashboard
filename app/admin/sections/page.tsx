@@ -4,7 +4,6 @@ import { fetchSections, fetchTenants } from "@/app/lib/data";
 import { NewSection } from "@/app/ui/admin/sections/newSection";
 import SectionsTable from "@/app/ui/admin/sections/table";
 import { lusitana } from "@/app/ui/fonts";
-import { store } from "@/app/store";
 
 async function Page() {
     const sections: Section[] = await fetchSections();
@@ -17,7 +16,6 @@ async function Page() {
             </div>
             <NewSection tenants={tenants} />
             <SectionsTable sections={sections} />
-            {/* <SectionsTable sections={store.getState().sections} /> */}
         </div>
     );
 }
