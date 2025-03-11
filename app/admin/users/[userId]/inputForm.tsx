@@ -4,7 +4,7 @@ import { KeyboardEvent } from "react";
 import { SectionForm, Section, Tenant, UserForm } from "@/app/lib/definitions";
 import { updateUser } from "@/app/lib/actions";
 import Link from "next/link";
-import RadioActive from "@/app/ui/adm/tenants/radioActive";
+import RadioActive from "@/app/ui/admin/tenants/radioActive";
 
 interface IInputFormProps {
   user: UserForm,

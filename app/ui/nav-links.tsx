@@ -20,7 +20,7 @@ const links = [
     href: '/erp/invoices',
     icon: DocumentDuplicateIcon,
   },
-  { name: 'Покупатели', href: '/erp/customers', icon: UserGroupIcon },
+  { name: 'Юридические лица', href: '/erp/legal-entities', icon: UserGroupIcon },
   { name: 'Администрирование', href: '/admin', icon: UserGroupIcon },
   // { name: 'Lesson', href: '/dashboard/lesson', icon: HomeIcon },
 ];

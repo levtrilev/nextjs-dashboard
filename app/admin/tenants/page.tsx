@@ -1,9 +1,10 @@
 'use server';
-import TenantsTable from "@/app/ui/adm/tenants/tenantsTable";
+import TenantsTable from "@/app/ui/admin/tenants/tenantsTable";
 import { Tenant } from "@/app/lib/definitions";
 import { fetchTenants } from "@/app/lib/data";
-import { NewTenant } from "@/app/ui/adm/tenants/newTenant";
+import { NewTenant } from "@/app/ui/admin/tenants/newTenant";
 import { lusitana } from "@/app/ui/fonts";
+import TenantsTestTable from "@/app/ui/admin/tenants/TenantsTestTable";
 
 async function Page() {
     const tenants: Tenant[] = await fetchTenants();
@@ -15,6 +16,7 @@ async function Page() {
             </div>
             <NewTenant />
             <TenantsTable tenants={tenants} />
+            {/* <TenantsTestTable /> */}
         </div>
     );
 }

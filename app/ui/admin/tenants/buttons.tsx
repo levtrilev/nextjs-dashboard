@@ -32,7 +32,7 @@ export function BtnEditTenantLink({ id }: { id: string }) {
   return (
     <Link
       key={"Edit"}
-      href={"/admin/tenants/" + id}
+      href={"/admin/tenants/" + id + "/edit"}
       className='flex h-10 items-center justify-center space-x-2 rounded-md border border-gray-200 bg-white p-2 text-sm font-medium hover:bg-gray-100 md:flex-none md:justify-start md:p-2 md:px-3'
     >
       <LinkIcon className="w-5 h-5 text-gray-800" />

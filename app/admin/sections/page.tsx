@@ -1,8 +1,8 @@
 'use server';
 import { Section, Tenant } from "@/app/lib/definitions";
 import { fetchSections, fetchTenants } from "@/app/lib/data";
-import { NewSection } from "@/app/ui/adm/sections/newSection";
-import SectionsTable from "@/app/ui/adm/sections/table";
+import { NewSection } from "@/app/ui/admin/sections/newSection";
+import SectionsTable from "@/app/ui/admin/sections/table";
 import { lusitana } from "@/app/ui/fonts";
 import { store } from "@/app/store";
 

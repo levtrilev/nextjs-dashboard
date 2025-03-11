@@ -1,8 +1,8 @@
 'use server';
 import { fetchTenants, fetchUsers } from "@/app/lib/data";
-import UsersTable from "@/app/ui/adm/users/table";
+import UsersTable from "@/app/ui/admin/users/table";
 import { User, Tenant } from '@/app/lib/definitions';
-import { NewUser } from "@/app/ui/adm/users/newUser";
+import { NewUser } from "@/app/ui/admin/users/newUser";
 import { lusitana } from "@/app/ui/fonts";
 
 async function Page() {

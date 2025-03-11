@@ -3,6 +3,10 @@
 @tailwind utilities; */
 @import "tailwindcss";
 
+input {
+  @apply border border-gray-200 focus:outline-none focus:ring focus:ring-blue-300;
+}
+
 input[type='number'] {
   -moz-appearance: textfield;
   appearance: textfield;

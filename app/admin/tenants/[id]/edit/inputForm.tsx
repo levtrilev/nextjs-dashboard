@@ -4,7 +4,7 @@ import { KeyboardEvent } from "react";
 import { Tenant } from "@/app/lib/definitions";
 import { updateTenant } from "@/app/lib/actions";
 import Link from "next/link";
-import RadioActive from "@/app/ui/adm/tenants/radioActive";
+import RadioActive from "@/app/ui/admin/tenants/radioActive";
 
 interface IInputFormProps {
   tenant: Tenant,
@@ -34,60 +34,75 @@ export default function InputForm(props: IInputFormProps) {
   };
   const handleChangeActive = (event: any) => {
     setTenant((prev) => ({
-        ...prev,
-        active: !prev.active,
+      ...prev,
+      active: !prev.active,
     }));
-};
+  };
   return (
     <div >
       {/* className="max-w-md mx-auto p-6 bg-white shadow-md rounded-md" */}
       <h3>{show && "Нажата клавиша Enter"}</h3>
       <div className="grid grid-cols-2 gap-4">
-        <div className="flex justify-between mt-6">
-          <label htmlFor="name" className="text-sm font-medium">
+        <div className="flex justify-between mt-1">
+          <label
+            htmlFor="name"
+            className="text-sm font-medium flex items-center p-2"
+          >
             Name:
           </label>
           <input
             id="name"
             type="text"
-            className="control rounded-md border border-gray-200"
+            className="w-7/8 control rounded-md border border-gray-200 p-2"
             value={tenant.name}
             onChange={(e) => handleChangeName(e)}
             onKeyDown={(e) => handleKeyDown(e)}
           />
         </div>
-        <div className="flex justify-between mt-6">
-          <label htmlFor="description" className="text-sm font-medium">
+        <div className="w-1/2"></div>
+        <div className="flex justify-between mt-1">
+          <label
+            htmlFor="description"
+            className="w-2/8 text-sm font-medium flex items-center p-2">
             Description:
           </label>
           <input
             id="description"
             type="text"
-            className="control rounded-md border border-gray-200"
+            className="w-13/16 control rounded-md border border-gray-200 p-2"
             value={tenant.description}
             onChange={(e) => handleChangeDescription(e)}
             onKeyDown={(e) => handleKeyDown(e)}
           />
         </div>
-        <RadioActive tenant={tenant} handleChangeActive={handleChangeActive}/>
+        <div className="w-1/2"></div>
+        <RadioActive tenant={tenant} handleChangeActive={handleChangeActive} />
         <div></div>
       </div>
-      <div className="flex justify-between mt-6">
-        <button
-          onClick={() => {
-            updateTenant(tenant);
-          }}
-          className="bg-blue-400 text-white w-full rounded-md border p-2 hover:bg-blue-100 hover:text-gray-500"
-        >
-          Save
-        </button>
-        <Link href={"/admin/tenants/"} className="w-full">
-          <button
-            className="bg-blue-400 text-white w-full rounded-md border p-2 hover:bg-blue-100 hover:text-gray-500"
-          >
-            Back to list
-          </button>
-        </Link>
+      <div className="flex justify-between mt-1">
+        <div className="flex w-1/2">
+          <div className="w-1/4">
+            <button
+              onClick={() => {
+                updateTenant(tenant);
+              }}
+              className="bg-blue-400 text-white w-full rounded-md border p-2 
+              hover:bg-blue-100 hover:text-gray-500 cursor-pointer"
+            >
+              Save
+            </button>
+          </div>
+          <div className="w-1/4">
+            <Link href={"/admin/tenants/"} >
+              <button
+                className="bg-blue-400 text-white w-full rounded-md border p-2
+                 hover:bg-blue-100 hover:text-gray-500 cursor-pointer"
+              >
+                Back to list
+              </button>
+            </Link>
+          </div>
+        </div>
       </div>
     </div>
   );

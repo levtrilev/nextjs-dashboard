@@ -1,4 +1,4 @@
-import { useState } from "react";
+// import { useState } from "react";
 import { CheckIcon, StopIcon } from "@heroicons/react/24/outline";
 import { Tenant } from "@/app/lib/definitions";
 
@@ -12,8 +12,8 @@ export default function RadioActive(props: IRadioActiveProps) {
     const tenant = props.tenant;
 
     return (
-        <div className="flex justify-between mt-6">
-            <legend className="text-sm font-medium">
+        <div className="flex justify-between mt-1">
+            <legend className="text-sm font-medium flex items-center p-2">
                 Active status:
             </legend>
             <div>
@@ -27,7 +27,7 @@ export default function RadioActive(props: IRadioActiveProps) {
                                 value="pending"
                                 defaultChecked={!tenant.active}
                                 onChange={(e) => props.handleChangeActive(e)}
-                                className="h-4 w-4 cursor-pointer border-gray-300 bg-gray-100 text-gray-600 focus:ring-2"
+                                className="h-4 w-4"
                                 aria-describedby="status-error"
                             />
                             <label
@@ -45,7 +45,7 @@ export default function RadioActive(props: IRadioActiveProps) {
                                 value="paid"
                                 defaultChecked={tenant.active}
                                 onChange={(e) => props.handleChangeActive(e)}
-                                className="h-4 w-4 cursor-pointer border-gray-300 bg-gray-100 text-gray-600 focus:ring-2"
+                                className="h-4 w-4"
                             />
                             <label
                                 htmlFor="active"

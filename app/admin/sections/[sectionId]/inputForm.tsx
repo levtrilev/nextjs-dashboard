@@ -4,7 +4,7 @@ import { KeyboardEvent } from "react";
 import { SectionForm, Section, Tenant } from "@/app/lib/definitions";
 import { updateSection } from "@/app/lib/actions";
 import Link from "next/link";
-import RadioActive from "@/app/ui/adm/tenants/radioActive";
+import RadioActive from "@/app/ui/admin/tenants/radioActive";
 
 interface IInputFormProps {
   section: SectionForm,
