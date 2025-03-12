@@ -8,7 +8,7 @@ import {
   CustomersTableType,
   FormattedCustomersTable,
 } from '@/app/lib/definitions';
-import { fetchFilteredLegalEntities } from '@/app/lib/data';
+import { fetchFilteredLegalEntities } from './actions';
 import { ChartBarIcon, ChartPieIcon } from '@heroicons/react/20/solid';
 import { BtnDeleteLegalEntity, BtnEditLegalEntityLink } from './buttons';
 

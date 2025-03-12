@@ -2,7 +2,7 @@
 // LegalEntity Page
 
 import EditForm from "./editForm";
-import { fetchLegalEntity } from "@/app/lib/data";
+import { fetchLegalEntity } from "../../lib/actions";
 import { LegalEntity } from "@/app/lib/definitions";
 import { lusitana } from "@/app/ui/fonts";
 

@@ -1,12 +1,12 @@
 
 // LegalEntities Page
 
-import { fetchLegalEntities, fetchLegalEntitiesPages } from "@/app/lib/data";
+import { fetchLegalEntities, fetchLegalEntitiesPages } from "./lib/actions";
 import { StoreProvider } from "@/app/StoreProvider";
 import Pagination from "@/app/ui/pagination";
-import CustomersTable from "@/app/ui/legal-entities/table";
+import CustomersTable from "@/app/erp/legal-entities/lib/table";
 import Search from "@/app/ui/search";
-import { CreateLegalEntity } from "@/app/ui/legal-entities/buttons";
+import { CreateLegalEntity } from "@/app/erp/legal-entities/lib/buttons";
 import { lusitana } from "@/app/ui/fonts";
 
 export default async function Page(props: {

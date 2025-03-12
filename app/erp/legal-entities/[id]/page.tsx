@@ -2,9 +2,9 @@
 // LegalEntity Page
 
 import EditForm from "./edit/editForm";
-import { fetchLegalEntity } from "@/app/lib/data";
 import { LegalEntity } from "@/app/lib/definitions";
 import { lusitana } from "@/app/ui/fonts";
+import { fetchLegalEntity } from "../lib/actions";
 
 async function Page(props: { params: Promise<{ id: string }> }) {
 

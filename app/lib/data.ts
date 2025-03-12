@@ -10,7 +10,6 @@ import {
   Section,
   SectionForm,
   UserForm,
-  LegalEntity,
 } from "./definitions";
 import { formatCurrency } from "./utils";
 import { User } from "./definitions";
@@ -354,126 +353,6 @@ export async function fetchSectionById(id: string) {
   } catch (err) {
     console.error("Database Error:", err);
     throw new Error("Failed to fetch section by id.");
-  }
-}
-
-//#endregion
-
-//#region LegalEntity
-
-export async function fetchLegalEntity(id: string) {
-  try {
-    const data = await sql<LegalEntity>`
-      SELECT
-        id,
-        name,
-        fullname,
-        inn,
-        address_legal,
-        phone,
-        email,
-        contact,
-        is_customer,
-        is_supplier,
-        kpp
-      FROM legal_entities
-      WHERE id = ${id}
-    `;
-
-    const legalEntity = data.rows[0];
-    return legalEntity;
-  } catch (err) {
-    console.error("Database Error:", err);
-    throw new Error("Failed to fetch legalEntity by id.");
-  }
-}
-
-export async function fetchLegalEntities() {
-  try {
-    const data = await sql<LegalEntity>`
-      SELECT
-        id,
-        name,
-        fullname,
-        inn,
-        address_legal,
-        phone,
-        email,
-        contact,
-        is_customer,
-        is_supplier,
-        kpp
-      FROM legal_entities
-      ORDER BY name ASC
-    `;
-
-    const legalEntities = data.rows;
-    return legalEntities;
-  } catch (err) {
-    console.error("Database Error:", err);
-    throw new Error("Failed to fetch all legal_entities.");
-  }
-}
-
-export async function fetchFilteredLegalEntities(
-  query: string,
-  currentPage: number
-) {
-  const offset = (currentPage - 1) * ITEMS_PER_PAGE;
-
-  try {
-    const legal_entities = await sql<LegalEntity>`
-      SELECT
-        id,
-        name,
-        fullname,
-        inn,
-        address_legal,
-        phone,
-        email,
-        contact,
-        is_customer,
-        is_supplier,
-        kpp
-      FROM legal_entities
-      WHERE
-        legal_entities.name ILIKE ${`%${query}%`} OR
-        legal_entities.email ILIKE ${`%${query}%`} OR
-        legal_entities.fullname ILIKE ${`%${query}%`} OR
-        legal_entities.address_legal ILIKE ${`%${query}%`} OR
-        legal_entities.phone ILIKE ${`%${query}%`} OR
-        legal_entities.inn ILIKE ${`%${query}%`} OR
-        legal_entities.contact ILIKE ${`%${query}%`}
-      ORDER BY name ASC
-      LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
-    `;
-
-    return legal_entities.rows;
-  } catch (error) {
-    console.error("Database Error:", error);
-    throw new Error("Failed to fetch Legal Entities.");
-  }
-}
-
-export async function fetchLegalEntitiesPages(query: string) {
-  try {
-    const count = await sql`SELECT COUNT(*)
-    FROM legal_entities
-    WHERE
-        legal_entities.name ILIKE ${`%${query}%`} OR
-        legal_entities.email ILIKE ${`%${query}%`} OR
-        legal_entities.fullname ILIKE ${`%${query}%`} OR
-        legal_entities.address_legal ILIKE ${`%${query}%`} OR
-        legal_entities.phone ILIKE ${`%${query}%`} OR
-        legal_entities.inn ILIKE ${`%${query}%`} OR
-        legal_entities.contact ILIKE ${`%${query}%`}
-  `;
-
-    const totalPages = Math.ceil(Number(count.rows[0].count) / ITEMS_PER_PAGE);
-    return totalPages;
-  } catch (error) {
-    console.error("Database Error:", error);
-    throw new Error("Failed to fetch total number of legal_entities.");
   }
 }
 

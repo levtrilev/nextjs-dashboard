@@ -2,7 +2,7 @@
 // LegalEntity buttons.tsx
 
 import { PencilIcon, PlusIcon, TrashIcon, ServerIcon } from '@heroicons/react/24/outline';
-import { deleteLegalEntity, updateLegalEntity } from '@/app/lib/features/legalEntities/actions';
+import { deleteLegalEntity, updateLegalEntity } from './actions';
 import Link from "next/link";
 import { LegalEntity } from '@/app/lib/definitions';
 

@@ -5,11 +5,11 @@
 import { useState } from "react";
 import { KeyboardEvent } from "react";
 import { LegalEntity } from "@/app/lib/definitions";
-import { updateLegalEntity } from "@/app/lib/features/legalEntities/actions";
+import { updateLegalEntity } from "../../lib/actions";
 import Link from "next/link";
-import RadioActive, { RadioActiveIsSupplier } from "@/app/ui/legal-entities/radioActive";
+import RadioActive, { RadioActiveIsSupplier } from "@/app/erp/legal-entities/lib/radioActive";
 import { redirect } from "next/navigation";
-import RadioActiveIsCustomer from "@/app/ui/legal-entities/radioActive";
+import RadioActiveIsCustomer from "@/app/erp/legal-entities/lib/radioActive";
 
 interface IEditFormProps {
   legalEntity: LegalEntity,

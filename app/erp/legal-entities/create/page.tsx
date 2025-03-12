@@ -1,4 +1,4 @@
-import Form from '@/app/ui/legal-entities/create-form';
+import Form from '@/app/erp/legal-entities/create/create-form';
 import Breadcrumbs from '@/app/ui/invoices/breadcrumbs';
  
 export default async function Page() { 
