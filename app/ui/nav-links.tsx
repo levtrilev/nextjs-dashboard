@@ -20,7 +20,8 @@ const links = [
     href: '/erp/invoices',
     icon: DocumentDuplicateIcon,
   },
-  { name: 'Юридические лица', href: '/erp/legal-entities', icon: UserGroupIcon },
+  
+  { name: 'Справочники', href: '#', icon: UserGroupIcon }, //    /erp/ref-books
   { name: 'Администрирование', href: '/admin', icon: UserGroupIcon },
   // { name: 'Lesson', href: '/dashboard/lesson', icon: HomeIcon },
 ];
@@ -28,6 +29,8 @@ const subMenu = [
   { mainItem: 'Администрирование', name: 'Пользователи', href: '/admin/users' },
   { mainItem: 'Администрирование', name: 'Организации', href: '/admin/tenants' },
   { mainItem: 'Администрирование', name: 'Разделы', href: '/admin/sections' },
+  { mainItem: 'Справочники', name: 'Юридические лица', href: '/erp/legal-entities' },
+  { mainItem: 'Справочники', name: 'Регионы', href: '/erp/regions' },
   // { mainItem: 'Home', name: 'About', href: '/dashboard' },
   // { mainItem: 'Home', name: 'Contacts', href: '/dashboard' },
   // { mainItem: 'Home', name: 'Support', href: '/dashboard' },

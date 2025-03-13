@@ -3,6 +3,20 @@
 // For simplicity of teaching, we're manually defining these types.
 // However, these types are generated automatically if you're using an ORM such as Prisma.
 
+import { DateTime } from "next-auth/providers/kakao";
+
+export type Region = {
+  id: string;
+  name: string;
+  capital: string;
+  area: string;
+  code: string;
+  section_id: string;
+  username: string;
+  timestamptz: string;
+  date: DateTime;
+};
+
 export type LegalEntity = {
   id: string;
   name: string;

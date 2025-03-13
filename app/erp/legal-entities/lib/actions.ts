@@ -10,7 +10,7 @@ import { redirect } from "next/navigation";
 import { auth, signIn } from "@/auth";
 import { LegalEntity } from "@/app/lib/definitions";
 
-const ITEMS_PER_PAGE = 6;
+const ITEMS_PER_PAGE = 8;
 
 //#region CreateLegalEntity
 
