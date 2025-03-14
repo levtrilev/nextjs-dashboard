@@ -28,6 +28,8 @@ export default function Form() {
     is_customer: false,
     is_supplier: false,
     kpp: "",
+    region_id: "",
+    section_id: "",
   } as LegalEntity);
   const initialState: LegalEntityState = { message: null, errors: {} };
   const [state, formAction] = useActionState(createLegalEntity, initialState);
@@ -49,7 +51,7 @@ export default function Form() {
             className="block w-full rounded-md py-2 px-3 text-sm placeholder:text-gray-500"
             placeholder="Название юрлица"
             aria-describedby="name-error"
-            onChange={(e) => setLegalEntity((prev) => ({...prev, name: e.target.value,}))}
+            onChange={(e) => setLegalEntity((prev) => ({ ...prev, name: e.target.value, }))}
           />
           <div id="name-error" aria-live="polite" aria-atomic="true">
             {state.errors?.name &&
@@ -75,7 +77,7 @@ export default function Form() {
             className="block w-full rounded-md py-2 px-3 text-sm placeholder:text-gray-500"
             placeholder="Полное наименование"
             aria-describedby="fullname-error"
-            onChange={(e) => setLegalEntity((prev) => ({...prev, fullname: e.target.value,}))}
+            onChange={(e) => setLegalEntity((prev) => ({ ...prev, fullname: e.target.value, }))}
 
           />
           <div id="fullname-error" aria-live="polite" aria-atomic="true">
@@ -102,7 +104,7 @@ export default function Form() {
             className="block w-full rounded-md py-2 px-3 text-sm placeholder:text-gray-500"
             placeholder="Контакты"
             aria-describedby="contact-error"
-            onChange={(e) => setLegalEntity((prev) => ({...prev, contact: e.target.value,}))}
+            onChange={(e) => setLegalEntity((prev) => ({ ...prev, contact: e.target.value, }))}
           />
           <div id="contact-error" aria-live="polite" aria-atomic="true">
             {state.errors?.contact &&
@@ -128,7 +130,7 @@ export default function Form() {
             className="block w-full rounded-md py-2 px-3 text-sm placeholder:text-gray-500"
             placeholder="Телефон"
             aria-describedby="phone-error"
-            onChange={(e) => setLegalEntity((prev) => ({...prev, phone: e.target.value,}))}
+            onChange={(e) => setLegalEntity((prev) => ({ ...prev, phone: e.target.value, }))}
           />
           <div id="phone-error" aria-live="polite" aria-atomic="true">
             {state.errors?.phone &&
@@ -154,7 +156,7 @@ export default function Form() {
             className="block w-full rounded-md py-2 px-3 text-sm placeholder:text-gray-500"
             placeholder="Email"
             aria-describedby="email-error"
-            onChange={(e) => setLegalEntity((prev) => ({...prev, email: e.target.value,}))}
+            onChange={(e) => setLegalEntity((prev) => ({ ...prev, email: e.target.value, }))}
           />
           <div id="email-error" aria-live="polite" aria-atomic="true">
             {state.errors?.email &&
@@ -180,7 +182,7 @@ export default function Form() {
             className="block w-full rounded-md py-2 px-3 text-sm placeholder:text-gray-500"
             placeholder="Юридический адрес"
             aria-describedby="address_legal-error"
-            onChange={(e) => setLegalEntity((prev) => ({...prev, address_legal: e.target.value,}))}
+            onChange={(e) => setLegalEntity((prev) => ({ ...prev, address_legal: e.target.value, }))}
           />
           <div id="address_legal-error" aria-live="polite" aria-atomic="true">
             {state.errors?.address_legal &&
@@ -206,7 +208,7 @@ export default function Form() {
             className="block w-full rounded-md py-2 px-3 text-sm placeholder:text-gray-500"
             placeholder="ИНН"
             aria-describedby="inn-error"
-            onChange={(e) => setLegalEntity((prev) => ({...prev, inn: e.target.value,}))}
+            onChange={(e) => setLegalEntity((prev) => ({ ...prev, inn: e.target.value, }))}
           />
           <div id="inn-error" aria-live="polite" aria-atomic="true">
             {state.errors?.inn &&
@@ -232,7 +234,7 @@ export default function Form() {
             className="block w-full rounded-md py-2 px-3 text-sm placeholder:text-gray-500"
             placeholder="КРР"
             aria-describedby="kpp-error"
-            onChange={(e) => setLegalEntity((prev) => ({...prev, kpp: e.target.value,}))}
+            onChange={(e) => setLegalEntity((prev) => ({ ...prev, kpp: e.target.value, }))}
           />
           <div id="kpp-error" aria-live="polite" aria-atomic="true">
             {state.errors?.kpp &&
@@ -255,7 +257,7 @@ export default function Form() {
             type="checkbox"
             defaultChecked={legalEntity.is_customer}
             aria-describedby="is_customer-error"
-            onChange={(e) => setLegalEntity((prev) => ({...prev, is_customer: e.target.checked,}))}
+            onChange={(e) => setLegalEntity((prev) => ({ ...prev, is_customer: e.target.checked, }))}
           />
         </div>
 
@@ -270,116 +272,59 @@ export default function Form() {
             type="checkbox"
             defaultChecked={legalEntity.is_supplier}
             aria-describedby="is_supplier-error"
-            onChange={(e) => setLegalEntity((prev) => ({...prev, is_supplier: e.target.checked,}))}
+            onChange={(e) => setLegalEntity((prev) => ({ ...prev, is_supplier: e.target.checked, }))}
           />
         </div>
 
-    {/* str_is_customer
-        <fieldset>
-
-          <div className="rounded-md border border-gray-200 bg-white px-[14px] py-1.5">
-            <div className="flex gap-4">
-              <div className="flex items-center">
-                <p className="text-sm font-medium pr-3 ">
-                  Покупатель?
-                </p>
-                <input
-                  id="customer_true"
-                  name="str_is_customer"
-                  type="radio"
-                  value={legalEntity.is_customer ? "true" : "false"}
-                  className="h-4 w-4"
-                  aria-describedby="status-error"
-                  onChange={(e) => handleChangeIsCustomer(e)}
-                />
-                <label
-                  htmlFor="customer_true"
-                  className="ml-2 flex cursor-pointer items-center gap-1.5 rounded-full bg-green-500 px-3 py-1.5 text-xs font-medium text-white"
-                >
-                  Yes <ClockIcon className="h-4 w-4" />
-                </label>
-              </div>
-              <div className="flex items-center">
-                <input
-                  id="customer_false"
-                  name="str_is_customer"
-                  type="radio"
-                  value={legalEntity.is_customer ? "true" : "false"}
-                  className="h-4 w-4"
-                  onChange={(e) => handleChangeIsCustomer(e)}
-                />
-                <label
-                  htmlFor="customer_false"
-                  className="ml-2 flex cursor-pointer items-center gap-1.5 rounded-full bg-gray-200 px-3 py-1.5 text-xs font-medium text-gray-400"
-                >
-                  No <CheckIcon className="h-4 w-4" />
-                </label>
-              </div>
-            </div>
-          </div>
-          <div id="is_customer-error" aria-live="polite" aria-atomic="true">
-            {state.errors?.str_is_customer &&
-              state.errors.str_is_customer.map((error: string) => (
-                <p className="mt-2 text-sm text-red-500" key={error}>
+        {/* region_id */}
+        <div className="flex justify-between mt-1">
+          <label
+            htmlFor="region_id"
+            className="w-2/8 text-sm text-blue-900 font-medium flex items-center p-2">
+            Регион:
+          </label>
+          <input
+            id="region_id"
+            name="region_id"
+            type="text"
+            className="w-13/16 control rounded-md border border-gray-200 p-2"
+            value={legalEntity.region_id}
+            onChange={(e) => setLegalEntity((prev) => ({ ...prev, region_id: e.target.value, }))}
+          />
+          <div id="region_id-error" aria-live="polite" aria-atomic="true">
+            {state.errors?.region_id &&
+              state.errors.region_id.map((error: string) => (
+                <p className="mt-2 text-xs text-red-500" key={error}>
                   {error}
                 </p>
               ))}
           </div>
-        </fieldset>
+        </div>
 
-        {/* str_is_supplier 
-        <fieldset>
-
-          <div className="rounded-md border border-gray-200 bg-white px-[14px] py-1.5 mt-4">
-            <div className="flex gap-4">
-              <div className="flex items-center">
-                <p className="text-sm font-medium pr-3 ">
-                  Поставщик?
-                </p>
-                <input
-                  id="supplier_true"
-                  name="str_is_supplier"
-                  type="radio"
-                  value={legalEntity.is_supplier ? "true" : "false"}
-                  className="h-4 w-4 cursor-pointer border-gray-300 bg-gray-100 text-gray-600 focus:ring-2"
-                  aria-describedby="status-error"
-                  onChange={(e) => handleChangeIsSupplier(e)}
-                />
-                <label
-                  htmlFor="supplier_true"
-                  className="ml-2 flex cursor-pointer items-center gap-1.5 rounded-full bg-green-500 px-3 py-1.5 text-xs font-medium text-white"
-                >
-                  Yes <ClockIcon className="h-4 w-4" />
-                </label>
-              </div>
-              <div className="flex items-center">
-                <input
-                  id="supplier_false"
-                  name="str_is_supplier"
-                  type="radio"
-                  value={legalEntity.is_supplier ? "true" : "false"}
-                  className="h-4 w-4"
-                  onChange={(e) => handleChangeIsCustomer(e)}
-                />
-                <label
-                  htmlFor="supplier_false"
-                  className="ml-2 flex cursor-pointer items-center gap-1.5 rounded-full bg-gray-200 px-3 py-1.5 text-xs font-medium text-gray-400"
-                >
-                  No <CheckIcon className="h-4 w-4" />
-                </label>
-              </div>
-            </div>
-          </div>
-          <div id="is_customer-error" aria-live="polite" aria-atomic="true">
-            {state.errors?.str_is_supplier &&
-              state.errors.str_is_supplier.map((error: string) => (
-                <p className="mt-2 text-sm text-red-500" key={error}>
+        {/* section_id */}
+        <div className="flex justify-between mt-1">
+          <label
+            htmlFor="section_id"
+            className="w-2/8 text-sm text-blue-900 font-medium flex items-center p-2">
+            Раздел:
+          </label>
+          <input
+            id="section_id"
+            name="section_id"
+            type="text"
+            className="w-13/16 control rounded-md border border-gray-200 p-2"
+            value={legalEntity.section_id}
+            onChange={(e) => setLegalEntity((prev) => ({ ...prev, section_id: e.target.value, }))}
+          />
+          <div id="section_id-error" aria-live="polite" aria-atomic="true">
+            {state.errors?.section_id &&
+              state.errors.section_id.map((error: string) => (
+                <p className="mt-2 text-xs text-red-500" key={error}>
                   {error}
                 </p>
               ))}
           </div>
-        </fieldset>
- */}
+        </div>
 
 
 

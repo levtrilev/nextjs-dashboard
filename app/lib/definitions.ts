@@ -29,8 +29,14 @@ export type LegalEntity = {
   is_customer: boolean;
   is_supplier: boolean;
   kpp: string;
+  region_id: string;
+  section_id: string;
 };
-
+// export type LegalEntityForm = {
+//   legalEntity: LegalEntity;
+//   region_name: string;
+//   section_name: string;
+// };
 export type LegalEntityForm = {
   id: string;
   name: string;
@@ -43,6 +49,10 @@ export type LegalEntityForm = {
   is_customer: boolean;
   is_supplier: boolean;
   kpp: string;
+  region_id: string;
+  section_id: string;
+  region_name: string;
+  section_name: string;
 };
 
 export type User = {

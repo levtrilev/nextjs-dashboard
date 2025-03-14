@@ -34,6 +34,7 @@ export default function Page() {
             by levtrishankov@yandex.ru
           </p>
           <LoginButton />
+          Demo:  user2@ya.ru   pwd: 123456
         </div>
         <div className="flex items-center justify-center p-3 md:w-4/5 md:px-7 md:py-3">
           {/* <Image

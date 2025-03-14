@@ -3,10 +3,10 @@ import { createPortal } from "react-dom";
 import { useRef, useEffect, useState, ReactNode, ReactPortal } from "react";
 
 export default function Modal({ children, open }: { children: ReactNode, open: boolean }) {
-  if (typeof window === 'undefined') {
-    // This ensures the component does not render on the server
-    return null;
-  }
+  // if (typeof window === 'undefined') {
+  //   // This ensures the component does not render on the server
+  //   return null;
+  // }
   const modalDomElement = document.getElementById("modal") as Element;
   const dialog = useRef<any>(null);
   const [portal, setPortal] = useState<ReactPortal>();

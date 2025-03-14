@@ -125,11 +125,3 @@ export default async function RegionsTable({
     </div>
   );
 }
-
-// {
-//   customers,
-// }: {
-//   customers: FormattedCustomersTable[];
-// }
-
-{/* <button className="rounded-md border border-gray-200 p-2 h-10 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"> */ }

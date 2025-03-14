@@ -2,16 +2,19 @@
 // LegalEntity Page
 
 import EditForm from "./editForm";
-import { fetchLegalEntity } from "../../lib/actions";
-import { LegalEntity } from "@/app/lib/definitions";
+import { fetchLegalEntity, fetchLegalEntityForm } from "../../lib/actions";
+import { LegalEntity, LegalEntityForm, Region } from "@/app/lib/definitions";
 import { lusitana } from "@/app/ui/fonts";
+import { fetchRegions } from "@/app/erp/regions/lib/actions";
 
 async function Page(props: { params: Promise<{ id: string }> }) {
 
+    const regions = await fetchRegions();
     const params = await props.params;
     const id = params.id;
     console.log("id: " + id);
-    const legalEntity: LegalEntity = await fetchLegalEntity(id);
+    // const legalEntity: LegalEntity = await fetchLegalEntity(id);
+    const legalEntity: LegalEntityForm = await fetchLegalEntityForm(id);
         if (!legalEntity) {
             return (<h3 className="text-xs font-medium text-gray-400">Not found! id: {id}</h3>);
         }
@@ -21,7 +24,7 @@ async function Page(props: { params: Promise<{ id: string }> }) {
                 <h1 className={`${lusitana.className} text-2xl`}>Юридическое лицо</h1>
             </div>
             <h3 className="text-xs font-medium text-gray-400">id: {id}</h3>
-            <EditForm legalEntity={legalEntity}></EditForm>
+            <EditForm legalEntity={legalEntity} regions={regions}></EditForm>
         </div>
 
     );

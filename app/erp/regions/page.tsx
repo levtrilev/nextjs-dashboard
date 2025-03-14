@@ -21,7 +21,7 @@ export default async function Page(props: {
   const totalPages = await fetchRegionsPages(query);
 
     // const customers = await fetchCustomers();
-    const legalEntities = await fetchRegions();
+    const regions = await fetchRegions();
     return (
         <StoreProvider>
             {/* <Counter /> */}

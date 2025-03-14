@@ -11,18 +11,22 @@ import {
 import { fetchFilteredLegalEntities } from './actions';
 import { ChartBarIcon, ChartPieIcon } from '@heroicons/react/20/solid';
 import { BtnDeleteLegalEntity, BtnEditLegalEntityLink } from './buttons';
+// import { fetchRegions } from '../../regions/lib/actions';
 
 export default async function CustomersTable({
   query,
   currentPage,
+  // regions,
 }: {
   query: string;
   currentPage: number;
+  // regions: Region[];
 }) {
 
   // const customers = await fetchFilteredLegalEntities(query, currentPage) as any[];
   // legalEntities
   const legalEntities = await fetchFilteredLegalEntities(query, currentPage);
+  // const regions = await fetchRegions();
 
   return (
     <div className="w-full">

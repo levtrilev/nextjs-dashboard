@@ -1,4 +1,3 @@
-
 // legalEntities actions
 
 "use server";
@@ -8,7 +7,7 @@ import { sql } from "@vercel/postgres";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { auth, signIn } from "@/auth";
-import { LegalEntity } from "@/app/lib/definitions";
+import { LegalEntity, LegalEntityForm } from "@/app/lib/definitions";
 
 const ITEMS_PER_PAGE = 8;
 
@@ -26,6 +25,8 @@ export type LegalEntityState = {
     contact?: string[];
     is_customer?: string[];
     is_supplier?: string[];
+    region_id?: string[];
+    section_id?: string[];
   };
   message?: string | null;
 };
@@ -56,6 +57,12 @@ const LegalEntityFormSchema = z.object({
   kpp: z.string().min(5, {
     message: "Поле КПП должно содержать не менее 5 символов.",
   }),
+  region_id: z
+    .string()
+    .uuid({ message: "Поле Регион должно содержать валидный UUID." }),
+  section_id: z
+    .string()
+    .uuid({ message: "Поле Раздел должно содержать валидный UUID." }),
 });
 
 const CreateLegalEntity = LegalEntityFormSchema.omit({ id: true });
@@ -73,13 +80,16 @@ export async function createLegalEntity(
     phone: formData.get("phone"),
     email: formData.get("email"),
     contact: formData.get("contact"),
-    is_customer: formData.get("is_customer") === 'on',
-    is_supplier: formData.get("is_supplier") === 'on',
+    is_customer: formData.get("is_customer") === "on",
+    is_supplier: formData.get("is_supplier") === "on",
     kpp: formData.get("kpp"),
+    region_id: formData.get("region_id"),
+    section_id: formData.get("section_id"),
   });
   // If form validation fails, return errors early. Otherwise, continue.
   if (!validatedFields.success) {
     console.log(validatedFields.error.flatten().fieldErrors);
+    console.log("section_id: " + formData.get("section_id"));
     return {
       errors: validatedFields.error.flatten().fieldErrors,
       message: "Неверные данные! Failed to Create newLegalEntity.",
@@ -97,20 +107,24 @@ export async function createLegalEntity(
     is_customer,
     is_supplier,
     kpp,
+    region_id,
+    section_id,
   } = validatedFields.data;
   // SELECT event_time_tz AT TIME ZONE 'Europe/Moscow' FROM example;
-  const date = new Date().toISOString();  //.split("T")[0]
+  const date = new Date().toISOString(); //.split("T")[0]
   // const is_customer = str_is_customer === "true" ? true : false;
   // const is_supplier = str_is_supplier === "true" ? false : true;
 
-  const  session = await auth();
+  const session = await auth();
   const username = session?.user?.name;
   try {
     await sql`
       INSERT INTO legal_entities (name, fullname, inn, address_legal, phone, 
-      email, contact, is_customer, is_supplier, kpp, username, date)
+      email, contact, is_customer, is_supplier, kpp, region_id, section_id, 
+      username, date)
       VALUES (${name}, ${fullname}, ${inn}, ${address_legal}, ${phone}, ${email}, 
-      ${contact}, ${is_customer}, ${is_supplier}, ${kpp}, ${username}, ${date})
+      ${contact}, ${is_customer}, ${is_supplier}, ${kpp}, ${region_id}, ${section_id}, 
+      ${username}, ${date})
     `;
   } catch (error) {
     console.error("Failed to create newLegalEntity:", error);
@@ -159,6 +173,8 @@ SET
     is_customer = ${legalEntity.is_customer},
     is_supplier = ${legalEntity.is_supplier},
     kpp = ${legalEntity.kpp},
+    region_id = ${legalEntity.region_id},
+    section_id = ${legalEntity.section_id}, 
     username = ${username},
     date = ${date}
 WHERE id = ${legalEntity.id};
@@ -189,12 +205,18 @@ export async function fetchLegalEntity(id: string) {
         contact,
         is_customer,
         is_supplier,
-        kpp
+        kpp,
+        region_id,
+        section_id
       FROM legal_entities
       WHERE id = ${id}
     `;
 
     const legalEntity = data.rows[0];
+    // после заполнения идентификаторов эти строки можно удалить
+    // if (!legalEntity.region_id) { legalEntity.region_id = ""; }
+    // if (!legalEntity.section_id) { legalEntity.section_id = ""; }
+    ////////////
     return legalEntity;
   } catch (err) {
     console.error("Database Error:", err);
@@ -216,7 +238,9 @@ export async function fetchLegalEntities() {
         contact,
         is_customer,
         is_supplier,
-        kpp
+        kpp,
+        region_id,
+        section_id
       FROM legal_entities
       ORDER BY name ASC
     `;
@@ -248,7 +272,9 @@ export async function fetchFilteredLegalEntities(
         contact,
         is_customer,
         is_supplier,
-        kpp
+        kpp,
+        region_id,
+        section_id
       FROM legal_entities
       WHERE
         legal_entities.name ILIKE ${`%${query}%`} OR
@@ -290,5 +316,40 @@ export async function fetchLegalEntitiesPages(query: string) {
     throw new Error("Failed to fetch total number of legal_entities.");
   }
 }
+
+export async function fetchLegalEntityForm(id: string) {
+  try {
+    const data = await sql<LegalEntityForm>`
+      SELECT
+        le.id,
+        le.name,
+        le.fullname,
+        le.inn,
+        le.address_legal,
+        le.phone,
+        le.email,
+        le.contact,
+        le.is_customer,
+        le.is_supplier,
+        le.kpp,
+        le.region_id,
+        le.section_id,
+        r.name as region_name,
+        s.name as section_name
+      FROM legal_entities le 
+      LEFT JOIN regions r ON le.region_id = r.id
+      LEFT JOIN sections s ON le.section_id = s.id
+      WHERE le.id = ${id}
+    `;
+
+    const legalEntity = data.rows[0];
+
+    return legalEntity;
+  } catch (err) {
+    console.error("Database Error:", err);
+    throw new Error("Failed to fetch legalEntity by id.");
+  }
+}
+
 
 //#endregion
