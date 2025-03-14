@@ -10,7 +10,6 @@ import RegionsRefTable from "./regionsRefTable";
 interface IBtnRegionsRefProps {
   regions: Region[],
   handleSelectRegion: (new_region_id: string, new_region_name: string) => void,
-  handleSelectSection: (new_section_id: string, new_section_name: string) => void,
 }
 
 export default function btnRegionsRef(props: IBtnRegionsRefProps) {

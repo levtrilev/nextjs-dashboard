@@ -46,14 +46,14 @@ export default function EditForm(props: IEditFormProps) {
   const handleSelectRegion = (new_region_id: string, new_region_name: string) => {
     setLegalEntity((prev) => ({
       ...prev,
-      region_id: new_region_id, 
+      region_id: new_region_id,
       region_name: new_region_name,
     }));
   };
   const handleSelectSection = (new_section_id: string, new_section_name: string) => {
     setLegalEntity((prev) => ({
       ...prev,
-      section_id: new_section_id, 
+      section_id: new_section_id,
       section_name: new_section_name,
     }));
   };
@@ -161,7 +161,7 @@ export default function EditForm(props: IEditFormProps) {
               onChange={(e) => setLegalEntity((prev) => ({ ...prev, region_id: e.target.value, }))}
               onKeyDown={(e) => handleKeyDown(e)}
             />
-            <BtnRegionsRef regions={props.regions} />
+
           </div>
           {/* region_name */}
           <div className="flex justify-between mt-1">
@@ -180,10 +180,9 @@ export default function EditForm(props: IEditFormProps) {
               onChange={(e) => setLegalEntity((prev) => ({ ...prev, region_id: e.target.value, }))}
               onKeyDown={(e) => handleKeyDown(e)}
             />
-            <BtnRegionsRef 
-            regions={props.regions}
-            handleSelectRegion={handleSelectRegion}
-            handleSelectSection={handleSelectSection} 
+            <BtnRegionsRef
+              regions={props.regions}
+              handleSelectRegion={handleSelectRegion}
             />
           </div>
         </div>
@@ -295,7 +294,7 @@ export default function EditForm(props: IEditFormProps) {
           <div className="w-full md:w-1/2">
             <Link href={"/erp/legal-entities/"} >
               <button
-              // onClick={()=>alert("region_name: " + legalEntity.region_name)}
+                // onClick={()=>alert("region_name: " + legalEntity.region_name)}
                 className="bg-blue-400 text-white w-full rounded-md border p-2
                  hover:bg-blue-100 hover:text-gray-500 cursor-pointer"
               >
