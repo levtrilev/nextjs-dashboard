@@ -24,6 +24,7 @@ export default function BtnRegionsRef(props: IBtnRegionsRefProps) {
     // }));
     setModal(false);
   };
+  const [term, setTerm] = useState<string>("");
 
   return (
     <div>
@@ -34,10 +35,12 @@ export default function BtnRegionsRef(props: IBtnRegionsRefProps) {
       </button>
       <Modal open={modal} >
 
-        <RegionsRefTable 
-        regions={props.regions} 
-        handleSelectRegion={props.handleSelectRegion}
-        closeModal={closeModal}
+        <RegionsRefTable
+          regions={props.regions}
+          handleSelectRegion={props.handleSelectRegion}
+          closeModal={closeModal}
+          setTerm={setTerm}
+          term={term}
         />
 
         {/* buttons */}
@@ -51,7 +54,7 @@ export default function BtnRegionsRef(props: IBtnRegionsRefProps) {
             Save
           </button>
           <button
-            onClick={closeModal}
+            onClick={()=>{closeModal(); setTerm("");}}
             className="bg-blue-400 text-white w-full rounded-md border p-2 hover:bg-blue-100 hover:text-gray-500"
           >
             Exit
