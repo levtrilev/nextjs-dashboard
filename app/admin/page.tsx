@@ -1,4 +1,5 @@
-import { fetchTenants, fetchSections, fetchUsers } from '../lib/data';
+import { fetchTenants, fetchUsers } from '../lib/data';
+import { fetchSections } from './sections/lib/actions';
 import TabsPage from "./tabs-page";
 // import { Suspense } from 'react';
 

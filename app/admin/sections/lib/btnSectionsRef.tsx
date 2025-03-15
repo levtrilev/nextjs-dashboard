@@ -2,15 +2,15 @@
 import Modal from "@/app/lib/modal";
 import { useState, useEffect } from "react";
 import { PencilIcon, EyeIcon, BookOpenIcon, BriefcaseIcon, BookmarkIcon } from "@heroicons/react/24/outline";
-import { Region } from "@/app/lib/definitions";
-import RegionsRefTable from "./regionsRefTable";
+import { Section, SectionForm } from "@/app/lib/definitions";
+import SectionsRefTable from "./sectionsRefTable";
 
-interface IBtnRegionsRefProps {
-  regions: Region[],
-  handleSelectRegion: (new_region_id: string, new_region_name: string) => void,
+interface IBtnSectionsRefProps {
+  sections: SectionForm[],
+  handleSelectSection: (new_section_id: string, new_section_name: string) => void,
 }
 
-export default function BtnRegionsRef(props: IBtnRegionsRefProps) {
+export default function BtnSectionsRef(props: IBtnSectionsRefProps) {
   // const regions = await fetchRegions();
   const [modal, setModal] = useState(false);
 
@@ -34,9 +34,9 @@ export default function BtnRegionsRef(props: IBtnRegionsRefProps) {
       </button>
       <Modal open={modal} >
 
-        <RegionsRefTable 
-        regions={props.regions} 
-        handleSelectRegion={props.handleSelectRegion}
+        <SectionsRefTable 
+        sections={props.sections} 
+        handleSelectSection={props.handleSelectSection}
         closeModal={closeModal}
         />
 

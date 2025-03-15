@@ -315,45 +315,5 @@ export async function fetchTenantById(id: string) {
   }
 }
 
-export async function fetchSections() {
-  try {
-    // t.name as tenant_id - в данном запросе нужно только имя тенанта.
-    // разместить его вместо id позволяет воспользоваться тем же типом Section
-    const data = await sql<Section>`
-            SELECT
-        s.id as id,
-        s.name as name,
-        t.name as tenant_id
-      FROM sections s JOIN tenants t ON s.tenant_id = t.id
-      ORDER BY tenant_id ASC
-    `;
-
-    const sections = data.rows;
-    return sections;
-  } catch (err) {
-    console.error("Database Error:", err);
-    throw new Error("Failed to fetch all sections.");
-  }
-}
-
-export async function fetchSectionById(id: string) {
-  try {
-    const data = await sql<SectionForm>`
-      SELECT
-        s.id as id,
-        s.name as name,
-        s.tenant_id as tenant_id,
-        t.name as tenant_name
-      FROM sections s JOIN tenants t ON s.tenant_id = t.id
-      WHERE s.id = ${id}
-    `;
-
-    const section = data.rows[0];
-    return section;
-  } catch (err) {
-    console.error("Database Error:", err);
-    throw new Error("Failed to fetch section by id.");
-  }
-}
 
 //#endregion

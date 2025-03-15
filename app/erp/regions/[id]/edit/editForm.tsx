@@ -10,6 +10,7 @@ import Link from "next/link";
 import RadioActive, { RadioActiveIsSupplier } from "@/app/erp/legal-entities/lib/radioActive";
 import { redirect } from "next/navigation";
 import RadioActiveIsCustomer from "@/app/erp/legal-entities/lib/radioActive";
+// import { useNavigate, useLocation } from 'react-router-dom';
 
 interface IEditFormProps {
   region: Region,
@@ -24,8 +25,13 @@ export default function EditForm(props: IEditFormProps) {
     }
   };
 
-
-
+  // const navigate = useNavigate();
+  // const location = useLocation();
+  // const previousRoute = location.state?.from || '/erp/legal-entities';
+  // navigate(previousRoute); // navigate(-1);
+  const handleRedirectBack = () => {
+    window.history.back(); // Возвращает пользователя на предыдущую страницу
+  };
   return (
     <div>
       <div className="flex flex-col md:flex-row gap-4 w-full">
@@ -109,7 +115,8 @@ export default function EditForm(props: IEditFormProps) {
             <button
               onClick={() => {
                 updateRegion(region);
-                redirect("/erp/regions/");
+                handleRedirectBack();
+                // redirect("/erp/regions/");
               }}
               className="bg-blue-400 text-white w-full rounded-md border p-2 
               hover:bg-blue-100 hover:text-gray-500 cursor-pointer"
@@ -118,8 +125,9 @@ export default function EditForm(props: IEditFormProps) {
             </button>
           </div>
           <div className="w-full md:w-1/2">
-            <Link href={"/erp/regions/"} >
+            <Link href={"#"} >
               <button
+              onClick={()=>handleRedirectBack()}
                 className="bg-blue-400 text-white w-full rounded-md border p-2
                  hover:bg-blue-100 hover:text-gray-500 cursor-pointer"
               >

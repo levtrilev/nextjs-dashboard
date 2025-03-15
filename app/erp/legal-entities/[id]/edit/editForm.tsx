@@ -4,17 +4,19 @@
 'use client';
 import { useState } from "react";
 import { KeyboardEvent } from "react";
-import { LegalEntity, LegalEntityForm, Region } from "@/app/lib/definitions";
+import { LegalEntityForm, Region, Section, SectionForm } from "@/app/lib/definitions";
 import { updateLegalEntity } from "../../lib/actions";
 import Link from "next/link";
-import RadioActive, { RadioActiveIsSupplier } from "@/app/erp/legal-entities/lib/radioActive";
+import { RadioActiveIsSupplier } from "@/app/erp/legal-entities/lib/radioActive";
 import { redirect } from "next/navigation";
 import RadioActiveIsCustomer from "@/app/erp/legal-entities/lib/radioActive";
 import BtnRegionsRef from "@/app/erp/regions/lib/btnRegionsRef";
+import BtnSectionsRef from "@/app/admin/sections/lib/btnSectionsRef";
 
 interface IEditFormProps {
   legalEntity: LegalEntityForm,
   regions: Region[],
+  sections: SectionForm[],
 }
 
 export default function EditForm(props: IEditFormProps) {
@@ -29,7 +31,9 @@ export default function EditForm(props: IEditFormProps) {
       setShow(true);
     }
   };
-
+  const handleRedirectBack = () => {
+    window.history.back(); // Возвращает пользователя на предыдущую страницу
+  };
   const handleChangeIsCustomer = (event: any) => {
     setLegalEntity((prev) => ({
       ...prev,
@@ -273,17 +277,19 @@ export default function EditForm(props: IEditFormProps) {
               onChange={(e) => setLegalEntity((prev) => ({ ...prev, section_id: e.target.value, }))}
               onKeyDown={(e) => handleKeyDown(e)}
             />
+            <BtnSectionsRef sections={props.sections} handleSelectSection={handleSelectSection}/>
           </div>
         </div>
       </div>
-      {/* button area */}
+      {/* buttons area */}
       <div className="flex justify-between mt-4 mr-4">
         <div className="flex w-full md:w-1/2">
           <div className="w-full md:w-1/2">
             <button
               onClick={() => {
                 updateLegalEntity(legalEntity);
-                redirect("/erp/legal-entities/");
+                handleRedirectBack();
+                // redirect("/erp/legal-entities/");
               }}
               className="bg-blue-400 text-white w-full rounded-md border p-2 
               hover:bg-blue-100 hover:text-gray-500 cursor-pointer"
@@ -292,9 +298,9 @@ export default function EditForm(props: IEditFormProps) {
             </button>
           </div>
           <div className="w-full md:w-1/2">
-            <Link href={"/erp/legal-entities/"} >
+            <Link href={"#"} >
               <button
-                // onClick={()=>alert("region_name: " + legalEntity.region_name)}
+                onClick={()=>handleRedirectBack()}
                 className="bg-blue-400 text-white w-full rounded-md border p-2
                  hover:bg-blue-100 hover:text-gray-500 cursor-pointer"
               >

@@ -1,10 +1,9 @@
 'use client';
 import { useState } from "react";
 import { KeyboardEvent } from "react";
-import { SectionForm, Section, Tenant } from "@/app/lib/definitions";
-import { updateSection } from "@/app/lib/actions";
+import { SectionForm, Tenant } from "@/app/lib/definitions";
 import Link from "next/link";
-import RadioActive from "@/app/ui/admin/tenants/radioActive";
+import { updateSection } from "../lib/actions";
 
 interface IInputFormProps {
   section: SectionForm,

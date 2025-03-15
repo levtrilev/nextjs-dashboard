@@ -1,9 +1,10 @@
 'use server';
 import { Section, Tenant } from "@/app/lib/definitions";
-import { fetchSections, fetchTenants } from "@/app/lib/data";
-import { NewSection } from "@/app/ui/admin/sections/newSection";
-import SectionsTable from "@/app/ui/admin/sections/table";
+import { fetchTenants } from "@/app/lib/data";
+import { NewSection } from "./lib/newSection";
+import SectionsTable from "./lib/table";
 import { lusitana } from "@/app/ui/fonts";
+import { fetchSections } from "./lib/actions";
 
 async function Page() {
     const sections: Section[] = await fetchSections();

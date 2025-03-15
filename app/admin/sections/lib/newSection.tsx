@@ -1,8 +1,8 @@
 'use client';
 import { useState } from 'react';
-import { createSection } from '../../../lib/actions';
 import { Section, Tenant } from '@/app/lib/definitions';
 import { PlusIcon } from '@heroicons/react/24/outline';
+import { createSection } from './actions';
 
 interface INewSectionProps {
   tenants: Tenant[],
