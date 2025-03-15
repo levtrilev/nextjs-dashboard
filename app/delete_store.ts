@@ -1,7 +1,7 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { useDispatch, useSelector, useStore } from "react-redux";
 import { Section } from "./lib/definitions";
-import { fetchSections } from "./lib/data";
+import { fetchSections } from "./admin/sections/lib/actions";
 
 type State = {
     sections: Section[];
