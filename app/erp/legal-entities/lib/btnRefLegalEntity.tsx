@@ -4,9 +4,10 @@ import { useState, useEffect } from "react";
 import { PencilIcon, EyeIcon, BookOpenIcon, BriefcaseIcon, BookmarkIcon } from "@heroicons/react/24/outline";
 import { fetchLegalEntities } from "./actions";
 import { Region } from "@/app/lib/definitions";
+import { current } from "@reduxjs/toolkit";
 
-export default async function BtnRefLegalEntity() {
-  const legalEntities = await fetchLegalEntities();
+export default async function BtnRefLegalEntity(current_sections: string) {
+  const legalEntities = await fetchLegalEntities(current_sections);
   const [modal, setModal] = useState(false);
 
   const openModal = () => {
