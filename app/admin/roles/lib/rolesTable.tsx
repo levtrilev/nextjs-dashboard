@@ -27,7 +27,7 @@ export const RolesTable: React.FC<IRolesTableProps> = (props: IRolesTableProps) 
                                         <div className="mb-2 flex items-center">
                                             <p>{role.name}</p>
                                         </div>
-                                        <p className="text-sm text-gray-500">tenant_id: {" "+role.tenant_id}</p>
+                                        <p className="text-sm text-gray-500">tenant_id: {" " + role.tenant_id}</p>
                                     </div>
                                 </div>
                                 <div className="flex w-full items-center justify-between pt-4">
@@ -45,50 +45,51 @@ export const RolesTable: React.FC<IRolesTableProps> = (props: IRolesTableProps) 
                             </div>
                         ))}
                     </div>
-                    <table className="hidden min-w-full text-gray-900 md:table">
-                        <thead className="rounded-lg text-left text-sm font-normal">
+                    <table className="table-fixed hidden w-full rounded-md text-gray-900 md:table">
+                        <thead className="rounded-md bg-gray-50 text-left text-sm font-normal">
                             <tr>
-                                <th scope="col" className="px-4 py-5 font-medium sm:pl-6">
+                                <th scope="col" className="w-1/8 overflow-hidden px-0 py-5 font-medium sm:pl-6">
                                     Роль
                                 </th>
-                                <th scope="col" className="px-3 py-5 font-medium">
+                                <th scope="col" className="w-1/8 px-3 py-5 font-medium">
                                     Организация
                                 </th>
-                                <th scope="col" className="px-2 py-5 font-medium">
+                                <th scope="col" className="w-1/8 px-3 py-5 font-medium">
                                     Описание
                                 </th>
-                                <th scope="col" className="px-4 py-5 font-medium">
+                                <th scope="col" className="w-1/8 px-3 py-5 font-medium">
                                     Разделы
                                 </th>
-                                <th scope="col" className="px-3 py-5 font-medium">
-                                    Действия
+                                <th scope="col" className="w-1/8 px-3 py-5 font-medium">
+                                    
                                 </th>
                             </tr>
                         </thead>
-                        <tbody className="bg-white">
+                        <tbody className="divide-y divide-gray-200 text-gray-900">
                             {roles?.map((role) => (
-                                <tr
-                                    key={role.id}
-                                    className="w-full border-b border-gray-200 py-3 text-sm last-of-type:border-none [&:first-child>td:first-child]:rounded-tl-lg [&:first-child>td:last-child]:rounded-tr-lg [&:last-child>td:first-child]:rounded-bl-lg [&:last-child>td:last-child]:rounded-br-lg"
-                                >
-                                    <td className="whitespace-nowrap py-3 pl-6 pr-3">
-                                        <div className="flex items-center gap-3">
-                                            <p>{role.name}</p>
+                                <tr key={role.id} className="group">
+                                    <td className="w-1/8 overflow-hidden whitespace-nowrap text-ellipsis bg-white py-1 pl-0 text-left  
+                      pr-3 text-sm text-black group-first-of-type:rounded-md group-last-of-type:rounded-md sm:pl-6">
+                                        <div className="flex items-left gap-3">
+                                            <a
+                                                href={"/admin/roles/" + role.id + "/edit"}
+                                                className="text-blue-800 underline"
+                                            >{role.name.substring(0, 20)}</a>
                                         </div>
                                     </td>
-                                    <td className="whitespace-nowrap px-3 py-3">
+                                    <td className="w-1/8 overflow-hidden whitespace-nowrap bg-white px-4 py-1 text-sm">
                                         {role.tenant_id}
                                     </td>
-                                    <td className="whitespace-nowrap px-3 py-3">
+                                    <td className="w-1/8 overflow-hidden whitespace-nowrap bg-white px-4 py-1 text-sm">
                                         {role.description}
                                     </td>
-                                    <td className="whitespace-nowrap px-3 py-3">
+                                    <td className="w-1/8 overflow-hidden whitespace-nowrap bg-white px-4 py-1 text-sm">
                                         {role.section_ids}
                                     </td>
-                                    <td className="whitespace-nowrap py-3 pl-6 pr-3">
+                                    <td className="w-1/16 whitespace-nowrap pl-4 py-1 pr-3">
                                         <div className="flex justify-end gap-3">
                                             <BtnDeleteRole id={role.id} />
-                                            <BtnEditRoleLink id={role.id} />
+                                            {/* <BtnEditRoleLink id={role.id} /> */}
                                         </div>
                                     </td>
                                 </tr>

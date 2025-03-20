@@ -178,3 +178,33 @@ WHERE sections.id = ANY (
   }
 }
 
+export async function getRoleSections(role_id: string): Promise<{
+  id: string;
+  name: string;
+  tenant_id: string;
+  tenant_name: string;
+}[] > {
+  if ( role_id === "" ) { return []; }
+  try {
+    const data = await sql<{
+      id: string;
+      name: string;
+      tenant_id: string;
+      tenant_name: string;
+  }>`    
+    SELECT s.id, s.name, s.tenant_id, t.name as tenant_name
+FROM sections s
+LEFT JOIN tenants t on s.tenant_id = t.id
+WHERE s.id = ANY (
+    SELECT unnest(section_ids)
+    FROM roles
+    WHERE roles.id = ${role_id}
+  )
+`;
+    const role_sections = data.rows;
+    return role_sections;
+  } catch (err) {
+    console.error("Database Error:", err);
+    throw new Error("Failed to fetch role_sections");
+  }
+}

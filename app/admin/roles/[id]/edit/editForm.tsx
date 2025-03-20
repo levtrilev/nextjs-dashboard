@@ -1,23 +1,37 @@
 'use client';
 import { useState } from "react";
 import { KeyboardEvent } from "react";
-import { Role } from "@/app/lib/definitions";
+import { Role, Section } from "@/app/lib/definitions";
 import { updateRole } from "../../lib/actions";
 import Link from "next/link";
 
 interface IEditFormProps {
-  role: Role,
+  role: {
+    id: string;
+    name: string;
+    description: string;
+    tenant_id: string;
+    tenant_name: string;
+    section_ids: string;
+  },
+  role_sections: {
+    id: string;
+    name: string;
+    tenant_id: string;
+    tenant_name: string;
+  }[],
 }
 // export const InputForm: React.FC<IInputFormProps> = (props: IInputFormProps) => {
 
 export default function EditForm(props: IEditFormProps) {
   const [role, setRole] = useState(props.role);
-  // const [show, setShow] = useState(false);
-  // const handleKeyDown = (e: KeyboardEvent) => {
-  //   if (e.key === "Enter") {
-  //     setShow(true);
-  //   }
-  // };
+  const sections = props.role.section_ids;
+  console.log("sections: " + sections);
+
+
+  const handleRedirectBack = () => {
+    window.history.back(); // Возвращает пользователя на предыдущую страницу
+  };
 
   const handleChangeName = (event: any) => {
     setRole((prev) => ({
@@ -34,47 +48,128 @@ export default function EditForm(props: IEditFormProps) {
 
   return (
     <div >
-      {/* className="max-w-md mx-auto p-6 bg-white shadow-md rounded-md" */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="flex justify-between mt-1">
-          <label
-            htmlFor="name"
-            className="text-sm font-medium flex items-center p-2"
-          >
-            Роль(название):
-          </label>
-          <input
-            id="name"
-            type="text"
-            className="w-7/8 control rounded-md border border-gray-200 p-2"
-            value={role.name}
-            onChange={(e) => handleChangeName(e)}
-          />
+      <div className="flex flex-col md:flex-row gap-4 w-full">
+        {/* first column */}
+        <div className="flex flex-col gap-4 w-full md:w-1/2">
+          {/* name */}
+          <div className="flex justify-between mt-1">
+            <label
+              htmlFor="name"
+              className="w-2/8 text-sm font-medium flex items-center p-2"
+            >
+              Название:
+            </label>
+            <input
+              id="name"
+              type="text"
+              className="w-13/16 control rounded-md border border-gray-200 p-2"
+              value={role.name}
+              onChange={(e) => handleChangeName(e)}
+            />
+          </div>
+          {/* description */}
+          <div className="flex justify-between mt-1">
+            <label
+              htmlFor="description"
+              className="w-2/8 text-sm font-medium flex items-center p-2">
+              Описание:
+            </label>
+            <input
+              id="description"
+              type="text"
+              className="w-13/16 control rounded-md border border-gray-200 p-2"
+              value={role.description}
+              onChange={(e) => handleChangeDescription(e)}
+            />
+          </div>
+          {/* tenant_id */}
+          <div className="flex justify-between mt-1">
+            <label
+              htmlFor="tenant_id"
+              className="w-2/8 text-sm font-medium flex items-center p-2">
+              tenant_id:
+            </label>
+            <input
+              id="tenant_id"
+              type="text"
+              className="w-13/16 control rounded-md border border-gray-200 p-2"
+              value={role.tenant_id}
+              onChange={(e) => setRole((prev) => ({ ...prev, tenant_id: e.target.value, }))}
+            />
+          </div>
+          {/* tenant_name */}
+          <div className="flex justify-between mt-1">
+            <label
+              htmlFor="tenant_name"
+              className="w-2/8 text-sm font-medium flex items-center p-2">
+              tenant_name:
+            </label>
+            <input
+              id="tenant_name"
+              type="text"
+              className="w-13/16 control rounded-md border border-gray-200 p-2"
+              value={role.tenant_name}
+              onChange={(e) => setRole((prev) => ({ ...prev, tenant_name: e.target.value, }))}
+            />
+          </div>
+
         </div>
-        <div className="w-1/2"></div>
-        <div className="flex justify-between mt-1">
-          <label
-            htmlFor="description"
-            className="w-2/8 text-sm font-medium flex items-center p-2">
-            Описание:
-          </label>
-          <input
-            id="description"
-            type="text"
-            className="w-13/16 control rounded-md border border-gray-200 p-2"
-            value={role.description}
-            onChange={(e) => handleChangeDescription(e)}
-          />
-        </div>
-        <div className="w-1/2"></div>
-        <div></div>
       </div>
-      <div className="flex justify-between mt-1">
-        <div className="flex w-1/2">
-          <div className="w-1/4">
+
+      {/* table area */}
+      <h2 className="px-2 pt-10 font-medium">Разделы:</h2>
+
+      <table className="table-fixed hidden w-full rounded-md text-gray-900 md:table">
+        <thead className="rounded-md bg-gray-50 text-left text-sm font-normal">
+          <tr>
+            <th scope="col" className="w-7/16 overflow-hidden px-0 py-5 font-medium sm:pl-6">
+              Название
+            </th>
+            <th scope="col" className="w-1/8 px-3 py-5 font-medium">
+              Организация
+            </th>
+
+          </tr>
+        </thead>
+
+        <tbody className="divide-y divide-gray-200 text-gray-900">
+          {props.role_sections.map((section) => (
+            <tr key={section.id} className="group">
+              <td className="w-7/16 overflow-hidden whitespace-nowrap text-ellipsis bg-white py-1 pl-0 text-left  
+                      pr-3 text-sm text-black group-first-of-type:rounded-md group-last-of-type:rounded-md sm:pl-6">
+                <div className="flex items-left gap-3">
+                  <a
+                    href={"/admin/sections/" + section.id + "/edit"}
+                    className="text-blue-800 underline"
+                  >{section.name.substring(0, 36)}</a>
+                </div>
+              </td>
+              <td className="w-1/8 overflow-hidden whitespace-nowrap bg-white px-4 py-1 text-sm">
+                {section.tenant_name}
+              </td>
+              <td className="w-1/16 whitespace-nowrap pl-4 py-1 pr-3">
+                <div className="flex justify-end gap-3">
+                  {/* <BtnDeleteRegion id={region.id} /> */}
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+
+
+
+
+
+      {/* button area */}
+      <div className="flex justify-between mt-4 mr-4">
+        <div className="flex w-full md:w-1/2">
+          <div className="w-full md:w-1/2">
             <button
               onClick={() => {
                 updateRole(role);
+                handleRedirectBack();
               }}
               className="bg-blue-400 text-white w-full rounded-md border p-2 
               hover:bg-blue-100 hover:text-gray-500 cursor-pointer"
@@ -82,9 +177,10 @@ export default function EditForm(props: IEditFormProps) {
               Сохранить
             </button>
           </div>
-          <div className="w-1/4">
-            <Link href={"/admin/tenants/"} >
+          <div className="w-full md:w-1/2">
+            <Link href={"#"} >
               <button
+                onClick={() => handleRedirectBack()}
                 className="bg-blue-400 text-white w-full rounded-md border p-2
                  hover:bg-blue-100 hover:text-gray-500 cursor-pointer"
               >
@@ -94,6 +190,7 @@ export default function EditForm(props: IEditFormProps) {
           </div>
         </div>
       </div>
+
     </div>
   );
 }

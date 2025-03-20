@@ -49,6 +49,35 @@ export async function fetchRole(id: string) {
   }
 }
 
+export async function fetchRoleForm(id: string) {
+  try {
+    const data = await sql<{
+      id: string;
+      name: string;
+      description: string;
+      tenant_id: string;
+      tenant_name: string;
+      section_ids: string;
+  }>`
+      SELECT
+        r.id,
+        r.name,
+        r.tenant_id,
+        r.section_ids,
+        t.name as tenant_name,
+      COALESCE(r.description, '') AS description
+      FROM roles r
+      LEFT JOIN tenants t on r.tenant_id = t.id
+      WHERE r.id = ${id}
+    `;
+
+    const role = data.rows[0];
+    return role;
+  } catch (err) {
+    console.error("Database Error:", err);
+    throw new Error("Failed to fetch roleForm");
+  }
+}
 //#endregion
 
 //#region Roles
