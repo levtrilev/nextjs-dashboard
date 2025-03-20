@@ -1,4 +1,4 @@
-// Sections lib.ts
+// Sections actions.ts
 
 "use server";
 import { Section, SectionForm } from "@/app/lib/definitions";

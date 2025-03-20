@@ -7,27 +7,30 @@ import Search from '@/app/ui/search';
 import {
   CustomersTableType,
   FormattedCustomersTable,
+  LegalEntity,
 } from '@/app/lib/definitions';
 import { fetchFilteredLegalEntities } from './actions';
 import { ChartBarIcon, ChartPieIcon } from '@heroicons/react/20/solid';
 import { BtnDeleteLegalEntity, BtnEditLegalEntityLink } from './buttons';
-// import { fetchRegions } from '../../regions/lib/actions';
+// import { useSelector } from 'react-redux';
+// import { userSessionSlice, UserSessionState } from '@/app/lib/features/userSession/userSessionSlice';
 
-export default async function CustomersTable({
+export default async function LegalEntitiesTable({
   query,
   currentPage,
-  // regions,
+  current_sections,
 }: {
   query: string;
   currentPage: number;
-  // regions: Region[];
+  current_sections: string;
 }) {
 
   // const customers = await fetchFilteredLegalEntities(query, currentPage) as any[];
   // legalEntities
-  const legalEntities = await fetchFilteredLegalEntities(query, currentPage);
-  // const regions = await fetchRegions();
+  // const current_sections = useSelector((state: { userSession: UserSessionState }) => userSessionSlice.selectors.selectCurrentSections(state));
 
+  const legalEntities = await fetchFilteredLegalEntities(query, currentPage, current_sections);
+  // const regions = await fetchRegions();
   return (
     <div className="w-full">
       <div className="mt-6 flow-root">
@@ -135,11 +138,3 @@ export default async function CustomersTable({
     </div>
   );
 }
-
-// {
-//   customers,
-// }: {
-//   customers: FormattedCustomersTable[];
-// }
-
-{/* <button className="rounded-md border border-gray-200 p-2 h-10 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"> */ }

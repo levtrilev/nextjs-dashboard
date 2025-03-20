@@ -1,9 +1,10 @@
 'use server';
-import { fetchTenants, fetchUsers } from "@/app/lib/data";
-import UsersTable from "@/app/ui/admin/users/table";
+import UsersTable from "./lib/table";
 import { User, Tenant } from '@/app/lib/definitions';
-import { NewUser } from "@/app/ui/admin/users/newUser";
+import { NewUser } from "./lib/newUser";
 import { lusitana } from "@/app/ui/fonts";
+import { fetchUsers } from "./lib/actions";
+import { fetchTenants } from "../tenants/lib/actions";
 
 async function Page() {
     const users: User[] = await fetchUsers();

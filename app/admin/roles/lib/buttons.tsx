@@ -1,12 +1,12 @@
 import { PencilIcon, PlusIcon, TrashIcon, ServerIcon } from '@heroicons/react/24/outline';
-import { deleteTenant, updateTenant } from '@/app/lib/actions';
+import { deleteRole, updateRole } from './actions';
 import Link from "next/link";
-import { Tenant } from '@/app/lib/definitions';
+import { Role } from '@/app/lib/definitions';
 
-export function BtnUpdateTenant({ tenant }: { tenant: Tenant }) {
-  const updateTenantWithData = updateTenant.bind(null, tenant);
+export function BtnUpdateRole({ role }: { role: Role }) {
+  const updateRoleWithData = updateRole.bind(null, role);
   return (
-    <form action={updateTenantWithData} className="w-full">
+    <form action={updateRoleWithData} className="w-full">
       <button className="bg-blue-400 text-white w-full rounded-md border p-2 hover:bg-blue-100 hover:text-gray-500">
         Save
       </button>
@@ -14,11 +14,11 @@ export function BtnUpdateTenant({ tenant }: { tenant: Tenant }) {
   );
 }
 
-export function BtnDeleteTenant({ name }: { name: string }) {
-  const deleteTenantWithName = deleteTenant.bind(null, name);
+export function BtnDeleteRole({ id }: { id: string }) {
+  const deleteRoleWithId = deleteRole.bind(null, id);
 
   return (
-    <form action={deleteTenantWithName}>
+    <form action={deleteRoleWithId}>
       <button className="rounded-md border border-gray-200 p-2 h-10 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
         <span className="sr-only">Delete</span>
         <TrashIcon className="w-5 h-5 text-gray-800" />
@@ -27,12 +27,12 @@ export function BtnDeleteTenant({ name }: { name: string }) {
   );
 }
 
-export function BtnEditTenantLink({ id }: { id: string }) {
+export function BtnEditRoleLink({ id }: { id: string }) {
   const LinkIcon = PencilIcon;
   return (
     <Link
       key={"Edit"}
-      href={"/admin/tenants/" + id + "/edit"}
+      href={"/admin/roles/" + id + "/edit"}
       className='flex h-10 items-center justify-center space-x-2 rounded-md border border-gray-200 bg-white p-2 text-sm font-medium hover:bg-gray-100 md:flex-none md:justify-start md:p-2 md:px-3'
     >
       <LinkIcon className="w-5 h-5 text-gray-800" />

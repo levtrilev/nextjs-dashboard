@@ -1,9 +1,9 @@
 'use client';
 import { useState } from 'react';
-import { createTenant } from '../../../lib/actions';
 import { PlusIcon } from '@heroicons/react/24/outline';
+import { createRole } from './actions';
 
-export const NewTenant = () => {
+export const NewRole = () => {
 
   const [name, setName] = useState<string>("");
   const [description, setDescription] = useState<string>("");
@@ -16,7 +16,7 @@ export const NewTenant = () => {
   return (
     <div className="flex items-center p-4">
       <form
-        action={() => { createTenant(name, description); setName(''); setDescription('') }}
+        action={() => { createRole(name, description, 'a262e083-8e1b-440c-8829-cec98c88f9fb', '{}'); setName(''); setDescription('') }}
         className="flex gap-2">
         <div className="flex-2 flex items-center">
           <input
@@ -37,7 +37,7 @@ export const NewTenant = () => {
             className="bg-blue-500 text-white w-full h-10 rounded-md border border-transparent px-3 py-2 hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300"
             >
             <div className="flex items-center justify-center h-full">
-            <span className="hidden md:block">Создать организацию</span>{' '}
+            <span className="hidden md:block">Создать роль</span>{' '}
               <PlusIcon className="h-5 md:ml-4" />
             </div>
           </button>

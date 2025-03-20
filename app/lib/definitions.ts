@@ -5,6 +5,14 @@
 
 import { DateTime } from "next-auth/providers/kakao";
 
+export type Role = {
+  id: string;
+  name: string;
+  description: string;
+  tenant_id: string;
+  section_ids: string;
+};
+
 export type Region = {
   id: string;
   name: string;

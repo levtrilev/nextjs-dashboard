@@ -1,62 +1,54 @@
 'use client';
 import { useState } from "react";
 import { KeyboardEvent } from "react";
-import { Tenant } from "@/app/lib/definitions";
-import { updateTenant } from "../../lib/actions";
+import { Role } from "@/app/lib/definitions";
+import { updateRole } from "../../lib/actions";
 import Link from "next/link";
-import RadioActive from "../../lib/radioActive";
 
-interface IInputFormProps {
-  tenant: Tenant,
+interface IEditFormProps {
+  role: Role,
 }
 // export const InputForm: React.FC<IInputFormProps> = (props: IInputFormProps) => {
 
-export default function InputForm(props: IInputFormProps) {
-  const [tenant, setTenant] = useState(props.tenant);
-  const [show, setShow] = useState(false);
-  const handleKeyDown = (e: KeyboardEvent) => {
-    if (e.key === "Enter") {
-      setShow(true);
-    }
-  };
+export default function EditForm(props: IEditFormProps) {
+  const [role, setRole] = useState(props.role);
+  // const [show, setShow] = useState(false);
+  // const handleKeyDown = (e: KeyboardEvent) => {
+  //   if (e.key === "Enter") {
+  //     setShow(true);
+  //   }
+  // };
 
   const handleChangeName = (event: any) => {
-    setTenant((prev) => ({
+    setRole((prev) => ({
       ...prev,
       name: event.target.value,
     }));
   };
   const handleChangeDescription = (event: any) => {
-    setTenant((prev) => ({
+    setRole((prev) => ({
       ...prev,
       description: event.target.value,
     }));
   };
-  const handleChangeActive = (event: any) => {
-    setTenant((prev) => ({
-      ...prev,
-      active: !prev.active,
-    }));
-  };
+
   return (
     <div >
       {/* className="max-w-md mx-auto p-6 bg-white shadow-md rounded-md" */}
-      <h3>{show && "Нажата клавиша Enter"}</h3>
       <div className="grid grid-cols-2 gap-4">
         <div className="flex justify-between mt-1">
           <label
             htmlFor="name"
             className="text-sm font-medium flex items-center p-2"
           >
-            Name:
+            Роль(название):
           </label>
           <input
             id="name"
             type="text"
             className="w-7/8 control rounded-md border border-gray-200 p-2"
-            value={tenant.name}
+            value={role.name}
             onChange={(e) => handleChangeName(e)}
-            onKeyDown={(e) => handleKeyDown(e)}
           />
         </div>
         <div className="w-1/2"></div>
@@ -64,19 +56,17 @@ export default function InputForm(props: IInputFormProps) {
           <label
             htmlFor="description"
             className="w-2/8 text-sm font-medium flex items-center p-2">
-            Description:
+            Описание:
           </label>
           <input
             id="description"
             type="text"
             className="w-13/16 control rounded-md border border-gray-200 p-2"
-            value={tenant.description}
+            value={role.description}
             onChange={(e) => handleChangeDescription(e)}
-            onKeyDown={(e) => handleKeyDown(e)}
           />
         </div>
         <div className="w-1/2"></div>
-        <RadioActive tenant={tenant} handleChangeActive={handleChangeActive} />
         <div></div>
       </div>
       <div className="flex justify-between mt-1">
@@ -84,12 +74,12 @@ export default function InputForm(props: IInputFormProps) {
           <div className="w-1/4">
             <button
               onClick={() => {
-                updateTenant(tenant);
+                updateRole(role);
               }}
               className="bg-blue-400 text-white w-full rounded-md border p-2 
               hover:bg-blue-100 hover:text-gray-500 cursor-pointer"
             >
-              Save
+              Сохранить
             </button>
           </div>
           <div className="w-1/4">
@@ -98,7 +88,7 @@ export default function InputForm(props: IInputFormProps) {
                 className="bg-blue-400 text-white w-full rounded-md border p-2
                  hover:bg-blue-100 hover:text-gray-500 cursor-pointer"
               >
-                Back to list
+                Отмена
               </button>
             </Link>
           </div>

@@ -2,7 +2,7 @@ import { Tenant } from "@/app/lib/definitions";
 import Modal from "../../../lib/modal";
 import { useState, useEffect } from "react";
 import { PencilIcon, EyeIcon, BookOpenIcon, BriefcaseIcon, BookmarkIcon } from "@heroicons/react/24/outline";
-import { updateTenant } from "@/app/lib/actions";
+import { updateTenant } from "./actions";
 
 interface ITenantProps {
   tenant: Tenant,
@@ -57,13 +57,20 @@ export const BtnEditTenantModal: React.FC<ITenantProps> = (props: ITenantProps) 
         <h2>Edit Tenant. id : {tenant.id}</h2>
         <div>name : {tenant.name}</div>
         <input
-          id={tenant.name} onChange={(e) => handleChangeName(e)} value={tenant.name ? tenant.name : undefined} type="text"
-          className="w-full rounded-md border p-2 hover:bg-gray-100" placeholder='Tenant name'
+          id={tenant.name} 
+          onChange={(e) => handleChangeName(e)} 
+          value={tenant.name ? tenant.name : undefined} type="text"
+          className="w-full rounded-md border p-2 hover:bg-gray-100" 
+          placeholder='Tenant name'
         />
         <div>description : {tenant.description}</div>
         <input
-          id={tenant.description} onChange={(e) => handleChangeDescription(e)} value={tenant.description ? tenant.description : undefined} type="text"
-          className="w-full rounded-md border p-2 hover:bg-gray-100" placeholder='Tenant description'
+          id={tenant.description} 
+          onChange={(e) => handleChangeDescription(e)} 
+          value={tenant.description ? tenant.description : undefined} 
+          type="text"
+          className="w-full rounded-md border p-2 hover:bg-gray-100" 
+          placeholder='Tenant description'
         />
         <div className="flex justify-between space-x-2" >
           <button

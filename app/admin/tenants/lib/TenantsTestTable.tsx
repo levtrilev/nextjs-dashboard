@@ -1,5 +1,5 @@
 'use client';
-import { deleteTenant, tenantsTestSlice,TenantsTestState } from '@/app/lib/features/tenants/tenantsTestSlice';
+import { deleteTenant, tenantsTestSlice,TenantsTestState } from '@/app/admin/tenants/lib/tenantsTestSlice';
 import { useSelector, useDispatch } from 'react-redux';
 
 export default function TenantsTestTable () {

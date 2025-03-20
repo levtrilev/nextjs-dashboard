@@ -2,21 +2,22 @@
 
 import { TrashIcon } from '@heroicons/react/24/outline';
 import { FaceSmileIcon } from '@heroicons/react/20/solid';
-import { deleteTenant } from '../../../lib/actions';
+import { deleteUser } from './actions';
 import { useState } from 'react';
 
-export default function DeleteTenant() {
-  const [tenantToDelete, changeTenantToDelete] = useState<string>("");
-  function handleChangeName(event: any) {
-    changeTenantToDelete(event.target.value);
+export function DeleteUser() {
+  const [emailToDelete, changeEmailToDelete] = useState<string>("");
+  function handleChangeEmail(event: any) {
+    changeEmailToDelete(event.target.value);
+    // console.log("handleChangeEmail: " + email);
   }
   return (
     <div className="flex items-center p-4">
-      <form action={() => deleteTenant(tenantToDelete)} className="flex space-x-2">
+      <form action={() => deleteUser(emailToDelete)} className="flex space-x-2">
         <div className="flex-2">
           <input
-            id="delete-tenant" onChange={(e) => handleChangeName(e)} defaultValue={tenantToDelete} type="text"
-            className=" w-full rounded-md border p-2 hover:bg-gray-100" placeholder='Tenant to delete'
+            id="delete-email" onChange={(e) => handleChangeEmail(e)} defaultValue={emailToDelete} type="text"
+            className=" w-full rounded-md border p-2 hover:bg-gray-100" placeholder='Email'
           />
         </div>
         <div className="flex-2">
@@ -25,7 +26,7 @@ export default function DeleteTenant() {
           >
             {/* <span className="sr-only">Delete User </span>
           <TrashIcon className="w-5" /> */}
-            Delete Tenant
+            Delete User
           </button>
         </div>
       </form>

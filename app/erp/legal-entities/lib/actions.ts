@@ -9,6 +9,36 @@ import { redirect } from "next/navigation";
 import { auth, signIn } from "@/auth";
 import { LegalEntity, LegalEntityForm } from "@/app/lib/definitions";
 
+// async function getCurrentSections(email: string): Promise<string | undefined> {
+//   if ( email === "" ) { return ""; }
+//   try {
+//     const user_sections = await sql<{id: string}>`    
+//     SELECT sections.id
+// FROM sections
+// WHERE sections.id = ANY (
+//     SELECT unnest(section_ids)
+//     FROM roles
+//     WHERE roles.id = ANY (
+//         SELECT unnest(role_ids)
+//         FROM users
+//         WHERE users.email = ${email}
+//     )
+// )
+//     `;
+//     // нужно вернуть значение как такое:
+//     // const current_sections = "{e21e9372-91c5-4856-a123-b6f3b53efc0f,05a57bc6-1dec-4c60-b430-f70166489422,fba0eac4-f2f8-497b-b15d-53c765eef16e}";
+//     const sections_id_array = user_sections.rows.map((section) => section.id);
+//     const sections_id_string = sections_id_array.join(",");
+//     return "{" + sections_id_string + "}";
+//   } catch (error) {
+//     console.error("Failed to fetch current_sections:", error);
+//     throw new Error("Failed to fetch current_sections.");
+//   }
+// }
+// const  session = await auth();
+// const email = session ? (session.user? session.user.email : "") : "";
+// const current_sections = await getCurrentSections(email as string);
+// console.log("current_sections: " + current_sections);
 const ITEMS_PER_PAGE = 8;
 
 //#region CreateLegalEntity
@@ -191,9 +221,12 @@ WHERE id = ${legalEntity.id};
 
 //#region LegalEntity
 
-export async function fetchLegalEntity(id: string) {
+export async function fetchLegalEntity(id: string, current_sections: string) {
   try {
     const data = await sql<LegalEntity>`
+WITH your_legal_entities AS ( SELECT * FROM legal_entities where section_id = 
+ANY (${current_sections}::uuid[]))
+
       SELECT
         id,
         name,
@@ -208,7 +241,7 @@ export async function fetchLegalEntity(id: string) {
         kpp,
         region_id,
         section_id
-      FROM legal_entities
+      FROM your_legal_entities
       WHERE id = ${id}
     `;
 
@@ -224,9 +257,12 @@ export async function fetchLegalEntity(id: string) {
   }
 }
 
-export async function fetchLegalEntities() {
+export async function fetchLegalEntities(current_sections: string) {
   try {
     const data = await sql<LegalEntity>`
+    WITH your_legal_entities AS ( SELECT * FROM legal_entities where section_id = 
+      ANY (${current_sections}::uuid[]))
+
       SELECT
         id,
         name,
@@ -241,7 +277,7 @@ export async function fetchLegalEntities() {
         kpp,
         region_id,
         section_id
-      FROM legal_entities
+      FROM your_legal_entities
       ORDER BY name ASC
     `;
 
@@ -255,12 +291,16 @@ export async function fetchLegalEntities() {
 
 export async function fetchFilteredLegalEntities(
   query: string,
-  currentPage: number
+  currentPage: number,
+  current_sections: string
 ) {
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
   try {
     const legal_entities = await sql<LegalEntity>`
+    WITH your_legal_entities AS ( SELECT * FROM legal_entities where section_id = 
+      ANY (${current_sections}::uuid[]))
+
       SELECT
         id,
         name,
@@ -275,7 +315,7 @@ export async function fetchFilteredLegalEntities(
         kpp,
         region_id,
         section_id
-      FROM legal_entities
+      FROM your_legal_entities legal_entities
       WHERE
         legal_entities.name ILIKE ${`%${query}%`} OR
         legal_entities.email ILIKE ${`%${query}%`} OR
@@ -295,10 +335,14 @@ export async function fetchFilteredLegalEntities(
   }
 }
 
-export async function fetchLegalEntitiesPages(query: string) {
+export async function fetchLegalEntitiesPages(query: string, current_sections: string) {
   try {
-    const count = await sql`SELECT COUNT(*)
-    FROM legal_entities
+    const count = await sql`
+    WITH your_legal_entities AS ( SELECT * FROM legal_entities where section_id = 
+      ANY (${current_sections}::uuid[]))
+    
+    SELECT COUNT(*)
+    FROM your_legal_entities legal_entities
     WHERE
         legal_entities.name ILIKE ${`%${query}%`} OR
         legal_entities.email ILIKE ${`%${query}%`} OR
@@ -317,9 +361,12 @@ export async function fetchLegalEntitiesPages(query: string) {
   }
 }
 
-export async function fetchLegalEntityForm(id: string) {
+export async function fetchLegalEntityForm(id: string, current_sections: string) {
   try {
     const data = await sql<LegalEntityForm>`
+    WITH your_legal_entities AS ( SELECT * FROM legal_entities where section_id = 
+      ANY (${current_sections}::uuid[]))
+
       SELECT
         le.id,
         le.name,
@@ -336,7 +383,7 @@ export async function fetchLegalEntityForm(id: string) {
         le.section_id,
         r.name as region_name,
         s.name as section_name
-      FROM legal_entities le 
+      FROM your_legal_entities le 
       LEFT JOIN regions r ON le.region_id = r.id
       LEFT JOIN sections s ON le.section_id = s.id
       WHERE le.id = ${id}

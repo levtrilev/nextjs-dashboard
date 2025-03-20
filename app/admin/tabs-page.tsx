@@ -1,15 +1,13 @@
 'use client';
 import TabsSection from "./tabs-section";
 import { useState } from "react";
-import { NewUser } from "@/app/ui/admin/users/newUser";
-import { DeleteUser } from "@/app/ui/admin/users/deleteUser";
-import UsersTable from "@/app/ui/admin/users/table";
 import { Tenant, User, Section } from '@/app/lib/definitions';
-import TenantsTable from "@/app/ui/admin/tenants/tenantsTable";
-import { NewTenant } from "@/app/ui/admin/tenants/newTenant";
-import DeleteTenant from "@/app/ui/admin/tenants/deleteTenant"
 import { NewSection } from "./sections/lib/newSection";
 import SectionsTable from "./sections/lib/table";
+import { NewTenant } from "./tenants/lib/newTenant";
+import TenantsTable from "./tenants/lib/tenantsTable";
+import { NewUser } from "./users/lib/newUser";
+import UsersTable from "./users/lib/table";
 
 interface ITabsPageProps {
     tenants: Tenant[],

@@ -1,9 +1,9 @@
 
 import InputForm from "./inputForm";
-import { fetchTenants } from "@/app/lib/data";
 import { Tenant, SectionForm } from "@/app/lib/definitions";
 import { lusitana } from "@/app/ui/fonts";
 import { fetchSectionById } from "../lib/actions";
+import { fetchTenants } from "../../tenants/lib/actions";
 
 async function Page({ params }: { params: any }) {
     const { id } = await params;

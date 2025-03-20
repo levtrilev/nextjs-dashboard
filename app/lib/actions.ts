@@ -151,130 +151,30 @@ export async function authenticate(
 }
 //#endregion
 
-//#region Users
-// async function createUser(newUser: User) {
-export async function createUser(
-  email: string,
-  password: string,
-  tenant_id: string,
-  is_admin: boolean = false
-) {
-  const saltOrRounds = 10;
-  const hash = await bcrypt.hash(password, saltOrRounds);
-
-  const newUser: User = {
-    id: "",
-    name: email,
-    email: email,
-    password: hash,
-    tenant_id: tenant_id,
-    is_admin: is_admin,
-  };
-  // Insert data into the database
-  //   console.log('createUser tenant_id: ' + newUser.tenant_id);
+export async function getCurrentSections(email: string): Promise<string > {
+  if ( email === "" ) { return ""; }
   try {
-    await sql`
-      INSERT INTO users (name, email, password, is_admin, tenant_id)
-      VALUES (${newUser.name}, ${newUser.email}, ${newUser.password}, ${newUser.is_admin}, ${newUser.tenant_id})
+    const user_sections = await sql<{id: string}>`    
+    SELECT sections.id
+FROM sections
+WHERE sections.id = ANY (
+    SELECT unnest(section_ids)
+    FROM roles
+    WHERE roles.id = ANY (
+        SELECT unnest(role_ids)
+        FROM users
+        WHERE users.email = ${email}
+    )
+)
     `;
+    // нужно вернуть значение как такое:
+    // const current_sections = "{e21e9372-91c5-4856-a123-b6f3b53efc0f,05a57bc6-1dec-4c60-b430-f70166489422,fba0eac4-f2f8-497b-b15d-53c765eef16e}";
+    const sections_id_array = user_sections.rows.map((section) => section.id);
+    const sections_id_string = sections_id_array.join(",");
+    return "{" + sections_id_string + "}";
   } catch (error) {
-    console.error("Failed to create user:", error);
-    throw new Error("Failed to create user.");
+    console.error("Failed to fetch current_sections:", error);
+    throw new Error("Failed to fetch current_sections.");
   }
-  revalidatePath("/admin");
-  redirect("/admin");
 }
 
-export async function updateUser(user: User) {
-  // password = ${user.password},
-  try {
-    await sql`
-      UPDATE users
-      SET name = ${user.name}, 
-      email = ${user.email}, 
-      is_admin = ${user.is_admin}, 
-      tenant_id = ${user.tenant_id}
-      WHERE id = ${user.id}
-    `;
-  } catch (error) {
-    console.error("Failed to update user:", error);
-    throw new Error("Failed to update user.");
-  }
-  revalidatePath("/admin/users");
-}
-
-export async function deleteUser(email: string) {
-  // const id = '5bce9a5e-73b8-40e1-b8e5-c681b0ef2c2b';
-  try {
-    await sql`DELETE FROM users WHERE email = ${email}`;
-    //   revalidatePath("/dashboard/invoices");
-    // return { message: "Deleted Invoice" };
-  } catch (error) {
-    // return { message: "Database Error: Failed to Delete Invoice" };
-    console.error("Database Error, Failed to Delete User:", error);
-    throw new Error("Database Error: Failed to Delete User");
-  }
-  revalidatePath("/admin");
-  redirect("/admin");
-}
-
-export async function deleteUserById(id: string) {
-  try {
-    await sql`DELETE FROM users WHERE id = ${id}`;
-  } catch (error) {
-    console.error("Database Error, Failed to Delete User by id:", error);
-    throw new Error("Database Error: Failed to Delete User by id");
-  }
-  revalidatePath("/admin");
-  redirect("/admin");
-}
-//#endregion
-
-
-
-//#region Tenants
-export async function createTenant(name: string, description: string) {
-  const newTenant: Tenant = {
-    id: "",
-    active: true,
-    name: name,
-    description: description,
-  };
-  try {
-    await sql`
-      INSERT INTO tenants (name, description)
-      VALUES (${newTenant.name}, ${newTenant.description})
-    `;
-  } catch (error) {
-    console.error("Failed to create tenant:", error);
-    throw new Error("Failed to create tenant.");
-  }
-  revalidatePath("/admin");
-  // redirect("/admin");
-}
-
-export async function updateTenant(tenant: Tenant) {
-  try {
-    await sql`
-      UPDATE tenants
-      SET name = ${tenant.name}, active = ${tenant.active}, description = ${tenant.description}
-      WHERE id = ${tenant.id}
-    `;
-  } catch (error) {
-    console.error("Failed to update tenant:", error);
-    throw new Error("Failed to update tenant.");
-  }
-  revalidatePath("/admin");
-}
-
-export async function deleteTenant(name: string) {
-  try {
-    await sql`DELETE FROM tenants WHERE name = ${name}`;
-  } catch (error) {
-    console.error("Database Error, Failed to Delete Tenant:", error);
-    throw new Error("Database Error: Failed to Delete Tenant");
-  }
-  revalidatePath("/admin");
-  // redirect("/admin");
-}
-//#endregion

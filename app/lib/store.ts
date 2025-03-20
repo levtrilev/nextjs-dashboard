@@ -3,7 +3,7 @@ import { combineSlices, configureStore } from "@reduxjs/toolkit";
 import { counterSlice } from "./features/counter/counterSlice";
 import { quotesApiSlice } from "./features/quotes/quotesApiSlice";
 // import { tenantsSlice } from "./features/tenants/tenantsSlice";
-import { tenantsTestSlice } from "./features/tenants/tenantsTestSlice";
+import { tenantsTestSlice } from "../admin/tenants/lib/tenantsTestSlice";
 
 // `combineSlices` automatically combines the reducers using
 // their `reducerPath`s, therefore we no longer need to call `combineReducers`.

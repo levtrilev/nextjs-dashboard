@@ -1,6 +1,9 @@
+
+// Users buttons
+
 import { PencilIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
-import { deleteUserById } from '@/app/lib/actions';
+import { deleteUserById } from './actions';
 
 export function UpdateInvoice({ id }: { id: string }) {
   return (
@@ -32,7 +35,9 @@ export function BtnEditUserLink({ id }: { id: string }) {
     <Link
       key={"Edit"}
       href={"/admin/users/" + id}
-      className='flex h-10 items-center justify-center space-x-2 rounded-md border border-gray-200 bg-white p-2 text-sm font-medium hover:bg-gray-100 md:flex-none md:justify-start md:p-2 md:px-3'
+      className='flex h-10 items-center justify-center space-x-2 rounded-md border 
+      border-gray-200 bg-white p-2 text-sm font-medium hover:bg-gray-100 md:flex-none 
+      md:justify-start md:p-2 md:px-3'
     >
       <LinkIcon className="w-5 h-5 text-gray-800" />
       <p className="hidden md:block text-gray-700">Edit</p>

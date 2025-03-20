@@ -6,9 +6,6 @@ import {
   InvoicesTable,
   LatestInvoiceRaw,
   Revenue,
-  Tenant,
-  Section,
-  SectionForm,
   UserForm,
 } from "./definitions";
 import { formatCurrency } from "./utils";
@@ -222,98 +219,5 @@ export async function fetchFilteredCustomers(query: string) {
     throw new Error("Failed to fetch customer table.");
   }
 }
-
-//#endregion
-
-//#region Admin
-
-export async function fetchUsers() {
-  try {
-    // t.name as tenant_id - в данном запросе нужно только имя тенанта.
-    // разместить его вместо id позволяет воспользоваться тем же типом User
-    const data = await sql<User>`
-      SELECT
-        u.id as id,
-        u.name as name,
-        u.email as email,
-        u.password as password,
-        u.is_admin as is_admin,
-        t.name as tenant_id
-      FROM users u JOIN tenants t ON u.tenant_id = t.id
-      ORDER BY tenant_id ASC
-    `;
-    // select u.name, t.name from users u join tenants t on u.tenant_id = t.id
-    const users = data.rows;
-    return users;
-  } catch (err) {
-    console.error("Database Error:", err);
-    throw new Error("Failed to fetch all users.");
-  }
-}
-
-export async function fetchUserById(id: string) {
-  try {
-    const data = await sql<UserForm>`
-      SELECT
-        u.id as id,
-        u.name as name,
-        u.email as email,
-        u.password as password,
-        u.is_admin as is_admin,
-        u.tenant_id as tenant_id,
-        t.name as tenant_name
-      FROM users u JOIN tenants t ON u.tenant_id = t.id
-      WHERE u.id = ${id}
-    `;
-
-    const section = data.rows[0];
-    return section;
-  } catch (err) {
-    console.error("Database Error:", err);
-    throw new Error("Failed to fetch user by id.");
-  }
-}
-
-export async function fetchTenants() {
-  try {
-    const data = await sql<Tenant>`
-      SELECT
-        id,
-        name,
-        active,
-        description
-      FROM tenants
-      ORDER BY name ASC
-    `;
-    // WHERE active
-
-    const tenants = data.rows;
-    return tenants;
-  } catch (err) {
-    console.error("Database Error:", err);
-    throw new Error("Failed to fetch all tenants.");
-  }
-}
-
-export async function fetchTenantById(id: string) {
-  try {
-    const data = await sql<Tenant>`
-      SELECT
-        id,
-        name,
-        active,
-        description
-      FROM tenants
-      WHERE id = ${id}
-    `;
-
-    const tenant = data.rows[0];
-    return tenant;
-  } catch (err) {
-    console.error("Database Error:", err);
-    throw new Error("Failed to fetch tenant by id.");
-  }
-}
-
 
 //#endregion

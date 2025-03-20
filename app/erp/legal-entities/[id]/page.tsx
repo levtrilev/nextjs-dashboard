@@ -6,12 +6,12 @@ import { LegalEntity } from "@/app/lib/definitions";
 import { lusitana } from "@/app/ui/fonts";
 import { fetchLegalEntity } from "../lib/actions";
 
-async function Page(props: { params: Promise<{ id: string }> }) {
+async function Page(props: { params: Promise<{ id: string }>, current_sections: string }) {
 
     const params = await props.params;
     const id = params.id;
     console.log("id: " + id);
-    const legalEntity: LegalEntity = await fetchLegalEntity(id);
+    const legalEntity: LegalEntity = await fetchLegalEntity(id, props.current_sections);
         if (!legalEntity) {
             return (<h3 className="text-xs font-medium text-gray-400">Not found! id: {id}</h3>);
         }

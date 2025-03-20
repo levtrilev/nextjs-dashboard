@@ -5,8 +5,16 @@ import clsx from 'clsx';
 import Link from 'next/link';
 import { generatePagination } from '@/app/lib/utils';
 import { usePathname, useSearchParams } from 'next/navigation';
+// import { UserSessionState } from '../lib/features/userSession/userSessionSlice';
+// import { useSelector } from 'react-redux';
+import { fetchLegalEntitiesPages } from '../erp/legal-entities/lib/actions';
 
 export default function Pagination({ totalPages }: { totalPages: number }) {
+  // export default async function Pagination({ query }: { query: string }) {
+
+    // const current_sections = useSelector((state: UserSessionState) => state.currentSections);
+    // const totalPages = await fetchLegalEntitiesPages(query, current_sections);
+
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const currentPage = Number(searchParams.get('page')) || 1;

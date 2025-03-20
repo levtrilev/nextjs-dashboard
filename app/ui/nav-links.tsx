@@ -29,6 +29,7 @@ const subMenu = [
   { mainItem: 'Администрирование', name: 'Пользователи', href: '/admin/users' },
   { mainItem: 'Администрирование', name: 'Организации', href: '/admin/tenants' },
   { mainItem: 'Администрирование', name: 'Разделы', href: '/admin/sections' },
+  { mainItem: 'Администрирование', name: 'Роли', href: '/admin/roles' },
   { mainItem: 'Справочники', name: 'Юридические лица', href: '/erp/legal-entities' },
   { mainItem: 'Справочники', name: 'Регионы', href: '/erp/regions' },
   // { mainItem: 'Home', name: 'About', href: '/dashboard' },

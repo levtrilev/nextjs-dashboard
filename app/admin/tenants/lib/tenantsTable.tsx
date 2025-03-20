@@ -1,9 +1,10 @@
 'use client';
 import { formatDateToLocal } from "@/app/lib/utils";
 import { Tenant } from '@/app/lib/definitions';
-import { BtnDeleteTenant } from "./buttons";
-import { BtnEditTenantLink } from "./buttons";
+// import { BtnDeleteTenant } from "./buttons";
+// import { BtnEditTenantLink } from "./buttons";
 import dynamic from 'next/dynamic';
+import { BtnDeleteTenant, BtnEditTenantLink } from "./buttons";
 const BtnEditTenantModal = dynamic(() => import('./btnEditTenantModal'), { ssr: false });
 
 interface ITenantsTableProps {

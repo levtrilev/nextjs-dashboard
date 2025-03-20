@@ -23,7 +23,7 @@ export default async function Page(props: {
     // const customers = await fetchCustomers();
     const regions = await fetchRegions();
     return (
-        <StoreProvider>
+        <>
             {/* <Counter /> */}
     <div className="w-full">
       <div className="flex w-full items-center justify-between">
@@ -39,7 +39,7 @@ export default async function Page(props: {
          <Pagination totalPages={totalPages} />
        </div>
        </div>
-        </StoreProvider>
+        </>
     );
 }
 

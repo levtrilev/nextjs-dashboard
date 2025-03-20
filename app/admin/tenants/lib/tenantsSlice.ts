@@ -1,8 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { createAppSlice } from "@/app/lib/createAppSlice";
-
-// import { Tenant } from "@/lib/definitions";
-import { fetchTenants } from "@/app/lib/data";
+import { fetchTenants } from "./actions";
 
 export interface TenantState {
   id: string;
