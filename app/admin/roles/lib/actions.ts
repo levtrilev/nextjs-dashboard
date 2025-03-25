@@ -16,7 +16,7 @@ export async function fetchRoles() {
         tenant_id,
         name,
         section_ids,
-        array_to_string(r.section_names, ', ') AS section_names,
+        section_names,
       COALESCE(description, '') AS description
       FROM roles
       ORDER BY name ASC
@@ -38,7 +38,7 @@ export async function fetchRole(id: string) {
         name,
         tenant_id,
         section_ids,
-        array_to_string(r.section_names, ', ') AS section_names,
+        section_names,
       COALESCE(description, '') AS description
       FROM roles
       WHERE id = ${id}
@@ -60,7 +60,7 @@ export async function fetchRoleForm(id: string) {
         r.name,
         r.tenant_id,
         r.section_ids,
-        array_to_string(r.section_names, ', ') AS section_names,
+        r.section_names,
         t.name as tenant_name,
       COALESCE(r.description, '') AS description
       FROM roles r
