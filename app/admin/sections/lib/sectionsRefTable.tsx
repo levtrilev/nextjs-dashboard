@@ -2,7 +2,12 @@ import { Section, SectionForm } from "@/app/lib/definitions";
 
 interface ISectionsRefTableProps {
     sections: SectionForm[],
-    handleSelectSection: (new_section_id: string, new_section_name: string) => void,
+    handleSelectSection: (
+        new_section_id: string, 
+        new_section_name: string, 
+        new_section_tenant_id: string, 
+        new_section_tenant_name: string
+      ) => void,
     closeModal: () => void,
 }
 
@@ -38,7 +43,7 @@ export default function SectionsRefTable(props: ISectionsRefTableProps) {
                           pr-3 text-sm text-black group-first-of-type:rounded-md group-last-of-type:rounded-md sm:pl-6">
                                                 <div className="flex items-left gap-3">
                                                     <a
-                                                        onClick={(e) => { props.handleSelectSection(section.id, section.name); props.closeModal() }}
+                                                        onClick={(e) => { props.handleSelectSection(section.id, section.name, section.tenant_id, section.tenant_name); props.closeModal() }}
                                                         // href={"#"}
                                                         className="text-blue-800 underline cursor-pointer hover:text-blue-600"
                                                     >{section.name.substring(0, 36)}</a>

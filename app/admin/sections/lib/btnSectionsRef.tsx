@@ -11,7 +11,12 @@ const Modal = dynamic(() => import('@/app/lib/modal'), { ssr: false });
 
 interface IBtnSectionsRefProps {
   sections: SectionForm[],
-  handleSelectSection: (new_section_id: string, new_section_name: string) => void,
+  handleSelectSection: (
+    new_section_id: string, 
+    new_section_name: string, 
+    new_section_tenant_id: string, 
+    new_section_tenant_name: string
+  ) => void,
 }
 
 export default function BtnSectionsRef(props: IBtnSectionsRefProps) {

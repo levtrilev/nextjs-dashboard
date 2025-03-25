@@ -23,12 +23,17 @@ export default function EditForm(props: IEditFormProps) {
   // const sections = props.role.section_ids;
   // console.log("sections: " + sections);
 
-  const handleSelectSection = (new_section_id: string, new_section_name: string) => {
+  const handleSelectSection = (
+    new_section_id: string, 
+    new_section_name: string, 
+    new_section_tenant_id: string, 
+    new_section_tenant_name: string
+  ) => {
     setRoleSections(role_sections.concat({
       id: new_section_id,
       name: new_section_name,
-      tenant_id: role.tenant_id,
-      tenant_name: role.tenant_name
+      tenant_id: new_section_tenant_id,
+      tenant_name: new_section_tenant_name
     }));
     prepareRoleSectionIds(role_sections.concat({ id: new_section_id, name: new_section_name, tenant_id: role.tenant_id, tenant_name: role.tenant_name }));
   };
