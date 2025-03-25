@@ -1,9 +1,12 @@
 
-import Modal from "@/app/lib/modal";
+// import Modal from "@/app/lib/modal";
 import { useState, useEffect } from "react";
 import { PencilIcon, EyeIcon, BookOpenIcon, BriefcaseIcon, BookmarkIcon } from "@heroicons/react/24/outline";
 import { Region } from "@/app/lib/definitions";
 import RegionsRefTable from "./regionsRefTable";
+
+import dynamic from 'next/dynamic';
+const Modal = dynamic(() => import('@/app/lib/modal'), { ssr: false });
 
 interface IBtnRegionsRefProps {
   regions: Region[],

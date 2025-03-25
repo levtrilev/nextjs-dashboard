@@ -11,8 +11,17 @@ export type Role = {
   description: string;
   tenant_id: string;
   section_ids: string;
+  section_names: string;
 };
-
+export type RoleForm = {
+  id: string;
+  name: string;
+  description: string;
+  tenant_id: string;
+  tenant_name: string;
+  section_ids: string;
+  section_names: string;
+};
 export type Region = {
   id: string;
   name: string;
@@ -24,7 +33,18 @@ export type Region = {
   timestamptz: string;
   date: DateTime;
 };
-
+export type RegionForm = {
+  id: string;
+  name: string;
+  capital: string;
+  area: string;
+  code: string;
+  section_id: string;
+  username: string;
+  timestamptz: string;
+  date: DateTime;
+  section_name: string;
+};
 export type LegalEntity = {
   id: string;
   name: string;
@@ -40,11 +60,7 @@ export type LegalEntity = {
   region_id: string;
   section_id: string;
 };
-// export type LegalEntityForm = {
-//   legalEntity: LegalEntity;
-//   region_name: string;
-//   section_name: string;
-// };
+
 export type LegalEntityForm = {
   id: string;
   name: string;

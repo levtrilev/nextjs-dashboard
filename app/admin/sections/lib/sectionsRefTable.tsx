@@ -39,8 +39,8 @@ export default function SectionsRefTable(props: ISectionsRefTableProps) {
                                                 <div className="flex items-left gap-3">
                                                     <a
                                                         onClick={(e) => { props.handleSelectSection(section.id, section.name); props.closeModal() }}
-                                                        href={"#"}
-                                                        className="text-blue-800 underline"
+                                                        // href={"#"}
+                                                        className="text-blue-800 underline cursor-pointer hover:text-blue-600"
                                                     >{section.name.substring(0, 36)}</a>
                                                 </div>
                                             </td>

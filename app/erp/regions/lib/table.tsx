@@ -62,19 +62,19 @@ export default async function RegionsTable({
               <table className="table-fixed hidden w-full rounded-md text-gray-900 md:table">
                 <thead className="rounded-md bg-gray-50 text-left text-sm font-normal">
                   <tr>
-                    <th scope="col" className="w-7/16 overflow-hidden px-0 py-5 font-medium sm:pl-6">
+                    <th scope="col" className="w-4/16 overflow-hidden px-0 py-5 font-medium sm:pl-6">
                       Название
                     </th>
-                    <th scope="col" className="w-1/8 px-3 py-5 font-medium">
+                    <th scope="col" className="w-4/16 px-3 py-5 font-medium">
                       Столица
                     </th>
-                    <th scope="col" className="w-1/8 px-3 py-5 font-medium">
+                    <th scope="col" className="w-3/16 px-3 py-5 font-medium">
                       Округ
                     </th>
-                    <th scope="col" className="w-1/8 px-3 py-5 font-medium">
+                    <th scope="col" className="w-1/16 px-3 py-5 font-medium">
                       Код
                     </th>
-                    <th scope="col" className="w-1/8 px-4 py-5 font-medium">
+                    <th scope="col" className="w-4/16 px-4 py-5 font-medium">
                       Раздел
                     </th>
                     <th scope="col" className="w-1/16 px-4 py-5 font-medium">
@@ -86,7 +86,7 @@ export default async function RegionsTable({
                 <tbody className="divide-y divide-gray-200 text-gray-900">
                   {regions.map((region) => (
                     <tr key={region.id} className="group">
-                      <td className="w-7/16 overflow-hidden whitespace-nowrap text-ellipsis bg-white py-1 pl-0 text-left  
+                      <td className="w-4/16 overflow-hidden whitespace-nowrap text-ellipsis bg-white py-1 pl-0 text-left  
                       pr-3 text-sm text-black group-first-of-type:rounded-md group-last-of-type:rounded-md sm:pl-6">
                         <div className="flex items-left gap-3">
                           <a
@@ -95,17 +95,17 @@ export default async function RegionsTable({
                           >{region.name.substring(0, 36)}</a>
                         </div>
                       </td>
-                      <td className="w-1/8 overflow-hidden whitespace-nowrap bg-white px-4 py-1 text-sm">
+                      <td className="w-4/16 overflow-hidden whitespace-nowrap bg-white px-4 py-1 text-sm">
                         {region.capital}
                       </td>
-                      <td className="w-1/8 overflow-hidden whitespace-nowrap bg-white px-4 py-1 text-sm">
+                      <td className="w-3/16 overflow-hidden whitespace-nowrap bg-white px-4 py-1 text-sm">
                         {region.area}
                       </td>
-                      <td className="w-1/8 overflow-hidden whitespace-nowrap bg-white px-4 py-1 text-sm">
+                      <td className="w-1/16 overflow-hidden whitespace-nowrap bg-white px-4 py-1 text-sm">
                         {region.code}
                       </td>
-                      <td className="w-1/8 overflow-hidden whitespace-nowrap bg-white px-4 py-1 text-sm group-first-of-type:rounded-md group-last-of-type:rounded-md">
-                        {region.section_id}
+                      <td className="w-4/16 overflow-hidden whitespace-nowrap bg-white px-4 py-1 text-sm group-first-of-type:rounded-md group-last-of-type:rounded-md">
+                        {region.section_name}
                       </td>
                       <td className="w-1/16 whitespace-nowrap pl-4 py-1 pr-3">
                         <div className="flex justify-end gap-3">

@@ -8,7 +8,7 @@ import { sql } from "@vercel/postgres";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { auth, signIn } from "@/auth";
-import { Region } from "@/app/lib/definitions";
+import { Region, RegionForm } from "@/app/lib/definitions";
 
 const ITEMS_PER_PAGE = 8;
 
@@ -117,7 +117,7 @@ export async function updateRegion(region: Region) {
 
   const session = await auth();
   const username = session?.user?.name;
-  const section_id = "e21e9372-91c5-4856-a123-b6f3b53efc0f";
+  // const section_id = "e21e9372-91c5-4856-a123-b6f3b53efc0f";
 
   try {
     await sql`
@@ -127,7 +127,7 @@ SET
     capital = ${region.capital},
     area = ${region.area},
     code = ${region.code},
-    section_id = ${section_id},
+    section_id = ${region.section_id},
     username = ${username},
     date = ${date}
 WHERE id = ${region.id};
@@ -167,7 +167,32 @@ export async function fetchRegion(id: string) {
     throw new Error("Failed to fetch region by id.");
   }
 }
+export async function fetchRegionForm(id: string) {
+  try {
+    const data = await sql<RegionForm>`
+      SELECT
+        regions.id,
+        regions.name,
+        regions.capital,
+        regions.area,
+        regions.code,
+        regions.section_id,
+        regions.username,
+        regions.timestamptz,
+        regions.date,
+        s.name as section_name
+      FROM regions
+      LEFT JOIN sections s on regions.section_id = s.id
+      WHERE regions.id = ${id}
+    `;
 
+    const region = data.rows[0];
+    return region;
+  } catch (err) {
+    console.error("Database Error:", err);
+    throw new Error("Failed to fetch region by id.");
+  }
+}
 export async function fetchRegions() {
   try {
     const data = await sql<Region>`
@@ -193,6 +218,32 @@ export async function fetchRegions() {
   }
 }
 
+export async function fetchRegionsForm() {
+  try {
+    const data = await sql<RegionForm>`
+      SELECT
+        regions.id,
+        regions.name,
+        regions.capital,
+        regions.area,
+        regions.code,
+        regions.section_id,
+        regions.username,
+        regions.timestamptz,
+        regions.date,
+        s.name as section_name
+      FROM regions
+      LEFT JOIN sections s on regions.section_id = s.id
+      ORDER BY name ASC
+    `;
+
+    const regions = data.rows;
+    return regions;
+  } catch (err) {
+    console.error("Database Error:", err);
+    throw new Error("Failed to fetch all regions.");
+  }
+}
 export async function fetchFilteredRegions(
   query: string,
   currentPage: number
@@ -200,18 +251,20 @@ export async function fetchFilteredRegions(
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
   try {
-    const regions = await sql<Region>`
+    const regions = await sql<RegionForm>`
       SELECT
-        id,
-        name,
-        capital,
-        area,
-        code,
-        section_id,
-        username,
-        timestamptz,
-        date
+        regions.id,
+        regions.name,
+        regions.capital,
+        regions.area,
+        regions.code,
+        regions.section_id,
+        regions.username,
+        regions.timestamptz,
+        regions.date,
+        s.name as section_name
       FROM regions
+      LEFT JOIN sections s on regions.section_id = s.id
       WHERE
         regions.name ILIKE ${`%${query}%`} OR
         regions.capital ILIKE ${`%${query}%`} OR

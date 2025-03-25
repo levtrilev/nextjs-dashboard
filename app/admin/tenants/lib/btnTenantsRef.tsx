@@ -2,20 +2,19 @@
 // import Modal from "@/app/lib/modal";
 import { useState, useEffect } from "react";
 import { PencilIcon, EyeIcon, BookOpenIcon, BriefcaseIcon, BookmarkIcon } from "@heroicons/react/24/outline";
-import { Section, SectionForm } from "@/app/lib/definitions";
-import SectionsRefTable from "./sectionsRefTable";
+import { Tenant } from "@/app/lib/definitions";
+import TenantsRefTable from "./tenantsRefTable";
 
 import dynamic from 'next/dynamic';
 const Modal = dynamic(() => import('@/app/lib/modal'), { ssr: false });
 
-
-interface IBtnSectionsRefProps {
-  sections: SectionForm[],
-  handleSelectSection: (new_section_id: string, new_section_name: string) => void,
+interface IBtnTenantsRefProps {
+  tenants: Tenant[],
+  handleSelectTenant: (new_tenant_id: string, new_tenant_name: string) => void,
 }
 
-export default function BtnSectionsRef(props: IBtnSectionsRefProps) {
-  // const regions = await fetchRegions();
+export default function BtnTenantsRef(props: IBtnTenantsRefProps) {
+
   const [modal, setModal] = useState(false);
 
   const openModal = () => {
@@ -38,9 +37,9 @@ export default function BtnSectionsRef(props: IBtnSectionsRefProps) {
       </button>
       <Modal open={modal} >
 
-        <SectionsRefTable 
-        sections={props.sections} 
-        handleSelectSection={props.handleSelectSection}
+        <TenantsRefTable 
+        tenants={props.tenants} 
+        handleSelectTenant={props.handleSelectTenant}
         closeModal={closeModal}
         />
 
@@ -48,7 +47,7 @@ export default function BtnSectionsRef(props: IBtnSectionsRefProps) {
         <div className="flex justify-between space-x-2" >
           <button
             onClick={() => {
-              alert("действие!")
+              // alert("действие!")
             }}
             className="bg-blue-400 text-white w-full rounded-md border p-2 hover:bg-blue-100 hover:text-gray-500"
           >
@@ -66,5 +65,3 @@ export default function BtnSectionsRef(props: IBtnSectionsRefProps) {
     </div>
   );
 }
-
-// export default BtnRefLegalEntity;

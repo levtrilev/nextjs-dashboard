@@ -149,24 +149,7 @@ export default function EditForm(props: IEditFormProps) {
               onKeyDown={(e) => handleKeyDown(e)}
             />
           </div>
-          {/* region_id */}
-          <div className="flex justify-between mt-1">
-            <label
-              htmlFor="region_id"
-              className="w-2/8 text-sm text-blue-900 font-medium flex items-center p-2">
-              Регион id:
-            </label>
 
-            <input
-              id="region_id"
-              type="text"
-              className="w-13/16 control rounded-md border border-gray-200 p-2"
-              value={legalEntity.region_id}
-              onChange={(e) => setLegalEntity((prev) => ({ ...prev, region_id: e.target.value, }))}
-              onKeyDown={(e) => handleKeyDown(e)}
-            />
-
-          </div>
           {/* region_name */}
           <div className="flex justify-between mt-1">
             <label
@@ -179,8 +162,9 @@ export default function EditForm(props: IEditFormProps) {
               id="region_name"
               type="text"
               name="region_name"
-              className="w-13/16 control rounded-md border border-gray-200 p-2"
+              className="w-13/16 pointer-events-none control rounded-md border border-gray-200 p-2"
               value={legalEntity.region_name}
+              readOnly
               onChange={(e) => setLegalEntity((prev) => ({ ...prev, region_id: e.target.value, }))}
               onKeyDown={(e) => handleKeyDown(e)}
             />
@@ -244,23 +228,7 @@ export default function EditForm(props: IEditFormProps) {
 
           <RadioActiveIsCustomer legalEntity={legalEntity} handleChange={handleChangeIsCustomer} />
           <RadioActiveIsSupplier legalEntity={legalEntity} handleChange={handleChangeIsSupplier} />
-          {/* section_id */}
-          <div className="flex justify-between mt-1">
-            <label
-              htmlFor="section_id"
-              className="w-2/8 text-sm text-blue-900 font-medium flex items-center p-2">
-              Раздел id:
-            </label>
-            <input
-              id="section_id"
-              name="section_id"
-              type="text"
-              className="w-13/16 control rounded-md border border-gray-200 p-2"
-              value={legalEntity.section_id}
-              onChange={(e) => setLegalEntity((prev) => ({ ...prev, section_id: e.target.value, }))}
-              onKeyDown={(e) => handleKeyDown(e)}
-            />
-          </div>
+
           {/* section_name */}
           <div className="flex justify-between mt-1">
             <label
@@ -272,10 +240,11 @@ export default function EditForm(props: IEditFormProps) {
               id="section_name"
               type="text"
               name="section_name"
-              className="w-13/16 control rounded-md border border-gray-200 p-2"
+              className="w-13/16 pointer-events-none control rounded-md border border-gray-200 p-2"
               value={legalEntity.section_name}
+              readOnly
               onChange={(e) => setLegalEntity((prev) => ({ ...prev, section_id: e.target.value, }))}
-              onKeyDown={(e) => handleKeyDown(e)}
+              // onKeyDown={(e) => handleKeyDown(e)}
             />
             <BtnSectionsRef sections={props.sections} handleSelectSection={handleSelectSection}/>
           </div>
