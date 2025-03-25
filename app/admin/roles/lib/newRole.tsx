@@ -16,7 +16,7 @@ export const NewRole = () => {
   return (
     <div className="flex items-center p-4">
       <form
-        action={() => { createRole(name, description, 'a262e083-8e1b-440c-8829-cec98c88f9fb', '{}'); setName(''); setDescription('') }}
+        action={() => { createRole(name, description, 'a262e083-8e1b-440c-8829-cec98c88f9fb', '{}', '{}'); setName(''); setDescription('') }}
         className="flex gap-2">
         <div className="flex-2 flex items-center">
           <input
