@@ -1,5 +1,5 @@
 
-// Regions Table
+// Premises Table
 
 import Image from 'next/image';
 import { lusitana } from '@/app/ui/fonts';
@@ -8,11 +8,11 @@ import {
   CustomersTableType,
   FormattedCustomersTable,
 } from '@/app/lib/definitions';
-import { fetchFilteredRegions } from './actions';
+import { fetchFilteredPremises } from './actions';
 import { ChartBarIcon, ChartPieIcon } from '@heroicons/react/20/solid';
-import { BtnDeleteRegion, BtnEditRegionLink } from './buttons';
+import { BtnDeletePremise, BtnEditPremiseLink } from './buttons';
 
-export default async function RegionsTable({
+export default async function PremisesTable({
   query,
   currentPage,
 }: {
@@ -20,7 +20,7 @@ export default async function RegionsTable({
   currentPage: number;
 }) {
 
-  const regions = await fetchFilteredRegions(query, currentPage);
+  const premises = await fetchFilteredPremises(query, currentPage);
 
   return (
     <div className="w-full">
@@ -29,31 +29,31 @@ export default async function RegionsTable({
           <div className="inline-block min-w-full align-middle">
             <div className="overflow-hidden rounded-md bg-gray-50 p-2 md:pt-0">
               <div className="md:hidden">
-                {regions?.map((region) => (
+                {premises?.map((premise) => (
                   <div
-                    key={region.id}
+                    key={premise.id}
                     className="mb-2 w-full rounded-md bg-white p-4"
                   >
                     <div className="flex items-center justify-between border-b pb-4">
                       <div>
                         <div className="mb-2 flex items-center">
                           <div className="flex items-center gap-3">
-                            <p>{region.name}</p>
+                            <p>{premise.name}</p>
                           </div>
                         </div>
                         <p className="text-sm text-gray-500">
-                          {region.capital}
+                          {premise.cadastral_number}
                         </p>
                       </div>
                     </div>
                     <div className="flex w-full items-center justify-between border-b py-5">
                       <div className="flex w-1/2 flex-col">
                         <p className="text-xs">Округ</p>
-                        <p className="font-medium">{region.area}</p>
+                        <p className="font-medium">{premise.region_name}</p>
                       </div>
                       <div className="flex w-1/2 flex-col">
                         <p className="text-xs">Код</p>
-                        <p className="font-medium">{region.code}</p>
+                        <p className="font-medium">{premise.address}</p>
                       </div>
                     </div>
                   </div>
@@ -66,13 +66,13 @@ export default async function RegionsTable({
                       Название
                     </th>
                     <th scope="col" className="w-4/16 px-3 py-5 font-medium">
-                      Столица
+                      Кадастровый номер
                     </th>
                     <th scope="col" className="w-3/16 px-3 py-5 font-medium">
-                      Округ
+                      Регион
                     </th>
                     <th scope="col" className="w-1/16 px-3 py-5 font-medium">
-                      Код
+                      Адрес
                     </th>
                     <th scope="col" className="w-4/16 px-4 py-5 font-medium">
                       Раздел
@@ -84,33 +84,33 @@ export default async function RegionsTable({
                 </thead>
 
                 <tbody className="divide-y divide-gray-200 text-gray-900">
-                  {regions.map((region) => (
-                    <tr key={region.id} className="group">
+                  {premises.map((premise) => (
+                    <tr key={premise.id} className="group">
                       <td className="w-4/16 overflow-hidden whitespace-nowrap text-ellipsis bg-white py-1 pl-0 text-left  
                       pr-3 text-sm text-black group-first-of-type:rounded-md group-last-of-type:rounded-md sm:pl-6">
                         <div className="flex items-left gap-3">
                           <a
-                            href={"/erp/regions/" + region.id + "/edit"}
+                            href={"/erp/premises/" + premise.id + "/edit"}
                             className="text-blue-800 underline"
-                          >{region.name.substring(0, 36)}</a>
+                          >{premise.name.substring(0, 36)}</a>
                         </div>
                       </td>
                       <td className="w-4/16 overflow-hidden whitespace-nowrap bg-white px-4 py-1 text-sm">
-                        {region.capital}
+                        {premise.cadastral_number}
                       </td>
                       <td className="w-3/16 overflow-hidden whitespace-nowrap bg-white px-4 py-1 text-sm">
-                        {region.area}
+                        {premise.region_name}
                       </td>
                       <td className="w-1/16 overflow-hidden whitespace-nowrap bg-white px-4 py-1 text-sm">
-                        {region.code}
+                        {premise.address}
                       </td>
                       <td className="w-4/16 overflow-hidden whitespace-nowrap bg-white px-4 py-1 text-sm group-first-of-type:rounded-md group-last-of-type:rounded-md">
-                        {region.section_name}
+                        {premise.section_name}
                       </td>
                       <td className="w-1/16 whitespace-nowrap pl-4 py-1 pr-3">
                         <div className="flex justify-end gap-3">
                           {/* <BtnEditTenantModal tenant={tenant} /> */}
-                          <BtnDeleteRegion id={region.id} />
+                          <BtnDeletePremise id={premise.id} />
                           {/* <BtnEditLegalEntityLink id={legalEntity.id} /> */}
                         </div>
                       </td>

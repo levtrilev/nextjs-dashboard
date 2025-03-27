@@ -4,6 +4,7 @@ import {
   UserGroupIcon,
   HomeIcon,
   DocumentDuplicateIcon,
+  BuildingOfficeIcon,
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -21,7 +22,8 @@ const links = [
     icon: DocumentDuplicateIcon,
   },
   
-  { name: 'Справочники', href: '#', icon: UserGroupIcon }, //    /erp/ref-books
+  { name: 'Справочники', href: '#', icon: UserGroupIcon },
+  { name: 'Помещения', href: '/erp/premises', icon: BuildingOfficeIcon }, //premise
   { name: 'Администрирование', href: '/admin', icon: UserGroupIcon },
   // { name: 'Lesson', href: '/dashboard/lesson', icon: HomeIcon },
 ];

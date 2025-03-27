@@ -5,6 +5,48 @@
 
 import { DateTime } from "next-auth/providers/kakao";
 
+export type Premise = {
+  id: string;
+  name: string;
+  description: string;
+  cadastral_number: string;
+  square: number;
+  address: string;
+  address_alt: string;
+  type: string;
+  status: string;
+  status_until: DateTime;
+  region_id: string;
+  owner_id: string;
+  operator_id: string;
+  section_id: string;
+  username: string;
+  timestamptz: string;
+  date_created: DateTime;
+};
+export type PremiseForm = {
+  id: string;
+  name: string;
+  description: string;
+  cadastral_number: string;
+  square: number;
+  address: string;
+  address_alt: string;
+  type: string;
+  status: string;
+  status_until: DateTime;
+  region_id: string;
+  owner_id: string;
+  operator_id: string;
+  section_id: string;
+  username: string;
+  timestamptz: string;
+  date_created: DateTime;
+  region_name: string;
+  owner_name: string;
+  operator_name: string;
+  section_name: string;
+};
 export type Role = {
   id: string;
   name: string;

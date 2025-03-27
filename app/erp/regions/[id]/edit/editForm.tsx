@@ -1,17 +1,13 @@
 
-// LegalEntity EditForm
+// Region EditForm
 
 'use client';
 import { useState } from "react";
 import { KeyboardEvent } from "react";
-import { Region, RegionForm, SectionForm } from "@/app/lib/definitions";
+import { RegionForm, SectionForm } from "@/app/lib/definitions";
 import { updateRegion } from "../../lib/actions";
 import Link from "next/link";
-import RadioActive, { RadioActiveIsSupplier } from "@/app/erp/legal-entities/lib/radioActive";
-import { redirect } from "next/navigation";
-import RadioActiveIsCustomer from "@/app/erp/legal-entities/lib/radioActive";
 import BtnSectionsRef from "@/app/admin/sections/lib/btnSectionsRef";
-// import { useNavigate, useLocation } from 'react-router-dom';
 
 interface IEditFormProps {
   region: RegionForm,
@@ -33,10 +29,7 @@ export default function EditForm(props: IEditFormProps) {
       section_name: new_section_name,
     }));
   };
-  // const navigate = useNavigate();
-  // const location = useLocation();
-  // const previousRoute = location.state?.from || '/erp/legal-entities';
-  // navigate(previousRoute); // navigate(-1);
+
   const handleRedirectBack = () => {
     window.history.back(); // Возвращает пользователя на предыдущую страницу
   };

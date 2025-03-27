@@ -1,7 +1,8 @@
+// Role EditForm
+
 'use client';
 import { useState } from "react";
-import { KeyboardEvent } from "react";
-import { Role, RoleForm, Section, SectionForm, Tenant } from "@/app/lib/definitions";
+import { RoleForm, Section, SectionForm, Tenant } from "@/app/lib/definitions";
 import { updateRole } from "../../lib/actions";
 import Link from "next/link";
 import BtnTenantsRef from "@/app/admin/tenants/lib/btnTenantsRef";
@@ -111,21 +112,6 @@ export default function EditForm(props: IEditFormProps) {
               onChange={(e) => handleChangeDescription(e)}
             />
           </div>
-          {/* tenant_id */}
-          {/* <div className="flex justify-between mt-1">
-            <label
-              htmlFor="tenant_id"
-              className="w-2/8 text-sm font-medium flex items-center p-2">
-              tenant_id:
-            </label>
-            <input
-              id="tenant_id"
-              type="text"
-              className="w-13/16 control rounded-md border border-gray-200 p-2"
-              value={role.tenant_id}
-              onChange={(e) => setRole((prev) => ({ ...prev, tenant_id: e.target.value, }))}
-            />
-          </div> */}
           {/* tenant_name */}
           <div className="flex justify-between mt-1">
             <label

@@ -1,13 +1,20 @@
 
-import Modal from "@/app/lib/modal";
+// import Modal from "@/app/lib/modal";
 import { useState, useEffect } from "react";
 import { PencilIcon, EyeIcon, BookOpenIcon, BriefcaseIcon, BookmarkIcon } from "@heroicons/react/24/outline";
-import { fetchLegalEntities } from "./actions";
 import { Region } from "@/app/lib/definitions";
-import { current } from "@reduxjs/toolkit";
+import RegionsRefTable from "./regionsRefTable";
 
-export default async function BtnRefLegalEntity(current_sections: string) {
-  const legalEntities = await fetchLegalEntities(current_sections);
+import dynamic from 'next/dynamic';
+const Modal = dynamic(() => import('@/app/lib/modal'), { ssr: false });
+
+interface IBtnRegionsRefProps {
+  regions: Region[],
+  handleSelectRegion: (new_region_id: string, new_region_name: string) => void,
+}
+
+export default function BtnRegionsRef(props: IBtnRegionsRefProps) {
+  // const regions = await fetchRegions();
   const [modal, setModal] = useState(false);
 
   const openModal = () => {
@@ -20,16 +27,24 @@ export default async function BtnRefLegalEntity(current_sections: string) {
     // }));
     setModal(false);
   };
+  const [term, setTerm] = useState<string>("");
 
   return (
-    <>
+    <div>
       <button
         onClick={openModal}
         className="rounded-md border border-gray-200 p-2 h-10 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
         <BookOpenIcon className="w-5 h-5 text-gray-800" />
       </button>
       <Modal open={modal} >
-        <h2>Вызов справочника</h2>
+
+        <RegionsRefTable
+          regions={props.regions}
+          handleSelectRegion={props.handleSelectRegion}
+          closeModal={closeModal}
+          setTerm={setTerm}
+          term={term}
+        />
 
         {/* buttons */}
         <div className="flex justify-between space-x-2" >
@@ -42,7 +57,7 @@ export default async function BtnRefLegalEntity(current_sections: string) {
             Save
           </button>
           <button
-            onClick={closeModal}
+            onClick={()=>{closeModal(); setTerm("");}}
             className="bg-blue-400 text-white w-full rounded-md border p-2 hover:bg-blue-100 hover:text-gray-500"
           >
             Exit
@@ -50,7 +65,7 @@ export default async function BtnRefLegalEntity(current_sections: string) {
         </div>
       </Modal>
       {/* <pre>show modal: {modal.toString()}</pre> */}
-    </>
+    </div>
   );
 }
 
