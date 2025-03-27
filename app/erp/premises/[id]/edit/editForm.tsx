@@ -170,7 +170,7 @@ export default function PremiseEditForm(props: IEditFormProps) {
             </label>
             <input
               id="square"
-              type="text"
+              type="number"
               name="square"
               className="w-13/16 control rounded-md border border-gray-200 p-2"
               value={premise.square.toString()}
