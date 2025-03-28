@@ -5,6 +5,8 @@ import {
   HomeIcon,
   DocumentDuplicateIcon,
   BuildingOfficeIcon,
+  BookOpenIcon,
+  ArrowRightCircleIcon,
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -15,14 +17,14 @@ import { useEffect, useRef, useState } from 'react';
 // Depending on the size of the application, this would be stored in a database.
 const links = [
   { name: 'Главное', href: '/erp', icon: HomeIcon },
-  { name: 'Руководителю', href: '/dashboard', icon: HomeIcon },
+  { name: 'Руководителю', href: '/dashboard', icon: ArrowRightCircleIcon },
   {
     name: 'Счета к получению',
     href: '/erp/invoices',
     icon: DocumentDuplicateIcon,
   },
   
-  { name: 'Справочники', href: '#', icon: UserGroupIcon },
+  { name: 'Справочники', href: '#', icon: BookOpenIcon },
   { name: 'Помещения', href: '/erp/premises', icon: BuildingOfficeIcon }, //premise
   { name: 'Администрирование', href: '/admin', icon: UserGroupIcon },
   // { name: 'Lesson', href: '/dashboard/lesson', icon: HomeIcon },

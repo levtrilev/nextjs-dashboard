@@ -5,11 +5,12 @@
 import { useState } from "react";
 import { KeyboardEvent } from "react";
 import { LegalEntity, PremiseForm, RegionForm, SectionForm } from "@/app/lib/definitions";
-import { updatePremise } from "../../lib/actions";
+import { createPremise, updatePremise } from "../../lib/actions";
 import Link from "next/link";
 import BtnSectionsRef from "@/app/admin/sections/lib/btnSectionsRef";
 import BtnRegionsRef from "@/app/erp/regions/lib/btnRegionsRef";
 import BtnLegalEntitiesRef from "@/app/erp/legal-entities/lib/btnLegalEntitiesRef";
+import { create } from "domain";
 
 interface IEditFormProps {
   premise: PremiseForm,
@@ -57,15 +58,15 @@ export default function PremiseEditForm(props: IEditFormProps) {
   const handleRedirectBack = () => {
     window.history.back(); // Возвращает пользователя на предыдущую страницу
   };
-    // Функция для преобразования даты в формат yyyy-MM-dd
-    const formatDateForInput = (date: Date | string): string => {
-      if (!date) return ''; // Если дата пустая, возвращаем пустую строку
-      const d = new Date(date);
-      const year = d.getFullYear();
-      const month = String(d.getMonth() + 1).padStart(2, '0'); // Месяцы начинаются с 0
-      const day = String(d.getDate()).padStart(2, '0');
-      return `${year}-${month}-${day}`;
-    };
+  // Функция для преобразования даты в формат yyyy-MM-dd
+  const formatDateForInput = (date: Date | string): string => {
+    if (!date) return ''; // Если дата пустая, возвращаем пустую строку
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0'); // Месяцы начинаются с 0
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
   return (
     <div>
       <div className="flex flex-col md:flex-row gap-4 w-full">
@@ -283,8 +284,12 @@ export default function PremiseEditForm(props: IEditFormProps) {
           <div className="w-full md:w-1/2">
             <button
               onClick={() => {
-                updatePremise(premise);
-                handleRedirectBack();
+                if (premise.id === "") {
+                  createPremise(premise);
+                } else {
+                  updatePremise(premise);
+                  handleRedirectBack();
+                }
               }}
               className="bg-blue-400 text-white w-full rounded-md border p-2 
               hover:bg-blue-100 hover:text-gray-500 cursor-pointer"

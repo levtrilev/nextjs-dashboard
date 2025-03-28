@@ -65,16 +65,16 @@ export default async function PremisesTable({
                     <th scope="col" className="w-4/16 overflow-hidden px-0 py-5 font-medium sm:pl-6">
                       Название
                     </th>
-                    <th scope="col" className="w-4/16 px-3 py-5 font-medium">
+                    <th scope="col" className="w-2/16 px-3 py-5 font-medium">
                       Кадастровый номер
                     </th>
-                    <th scope="col" className="w-3/16 px-3 py-5 font-medium">
+                    <th scope="col" className="w-2/16 px-3 py-5 font-medium">
                       Регион
                     </th>
-                    <th scope="col" className="w-1/16 px-3 py-5 font-medium">
+                    <th scope="col" className="w-4/16 px-3 py-5 font-medium">
                       Адрес
                     </th>
-                    <th scope="col" className="w-4/16 px-4 py-5 font-medium">
+                    <th scope="col" className="w-2/16 px-4 py-5 font-medium">
                       Раздел
                     </th>
                     <th scope="col" className="w-1/16 px-4 py-5 font-medium">
@@ -95,16 +95,16 @@ export default async function PremisesTable({
                           >{premise.name.substring(0, 36)}</a>
                         </div>
                       </td>
-                      <td className="w-4/16 overflow-hidden whitespace-nowrap bg-white px-4 py-1 text-sm">
+                      <td className="w-2/16 overflow-hidden whitespace-nowrap bg-white px-4 py-1 text-sm">
                         {premise.cadastral_number}
                       </td>
-                      <td className="w-3/16 overflow-hidden whitespace-nowrap bg-white px-4 py-1 text-sm">
+                      <td className="w-2/16 overflow-hidden whitespace-nowrap bg-white px-4 py-1 text-sm">
                         {premise.region_name}
                       </td>
-                      <td className="w-1/16 overflow-hidden whitespace-nowrap bg-white px-4 py-1 text-sm">
+                      <td className="w-4/16 overflow-hidden whitespace-nowrap bg-white px-4 py-1 text-sm">
                         {premise.address}
                       </td>
-                      <td className="w-4/16 overflow-hidden whitespace-nowrap bg-white px-4 py-1 text-sm group-first-of-type:rounded-md group-last-of-type:rounded-md">
+                      <td className="w-2/16 overflow-hidden whitespace-nowrap bg-white px-4 py-1 text-sm group-first-of-type:rounded-md group-last-of-type:rounded-md">
                         {premise.section_name}
                       </td>
                       <td className="w-1/16 whitespace-nowrap pl-4 py-1 pr-3">

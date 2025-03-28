@@ -77,7 +77,7 @@ const PremiseFormSchema = z.object({
 const CreatePremise = PremiseFormSchema.omit({ id: true });
 const UpdatePremise = PremiseFormSchema.omit({ id: true });
 
-export async function createPremise(
+export async function createPremiseWithWalidation(
   prevState: PremiseState,
   formData: FormData
 ) {
@@ -137,6 +137,41 @@ export async function deletePremise(id: string) {
   revalidatePath("/erp/premises");
 }
 
+export async function createPremise(
+  premise: PremiseForm,
+) {
+  try {
+    await sql`
+      INSERT INTO premises (name, description, cadastral_number, square, address, address_alt, 
+      type, status, status_until, region_id, owner_id, operator_id, section_id, username, date_created)
+      VALUES (
+      ${premise.name}, 
+      ${premise.description}, 
+      ${premise.cadastral_number}, 
+      ${premise.square}, 
+      ${premise.address}, 
+      ${premise.address_alt}, 
+      ${premise.type}, 
+      ${premise.status}, 
+      ${premise.status_until}, 
+      ${premise.region_id}, 
+      ${premise.owner_id}, 
+      ${premise.operator_id}, 
+      ${premise.section_id}, 
+      ${premise.username}, 
+      ${premise.date_created}) 
+    `;
+  } catch (error) {
+    console.error("Failed to create premise:", error);
+    // throw new Error("Failed to create newLegalEntity.");
+    return {
+      message: "Database Error: Failed to create new premise.",
+      // errors: undefined,
+    };
+  }
+  revalidatePath("/erp/premises");
+  redirect("/erp/premises");
+}
 export async function updatePremise(premise: Premise) {
   const date = new Date().toISOString(); //.split("T")[0]
 

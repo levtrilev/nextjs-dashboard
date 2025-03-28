@@ -6,7 +6,7 @@ import Pagination from "@/app/ui/pagination";
 import Search from "@/app/ui/search";
 import { lusitana } from "@/app/ui/fonts";
 import { CreatePremise } from "./lib/buttons";
-import PremisesTable from "./lib/table";
+import PremisesTable from "./lib/premisesTable";
 
 export default async function Page(props: {
   searchParams?: Promise<{
