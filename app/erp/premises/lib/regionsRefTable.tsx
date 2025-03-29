@@ -19,7 +19,7 @@ export default function RegionsRefTable(props: IRegionsRefTableProps) {
     return (
         <div className="w-full">
             <p>Выберите регион:</p>
-            <RefSearch callback={handleSearch} term={props.term}/>
+            <RefSearch callback={handleSearch} term={props.term} elementIdPrefix=""/>
             <div className="mt-0 flow-root">
                 <div className="overflow-x-auto">
                     <div className="inline-block min-w-full align-middle">
