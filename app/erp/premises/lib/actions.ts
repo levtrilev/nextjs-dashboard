@@ -65,13 +65,13 @@ export async function createPremise(
       ${premise.address_alt}, 
       ${premise.type}, 
       ${premise.status}, 
-      ${premise.status_until}, 
+      ${premise.status_until.toISOString()}, 
       ${premise.region_id}, 
       ${premise.owner_id}, 
       ${premise.operator_id}, 
       ${premise.section_id}, 
       ${premise.username}, 
-      ${premise.date_created}) 
+      ${premise.date_created ? premise.date_created.toISOString() : new Date().toISOString()}
     `;
   } catch (error) {
     console.error("Failed to create premise:", error);
@@ -103,7 +103,7 @@ SET
     address_alt = ${premise.address_alt},
     type = ${premise.type},
     status = ${premise.status},
-    status_until = ${premise.status_until},
+    status_until = ${premise.status_until.toISOString()},
     region_id = ${premise.region_id},
     owner_id = ${premise.owner_id},
     operator_id = ${premise.operator_id},

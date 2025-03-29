@@ -103,7 +103,7 @@ export default function PremiseEditForm(props: IEditFormProps) {
     const errors = validate();
     if (errors) {
       setShowErrors(true);
-      console.log("ошибки есть: " + JSON.stringify(errors));
+      // console.log("ошибки есть: " + JSON.stringify(errors));
       return;
     }
     if (formData.id === "") {
