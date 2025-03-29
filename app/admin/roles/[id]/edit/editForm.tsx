@@ -9,7 +9,7 @@ import BtnTenantsRef from "@/app/admin/tenants/lib/btnTenantsRef";
 import BtnSectionsRef from "@/app/admin/sections/lib/btnSectionsRef";
 import { TrashIcon } from "@heroicons/react/24/outline";
 
-interface IEditFormProps {
+interface IRoleEditFormProps {
   role: RoleForm,
   role_sections: SectionForm[],
 
@@ -17,7 +17,7 @@ interface IEditFormProps {
   sections: SectionForm[],
 }
 
-export default function EditForm(props: IEditFormProps) {
+export default function RoleEditForm(props: IRoleEditFormProps) {
   const [role, setRole] = useState(props.role);
   const [newSection, setNewSection] = useState<Section>({ id: "", name: "", tenant_id: "" });
   const [role_sections, setRoleSections] = useState<SectionForm[]>(props.role_sections);
@@ -36,7 +36,12 @@ export default function EditForm(props: IEditFormProps) {
       tenant_id: new_section_tenant_id,
       tenant_name: new_section_tenant_name
     }));
-    prepareRoleSectionIds(role_sections.concat({ id: new_section_id, name: new_section_name, tenant_id: role.tenant_id, tenant_name: role.tenant_name }));
+    prepareRoleSectionIds(role_sections.concat({
+      id: new_section_id,
+      name: new_section_name,
+      tenant_id: new_section_tenant_id,
+      tenant_name: new_section_tenant_name
+    }));
   };
 
   const handleRedirectBack = () => {
@@ -197,7 +202,7 @@ export default function EditForm(props: IEditFormProps) {
           <div className="w-full md:w-1/2">
             <button
               onClick={() => {
-                updateRole(role);
+                updateRole({ ...role, section_ids: role.section_ids ? role.section_ids : "{}", section_names: role.section_names ? role.section_names : "{}" });
                 // handleRedirectBack();
               }}
               className="bg-blue-400 text-white w-full rounded-md border p-2 

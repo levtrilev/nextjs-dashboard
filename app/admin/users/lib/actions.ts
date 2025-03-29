@@ -27,6 +27,7 @@ export async function createUser(
     password: hash,
     tenant_id: tenant_id,
     is_admin: is_admin,
+    role_ids: "{}",
   };
   // Insert data into the database
   //   console.log('createUser tenant_id: ' + newUser.tenant_id);
@@ -51,7 +52,8 @@ export async function updateUser(user: User) {
             SET name = ${user.name}, 
             email = ${user.email}, 
             is_admin = ${user.is_admin}, 
-            tenant_id = ${user.tenant_id}
+            tenant_id = ${user.tenant_id},
+            role_ids = ${user.role_ids}
             WHERE id = ${user.id}
           `;
   } catch (error) {

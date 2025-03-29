@@ -60,8 +60,8 @@ export type RoleForm = {
   description: string;
   tenant_id: string;
   tenant_name: string;
-  section_ids: string;
-  section_names: string;
+  section_ids?: string;
+  section_names?: string;
 };
 export type Region = {
   id: string;
@@ -127,6 +127,7 @@ export type User = {
   password: string;
   is_admin: boolean;
   tenant_id: string;
+  role_ids: string;
 };
 
 export type UserForm = {
@@ -137,6 +138,7 @@ export type UserForm = {
   is_admin: boolean;
   tenant_id: string;
   tenant_name: string;
+  role_ids: string;
 };
 
 export type Tenant = {

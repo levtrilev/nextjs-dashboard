@@ -128,7 +128,8 @@ export async function createRole(name: string, description: string, tenant_id: s
     try {
       await sql`
         UPDATE roles
-        SET name = ${role.name}, description = ${role.description}, tenant_id = ${role.tenant_id}, section_ids = ${role.section_ids}, section_names = ${role.section_names}
+        SET name = ${role.name}, description = ${role.description}, tenant_id = ${role.tenant_id}
+        , section_ids = ${role.section_ids}, section_names = ${role.section_names}
         WHERE id = ${role.id}
       `;
     } catch (error) {
