@@ -11,13 +11,16 @@ const Modal = dynamic(() => import('@/app/lib/modal'), { ssr: false });
 interface IBtnLegalEntitiesRefProps {
   legalEntities: LegalEntity[],
   handleSelectLE: (new_le_id: string, new_le_name: string) => void,
+  elementIdPrefix: string,
 }
 
 export default function BtnLegalEntitiesRef(props: IBtnLegalEntitiesRefProps) {
   // const regions = await fetchRegions();
   const [modal, setModal] = useState(false);
 
-  const openModal = () => {
+  const openModal = (e: React.MouseEvent<HTMLElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
     setModal(true);
     // redirect("/dashboard/admin/tenants/1");
   };
@@ -44,6 +47,7 @@ export default function BtnLegalEntitiesRef(props: IBtnLegalEntitiesRefProps) {
           closeModal={closeModal}
           setTerm={setTerm}
           term={term}
+          elementIdPrefix={props.elementIdPrefix}
         />
 
         {/* buttons */}

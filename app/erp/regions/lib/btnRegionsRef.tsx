@@ -17,7 +17,9 @@ export default function BtnRegionsRef(props: IBtnRegionsRefProps) {
   // const regions = await fetchRegions();
   const [modal, setModal] = useState(false);
 
-  const openModal = () => {
+  const openModal = (e: React.MouseEvent<HTMLElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
     setModal(true);
     // redirect("/dashboard/admin/tenants/1");
   };

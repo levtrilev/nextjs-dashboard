@@ -67,3 +67,11 @@ export const generatePagination = (currentPage: number, totalPages: number) => {
     totalPages,
   ];
 };
+export const formatDateForInput = (date: Date | string) => {
+  if (!date) return ''; // Если дата пустая, возвращаем пустую строку
+  const d = new Date(date);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0'); // Месяцы начинаются с 0
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};

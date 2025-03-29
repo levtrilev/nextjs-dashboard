@@ -8,6 +8,7 @@ interface ILegalEntitiesRefTableProps {
     closeModal: () => void,
     setTerm: (value: string) => void,
     term: string,
+    elementIdPrefix: string,
 }
 
 export default function LegalEntitiesRefTable(props: ILegalEntitiesRefTableProps) {
@@ -19,7 +20,7 @@ export default function LegalEntitiesRefTable(props: ILegalEntitiesRefTableProps
     return (
         <div className="w-full">
             <p>Выберите юр.лицо:</p>
-            <RefSearch callback={handleSearch} term={props.term}/>
+            <RefSearch callback={handleSearch} term={props.term} elementIdPrefix={props.elementIdPrefix}/>
             <div className="mt-0 flow-root">
                 <div className="overflow-x-auto">
                     <div className="inline-block min-w-full align-middle">

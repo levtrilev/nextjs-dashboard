@@ -8,19 +8,20 @@ import { auth } from "@/auth";
 import { getCurrentSections } from "@/app/lib/actions";
 import Breadcrumbs from '@/app/ui/invoices/breadcrumbs';
 import { DateTime } from "next-auth/providers/kakao";
+import { formatDateForInput } from "@/app/lib/utils";
 
 export default async function Page() {
   const session = await auth();
   const email = session ? (session.user ? session.user.email : "") : "";
   const current_sections = await getCurrentSections(email as string);
-  const formatDateForInput = (date: Date | string): string => {
-    if (!date) return ''; // Если дата пустая, возвращаем пустую строку
-    const d = new Date(date);
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, '0'); // Месяцы начинаются с 0
-    const day = String(d.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  };
+  // const formatDateForInput = (date: Date | string): string => {
+  //   if (!date) return ''; // Если дата пустая, возвращаем пустую строку
+  //   const d = new Date(date);
+  //   const year = d.getFullYear();
+  //   const month = String(d.getMonth() + 1).padStart(2, '0'); // Месяцы начинаются с 0
+  //   const day = String(d.getDate()).padStart(2, '0');
+  //   return `${year}-${month}-${day}`;
+  // };
   const premise: PremiseForm = {
     id: "",
     name: "",
@@ -31,14 +32,14 @@ export default async function Page() {
     address_alt: "",
     type: "",
     status: "",
-    status_until: formatDateForInput(new Date()),
+    status_until: new Date(), //formatDateForInput(new Date()),
     region_id: "",
     owner_id: "",
     operator_id: "",
     section_id: "",
     username: "",
-    timestamptz: new Date().toISOString(),
-    date_created: formatDateForInput(new Date()),
+    // timestamptz: new Date().toISOString(),
+    date_created: new Date(), //formatDateForInput(new Date()),
     section_name: "",
     region_name: "",
     owner_name: "",

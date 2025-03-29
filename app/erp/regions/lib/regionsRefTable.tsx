@@ -19,7 +19,7 @@ export default function RegionsRefTable(props: IRegionsRefTableProps) {
     return (
         <div className="w-full">
             <p>Выберите регион:</p>
-            <RefSearch callback={handleSearch} term={props.term}/>
+            <RefSearch callback={handleSearch} term={props.term} elementIdPrefix=""/>
             <div className="mt-0 flow-root">
                 <div className="overflow-x-auto">
                     <div className="inline-block min-w-full align-middle">
@@ -52,7 +52,9 @@ export default function RegionsRefTable(props: IRegionsRefTableProps) {
                           pr-3 text-sm text-black group-first-of-type:rounded-md group-last-of-type:rounded-md sm:pl-6">
                                                 <div className="flex items-left gap-3">
                                                     <a
-                                                        onClick={(e) => { 
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            e.stopPropagation(); 
                                                             props.handleSelectRegion(region.id, region.name);
                                                             props.setTerm(""); 
                                                             props.closeModal(); 
