@@ -4,7 +4,7 @@
 import EditForm from "./edit/editForm";
 import { LegalEntity } from "@/app/lib/definitions";
 import { lusitana } from "@/app/ui/fonts";
-import { fetchLegalEntity } from "../lib/actions";
+import { fetchLegalEntity } from "../lib/le-actions";
 import { auth } from "@/auth";
 import { getCurrentSections } from "@/app/lib/actions";
 

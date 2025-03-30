@@ -2,13 +2,13 @@
 // LegalEntity Page
 
 import EditForm from "./editForm";
-import { fetchPremise, fetchPremiseForm } from "../../lib/actions";
+import { fetchPremise, fetchPremiseForm } from "../../lib/premis-actions";
 import { Region, PremiseForm } from "@/app/lib/definitions";
 import { lusitana } from "@/app/ui/fonts";
-import { fetchSectionsForm } from "@/app/admin/sections/lib/actions";
-import { fetchRegionsForm } from "@/app/erp/regions/lib/actions";
+import { fetchSectionsForm } from "@/app/admin/sections/lib/sections-actions";
+import { fetchRegionsForm } from "@/app/erp/regions/lib/region-actions";
 import PremiseEditForm from "./editForm";
-import { fetchLegalEntities } from "@/app/erp/legal-entities/lib/actions";
+import { fetchLegalEntities } from "@/app/erp/legal-entities/lib/le-actions";
 import { current } from "@reduxjs/toolkit";
 import { auth } from "@/auth";
 import { getCurrentSections } from "@/app/lib/actions";
@@ -22,12 +22,13 @@ async function Page(props: { params: Promise<{ id: string }> }) {
     const session = await auth();
     const email = session ? (session.user ? session.user.email : "") : "";
     const current_sections = await getCurrentSections(email as string);
-    const premise: PremiseForm = await fetchPremiseForm(id);
+
+    const premise: PremiseForm = await fetchPremiseForm(id, current_sections);
         if (!premise) {
             return (<h3 className="text-xs font-medium text-gray-400">Not found! id: {id}</h3>);
         }
-    const sections = await fetchSectionsForm();
-    const regions = await fetchRegionsForm();
+    const sections = await fetchSectionsForm(current_sections);
+    const regions = await fetchRegionsForm(current_sections);
     const legalEntities = await fetchLegalEntities(current_sections);
     return (
         <div className="w-full">

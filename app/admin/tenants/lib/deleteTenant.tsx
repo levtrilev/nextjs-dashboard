@@ -2,7 +2,7 @@
 
 import { TrashIcon } from '@heroicons/react/24/outline';
 import { FaceSmileIcon } from '@heroicons/react/20/solid';
-import { deleteTenant } from './actions';
+import { deleteTenant } from './tenants-actions';
 import { useState } from 'react';
 
 export default function DeleteTenant() {

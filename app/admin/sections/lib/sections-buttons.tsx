@@ -3,7 +3,7 @@
 
 import { PencilIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
-import { deleteSectionById } from './actions';
+import { deleteSectionById } from './sections-actions';
 // import clsx from 'clsx';
 
 export function BtnDeleteSection({ id }: { id: string }) {

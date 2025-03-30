@@ -2,12 +2,13 @@
 import { useState } from "react";
 import { KeyboardEvent } from "react";
 import { Tenant } from "@/app/lib/definitions";
-import { updateTenant } from "../../lib/actions";
+import { updateTenant } from "../../lib/tenants-actions";
 import Link from "next/link";
 import RadioActive from "../../lib/radioActive";
 
 interface IInputFormProps {
   tenant: Tenant,
+  admin: boolean,
 }
 // export const InputForm: React.FC<IInputFormProps> = (props: IInputFormProps) => {
 
@@ -83,6 +84,7 @@ export default function InputForm(props: IInputFormProps) {
         <div className="flex w-1/2">
           <div className="w-1/4">
             <button
+              disabled={!props.admin}
               onClick={() => {
                 updateTenant(tenant);
               }}

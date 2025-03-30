@@ -3,11 +3,12 @@ import { useState } from "react";
 import { KeyboardEvent } from "react";
 import { SectionForm, Tenant } from "@/app/lib/definitions";
 import Link from "next/link";
-import { updateSection } from "../lib/actions";
+import { updateSection } from "../lib/sections-actions";
 
 interface IInputFormProps {
   section: SectionForm,
   tenants: Tenant[],
+  admin: boolean,
 }
 // export const InputForm: React.FC<IInputFormProps> = (props: IInputFormProps) => {
 
@@ -20,7 +21,7 @@ export default function InputForm(props: IInputFormProps) {
     }
   };
 
-// console.log("name: "+section.name);
+  // console.log("name: "+section.name);
 
   const handleChangeName = (event: any) => {
     setSection((prev) => ({
@@ -90,8 +91,9 @@ export default function InputForm(props: IInputFormProps) {
       </div>
       <div className="flex justify-between mt-6">
         <button
+          disabled={!props.admin}
           onClick={() => {
-            updateSection({id:section.id, name:section.name, tenant_id:section.tenant_id});
+            updateSection({ id: section.id, name: section.name, tenant_id: section.tenant_id });
           }}
           className="bg-blue-400 text-white w-full rounded-md border p-2 hover:bg-blue-100 hover:text-gray-500"
         >

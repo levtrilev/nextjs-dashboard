@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { createUser } from './actions';
+import { createUser } from './users-actions';
 import { Tenant } from '@/app/lib/definitions';
 import { PlusIcon } from '@heroicons/react/24/outline';
 

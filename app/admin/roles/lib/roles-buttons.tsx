@@ -1,5 +1,5 @@
 import { PencilIcon, PlusIcon, TrashIcon, ServerIcon } from '@heroicons/react/24/outline';
-import { deleteRole, updateRole } from './actions';
+import { deleteRole, updateRole } from './roles-actions';
 import Link from "next/link";
 import { Role } from '@/app/lib/definitions';
 

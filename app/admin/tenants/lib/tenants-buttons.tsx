@@ -1,5 +1,5 @@
 import { PencilIcon, PlusIcon, TrashIcon, ServerIcon } from '@heroicons/react/24/outline';
-import { deleteTenant, updateTenant } from './actions';
+import { deleteTenant, updateTenant } from './tenants-actions';
 import Link from "next/link";
 import { Tenant } from '@/app/lib/definitions';
 

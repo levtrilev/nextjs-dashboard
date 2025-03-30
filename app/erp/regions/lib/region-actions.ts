@@ -143,9 +143,12 @@ WHERE id = ${region.id};
 
 //#region fetchRegion
 
-export async function fetchRegion(id: string) {
+export async function fetchRegion(id: string, current_sections: string) {
   try {
     const data = await sql<Region>`
+      WITH your_regions AS ( SELECT * FROM regions where section_id = 
+        ANY (${current_sections}::uuid[]))
+
       SELECT
         id,
         name,
@@ -156,7 +159,7 @@ export async function fetchRegion(id: string) {
         username,
         timestamptz,
         date
-      FROM regions
+      FROM your_regions regions
       WHERE id = ${id}
     `;
 
@@ -167,9 +170,12 @@ export async function fetchRegion(id: string) {
     throw new Error("Failed to fetch region by id.");
   }
 }
-export async function fetchRegionForm(id: string) {
+export async function fetchRegionForm(id: string, current_sections: string) {
   try {
     const data = await sql<RegionForm>`
+      WITH your_regions AS ( SELECT * FROM regions where section_id = 
+        ANY (${current_sections}::uuid[]))
+
       SELECT
         regions.id,
         regions.name,
@@ -181,7 +187,7 @@ export async function fetchRegionForm(id: string) {
         regions.timestamptz,
         regions.date,
         s.name as section_name
-      FROM regions
+      FROM your_regions regions
       LEFT JOIN sections s on regions.section_id = s.id
       WHERE regions.id = ${id}
     `;
@@ -193,9 +199,12 @@ export async function fetchRegionForm(id: string) {
     throw new Error("Failed to fetch region by id.");
   }
 }
-export async function fetchRegions() {
+export async function fetchRegions(current_sections: string) {
   try {
     const data = await sql<Region>`
+      WITH your_regions AS ( SELECT * FROM regions where section_id = 
+        ANY (${current_sections}::uuid[]))
+
       SELECT
         id,
         name,
@@ -206,7 +215,7 @@ export async function fetchRegions() {
         username,
         timestamptz,
         date
-      FROM regions
+      FROM your_regions regions
       ORDER BY name ASC
     `;
 
@@ -218,9 +227,12 @@ export async function fetchRegions() {
   }
 }
 
-export async function fetchRegionsForm() {
+export async function fetchRegionsForm(current_sections: string) {
   try {
     const data = await sql<RegionForm>`
+      WITH your_regions AS ( SELECT * FROM regions where section_id = 
+        ANY (${current_sections}::uuid[]))
+
       SELECT
         regions.id,
         regions.name,
@@ -232,7 +244,7 @@ export async function fetchRegionsForm() {
         regions.timestamptz,
         regions.date,
         s.name as section_name
-      FROM regions
+      FROM your_regions regions
       LEFT JOIN sections s on regions.section_id = s.id
       ORDER BY name ASC
     `;
@@ -246,12 +258,16 @@ export async function fetchRegionsForm() {
 }
 export async function fetchFilteredRegions(
   query: string,
-  currentPage: number
+  currentPage: number,
+  current_sections: string
 ) {
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
   try {
     const regions = await sql<RegionForm>`
+      WITH your_regions AS ( SELECT * FROM regions where section_id = 
+        ANY (${current_sections}::uuid[]))
+            
       SELECT
         regions.id,
         regions.name,
@@ -263,7 +279,7 @@ export async function fetchFilteredRegions(
         regions.timestamptz,
         regions.date,
         s.name as section_name
-      FROM regions
+      FROM your_regions regions
       LEFT JOIN sections s on regions.section_id = s.id
       WHERE
         regions.name ILIKE ${`%${query}%`} OR
@@ -281,10 +297,14 @@ export async function fetchFilteredRegions(
   }
 }
 
-export async function fetchRegionsPages(query: string) {
+export async function fetchRegionsPages(query: string, current_sections: string) {
   try {
-    const count = await sql`SELECT COUNT(*)
-    FROM regions
+    const count = await sql`
+    WITH your_regions AS ( SELECT * FROM regions where section_id = 
+      ANY (${current_sections}::uuid[])) 
+
+    SELECT COUNT(*)
+    FROM your_regions regions
     WHERE
         regions.name ILIKE ${`%${query}%`} OR
         regions.capital ILIKE ${`%${query}%`} OR

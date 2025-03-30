@@ -3,7 +3,7 @@
 'use client';
 import { useState } from "react";
 import { RoleForm, Section, SectionForm, Tenant } from "@/app/lib/definitions";
-import { updateRole } from "../../lib/actions";
+import { updateRole } from "../../lib/roles-actions";
 import Link from "next/link";
 import BtnTenantsRef from "@/app/admin/tenants/lib/btnTenantsRef";
 import BtnSectionsRef from "@/app/admin/sections/lib/btnSectionsRef";

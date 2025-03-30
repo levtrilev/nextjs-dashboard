@@ -8,19 +8,21 @@ import {
   CustomersTableType,
   FormattedCustomersTable,
 } from '@/app/lib/definitions';
-import { fetchFilteredPremises } from './actions';
+import { fetchFilteredPremises } from './premis-actions';
 import { ChartBarIcon, ChartPieIcon } from '@heroicons/react/20/solid';
 import { BtnDeletePremise, BtnEditPremiseLink } from './buttons';
 
 export default async function PremisesTable({
   query,
   currentPage,
+  current_sections,
 }: {
   query: string;
   currentPage: number;
+  current_sections: string;
 }) {
 
-  const premises = await fetchFilteredPremises(query, currentPage);
+  const premises = await fetchFilteredPremises(query, currentPage, current_sections);
 
   return (
     <div className="w-full">

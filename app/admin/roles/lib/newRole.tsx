@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { PlusIcon } from '@heroicons/react/24/outline';
-import { createRole } from './actions';
+import { createRole } from './roles-actions';
 
 export const NewRole = () => {
 

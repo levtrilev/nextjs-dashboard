@@ -72,6 +72,7 @@ export async function createPremise(
       ${premise.section_id}, 
       ${premise.username}, 
       ${premise.date_created ? premise.date_created.toISOString() : new Date().toISOString()}
+    )
     `;
   } catch (error) {
     console.error("Failed to create premise:", error);
@@ -122,9 +123,12 @@ WHERE id = ${premise.id};
 
 //#region fetchPremise
 
-export async function fetchPremise(id: string) {
+export async function fetchPremise(id: string, current_sections: string) {
   try {
     const data = await sql<Premise>`
+    WITH your_premises AS ( SELECT * FROM premises where section_id = 
+ANY (${current_sections}::uuid[]))
+
       SELECT
         id,
         name,
@@ -143,7 +147,7 @@ export async function fetchPremise(id: string) {
         username,
         timestamptz,
         date_created
-      FROM premises
+      FROM your_premises premises
       WHERE id = ${id}
     `;
 
@@ -154,9 +158,12 @@ export async function fetchPremise(id: string) {
     throw new Error("Failed to fetch premise!");
   }
 }
-export async function fetchPremiseForm(id: string) {
+export async function fetchPremiseForm(id: string, current_sections: string) {
   try {
     const data = await sql<PremiseForm>`
+      WITH your_premises AS ( SELECT * FROM premises where section_id = 
+        ANY (${current_sections}::uuid[]))
+
       SELECT
         p.id,
         p.name,
@@ -179,7 +186,7 @@ export async function fetchPremiseForm(id: string) {
           COALESCE(le_owner.name, '') as owner_name,
           COALESCE(le_operator.name, '') as operator_name,
           COALESCE(s.name, '') as section_name
-      FROM premises p
+      FROM your_premises p
       LEFT JOIN sections s on p.section_id = s.id
       LEFT JOIN regions r on p.region_id = r.id
       LEFT JOIN legal_entities le_owner ON p.owner_id = le_owner.id
@@ -194,9 +201,12 @@ export async function fetchPremiseForm(id: string) {
     throw new Error("Failed to fetch premise!");
   }
 }
-export async function fetchPremises() {
+export async function fetchPremises(current_sections: string) {
   try {
     const data = await sql<Premise>`
+      WITH your_premises AS ( SELECT * FROM premises where section_id = 
+        ANY (${current_sections}::uuid[]))
+
       SELECT
         id,
         name,
@@ -215,7 +225,7 @@ export async function fetchPremises() {
         username,
         timestamptz,
         date_created
-      FROM premises
+      FROM your_premises premises
       ORDER BY name ASC
     `;
 
@@ -227,9 +237,12 @@ export async function fetchPremises() {
   }
 }
 
-export async function fetchPremisesForm() {
+export async function fetchPremisesForm(current_sections: string) {
   try {
     const data = await sql<RegionForm>`
+      WITH your_premises AS ( SELECT * FROM premises where section_id = 
+        ANY (${current_sections}::uuid[]))
+
       SELECT
         p.id,
         p.name,
@@ -252,7 +265,7 @@ export async function fetchPremisesForm() {
           COALESCE(le_owner.name, '') as owner_name,
           COALESCE(le_operator.name, '') as operator_name,
           COALESCE(s.name as section_name, '')
-      FROM premises p
+      FROM your_premises p
       LEFT JOIN sections s on p.section_id = s.id
       LEFT JOIN regions r on p.region_id = r.id
       LEFT JOIN legal_entities le_owner ON p.owner_id = le_owner.id
@@ -269,12 +282,16 @@ export async function fetchPremisesForm() {
 }
 export async function fetchFilteredPremises(
   query: string,
-  currentPage: number
+  currentPage: number,
+  current_sections: string
 ) {
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
   try {
     const premises = await sql<PremiseForm>`
+      WITH your_premises AS ( SELECT * FROM premises where section_id = 
+        ANY (${current_sections}::uuid[]))
+
       SELECT
         p.id,
         p.name,
@@ -297,7 +314,7 @@ export async function fetchFilteredPremises(
           le_owner.name as owner_name,
           le_operator.name as operator_name,
           s.name as section_name
-      FROM premises p
+      FROM your_premises p
       LEFT JOIN sections s on p.section_id = s.id
       LEFT JOIN regions r on p.region_id = r.id
       LEFT JOIN legal_entities le_owner ON p.owner_id = le_owner.id
@@ -319,10 +336,14 @@ export async function fetchFilteredPremises(
   }
 }
 
-export async function fetchPremisesPages(query: string) {
+export async function fetchPremisesPages(query: string, current_sections: string) {
   try {
-    const count = await sql`SELECT COUNT(*)
-    FROM premises
+    const count = await sql`
+    WITH your_premises AS ( SELECT * FROM premises where section_id = 
+      ANY (${current_sections}::uuid[]))
+
+    SELECT COUNT(*)
+    FROM your_premises premises
     WHERE
         name ILIKE ${`%${query}%`} OR
         description ILIKE ${`%${query}%`} OR

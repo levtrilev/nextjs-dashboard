@@ -8,19 +8,21 @@ import {
   CustomersTableType,
   FormattedCustomersTable,
 } from '@/app/lib/definitions';
-import { fetchFilteredRegions } from './actions';
+import { fetchFilteredRegions } from './region-actions';
 import { ChartBarIcon, ChartPieIcon } from '@heroicons/react/20/solid';
-import { BtnDeleteRegion, BtnEditRegionLink } from './buttons';
+import { BtnDeleteRegion, BtnEditRegionLink } from './region-buttons';
 
 export default async function RegionsTable({
   query,
   currentPage,
+  current_sections,
 }: {
   query: string;
   currentPage: number;
+  current_sections: string;
 }) {
 
-  const regions = await fetchFilteredRegions(query, currentPage);
+  const regions = await fetchFilteredRegions(query, currentPage, current_sections);
 
   return (
     <div className="w-full">

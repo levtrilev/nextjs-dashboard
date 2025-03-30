@@ -4,11 +4,12 @@ import { Tenant } from '@/app/lib/definitions';
 // import { BtnDeleteTenant } from "./buttons";
 // import { BtnEditTenantLink } from "./buttons";
 import dynamic from 'next/dynamic';
-import { BtnDeleteTenant, BtnEditTenantLink } from "./buttons";
+import { BtnDeleteTenant, BtnEditTenantLink } from "./tenants-buttons";
 const BtnEditTenantModal = dynamic(() => import('./btnEditTenantModal'), { ssr: false });
 
 interface ITenantsTableProps {
     tenants: Tenant[],
+    superadmin: boolean,
 }
 export const TenantsTable: React.FC<ITenantsTableProps> = (props: ITenantsTableProps) => {
 
@@ -93,9 +94,9 @@ export const TenantsTable: React.FC<ITenantsTableProps> = (props: ITenantsTableP
                                     </td>
                                     <td className="whitespace-nowrap py-3 pl-6 pr-3">
                                         <div className="flex justify-end gap-3">
-                                            <BtnEditTenantModal tenant={tenant} />
-                                            <BtnDeleteTenant name={tenant.name} />
-                                            <BtnEditTenantLink id={tenant.id} />
+                                            { props.superadmin && <BtnEditTenantModal tenant={tenant} /> }
+                                            { props.superadmin && <BtnDeleteTenant name={tenant.name} /> }
+                                            { props.superadmin && <BtnEditTenantLink id={tenant.id} /> }
                                         </div>
                                     </td>
                                 </tr>

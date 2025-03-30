@@ -1,7 +1,7 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { useDispatch, useSelector, useStore } from "react-redux";
 import { Section } from "./lib/definitions";
-import { fetchSections } from "./admin/sections/lib/actions";
+import { fetchSections_deprecated } from "./admin/sections/lib/sections-actions";
 
 type State = {
     sections: Section[];
@@ -21,7 +21,7 @@ type SelectSectionAction = {
 }
 type Action = GetSectionsAction | UpdateSectionAction | SelectSectionAction;
 
-const sections: Section[] = await fetchSections();
+const sections: Section[] = await fetchSections_deprecated();
 const initialState: State = {
     sections: sections,
     selectedSection: null

@@ -2,7 +2,7 @@
 
 import { useSelector } from "react-redux";
 import { userSessionSlice, UserSessionState } from "@/app/lib/features/userSession/userSessionSlice";
-import LegalEntitiesTable from "./lib/table";
+import LegalEntitiesTable from "./lib/le-table";
 
 export const UserSessionComponent = ({
     query,

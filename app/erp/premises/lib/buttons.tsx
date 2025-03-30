@@ -2,7 +2,7 @@
 // Premise buttons.tsx
 
 import { PencilIcon, PlusIcon, TrashIcon, ServerIcon } from '@heroicons/react/24/outline';
-import { deletePremise, updatePremise } from './actions';
+import { deletePremise, updatePremise } from './premis-actions';
 import Link from "next/link";
 import { Premise, Region } from '@/app/lib/definitions';
 

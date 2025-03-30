@@ -5,7 +5,7 @@
 import { useState } from "react";
 import { KeyboardEvent } from "react";
 import { RegionForm, SectionForm } from "@/app/lib/definitions";
-import { updateRegion } from "../../lib/actions";
+import { updateRegion } from "../../lib/region-actions";
 import Link from "next/link";
 import BtnSectionsRef from "@/app/admin/sections/lib/btnSectionsRef";
 

@@ -2,7 +2,7 @@
 import { formatDateToLocal } from "@/app/lib/utils";
 import { RoleForm } from '@/app/lib/definitions';
 import dynamic from 'next/dynamic';
-import { BtnDeleteRole, BtnEditRoleLink } from "./buttons";
+import { BtnDeleteRole, BtnEditRoleLink } from "./roles-buttons";
 import { useEffect, useState } from "react";
 
 interface IRolesTableProps {

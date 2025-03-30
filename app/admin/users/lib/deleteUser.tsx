@@ -2,7 +2,7 @@
 
 import { TrashIcon } from '@heroicons/react/24/outline';
 import { FaceSmileIcon } from '@heroicons/react/20/solid';
-import { deleteUser } from './actions';
+import { deleteUser } from './users-actions';
 import { useState } from 'react';
 
 export function DeleteUser() {

@@ -2,11 +2,11 @@
 // LegalEntity Page
 
 import EditForm from "./editForm";
-import { fetchLegalEntityForm } from "../../lib/actions";
+import { fetchLegalEntityForm } from "../../lib/le-actions";
 import { LegalEntityForm } from "@/app/lib/definitions";
 import { lusitana } from "@/app/ui/fonts";
-import { fetchRegions } from "@/app/erp/regions/lib/actions";
-import { fetchSections, fetchSectionsForm } from "@/app/admin/sections/lib/actions";
+import { fetchRegions } from "@/app/erp/regions/lib/region-actions";
+import { fetchSectionsForm } from "@/app/admin/sections/lib/sections-actions";
 import { auth } from "@/auth";
 import { getCurrentSections } from "@/app/lib/actions";
 // import { useSelector } from "react-redux";
@@ -19,11 +19,11 @@ async function Page(props: { params: Promise<{ id: string }> }) {
     const current_sections = await getCurrentSections(email as string);
     // const current_sections = useSelector((state: { userSession: UserSessionState }) => userSessionSlice.selectors.selectCurrentSections(state));
 
-    const regions = await fetchRegions();
-    const sections = await fetchSectionsForm();
+    const regions = await fetchRegions(current_sections);
+    const sections = await fetchSectionsForm(current_sections);
     const params = await props.params;
     const id = params.id;
-    console.log("current_sections: " + current_sections);
+    // console.log("current_sections: " + current_sections);
 
     // const legalEntity: LegalEntity = await fetchLegalEntity(id);
     const legalEntity: LegalEntityForm = await fetchLegalEntityForm(id, current_sections);

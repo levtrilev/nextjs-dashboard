@@ -126,6 +126,7 @@ export type User = {
   email: string;
   password: string;
   is_admin: boolean;
+  is_superadmin: boolean;
   tenant_id: string;
   role_ids: string;
 };
@@ -136,6 +137,7 @@ export type UserForm = {
   email: string;
   password: string;
   is_admin: boolean;
+  is_superadmin: boolean;
   tenant_id: string;
   tenant_name: string;
   role_ids: string;

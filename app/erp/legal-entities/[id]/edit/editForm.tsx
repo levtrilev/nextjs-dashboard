@@ -5,7 +5,7 @@
 import { useState } from "react";
 import { KeyboardEvent } from "react";
 import { LegalEntityForm, Region, Section, SectionForm } from "@/app/lib/definitions";
-import { updateLegalEntity } from "../../lib/actions";
+import { updateLegalEntity } from "../../lib/le-actions";
 import Link from "next/link";
 import { RadioActiveIsSupplier } from "@/app/erp/legal-entities/lib/radioActive";
 import { redirect } from "next/navigation";

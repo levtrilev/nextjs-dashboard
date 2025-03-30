@@ -2,7 +2,7 @@ import { Tenant } from "@/app/lib/definitions";
 import Modal from "../../../lib/modal";
 import { useState, useEffect } from "react";
 import { PencilIcon, EyeIcon, BookOpenIcon, BriefcaseIcon, BookmarkIcon } from "@heroicons/react/24/outline";
-import { updateTenant } from "./actions";
+import { updateTenant } from "./tenants-actions";
 
 interface ITenantProps {
   tenant: Tenant,

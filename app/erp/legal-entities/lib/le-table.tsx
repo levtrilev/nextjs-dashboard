@@ -9,9 +9,9 @@ import {
   FormattedCustomersTable,
   LegalEntity,
 } from '@/app/lib/definitions';
-import { fetchFilteredLegalEntities } from './actions';
+import { fetchFilteredLegalEntities } from './le-actions';
 import { ChartBarIcon, ChartPieIcon } from '@heroicons/react/20/solid';
-import { BtnDeleteLegalEntity, BtnEditLegalEntityLink } from './buttons';
+import { BtnDeleteLegalEntity, BtnEditLegalEntityLink } from './le-buttons';
 // import { useSelector } from 'react-redux';
 // import { userSessionSlice, UserSessionState } from '@/app/lib/features/userSession/userSessionSlice';
 
@@ -25,12 +25,7 @@ export default async function LegalEntitiesTable({
   current_sections: string;
 }) {
 
-  // const customers = await fetchFilteredLegalEntities(query, currentPage) as any[];
-  // legalEntities
-  // const current_sections = useSelector((state: { userSession: UserSessionState }) => userSessionSlice.selectors.selectCurrentSections(state));
-
   const legalEntities = await fetchFilteredLegalEntities(query, currentPage, current_sections);
-  // const regions = await fetchRegions();
   return (
     <div className="w-full">
       <div className="mt-6 flow-root">

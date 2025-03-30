@@ -1,13 +1,15 @@
 
 // Regions Page
 
-import { fetchRegionsForm, fetchRegionsPages } from "./lib/actions";
+import { fetchRegionsForm, fetchRegionsPages } from "./lib/region-actions";
 // import { StoreProvider } from "@/app/StoreProvider";
 import Pagination from "@/app/ui/pagination";
-import RegionsTable from "@/app/erp/regions/lib/table";
+import RegionsTable from "@/app/erp/regions/lib/region-table";
 import Search from "@/app/ui/search";
-import { CreateRegion } from "@/app/erp/regions/lib/buttons";
+import { CreateRegion } from "@/app/erp/regions/lib/region-buttons";
 import { lusitana } from "@/app/ui/fonts";
+import { auth } from "@/auth";
+import { getCurrentSections } from "@/app/lib/actions";
 
 export default async function Page(props: {
   searchParams?: Promise<{
@@ -15,10 +17,14 @@ export default async function Page(props: {
     page?: string;
   }>;
 }) {
+    const session = await auth();
+    const email = session ? (session.user ? session.user.email : "") : "";
+    const current_sections = await getCurrentSections(email as string);
+
   const searchParams = await props.searchParams;
   const query = searchParams?.query || '';
   const currentPage = Number(searchParams?.page) || 1;
-  const totalPages = await fetchRegionsPages(query);
+  const totalPages = await fetchRegionsPages(query, current_sections);
 
   // const customers = await fetchCustomers();
   // const regions = await fetchRegionsForm();
@@ -34,7 +40,7 @@ export default async function Page(props: {
           <CreateRegion />
         </div>
 
-        <RegionsTable query={query} currentPage={currentPage} />
+        <RegionsTable query={query} currentPage={currentPage} current_sections={current_sections}/>
         <div className="mt-5 flex w-full justify-center">
           <Pagination totalPages={totalPages} />
         </div>

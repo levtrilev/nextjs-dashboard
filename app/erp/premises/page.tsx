@@ -1,12 +1,14 @@
 
 // Premises Page
 
-import { fetchPremisesForm, fetchPremisesPages } from "./lib/actions";
+import { fetchPremisesForm, fetchPremisesPages } from "./lib/premis-actions";
 import Pagination from "@/app/ui/pagination";
 import Search from "@/app/ui/search";
 import { lusitana } from "@/app/ui/fonts";
 import { CreatePremise } from "./lib/buttons";
 import PremisesTable from "./lib/premisesTable";
+import { auth } from "@/auth";
+import { getCurrentSections } from "@/app/lib/actions";
 
 export default async function Page(props: {
   searchParams?: Promise<{
@@ -14,10 +16,14 @@ export default async function Page(props: {
     page?: string;
   }>;
 }) {
+  const session = await auth();
+  const email = session ? (session.user ? session.user.email : "") : "";
+  const current_sections = await getCurrentSections(email as string);
+
   const searchParams = await props.searchParams;
   const query = searchParams?.query || '';
   const currentPage = Number(searchParams?.page) || 1;
-  const totalPages = await fetchPremisesPages(query);
+  const totalPages = await fetchPremisesPages(query, current_sections);
 
   // const customers = await fetchCustomers();
   // const regions = await fetchRegionsForm();
@@ -33,7 +39,7 @@ export default async function Page(props: {
           <CreatePremise />
         </div>
 
-        <PremisesTable query={query} currentPage={currentPage} />
+        <PremisesTable query={query} currentPage={currentPage} current_sections={current_sections}/>
         <div className="mt-5 flex w-full justify-center">
           <Pagination totalPages={totalPages} />
         </div>

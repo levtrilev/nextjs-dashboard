@@ -1,11 +1,11 @@
 
 // LegalEntities Page
 
-import { fetchLegalEntities, fetchLegalEntitiesPages } from "./lib/actions";
+import { fetchLegalEntities, fetchLegalEntitiesPages } from "./lib/le-actions";
 import Pagination from "@/app/ui/pagination";
-import LegalEntitiesTable from "@/app/erp/legal-entities/lib/table";
+import LegalEntitiesTable from "@/app/erp/legal-entities/lib/le-table";
 import Search from "@/app/ui/search";
-import { CreateLegalEntity } from "@/app/erp/legal-entities/lib/buttons";
+import { CreateLegalEntity } from "@/app/erp/legal-entities/lib/le-buttons";
 import { lusitana } from "@/app/ui/fonts";
 import { auth } from "@/auth";
 import { getCurrentSections } from "@/app/lib/actions";
@@ -30,8 +30,6 @@ export default async function Page(props: {
   const currentPage = Number(searchParams?.page) || 1;
   const totalPages = await fetchLegalEntitiesPages(query, current_sections);
 
-  // const customers = await fetchCustomers();
-  const legalEntities = await fetchLegalEntities(current_sections);
   return (
     <>
       {/* <Counter /> */}

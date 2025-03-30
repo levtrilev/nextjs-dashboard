@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { KeyboardEvent } from "react";
 import { RoleForm, SectionForm, Tenant, UserForm } from "@/app/lib/definitions";
-import { updateUser } from "../lib/actions";
+import { updateUser } from "../lib/users-actions";
 import Link from "next/link";
 import { TrashIcon } from "@heroicons/react/24/outline";
 import BtnRolesRef from "@/app/admin/roles/lib/btnRolesRef";
@@ -13,6 +13,7 @@ interface IInputFormProps {
   tenants: Tenant[],
   user_roles: RoleForm[],
   roles: RoleForm[],
+  admin: boolean,
 }
 // export const InputForm: React.FC<IInputFormProps> = (props: IInputFormProps) => {
 
@@ -23,10 +24,10 @@ export default function InputForm(props: IInputFormProps) {
   // console.log("name: "+section.name);
 
   const handleSelectRole = (
-    new_role_id: string, 
+    new_role_id: string,
     new_role_name: string,
-    new_role_description: string, 
-    new_role_tenant_id: string, 
+    new_role_description: string,
+    new_role_tenant_id: string,
     new_role_tenant_name: string,
   ) => {
     setUserRoles(userRoles.concat({
@@ -85,7 +86,7 @@ export default function InputForm(props: IInputFormProps) {
             className="control rounded-md border border-gray-200"
             value={user.name}
             onChange={(e) => handleChangeName(e)}
-            // onKeyDown={(e) => handleKeyDown(e)}
+          // onKeyDown={(e) => handleKeyDown(e)}
           />
         </div>
         {/* <div className="flex justify-between mt-6">
@@ -191,6 +192,7 @@ export default function InputForm(props: IInputFormProps) {
       {/* кнопки */}
       <div className="flex justify-between mt-6">
         <button
+          disabled={!props.admin}
           onClick={() => {
             updateUser({
               id: user.id,
@@ -198,6 +200,7 @@ export default function InputForm(props: IInputFormProps) {
               email: user.email,
               password: user.password,
               is_admin: user.is_admin,
+              is_superadmin: user.is_superadmin,
               tenant_id: user.tenant_id,
               role_ids: user.role_ids,
             });

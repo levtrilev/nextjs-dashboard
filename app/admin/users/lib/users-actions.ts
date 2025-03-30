@@ -27,6 +27,7 @@ export async function createUser(
     password: hash,
     tenant_id: tenant_id,
     is_admin: is_admin,
+    is_superadmin: is_admin,
     role_ids: "{}",
   };
   // Insert data into the database
@@ -91,8 +92,7 @@ export async function deleteUserById(id: string) {
 //#endregion
 
 //#region fetchUsers
-
-export async function fetchUsers() {
+export async function fetchUsersSuperadmin() {
   try {
     // t.name as tenant_id - в данном запросе нужно только имя тенанта.
     // разместить его вместо id позволяет воспользоваться тем же типом User
@@ -103,8 +103,57 @@ export async function fetchUsers() {
           u.email as email,
           u.password as password,
           u.is_admin as is_admin,
-          t.name as tenant_id
+          t.id as tenant_id
         FROM users u JOIN tenants t ON u.tenant_id = t.id
+        ORDER BY tenant_id ASC
+      `;
+    // select u.name, t.name from users u join tenants t on u.tenant_id = t.id
+    const users = data.rows;
+    return users;
+  } catch (err) {
+    console.error("Database Error:", err);
+    throw new Error("Failed to fetch all users.");
+  }
+}
+export async function fetchUsersAdmin(tenant_id: string) {
+  try {
+    // t.name as tenant_id - в данном запросе нужно только имя тенанта.
+    // разместить его вместо id позволяет воспользоваться тем же типом User
+    const data = await sql<User>`
+        SELECT
+          u.id as id,
+          u.name as name,
+          u.email as email,
+          u.password as password,
+          u.is_admin as is_admin,
+          t.id as tenant_id
+        FROM users u JOIN tenants t ON u.tenant_id = t.id
+        WHERE u.tenant_id = ${tenant_id}
+        ORDER BY tenant_id ASC
+      `;
+    // select u.name, t.name from users u join tenants t on u.tenant_id = t.id
+    const users = data.rows;
+    return users;
+  } catch (err) {
+    console.error("Database Error:", err);
+    throw new Error("Failed to fetch all users.");
+  }
+}
+
+export async function fetchUsersUser(email: string) {
+  try {
+    // t.name as tenant_id - в данном запросе нужно только имя тенанта.
+    // разместить его вместо id позволяет воспользоваться тем же типом User
+    const data = await sql<User>`
+        SELECT
+          u.id as id,
+          u.name as name,
+          u.email as email,
+          u.password as password,
+          u.is_admin as is_admin,
+          t.id as tenant_id
+        FROM users u JOIN tenants t ON u.tenant_id = t.id
+        WHERE u.email = ${email}
         ORDER BY tenant_id ASC
       `;
     // select u.name, t.name from users u join tenants t on u.tenant_id = t.id

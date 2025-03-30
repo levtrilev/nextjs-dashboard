@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Section, Tenant } from '@/app/lib/definitions';
 import { PlusIcon } from '@heroicons/react/24/outline';
-import { createSection } from './actions';
+import { createSection } from './sections-actions';
 
 interface INewSectionProps {
   tenants: Tenant[],

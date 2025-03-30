@@ -3,7 +3,7 @@
 
 import { PencilIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
-import { deleteUserById } from './actions';
+import { deleteUserById } from './users-actions';
 
 export function UpdateInvoice({ id }: { id: string }) {
   return (

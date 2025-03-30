@@ -7,7 +7,7 @@ import { generatePagination } from '@/app/lib/utils';
 import { usePathname, useSearchParams } from 'next/navigation';
 // import { UserSessionState } from '../lib/features/userSession/userSessionSlice';
 // import { useSelector } from 'react-redux';
-import { fetchLegalEntitiesPages } from '../erp/legal-entities/lib/actions';
+import { fetchLegalEntitiesPages } from '../erp/legal-entities/lib/le-actions';
 
 export default function Pagination({ totalPages }: { totalPages: number }) {
   // export default async function Pagination({ query }: { query: string }) {

@@ -13,7 +13,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { Button } from '@/app/ui/button';
 import { useActionState, useState } from 'react';
-import { createRegion, RegionState } from '@/app/erp/regions/lib/actions';
+import { createRegion, RegionState } from '@/app/erp/regions/lib/region-actions';
 
 export default function Form() {
   const [region, setRegion] = useState({

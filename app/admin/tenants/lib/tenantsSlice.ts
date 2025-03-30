@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { createAppSlice } from "@/app/lib/createAppSlice";
-import { fetchTenants } from "./actions";
+import { fetchTenantsSuperadmin } from "./tenants-actions";
 
 export interface TenantState {
   id: string;
@@ -51,7 +51,7 @@ export const tenantsSlice = createAppSlice({
     }),
     fetchTenantsAsync: create.asyncThunk(
       async () => {
-        const tenants: TenantState[] = await fetchTenants();
+        const tenants: TenantState[] = await fetchTenantsSuperadmin();
         // The value we return becomes the `fulfilled` action payload
         return tenants;
       },

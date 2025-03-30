@@ -62,7 +62,7 @@ export async function deleteSectionById(id: string) {
 }
 //#endregion
 
-export async function fetchSections() {
+export async function fetchSections_deprecated() {
   try {
     const data = await sql<Section>`
               SELECT
@@ -81,7 +81,8 @@ export async function fetchSections() {
   }
 }
 
-export async function fetchSectionsForm() {
+
+export async function fetchSectionsFormSuperadmin() {
   try {
 
     const data = await sql<SectionForm>`
@@ -91,6 +92,49 @@ export async function fetchSectionsForm() {
           s.tenant_id as tenant_id,
           t.name as tenant_name
         FROM sections s LEFT JOIN tenants t ON s.tenant_id = t.id
+        ORDER BY tenant_name ASC
+      `;
+
+    const sections = data.rows;
+    return sections;
+  } catch (err) {
+    console.error("Database Error:", err);
+    throw new Error("Failed to fetch all sections with fetchSectionsForm.");
+  }
+}
+
+export async function fetchSectionsFormAdmin(tenant_id: string) {
+  try {
+
+    const data = await sql<SectionForm>`
+        SELECT
+          s.id as id,
+          s.name as name,
+          s.tenant_id as tenant_id,
+          t.name as tenant_name
+        FROM sections s LEFT JOIN tenants t ON s.tenant_id = t.id
+        WHERE s.tenant_id = ${tenant_id}
+        ORDER BY tenant_name ASC
+      `;
+
+    const sections = data.rows;
+    return sections;
+  } catch (err) {
+    console.error("Database Error:", err);
+    throw new Error("Failed to fetch all sections with fetchSectionsForm.");
+  }
+}
+export async function fetchSectionsForm(current_sections: string) {
+  try {
+
+    const data = await sql<SectionForm>`
+        SELECT
+          s.id as id,
+          s.name as name,
+          s.tenant_id as tenant_id,
+          t.name as tenant_name
+        FROM sections s LEFT JOIN tenants t ON s.tenant_id = t.id
+        WHERE s.id = ANY (${current_sections}::uuid[])
         ORDER BY tenant_name ASC
       `;
 

@@ -1,9 +1,12 @@
+
+//premise create Page
+
 import PremiseEditForm from "../[id]/edit/editForm";
 import { PremiseForm } from "@/app/lib/definitions";
 import { lusitana } from "@/app/ui/fonts";
-import { fetchSectionsForm } from "@/app/admin/sections/lib/actions";
-import { fetchRegionsForm } from "@/app/erp/regions/lib/actions";
-import { fetchLegalEntities } from "@/app/erp/legal-entities/lib/actions";
+import { fetchSectionsForm } from "@/app/admin/sections/lib/sections-actions";
+import { fetchRegionsForm } from "@/app/erp/regions/lib/region-actions";
+import { fetchLegalEntities } from "@/app/erp/legal-entities/lib/le-actions";
 import { auth } from "@/auth";
 import { getCurrentSections } from "@/app/lib/actions";
 import Breadcrumbs from '@/app/ui/invoices/breadcrumbs';
@@ -47,10 +50,8 @@ export default async function Page() {
 
   } as PremiseForm;
 
-
-
-  const sections = await fetchSectionsForm();
-  const regions = await fetchRegionsForm();
+  const sections = await fetchSectionsForm(current_sections);
+  const regions = await fetchRegionsForm(current_sections);
   const legalEntities = await fetchLegalEntities(current_sections);
   return (
     <main>

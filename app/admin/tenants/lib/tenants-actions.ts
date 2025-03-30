@@ -7,7 +7,7 @@ import { revalidatePath } from "next/cache";
 
 //#region fetchTenants
 
-export async function fetchTenants() {
+export async function fetchTenantsSuperadmin() {
   try {
     const data = await sql<Tenant>`
       SELECT
@@ -27,7 +27,26 @@ export async function fetchTenants() {
     throw new Error("Failed to fetch all tenants.");
   }
 }
+export async function fetchTenantsAdmin(tenant_id: string) {
+  try {
+    const data = await sql<Tenant>`
+      SELECT
+        id,
+        name,
+        active,
+        COALESCE(description, '') AS description
+      FROM tenants
+      WHERE id = ${tenant_id}
+    `;
+    // WHERE active
 
+    const tenants = data.rows;
+    return tenants;
+  } catch (err) {
+    console.error("Database Error:", err);
+    throw new Error("Failed to fetch all tenants.");
+  }
+}
 export async function fetchTenantById(id: string) {
   try {
     const data = await sql<Tenant>`
