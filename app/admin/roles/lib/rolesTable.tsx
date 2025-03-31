@@ -1,12 +1,10 @@
 'use client';
-import { formatDateToLocal } from "@/app/lib/utils";
 import { RoleForm } from '@/app/lib/definitions';
-import dynamic from 'next/dynamic';
-import { BtnDeleteRole, BtnEditRoleLink } from "./roles-buttons";
-import { useEffect, useState } from "react";
+import { BtnDeleteRole } from "./roles-buttons";
 
 interface IRolesTableProps {
     roles: RoleForm[],
+    admin: boolean | undefined,
 }
 export const RolesTable: React.FC<IRolesTableProps> = (props: IRolesTableProps) => {
     const datePlaceHolder = "01.01.2025";
@@ -71,10 +69,12 @@ export const RolesTable: React.FC<IRolesTableProps> = (props: IRolesTableProps) 
                                     <td className="w-3/16 overflow-hidden whitespace-nowrap text-ellipsis bg-white py-1 pl-0 text-left  
                       pr-3 text-sm text-black group-first-of-type:rounded-md group-last-of-type:rounded-md sm:pl-6">
                                         <div className="flex items-left gap-3">
-                                            <a
+                                            {props.admin ? <a
+                                            
                                                 href={"/admin/roles/" + role.id + "/edit"}
                                                 className="text-blue-800 underline"
-                                            >{role.name.substring(0, 20)}</a>
+                                            >{role.name.substring(0, 20)}</a> : 
+                                                <p>{role.name.substring(0, 20)}</p>}
                                         </div>
                                     </td>
                                     <td className="w-1/8 overflow-hidden whitespace-nowrap bg-white px-4 py-1 text-sm">
@@ -88,7 +88,7 @@ export const RolesTable: React.FC<IRolesTableProps> = (props: IRolesTableProps) 
                                     </td>
                                     <td className="w-1/16 whitespace-nowrap pl-4 py-1 pr-3">
                                         <div className="flex justify-end gap-3">
-                                            <BtnDeleteRole id={role.id} />
+                                        { props.admin && <BtnDeleteRole id={role.id} /> }                                          
                                             {/* <BtnEditRoleLink id={role.id} /> */}
                                         </div>
                                     </td>

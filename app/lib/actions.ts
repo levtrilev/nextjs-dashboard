@@ -6,7 +6,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { auth, signIn } from "@/auth";
 import { AuthError } from "next-auth";
-import type { Section, User, Tenant } from "@/app/lib/definitions";
+import type { Section, User, Tenant, RoleForm } from "@/app/lib/definitions";
 import bcrypt from "bcrypt";
 
 export type State = {
@@ -179,26 +179,11 @@ WHERE sections.id = ANY (
 }
 
 
-export async function getUserRoles(user_id: string): Promise<{
-  id: string;
-  name: string;
-  description: string;
-  tenant_id: string;
-  tenant_name: string;
-  // section_id: string;
-  // section_name: string;
-}[] > {
+export async function getUserRoles(user_id: string ): Promise<RoleForm[]>
+{
   if ( user_id === "" ) { return []; }
   try {
-    const data = await sql<{
-      id: string;
-      name: string;
-      description: string;
-      tenant_id: string;
-      tenant_name: string;
-      // section_id: string;
-      // section_name: string;
-  }>`    
+    const data = await sql<RoleForm>`    
     SELECT r.id, r.name, r.description, r.tenant_id, t.name as tenant_name
 FROM roles r
 LEFT JOIN tenants t on r.tenant_id = t.id

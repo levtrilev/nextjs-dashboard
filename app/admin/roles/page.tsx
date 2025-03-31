@@ -8,6 +8,7 @@ import { RolesTable } from "./lib/rolesTable";
 import { fetchRolesFormAdmin, fetchRolesFormSuperadmin } from "./lib/roles-actions";
 import { NewRole } from "./lib/newRole";
 import { auth, getUser } from "@/auth";
+import { getUserRoles } from "@/app/lib/actions";
 // import { fetchTenants } from "../tenants/lib/actions";
 
 async function Page() {
@@ -17,10 +18,10 @@ async function Page() {
     const user = await getUser(email as string);
     const isSuperadmin = user?.is_superadmin;
     const isAdmin = user?.is_admin;
-
+console.log("user.id: ", user?.id);
     const roles = isSuperadmin ? await fetchRolesFormSuperadmin()
         : isAdmin ? await fetchRolesFormAdmin(user.tenant_id)
-            : [];
+            : user ? await getUserRoles(user.id) : [];
 
     // const roles: RoleForm[] = await fetchRolesForm();
     return (
@@ -29,7 +30,7 @@ async function Page() {
                 <h1 className={`${lusitana.className} text-2xl`}>Роли</h1>
             </div>
             { (isSuperadmin || isAdmin) && <NewRole /> }
-            <RolesTable roles={roles} />
+            <RolesTable roles={roles} admin={ isSuperadmin || isAdmin }/>
         </div>
     );
 }
