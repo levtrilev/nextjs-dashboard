@@ -198,7 +198,6 @@ export default function InputForm(props: IInputFormProps) {
               id: user.id,
               name: user.name,
               email: user.email,
-              password: user.password,
               is_admin: user.is_admin,
               is_superadmin: user.is_superadmin,
               tenant_id: user.tenant_id,

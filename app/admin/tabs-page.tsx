@@ -1,7 +1,7 @@
 'use client';
 import TabsSection from "./tabs-section";
 import { useState } from "react";
-import { Tenant, User, Section } from '@/app/lib/definitions';
+import { Tenant, User, Section, UserForm, SectionForm } from '@/app/lib/definitions';
 import { NewSection } from "./sections/lib/newSection";
 import SectionsTable from "./sections/lib/sections-table";
 import { NewTenant } from "./tenants/lib/newTenant";
@@ -11,8 +11,8 @@ import UsersTable from "./users/lib/users-table";
 
 interface ITabsPageProps {
     tenants: Tenant[],
-    users: User[],
-    sections: Section[],
+    users: UserForm[],
+    sections: SectionForm[],
     isSuperadmin: boolean,
     isAdmin: boolean,
 }
