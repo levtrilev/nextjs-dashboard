@@ -2,21 +2,30 @@
 import { useState } from 'react';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import { createRole } from './roles-actions';
+import { Tenant } from '@/app/lib/definitions';
 
-export const NewRole = () => {
+interface INewRoleProps {
+  tenants: Tenant[],
+}
+export const NewRole = (props: INewRoleProps) => {
 
   const [name, setName] = useState<string>("");
   const [description, setDescription] = useState<string>("");
+  const [tenantId, setTenantId] = useState<string>("");
+
   function handleChangeName(event: any) {
     setName(event.target.value);
   }
   function handleChangeDescription(event: any) {
     setDescription(event.target.value);
   }
+  function handleSelectTenant(event: any) {
+    setTenantId(event.target.value);
+  }
   return (
     <div className="flex items-center p-4">
       <form
-        action={() => { createRole(name, description, 'a262e083-8e1b-440c-8829-cec98c88f9fb', '{}', '{}'); setName(''); setDescription('') }}
+        action={() => { createRole(name, description, tenantId, '{}', '{}'); setName(''); setDescription('') }}
         className="flex gap-2">
         <div className="flex-2 flex items-center">
           <input
@@ -25,14 +34,32 @@ export const NewRole = () => {
             placeholder='Название'
           />
         </div>
-        <div className="flex-4 flex items-center">
+        <div className="flex-3 flex items-center">
           <input
             id="tenant-description" onChange={(e) => handleChangeDescription(e)} defaultValue={description} type="text"
             className="w-full h-10 rounded-md border border-gray-300 px-3 py-2 hover:bg-gray-50 focus:outline-none focus:ring focus:ring-blue-300"
             placeholder='Описание'
           />
         </div>
-        <div className="flex-4">
+        <div className="flex-2 flex items-center">
+          <select
+            id="selectTenant"
+            name="tenantId"
+            className="w-full h-10 cursor-pointer rounded-md border border-gray-300 px-3 py-2 hover:bg-gray-50 focus:outline-none focus:ring focus:ring-blue-300"
+            defaultValue=""
+            onChange={(e) => handleSelectTenant(e)}
+          >
+            <option value="" disabled>
+              Организация
+            </option>
+            {props.tenants.map((tenant) => (
+              <option key={tenant.id} value={tenant.id}>
+                {tenant.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="flex-2">
           <button
             className="bg-blue-500 text-white w-full h-10 rounded-md border border-transparent px-3 py-2 hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300"
             >

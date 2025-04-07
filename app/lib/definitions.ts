@@ -135,7 +135,7 @@ export type UserForm = {
   id: string;
   name: string;
   email: string;
-  password: string;
+  password?: string;
   is_admin: boolean;
   is_superadmin: boolean;
   tenant_id: string;

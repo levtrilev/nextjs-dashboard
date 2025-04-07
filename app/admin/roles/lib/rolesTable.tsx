@@ -64,7 +64,7 @@ export const RolesTable: React.FC<IRolesTableProps> = (props: IRolesTableProps) 
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200 text-gray-900">
-                            {roles?.map((role) => (
+                            {roles.map((role) => (
                                 <tr key={role.id} className="group">
                                     <td className="w-3/16 overflow-hidden whitespace-nowrap text-ellipsis bg-white py-1 pl-0 text-left  
                       pr-3 text-sm text-black group-first-of-type:rounded-md group-last-of-type:rounded-md sm:pl-6">

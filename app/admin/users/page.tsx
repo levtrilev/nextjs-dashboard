@@ -3,7 +3,7 @@
 
 'use server';
 import UsersTable from "./lib/users-table";
-import { User, Tenant } from '@/app/lib/definitions';
+import { User, Tenant, UserForm } from '@/app/lib/definitions';
 import { NewUser } from "./lib/newUser";
 import { lusitana } from "@/app/ui/fonts";
 import { fetchUsersAdmin, fetchUsersSuperadmin, fetchUsersUser } from "./lib/users-actions";
@@ -18,7 +18,7 @@ async function Page() {
     const isSuperadmin = user.is_superadmin;
     const isAdmin = user.is_admin;
 
-        const users: User[] = isSuperadmin ? await fetchUsersSuperadmin()
+        const users: UserForm[] = isSuperadmin ? await fetchUsersSuperadmin()
             : isAdmin ? await fetchUsersAdmin(user.tenant_id)
                 : await fetchUsersUser(email as string);
 

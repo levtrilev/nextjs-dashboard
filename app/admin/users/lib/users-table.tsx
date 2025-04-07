@@ -1,9 +1,9 @@
 import { formatDateToLocal } from "@/app/lib/utils";
-import { User } from '@/app/lib/definitions';
+import { User, UserForm } from '@/app/lib/definitions';
 import { BtnDeleteUser, BtnEditUserLink } from "./users-buttons";
 
 interface IUsersTableProps {
-    users: User[],
+    users: UserForm[],
     admin: boolean,
 }
 export const UsersTable: React.FC<IUsersTableProps> = (props: IUsersTableProps) => {
@@ -34,7 +34,7 @@ export const UsersTable: React.FC<IUsersTableProps> = (props: IUsersTableProps) 
                                 <div className="flex w-full items-center justify-between pt-4">
                                     <div>
                                         <p className="text-xl font-medium">
-                                            {user.is_admin.toString()}
+                                            {user.is_admin?.toString()}
                                         </p>
                                     </div>
                                     <div className="flex justify-end gap-2">
@@ -57,7 +57,7 @@ export const UsersTable: React.FC<IUsersTableProps> = (props: IUsersTableProps) 
                                     Организация
                                 </th>
                                 <th scope="col" className="px-3 py-5 font-medium">
-                                    Администратор
+                                    admin?
                                 </th>
                                 <th scope="col" className="px-3 py-5 font-medium">
                                     Дата создания
@@ -81,11 +81,11 @@ export const UsersTable: React.FC<IUsersTableProps> = (props: IUsersTableProps) 
                                     </td>
                                     <td className="whitespace-nowrap py-3 pl-6 pr-3">
                                         <div className="flex items-center gap-3">
-                                            <p>{user.tenant_id}</p>
+                                            <p>{user.tenant_name}</p>
                                         </div>
                                     </td>
                                     <td className="whitespace-nowrap px-3 py-3">
-                                        {user.is_admin.toString()}
+                                        {user.is_superadmin ? "super" : user.is_admin ? "admin" : " -- "}
                                     </td>
                                     <td className="whitespace-nowrap px-3 py-3">
                                         {formatDateToLocal(datePlaceHolder)}

@@ -1,9 +1,9 @@
 import { formatDateToLocal } from "@/app/lib/utils";
-import { Section } from '@/app/lib/definitions';
+import { SectionForm } from '@/app/lib/definitions';
 import { BtnDeleteSection, BtnEditSectionLink } from "./sections-buttons";
 
 interface ISectionsTableProps {
-    sections: Section[],
+    sections: SectionForm[],
     admin: boolean,
 }
 export const SectionsTable: React.FC<ISectionsTableProps> = (props: ISectionsTableProps) => {
@@ -17,7 +17,7 @@ export const SectionsTable: React.FC<ISectionsTableProps> = (props: ISectionsTab
             <div className="inline-block min-w-full align-middle">
                 <div className="rounded-lg bg-gray-50 p-2 md:pt-0">
                     <div className="md:hidden">
-                        {sections?.map((sec) => (
+                        {sections.map((sec) => (
                             <div
                                 key={sec.id}
                                 className="mb-2 w-full rounded-md bg-white p-4"
@@ -77,7 +77,7 @@ export const SectionsTable: React.FC<ISectionsTableProps> = (props: ISectionsTab
                                     </td>
                                     <td className="whitespace-nowrap py-3 pl-6 pr-3">
                                         <div className="flex items-center gap-3">
-                                            <p>{sec.tenant_id}</p>
+                                            <p>{sec.tenant_name}</p>
                                         </div>
                                     </td>
                                     <td className="whitespace-nowrap px-3 py-3">

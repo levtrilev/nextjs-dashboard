@@ -25,7 +25,7 @@ export default function LegalEntitiesRefTable(props: ILegalEntitiesRefTableProps
                 <div className="overflow-x-auto">
                     <div className="inline-block min-w-full align-middle">
                         <div className="overflow-hidden rounded-md bg-gray-50 p-1 md:pt-0">
-                            <table className="table-fixed hidden w-full rounded-md text-gray-900 md:table">
+                            <table className="table-fixed w-full rounded-md text-gray-900 md:table">
                                 <thead className="rounded-md bg-gray-50 text-left text-sm font-normal">
                                     <tr>
                                         <th scope="col" className="w-1/2 overflow-hidden px-0 py-5 font-medium sm:pl-6">

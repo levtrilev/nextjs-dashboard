@@ -94,20 +94,21 @@ export async function deleteUserById(id: string) {
 //#region fetchUsers
 export async function fetchUsersSuperadmin() {
   try {
-    // t.name as tenant_id - в данном запросе нужно только имя тенанта.
-    // разместить его вместо id позволяет воспользоваться тем же типом User
-    const data = await sql<User>`
+
+    const data = await sql<UserForm>`
         SELECT
           u.id as id,
           u.name as name,
           u.email as email,
-          u.password as password,
           u.is_admin as is_admin,
-          t.id as tenant_id
+          u.is_superadmin as is_superadmin,
+          u.tenant_id as tenant_id,
+          t.name as tenant_name,
+          u.role_ids as role_ids
         FROM users u JOIN tenants t ON u.tenant_id = t.id
         ORDER BY tenant_id ASC
       `;
-    // select u.name, t.name from users u join tenants t on u.tenant_id = t.id
+
     const users = data.rows;
     return users;
   } catch (err) {
@@ -117,21 +118,22 @@ export async function fetchUsersSuperadmin() {
 }
 export async function fetchUsersAdmin(tenant_id: string) {
   try {
-    // t.name as tenant_id - в данном запросе нужно только имя тенанта.
-    // разместить его вместо id позволяет воспользоваться тем же типом User
-    const data = await sql<User>`
-        SELECT
-          u.id as id,
-          u.name as name,
-          u.email as email,
-          u.password as password,
-          u.is_admin as is_admin,
-          t.id as tenant_id
-        FROM users u JOIN tenants t ON u.tenant_id = t.id
+
+    const data = await sql<UserForm>`
+    SELECT
+      u.id as id,
+      u.name as name,
+      u.email as email,
+      u.is_admin as is_admin,
+      u.is_superadmin as is_superadmin,
+      u.tenant_id as tenant_id,
+      t.name as tenant_name,
+      u.role_ids as role_ids
+    FROM users u JOIN tenants t ON u.tenant_id = t.id
         WHERE u.tenant_id = ${tenant_id}
         ORDER BY tenant_id ASC
       `;
-    // select u.name, t.name from users u join tenants t on u.tenant_id = t.id
+
     const users = data.rows;
     return users;
   } catch (err) {
@@ -142,21 +144,22 @@ export async function fetchUsersAdmin(tenant_id: string) {
 
 export async function fetchUsersUser(email: string) {
   try {
-    // t.name as tenant_id - в данном запросе нужно только имя тенанта.
-    // разместить его вместо id позволяет воспользоваться тем же типом User
-    const data = await sql<User>`
-        SELECT
-          u.id as id,
-          u.name as name,
-          u.email as email,
-          u.password as password,
-          u.is_admin as is_admin,
-          t.id as tenant_id
+
+    const data = await sql<UserForm>`
+    SELECT
+      u.id as id,
+      u.name as name,
+      u.email as email,
+      u.is_admin as is_admin,
+      u.is_superadmin as is_superadmin,
+      u.tenant_id as tenant_id,
+      t.name as tenant_name,
+      u.role_ids as role_ids
         FROM users u JOIN tenants t ON u.tenant_id = t.id
         WHERE u.email = ${email}
         ORDER BY tenant_id ASC
       `;
-    // select u.name, t.name from users u join tenants t on u.tenant_id = t.id
+
     const users = data.rows;
     return users;
   } catch (err) {
@@ -172,14 +175,15 @@ export async function fetchUserById(id: string) {
           u.id as id,
           u.name as name,
           u.email as email,
-          u.password as password,
           u.is_admin as is_admin,
+          u.is_superadmin as is_superadmin,
           u.tenant_id as tenant_id,
-          t.name as tenant_name
+          t.name as tenant_name,
+          u.role_ids as role_ids
         FROM users u JOIN tenants t ON u.tenant_id = t.id
         WHERE u.id = ${id}
       `;
-
+//           u.password as password,
     const section = data.rows[0];
     return section;
   } catch (err) {

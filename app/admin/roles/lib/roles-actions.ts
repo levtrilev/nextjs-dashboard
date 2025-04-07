@@ -173,7 +173,7 @@ export async function updateRole(role: Role) {
 
 export async function deleteRole(id: string) {
   try {
-    await sql`DELETE FROM tenants WHERE id = ${id}`;
+    await sql`DELETE FROM roles WHERE id = ${id}`;
   } catch (error) {
     console.error("Database Error, Failed to delete role:", error);
     throw new Error("Database Error: Failed to delete role");
