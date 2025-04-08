@@ -25,7 +25,7 @@ const links = [
   },
   
   { name: 'Справочники', href: '#', icon: BookOpenIcon },
-  { name: 'Помещения', href: '/erp/premises', icon: BuildingOfficeIcon }, //premise
+  { name: 'Помещения', href: '#', icon: BuildingOfficeIcon }, //premise
   { name: 'Администрирование', href: '/admin', icon: UserGroupIcon },
   // { name: 'Lesson', href: '/dashboard/lesson', icon: HomeIcon },
 ];
@@ -36,6 +36,8 @@ const subMenu = [
   { mainItem: 'Администрирование', name: 'Роли', href: '/admin/roles' },
   { mainItem: 'Справочники', name: 'Юридические лица', href: '/erp/legal-entities' },
   { mainItem: 'Справочники', name: 'Регионы', href: '/erp/regions' },
+  { mainItem: 'Помещения', name: 'Помещения', href: '/erp/premises' },
+  { mainItem: 'Помещения', name: 'Планы обслуживания', href: '/erp/task-schedules' },
   // { mainItem: 'Home', name: 'About', href: '/dashboard' },
   // { mainItem: 'Home', name: 'Contacts', href: '/dashboard' },
   // { mainItem: 'Home', name: 'Support', href: '/dashboard' },

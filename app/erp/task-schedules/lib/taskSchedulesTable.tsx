@@ -1,18 +1,15 @@
 
-// Premises Table
+// TaskSchedules Table
 
 import Image from 'next/image';
 import { lusitana } from '@/app/ui/fonts';
 import Search from '@/app/ui/search';
-import {
-  CustomersTableType,
-  FormattedCustomersTable,
-} from '@/app/lib/definitions';
-import { fetchFilteredPremises } from './premisesActions';
+import { fetchFilteredTaskSchedules } from './taskSchedulesActions';
 import { ChartBarIcon, ChartPieIcon } from '@heroicons/react/20/solid';
-import { BtnDeletePremise, BtnEditPremiseLink } from './buttons';
+import { BtnDeleteTaskSchedule, BtnEditTaskScheduleLink } from './buttons';
+import { TaskScheduleForm } from '@/app/lib/definitions';
 
-export default async function PremisesTable({
+export default async function TaskSchedulesTable({
   query,
   currentPage,
   current_sections,
@@ -22,7 +19,7 @@ export default async function PremisesTable({
   current_sections: string;
 }) {
 
-  const premises = await fetchFilteredPremises(query, currentPage, current_sections);
+  const taskSchedules = await fetchFilteredTaskSchedules(query, currentPage, current_sections);
 
   return (
     <div className="w-full">
@@ -31,31 +28,31 @@ export default async function PremisesTable({
           <div className="inline-block min-w-full align-middle">
             <div className="overflow-hidden rounded-md bg-gray-50 p-2 md:pt-0">
               <div className="md:hidden">
-                {premises?.map((premise) => (
+                {taskSchedules?.map((taskSchedule) => (
                   <div
-                    key={premise.id}
+                    key={taskSchedule.id}
                     className="mb-2 w-full rounded-md bg-white p-4"
                   >
                     <div className="flex items-center justify-between border-b pb-4">
                       <div>
                         <div className="mb-2 flex items-center">
                           <div className="flex items-center gap-3">
-                            <p>{premise.name}</p>
+                            <p>{taskSchedule.name}</p>
                           </div>
                         </div>
                         <p className="text-sm text-gray-500">
-                          {premise.cadastral_number}
+                          {taskSchedule.description}
                         </p>
                       </div>
                     </div>
                     <div className="flex w-full items-center justify-between border-b py-5">
                       <div className="flex w-1/2 flex-col">
                         <p className="text-xs">Округ</p>
-                        <p className="font-medium">{premise.region_name}</p>
+                        <p className="font-medium">{taskSchedule.schedule_owner_name}</p>
                       </div>
                       <div className="flex w-1/2 flex-col">
                         <p className="text-xs">Код</p>
-                        <p className="font-medium">{premise.address}</p>
+                        <p className="font-medium">{taskSchedule.date_start.toISOString()}</p>
                       </div>
                     </div>
                   </div>
@@ -86,33 +83,33 @@ export default async function PremisesTable({
                 </thead>
 
                 <tbody className="divide-y divide-gray-200 text-gray-900">
-                  {premises.map((premise) => (
-                    <tr key={premise.id} className="group">
+                  {taskSchedules.map((taskSchedule) => (
+                    <tr key={taskSchedule.id} className="group">
                       <td className="w-4/16 overflow-hidden whitespace-nowrap text-ellipsis bg-white py-1 pl-0 text-left  
                       pr-3 text-sm text-black group-first-of-type:rounded-md group-last-of-type:rounded-md sm:pl-6">
                         <div className="flex items-left gap-3">
                           <a
-                            href={"/erp/premises/" + premise.id + "/edit"}
+                            href={"/erp/task-schedules/" + taskSchedule.id + "/edit"}
                             className="text-blue-800 underline"
-                          >{premise.name.substring(0, 36)}</a>
+                          >{taskSchedule.name.substring(0, 36)}</a>
                         </div>
                       </td>
                       <td className="w-2/16 overflow-hidden whitespace-nowrap bg-white px-4 py-1 text-sm">
-                        {premise.cadastral_number}
+                        {taskSchedule.description}
                       </td>
                       <td className="w-2/16 overflow-hidden whitespace-nowrap bg-white px-4 py-1 text-sm">
-                        {premise.region_name}
+                        {taskSchedule.schedule_owner_name}
                       </td>
                       <td className="w-4/16 overflow-hidden whitespace-nowrap bg-white px-4 py-1 text-sm">
-                        {premise.address}
+                        {taskSchedule.date_start.toISOString()}
                       </td>
                       <td className="w-2/16 overflow-hidden whitespace-nowrap bg-white px-4 py-1 text-sm group-first-of-type:rounded-md group-last-of-type:rounded-md">
-                        {premise.section_name}
+                        {taskSchedule.section_name}
                       </td>
                       <td className="w-1/16 whitespace-nowrap pl-4 py-1 pr-3">
                         <div className="flex justify-end gap-3">
                           {/* <BtnEditTenantModal tenant={tenant} /> */}
-                          <BtnDeletePremise id={premise.id} />
+                          <BtnDeleteTaskSchedule id={taskSchedule.id} />
                           {/* <BtnEditLegalEntityLink id={legalEntity.id} /> */}
                         </div>
                       </td>

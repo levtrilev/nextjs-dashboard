@@ -1,9 +1,41 @@
 // This file contains type definitions for your data.
-// It describes the shape of the data, and what data type each property should accept.
-// For simplicity of teaching, we're manually defining these types.
-// However, these types are generated automatically if you're using an ORM such as Prisma.
+// These types may be generated automatically if you're using an ORM such as Prisma.
 
 import { DateTime } from "next-auth/providers/kakao";
+
+export type TaskSchedule = {
+  id: string;
+  name: string;
+  description: string;
+  premise_id: string;
+  schedule_owner_id: string;
+  date: Date;
+  date_start: Date;
+  date_end: Date;
+  section_id: string;
+  username?: string;
+  timestamptz?: string;
+  date_created?: Date;
+};
+
+export type TaskScheduleForm = {
+  id: string;
+  name: string;
+  description: string;
+  premise_id: string;
+  schedule_owner_id: string;
+  date: Date;
+  date_start: Date;
+  date_end: Date;
+  section_id: string;
+  username?: string;
+  timestamptz?: string;
+  date_created?: Date;
+  schedule_owner_name: string;
+  section_name: string;
+  premise_name: string;
+};
+
 
 export type Premise = {
   id: string;

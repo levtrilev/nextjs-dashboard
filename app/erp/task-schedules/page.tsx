@@ -1,14 +1,16 @@
 
-// Premises Page
+// TaskSchedules Page
 
-import { fetchPremisesForm, fetchPremisesPages } from "./lib/premisesActions";
 import Pagination from "@/app/ui/pagination";
 import Search from "@/app/ui/search";
 import { lusitana } from "@/app/ui/fonts";
-import { CreatePremise } from "./lib/buttons";
-import PremisesTable from "./lib/premisesTable";
+// import { CreateTaskSchedule } from "./lib/buttons";
+// import TaskSchedulesTable from "./lib/taskSchedulesTable";
 import { auth } from "@/auth";
 import { getCurrentSections } from "@/app/lib/actions";
+import { fetchTaskSchedulesPages } from "./lib/taskSchedulesActions";
+import { CreateTaskSchedule } from "./lib/buttons";
+import TaskSchedulesTable from "./lib/taskSchedulesTable";
 
 export default async function Page(props: {
   searchParams?: Promise<{
@@ -23,7 +25,7 @@ export default async function Page(props: {
   const searchParams = await props.searchParams;
   const query = searchParams?.query || '';
   const currentPage = Number(searchParams?.page) || 1;
-  const totalPages = await fetchPremisesPages(query, current_sections);
+  const totalPages = await fetchTaskSchedulesPages(query, current_sections);
 
   // const customers = await fetchCustomers();
   // const regions = await fetchRegionsForm();
@@ -32,14 +34,14 @@ export default async function Page(props: {
       {/* <Counter /> */}
       <div className="w-full">
         <div className="flex w-full items-center justify-between">
-          <h1 className={`${lusitana.className} text-2xl`}>Помещения</h1>
+          <h1 className={`${lusitana.className} text-2xl`}>Планы обслуживания</h1>
         </div>
         <div className="mt-4 flex items-center justify-between gap-2 md:mt-8">
-          <Search placeholder="Найти помещение..." />
-          <CreatePremise />
+          <Search placeholder="Найти план обслуживания..." />
+          <CreateTaskSchedule />
         </div>
 
-        <PremisesTable query={query} currentPage={currentPage} current_sections={current_sections}/>
+        <TaskSchedulesTable query={query} currentPage={currentPage} current_sections={current_sections}/>
         <div className="mt-5 flex w-full justify-center">
           <Pagination totalPages={totalPages} />
         </div>

@@ -2,29 +2,24 @@
 // import Modal from "@/app/lib/modal";
 import { useState, useEffect } from "react";
 import { PencilIcon, EyeIcon, BookOpenIcon, BriefcaseIcon, BookmarkIcon } from "@heroicons/react/24/outline";
-import { Region } from "@/app/lib/definitions";
-import RegionsRefTable from "./regionsRefTable";
+import { Premise } from "@/app/lib/definitions";
+import PremisesRefTable from "./premisesRefTable";
 
 import dynamic from 'next/dynamic';
 const Modal = dynamic(() => import('@/app/lib/modal'), { ssr: false });
 
-interface IBtnRegionsRefProps {
-  regions: Region[],
-  handleSelectRegion: (new_region_id: string, new_region_name: string) => void,
+interface IBtnPremisesRefProps {
+  premises: Premise[],
+  handleSelectPremise: (new_premise_id: string, new_premise_name: string) => void,
 }
 
-export default function BtnRegionsRef(props: IBtnRegionsRefProps) {
-  // const regions = await fetchRegions();
+export default function BtnPremisesRef(props: IBtnPremisesRefProps) {
   const [modal, setModal] = useState(false);
 
   const openModal = () => {
     setModal(true);
-    // redirect("/dashboard/admin/tenants/1");
   };
   const closeModal = () => {
-    // setTenant((prev) => ({
-    //   ...props.tenant,
-    // }));
     setModal(false);
   };
   const [term, setTerm] = useState<string>("");
@@ -38,9 +33,9 @@ export default function BtnRegionsRef(props: IBtnRegionsRefProps) {
       </button>
       <Modal open={modal} >
 
-        <RegionsRefTable
-          regions={props.regions}
-          handleSelectRegion={props.handleSelectRegion}
+        <PremisesRefTable
+          premises={props.premises}
+          handleSelectPremise={props.handleSelectPremise}
           closeModal={closeModal}
           setTerm={setTerm}
           term={term}

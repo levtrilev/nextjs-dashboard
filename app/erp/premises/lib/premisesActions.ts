@@ -239,7 +239,7 @@ export async function fetchPremises(current_sections: string) {
 
 export async function fetchPremisesForm(current_sections: string) {
   try {
-    const data = await sql<RegionForm>`
+    const data = await sql<PremiseForm>`
       WITH your_premises AS ( SELECT * FROM premises where section_id = 
         ANY (${current_sections}::uuid[]))
 
@@ -264,7 +264,7 @@ export async function fetchPremisesForm(current_sections: string) {
           COALESCE(r.name, '') as region_name,
           COALESCE(le_owner.name, '') as owner_name,
           COALESCE(le_operator.name, '') as operator_name,
-          COALESCE(s.name as section_name, '')
+          COALESCE(s.name, '') as section_name
       FROM your_premises p
       LEFT JOIN sections s on p.section_id = s.id
       LEFT JOIN regions r on p.region_id = r.id

@@ -2,25 +2,25 @@
 // Premise buttons.tsx
 
 import { PencilIcon, PlusIcon, TrashIcon, ServerIcon } from '@heroicons/react/24/outline';
-import { deletePremise, updatePremise } from './premisesActions';
+import { deleteTaskSchedule, updateTaskSchedule } from './taskSchedulesActions';
 import Link from "next/link";
-import { Premise, Region } from '@/app/lib/definitions';
+import { Premise, TaskSchedule } from '@/app/lib/definitions';
 
-export function CreatePremise() {
+export function CreateTaskSchedule() {
   return (
     <Link
-      href="/erp/premises/create"
+      href="/erp/task-schedules/create"
       className="flex h-10 items-center rounded-lg bg-blue-600 px-4 text-sm font-medium text-white transition-colors hover:bg-blue-500 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-blue-600"
     >
-      <span className="hidden md:block">Создать Помещение</span>{' '}
+      <span className="hidden md:block">Создать План обслуживания</span>{' '}
       <PlusIcon className="h-5 md:ml-4" />
     </Link>
   );
 }
-export function BtnUpdatePremise({ premise }: { premise: Premise }) {
-  const updatePremiseWithData = updatePremise.bind(null, premise);
+export function BtnUpdateTaskSchedule({ taskSchedule }: { taskSchedule: TaskSchedule }) {
+  const updateTaskScheduleWithData = updateTaskSchedule.bind(null, taskSchedule);
   return (
-    <form action={updatePremiseWithData} className="w-full">
+    <form action={updateTaskScheduleWithData} className="w-full">
       <button className="bg-blue-400 text-white w-full rounded-md border p-2 hover:bg-blue-100 hover:text-gray-500">
         Save
       </button>
@@ -28,11 +28,11 @@ export function BtnUpdatePremise({ premise }: { premise: Premise }) {
   );
 }
 
-export function BtnDeletePremise({ id }: { id: string }) {
-  const deletePremiseWithId = deletePremise.bind(null, id);
+export function BtnDeleteTaskSchedule({ id }: { id: string }) {
+  const deleteTaskScheduleWithId = deleteTaskSchedule.bind(null, id);
 
   return (
-    <form action={deletePremiseWithId}>
+    <form action={deleteTaskScheduleWithId}>
       <button className="rounded-md border border-gray-200 p-2 h-10 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
         <span className="sr-only">Delete</span>
         <TrashIcon className="w-5 h-5 text-gray-800" />
@@ -41,12 +41,12 @@ export function BtnDeletePremise({ id }: { id: string }) {
   );
 }
 
-export function BtnEditPremiseLink({ id }: { id: string }) {
+export function BtnEditTaskScheduleLink({ id }: { id: string }) {
   const LinkIcon = PencilIcon;
   return (
     <Link
       key={"Edit"}
-      href={"/erp/regions/" + id + "/edit"}
+      href={"/erp/task-schedules/" + id + "/edit"}
       className='flex h-10 items-center justify-center space-x-2 rounded-md border border-gray-200 
       bg-white p-2 text-sm font-medium hover:bg-gray-100 md:flex-none md:justify-start md:p-2 md:px-3'
     >

@@ -4,7 +4,7 @@
 'use client';
 import { useState } from "react";
 import { LegalEntity, PremiseForm, RegionForm, SectionForm } from "@/app/lib/definitions";
-import { createPremise, updatePremise } from "../../lib/premis-actions";
+import { createPremise, updatePremise } from "../../lib/premisesActions";
 import Link from "next/link";
 import BtnSectionsRef from "@/app/admin/sections/lib/btnSectionsRef";
 import BtnRegionsRef from "@/app/erp/regions/lib/btnRegionsRef";
