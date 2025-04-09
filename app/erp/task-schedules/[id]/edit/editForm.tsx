@@ -96,7 +96,7 @@ export default function TaskScheduleEditForm(props: IEditFormProps) {
       section_name: new_section_name,
     }));
   };
-  
+
   const handleSelectPremise = (new_premise_id: string, new_premise_name: string) => {
     setFormData((prev) => ({
       ...prev,
@@ -165,14 +165,14 @@ export default function TaskScheduleEditForm(props: IEditFormProps) {
             <div className="flex justify-between mt-1">
               <label
                 htmlFor="schedule_owner_name"
-                className="w-2/8 text-sm text-blue-900 font-medium flex items-center p-2">
+                className="w-3/8 text-sm text-blue-900 font-medium flex items-center p-2">
                 Владелец плана:
               </label>
               <input
                 id="schedule_owner_name"
                 type="text"
                 name="schedule_owner_name"
-                className="w-13/16 pointer-events-none control rounded-md border border-gray-200 p-2"
+                className="w-11/16 pointer-events-none control rounded-md border border-gray-200 p-2"
                 value={formData.schedule_owner_name}
                 readOnly
                 onChange={(e) => setFormData((prev) => ({ ...prev, schedule_owner_name: e.target.value, }))}
@@ -186,6 +186,34 @@ export default function TaskScheduleEditForm(props: IEditFormProps) {
             <div id="schedule_owner_name-error" aria-live="polite" aria-atomic="true">
               {errors?.schedule_owner_name &&
                 errors.schedule_owner_name._errors.map((error: string) => (
+                  <p className="mt-2 text-xs text-red-500" key={error}>
+                    {error}
+                  </p>
+                ))}
+            </div>
+          </div>
+          {/* premise_name */}
+          <div className="flex-col">
+            <div className="flex justify-between mt-1">
+              <label
+                htmlFor="premise_name"
+                className="w-2/8 text-sm text-blue-900 font-medium flex items-center p-2">
+                Помещение:
+              </label>
+              <input
+                id="premise_name"
+                type="text"
+                name="premise_name"
+                className="w-13/16 pointer-events-none control rounded-md border border-gray-200 p-2"
+                value={formData.premise_name}
+                readOnly
+                onChange={(e) => setFormData((prev) => ({ ...prev, premise_name: e.target.value, }))}
+              />
+              <BtnPremisesRef premises={props.premises} handleSelectPremise={handleSelectPremise} />
+            </div>
+            <div id="premise_name-error" aria-live="polite" aria-atomic="true">
+              {errors?.premise_name &&
+                errors.premise_name._errors.map((error: string) => (
                   <p className="mt-2 text-xs text-red-500" key={error}>
                     {error}
                   </p>
@@ -218,6 +246,9 @@ export default function TaskScheduleEditForm(props: IEditFormProps) {
                 ))}
             </div>
           </div>
+        </div>
+        {/* second column */}
+        <div className="flex flex-col gap-4 w-full md:w-1/2">
           {/* date */}
           <div className="flex-col">
             <div className="flex justify-between mt-1">
@@ -252,7 +283,7 @@ export default function TaskScheduleEditForm(props: IEditFormProps) {
             <div className="flex justify-between mt-1">
               <label
                 htmlFor="date_start"
-                className="w-3/8 text-sm text-blue-900 font-medium flex items-center p-2">
+                className="w-4/8 text-sm text-blue-900 font-medium flex items-center p-2">
                 Дата начала действия:
               </label>
               <input
@@ -281,7 +312,7 @@ export default function TaskScheduleEditForm(props: IEditFormProps) {
             <div className="flex justify-between mt-1">
               <label
                 htmlFor="date_end"
-                className="w-3/8 text-sm text-blue-900 font-medium flex items-center p-2">
+                className="w-4/8 text-sm text-blue-900 font-medium flex items-center p-2">
                 Дата окончания действия:
               </label>
               <input
@@ -305,10 +336,6 @@ export default function TaskScheduleEditForm(props: IEditFormProps) {
                 ))}
             </div>
           </div>
-        </div>
-        {/* second column */}
-        <div className="flex flex-col gap-4 w-full md:w-1/2">
-
           {/* section_name */}
           <div className="flex-col">
             <div className="flex justify-between mt-1">
@@ -331,34 +358,6 @@ export default function TaskScheduleEditForm(props: IEditFormProps) {
             <div id="section_name-error" aria-live="polite" aria-atomic="true">
               {errors?.section_name &&
                 errors.section_name._errors.map((error: string) => (
-                  <p className="mt-2 text-xs text-red-500" key={error}>
-                    {error}
-                  </p>
-                ))}
-            </div>
-          </div>
-          {/* premise_name */}
-          <div className="flex-col">
-            <div className="flex justify-between mt-1">
-              <label
-                htmlFor="premise_name"
-                className="w-2/8 text-sm text-blue-900 font-medium flex items-center p-2">
-                Помещение:
-              </label>
-              <input
-                id="premise_name"
-                type="text"
-                name="premise_name"
-                className="w-13/16 pointer-events-none control rounded-md border border-gray-200 p-2"
-                value={formData.premise_name}
-                readOnly
-                onChange={(e) => setFormData((prev) => ({ ...prev, premise_name: e.target.value, }))}
-              />
-              <BtnPremisesRef premises={props.premises} handleSelectPremise={handleSelectPremise} />
-            </div>
-            <div id="premise_name-error" aria-live="polite" aria-atomic="true">
-              {errors?.premise_name &&
-                errors.premise_name._errors.map((error: string) => (
                   <p className="mt-2 text-xs text-red-500" key={error}>
                     {error}
                   </p>

@@ -16,7 +16,9 @@ interface IBtnPremisesRefProps {
 export default function BtnPremisesRef(props: IBtnPremisesRefProps) {
   const [modal, setModal] = useState(false);
 
-  const openModal = () => {
+  const openModal = (e: React.MouseEvent<HTMLElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
     setModal(true);
   };
   const closeModal = () => {
