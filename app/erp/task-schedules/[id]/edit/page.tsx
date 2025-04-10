@@ -36,7 +36,7 @@ async function Page(props: { params: Promise<{ id: string }> }) {
     return (
         <div className="w-full">
             <div className="flex w-full items-center justify-between">
-                <h1 className={`${lusitana.className} text-2xl`}>Помещение</h1>
+                <h1 className={`${lusitana.className} text-2xl`}>План обслуживания</h1>
             </div>
             <h3 className="text-xs font-medium text-gray-400">id: {id}</h3>
             <TaskScheduleEditForm 

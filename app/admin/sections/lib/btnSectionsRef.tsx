@@ -27,15 +27,11 @@ export default function BtnSectionsRef(props: IBtnSectionsRefProps) {
     e.preventDefault();
     e.stopPropagation();
     setModal(true);
-    // redirect("/dashboard/admin/tenants/1");
   };
   const closeModal = () => {
-    // setTenant((prev) => ({
-    //   ...props.tenant,
-    // }));
     setModal(false);
   };
-
+  const [term, setTerm] = useState<string>("");
   return (
     <div>
       <button
@@ -49,6 +45,8 @@ export default function BtnSectionsRef(props: IBtnSectionsRefProps) {
         sections={props.sections} 
         handleSelectSection={props.handleSelectSection}
         closeModal={closeModal}
+        setTerm={setTerm}
+        term={term}
         />
 
         {/* buttons */}

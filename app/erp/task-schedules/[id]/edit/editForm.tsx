@@ -11,6 +11,14 @@ import BtnRegionsRef from "@/app/erp/regions/lib/btnRegionsRef";
 import BtnLegalEntitiesRef from "@/app/erp/legal-entities/lib/btnLegalEntitiesRef";
 import { z } from "zod";
 import BtnPremisesRef from "@/app/erp/premises/lib/btnPremisesRef";
+import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
+import { pdf, PDFViewer } from '@react-pdf/renderer';
+// import { saveAs } from 'file-saver';
+import { Font } from '@react-pdf/renderer';
+Font.register({
+  family: 'Arial',
+  src: 'https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-light-webfont.ttf',
+})
 
 interface IEditFormProps {
   taskSchedule: TaskScheduleForm,
@@ -18,7 +26,6 @@ interface IEditFormProps {
   premises: PremiseForm[],
   legalEntities: LegalEntity[],
 }
-
 
 const TaskScheduleFormSchemaFull = z.object({
   id: z.string().uuid(),
@@ -60,7 +67,7 @@ type FormData = z.infer<typeof TaskScheduleFormSchemaFull>;
 export default function TaskScheduleEditForm(props: IEditFormProps) {
 
   const [showErrors, setShowErrors] = useState(false);
-
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [formData, setFormData] = useState<FormData>(props.taskSchedule);
 
   const validate = () => {
@@ -123,273 +130,375 @@ export default function TaskScheduleEditForm(props: IEditFormProps) {
     const day = String(d.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
   };
+  // Создаем стили для PDF
+  const styles = StyleSheet.create({
+    page: {
+      flexDirection: 'column',
+      padding: 30,
+      fontSize: 12,
+    },
+    section: {
+      margin: 10,
+      padding: 10,
+      flexGrow: 1,
+    },
+    text: {
+      fontFamily: 'Arial', // Используем стандартный шрифт
+      fontSize: 12,
+    },
+  });
+  // Компонент PDF
+  const PdfDocument = ({ formData }: { formData: FormData }) => (
+    <Document>
+      <Page size="A4" style={styles.page}>
+        <View style={styles.section}>
+          <Text style={styles.text}>Название: {formData.name}</Text>
+          <Text style={styles.text}>Описание: {formData.description}</Text>
+          <Text style={styles.text}>Дата принятия плана: {formData.date?.toISOString().split('T')[0]}</Text>
+          <Text style={styles.text}>Дата начала действия: {formData.date_start?.toISOString().split('T')[0]}</Text>
+          <Text style={styles.text}>Дата окончания действия: {formData.date_end?.toISOString().split('T')[0]}</Text>
+          <Text style={styles.text}>Раздел: {formData.section_name}</Text>
+          <Text style={styles.text}>Помещение: {formData.premise_name}</Text>
+          <Text style={styles.text}>Владелец плана: {formData.schedule_owner_name}</Text>
+        </View>
+      </Page>
+    </Document>
+  );
+  const handleShowPDF = async () => {
+    try {
+      // Создаем PDF из компонента PdfDocument
+      const blob = await pdf(<PdfDocument formData={formData} />).toBlob();
 
+      // Создаем URL для Blob-объекта
+      const url = URL.createObjectURL(blob);
+
+      setPdfUrl(url);
+
+    } catch (error) {
+      console.error('Ошибка при экспорте PDF:', error);
+
+    }
+  };
+  const handleClosePDF = () => {
+    if (pdfUrl) {
+      // Освобождаем ресурсы Blob-URL
+      URL.revokeObjectURL(pdfUrl);
+      // Убираем iframe
+      setPdfUrl(null);
+    }
+  };
   const errors = showErrors ? validate() : undefined;
   // const errors = validate();
   return (
-    <form onSubmit={handleSubmit}>
-      <div className="flex flex-col md:flex-row gap-4 w-full">
-        {/* first column */}
-        <div className="flex flex-col gap-4 w-full md:w-1/2">
+    <div>
+      {!pdfUrl && (
+        <form id="task-schedule-form" onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <div className="flex flex-col md:flex-row gap-4 w-full">
+            {/* first column */}
+            <div className="flex flex-col gap-4 w-full md:w-1/2">
 
-          {/* name */}
-          <div className="flex-col">
-            <div className="flex justify-between mt-1">
-              <label
-                htmlFor="name"
-                className="text-sm text-blue-900 font-medium flex items-center p-2"
-              >
-                Название:
-              </label>
-              <input
-                id="name"
-                type="text"
-                name="name"
-                autoComplete="off"
-                className="w-7/8 control rounded-md border border-gray-200 p-2"
-                value={formData.name}
-                onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value, }))}
-              />
+              {/* name */}
+              <div className="flex-col">
+                <div className="flex justify-between mt-1">
+                  <label
+                    htmlFor="name"
+                    className="text-sm text-blue-900 font-medium flex items-center p-2"
+                  >
+                    Название:
+                  </label>
+                  <input
+                    id="name"
+                    type="text"
+                    name="name"
+                    autoComplete="off"
+                    className="w-7/8 control rounded-md border border-gray-200 p-2"
+                    value={formData.name}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value, }))}
+                  />
+                </div>
+                <div id="name-error" aria-live="polite" aria-atomic="true">
+                  {errors?.name &&
+                    errors.name._errors.map((error: string) => (
+                      <p className="mt-2 text-xs text-red-500" key={error}>
+                        {error}
+                      </p>
+                    ))}
+                </div>
+              </div>
+              {/* schedule_owner_name */}
+              <div className="flex-col">
+                <div className="flex justify-between mt-1">
+                  <label
+                    htmlFor="schedule_owner_name"
+                    className="w-3/8 text-sm text-blue-900 font-medium flex items-center p-2">
+                    Владелец плана:
+                  </label>
+                  <input
+                    id="schedule_owner_name"
+                    type="text"
+                    name="schedule_owner_name"
+                    className="w-11/16 pointer-events-none control rounded-md border border-gray-200 p-2"
+                    value={formData.schedule_owner_name}
+                    readOnly
+                    onChange={(e) => setFormData((prev) => ({ ...prev, schedule_owner_name: e.target.value, }))}
+                  />
+                  <BtnLegalEntitiesRef
+                    legalEntities={props.legalEntities}
+                    handleSelectLE={handleSelectOwner}
+                    elementIdPrefix="schedule_owner_name_"
+                  />
+                </div>
+                <div id="schedule_owner_name-error" aria-live="polite" aria-atomic="true">
+                  {errors?.schedule_owner_name &&
+                    errors.schedule_owner_name._errors.map((error: string) => (
+                      <p className="mt-2 text-xs text-red-500" key={error}>
+                        {error}
+                      </p>
+                    ))}
+                </div>
+              </div>
+              {/* premise_name */}
+              <div className="flex-col">
+                <div className="flex justify-between mt-1">
+                  <label
+                    htmlFor="premise_name"
+                    className="w-2/8 text-sm text-blue-900 font-medium flex items-center p-2">
+                    Помещение:
+                  </label>
+                  <input
+                    id="premise_name"
+                    type="text"
+                    name="premise_name"
+                    className="w-13/16 pointer-events-none control rounded-md border border-gray-200 p-2"
+                    value={formData.premise_name}
+                    readOnly
+                    onChange={(e) => setFormData((prev) => ({ ...prev, premise_name: e.target.value, }))}
+                  />
+                  <BtnPremisesRef premises={props.premises} handleSelectPremise={handleSelectPremise} />
+                </div>
+                <div id="premise_name-error" aria-live="polite" aria-atomic="true">
+                  {errors?.premise_name &&
+                    errors.premise_name._errors.map((error: string) => (
+                      <p className="mt-2 text-xs text-red-500" key={error}>
+                        {error}
+                      </p>
+                    ))}
+                </div>
+              </div>
+              {/* description */}
+              <div className="flex-col">
+                <div className="flex justify-between mt-1">
+                  <label
+                    htmlFor="description"
+                    className="w-2/8 text-sm text-blue-900 font-medium flex items-center p-2">
+                    Описание:
+                  </label>
+                  <input
+                    id="description"
+                    type="text"
+                    name="description"
+                    className="w-13/16 control rounded-md border border-gray-200 p-2"
+                    value={formData.description}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value, }))}
+                  />
+                </div>
+                <div id="description-error" aria-live="polite" aria-atomic="true">
+                  {errors?.description &&
+                    errors.description._errors.map((error: string) => (
+                      <p className="mt-2 text-xs text-red-500" key={error}>
+                        {error}
+                      </p>
+                    ))}
+                </div>
+              </div>
             </div>
-            <div id="name-error" aria-live="polite" aria-atomic="true">
-              {errors?.name &&
-                errors.name._errors.map((error: string) => (
-                  <p className="mt-2 text-xs text-red-500" key={error}>
-                    {error}
-                  </p>
-                ))}
+            {/* second column */}
+            <div className="flex flex-col gap-4 w-full md:w-1/2">
+              {/* date */}
+              <div className="flex-col">
+                <div className="flex justify-between mt-1">
+                  <label
+                    htmlFor="date"
+                    className="w-3/8 text-sm text-blue-900 font-medium flex items-center p-2">
+                    Дата принятия плана:
+                  </label>
+                  <input
+                    id="date"
+                    type="date"
+                    name="date"
+                    className="w-10/16 control rounded-md border border-gray-200 p-2"
+                    value={formatDateForInput(formData.date)} // Преобразуем дату в нужный формат
+                    onChange={(e) => {
+                      // console.log('New date:', formData.date);
+                      setFormData((prev) => ({ ...prev, date: new Date(e.target.value), }));
+                    }}
+                  />
+                </div>
+                <div id="date-error" aria-live="polite" aria-atomic="true">
+                  {errors?.date &&
+                    errors.date._errors.map((error: string) => (
+                      <p className="mt-2 text-xs text-red-500" key={error}>
+                        {error}
+                      </p>
+                    ))}
+                </div>
+              </div>
+              {/* date_start */}
+              <div className="flex-col">
+                <div className="flex justify-between mt-1">
+                  <label
+                    htmlFor="date_start"
+                    className="w-4/8 text-sm text-blue-900 font-medium flex items-center p-2">
+                    Дата начала действия:
+                  </label>
+                  <input
+                    id="date_start"
+                    type="date"
+                    name="date_start"
+                    className="w-10/16 control rounded-md border border-gray-200 p-2"
+                    value={formatDateForInput(formData.date_start)} // Преобразуем дату в нужный формат
+                    onChange={(e) => {
+                      // console.log('New date_start:', formData.date_start);
+                      setFormData((prev) => ({ ...prev, date_start: new Date(e.target.value), }));
+                    }}
+                  />
+                </div>
+                <div id="date_start-error" aria-live="polite" aria-atomic="true">
+                  {errors?.date_start &&
+                    errors.date_start._errors.map((error: string) => (
+                      <p className="mt-2 text-xs text-red-500" key={error}>
+                        {error}
+                      </p>
+                    ))}
+                </div>
+              </div>
+              {/* date_end */}
+              <div className="flex-col">
+                <div className="flex justify-between mt-1">
+                  <label
+                    htmlFor="date_end"
+                    className="w-4/8 text-sm text-blue-900 font-medium flex items-center p-2">
+                    Дата окончания действия:
+                  </label>
+                  <input
+                    id="date_end"
+                    type="date"
+                    name="date_end"
+                    className="w-10/16 control rounded-md border border-gray-200 p-2"
+                    value={formatDateForInput(formData.date_end)} // Преобразуем дату в нужный формат
+                    onChange={(e) => {
+                      // console.log('New date_end:', formData.date_end);
+                      setFormData((prev) => ({ ...prev, date_end: new Date(e.target.value), }));
+                    }}
+                  />
+                </div>
+                <div id="date_end-error" aria-live="polite" aria-atomic="true">
+                  {errors?.date_end &&
+                    errors.date_end._errors.map((error: string) => (
+                      <p className="mt-2 text-xs text-red-500" key={error}>
+                        {error}
+                      </p>
+                    ))}
+                </div>
+              </div>
+              {/* section_name */}
+              <div className="flex-col">
+                <div className="flex justify-between mt-1">
+                  <label
+                    htmlFor="section_name"
+                    className="w-2/8 text-sm text-blue-900 font-medium flex items-center p-2">
+                    Раздел:
+                  </label>
+                  <input
+                    id="section_name"
+                    type="text"
+                    name="section_name"
+                    className="w-13/16 pointer-events-none control rounded-md border border-gray-200 p-2"
+                    value={formData.section_name}
+                    readOnly
+                    onChange={(e) => setFormData((prev) => ({ ...prev, section_name: e.target.value, }))}
+                  />
+                  <BtnSectionsRef sections={props.sections} handleSelectSection={handleSelectSection} />
+                </div>
+                <div id="section_name-error" aria-live="polite" aria-atomic="true">
+                  {errors?.section_name &&
+                    errors.section_name._errors.map((error: string) => (
+                      <p className="mt-2 text-xs text-red-500" key={error}>
+                        {error}
+                      </p>
+                    ))}
+                </div>
+              </div>
             </div>
           </div>
-          {/* schedule_owner_name */}
-          <div className="flex-col">
-            <div className="flex justify-between mt-1">
-              <label
-                htmlFor="schedule_owner_name"
-                className="w-3/8 text-sm text-blue-900 font-medium flex items-center p-2">
-                Владелец плана:
-              </label>
-              <input
-                id="schedule_owner_name"
-                type="text"
-                name="schedule_owner_name"
-                className="w-11/16 pointer-events-none control rounded-md border border-gray-200 p-2"
-                value={formData.schedule_owner_name}
-                readOnly
-                onChange={(e) => setFormData((prev) => ({ ...prev, schedule_owner_name: e.target.value, }))}
-              />
-              <BtnLegalEntitiesRef
-                legalEntities={props.legalEntities}
-                handleSelectLE={handleSelectOwner}
-                elementIdPrefix="schedule_owner_name_"
-              />
-            </div>
-            <div id="schedule_owner_name-error" aria-live="polite" aria-atomic="true">
-              {errors?.schedule_owner_name &&
-                errors.schedule_owner_name._errors.map((error: string) => (
-                  <p className="mt-2 text-xs text-red-500" key={error}>
-                    {error}
-                  </p>
-                ))}
-            </div>
-          </div>
-          {/* premise_name */}
-          <div className="flex-col">
-            <div className="flex justify-between mt-1">
-              <label
-                htmlFor="premise_name"
-                className="w-2/8 text-sm text-blue-900 font-medium flex items-center p-2">
-                Помещение:
-              </label>
-              <input
-                id="premise_name"
-                type="text"
-                name="premise_name"
-                className="w-13/16 pointer-events-none control rounded-md border border-gray-200 p-2"
-                value={formData.premise_name}
-                readOnly
-                onChange={(e) => setFormData((prev) => ({ ...prev, premise_name: e.target.value, }))}
-              />
-              <BtnPremisesRef premises={props.premises} handleSelectPremise={handleSelectPremise} />
-            </div>
-            <div id="premise_name-error" aria-live="polite" aria-atomic="true">
-              {errors?.premise_name &&
-                errors.premise_name._errors.map((error: string) => (
-                  <p className="mt-2 text-xs text-red-500" key={error}>
-                    {error}
-                  </p>
-                ))}
-            </div>
-          </div>
-          {/* description */}
-          <div className="flex-col">
-            <div className="flex justify-between mt-1">
-              <label
-                htmlFor="description"
-                className="w-2/8 text-sm text-blue-900 font-medium flex items-center p-2">
-                Описание:
-              </label>
-              <input
-                id="description"
-                type="text"
-                name="description"
-                className="w-13/16 control rounded-md border border-gray-200 p-2"
-                value={formData.description}
-                onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value, }))}
-              />
-            </div>
-            <div id="description-error" aria-live="polite" aria-atomic="true">
-              {errors?.description &&
-                errors.description._errors.map((error: string) => (
-                  <p className="mt-2 text-xs text-red-500" key={error}>
-                    {error}
-                  </p>
-                ))}
-            </div>
-          </div>
-        </div>
-        {/* second column */}
-        <div className="flex flex-col gap-4 w-full md:w-1/2">
-          {/* date */}
-          <div className="flex-col">
-            <div className="flex justify-between mt-1">
-              <label
-                htmlFor="date"
-                className="w-3/8 text-sm text-blue-900 font-medium flex items-center p-2">
-                Дата принятия плана:
-              </label>
-              <input
-                id="date"
-                type="date"
-                name="date"
-                className="w-10/16 control rounded-md border border-gray-200 p-2"
-                value={formatDateForInput(formData.date)} // Преобразуем дату в нужный формат
-                onChange={(e) => {
-                  // console.log('New date:', formData.date);
-                  setFormData((prev) => ({ ...prev, date: new Date(e.target.value), }));
-                }}
-              />
-            </div>
-            <div id="date-error" aria-live="polite" aria-atomic="true">
-              {errors?.date &&
-                errors.date._errors.map((error: string) => (
-                  <p className="mt-2 text-xs text-red-500" key={error}>
-                    {error}
-                  </p>
-                ))}
-            </div>
-          </div>
-          {/* date_start */}
-          <div className="flex-col">
-            <div className="flex justify-between mt-1">
-              <label
-                htmlFor="date_start"
-                className="w-4/8 text-sm text-blue-900 font-medium flex items-center p-2">
-                Дата начала действия:
-              </label>
-              <input
-                id="date_start"
-                type="date"
-                name="date_start"
-                className="w-10/16 control rounded-md border border-gray-200 p-2"
-                value={formatDateForInput(formData.date_start)} // Преобразуем дату в нужный формат
-                onChange={(e) => {
-                  // console.log('New date_start:', formData.date_start);
-                  setFormData((prev) => ({ ...prev, date_start: new Date(e.target.value), }));
-                }}
-              />
-            </div>
-            <div id="date_start-error" aria-live="polite" aria-atomic="true">
-              {errors?.date_start &&
-                errors.date_start._errors.map((error: string) => (
-                  <p className="mt-2 text-xs text-red-500" key={error}>
-                    {error}
-                  </p>
-                ))}
-            </div>
-          </div>
-          {/* date_end */}
-          <div className="flex-col">
-            <div className="flex justify-between mt-1">
-              <label
-                htmlFor="date_end"
-                className="w-4/8 text-sm text-blue-900 font-medium flex items-center p-2">
-                Дата окончания действия:
-              </label>
-              <input
-                id="date_end"
-                type="date"
-                name="date_end"
-                className="w-10/16 control rounded-md border border-gray-200 p-2"
-                value={formatDateForInput(formData.date_end)} // Преобразуем дату в нужный формат
-                onChange={(e) => {
-                  // console.log('New date_end:', formData.date_end);
-                  setFormData((prev) => ({ ...prev, date_end: new Date(e.target.value), }));
-                }}
-              />
-            </div>
-            <div id="date_end-error" aria-live="polite" aria-atomic="true">
-              {errors?.date_end &&
-                errors.date_end._errors.map((error: string) => (
-                  <p className="mt-2 text-xs text-red-500" key={error}>
-                    {error}
-                  </p>
-                ))}
-            </div>
-          </div>
-          {/* section_name */}
-          <div className="flex-col">
-            <div className="flex justify-between mt-1">
-              <label
-                htmlFor="section_name"
-                className="w-2/8 text-sm text-blue-900 font-medium flex items-center p-2">
-                Раздел:
-              </label>
-              <input
-                id="section_name"
-                type="text"
-                name="section_name"
-                className="w-13/16 pointer-events-none control rounded-md border border-gray-200 p-2"
-                value={formData.section_name}
-                readOnly
-                onChange={(e) => setFormData((prev) => ({ ...prev, section_name: e.target.value, }))}
-              />
-              <BtnSectionsRef sections={props.sections} handleSelectSection={handleSelectSection} />
-            </div>
-            <div id="section_name-error" aria-live="polite" aria-atomic="true">
-              {errors?.section_name &&
-                errors.section_name._errors.map((error: string) => (
-                  <p className="mt-2 text-xs text-red-500" key={error}>
-                    {error}
-                  </p>
-                ))}
-            </div>
-          </div>
-        </div>
-      </div>
-      {/* button area */}
-      <div className="flex justify-between mt-4 mr-4">
-        <div className="flex w-full md:w-1/2">
-          <div className="w-full md:w-1/2">
-            <button
-              className="bg-blue-400 text-white w-full rounded-md border p-2 
+          {/* button area */}
+          <div className="flex justify-between mt-4 mr-4">
+            <div className="flex w-full md:w-1/2">
+              <div className="w-full md:w-1/2">
+                <button
+                  className="bg-blue-400 text-white w-full rounded-md border p-2 
               hover:bg-blue-100 hover:text-gray-500 cursor-pointer"
-              type="submit">
-              Сохранить
-            </button>
-          </div>
-          <div className="w-full md:w-1/2">
-            <Link href={"#"} >
-              <button
-                onClick={() => handleRedirectBack()}
-                className="bg-blue-400 text-white w-full rounded-md border p-2
+                  type="submit">
+                  Сохранить
+                </button>
+              </div>
+              <div className="w-full md:w-1/2">
+                <Link href={"#"} >
+                  <button
+                    onClick={() => handleRedirectBack()}
+                    className="bg-blue-400 text-white w-full rounded-md border p-2
                  hover:bg-blue-100 hover:text-gray-500 cursor-pointer"
-              >
-                Отмена
-              </button>
-            </Link>
+                  >
+                    Отмена
+                  </button>
+                </Link>
+              </div>
+              <div className="w-full md:w-1/2">
+                <button
+                  type="button"
+                  onClick={handleShowPDF}
+                  className="bg-green-400 text-white w-full rounded-md border p-2 hover:bg-green-100 hover:text-gray-500 cursor-pointer"
+                >
+                  Открыть PDF
+                </button>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
-    </form>
+        </form>
+      )}
+      {/* Кнопка закрытия PDF*/}
+      {
+        pdfUrl &&
+        <button
+          onClick={handleClosePDF}
+          style={{
+            position: 'absolute',
+            top: '50px',
+            right: '50px',
+            padding: '5px 10px',
+            background: 'red',
+            color: 'white',
+            border: 'none',
+            borderRadius: '5px',
+            cursor: 'pointer',
+          }}
+        >
+          Закрыть PDF
+        </button>
+      }
+      {/* Отображение PDF в iframe */}
+      {pdfUrl && (
+        <iframe
+          src={pdfUrl}
+          style={{
+            width: '100%',
+            height: '1200px',
+            border: '2px solid red', // Временная граница для отладки
+            marginTop: '20px',
+          }}
+          title="PDF Preview"
+        />
+      )}
+    </div>
   );
 }

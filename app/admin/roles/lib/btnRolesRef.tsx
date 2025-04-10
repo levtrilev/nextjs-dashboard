@@ -32,7 +32,7 @@ export default function IBtnRolesRef(props: IBtnRolesRefProps) {
   const closeModal = () => {
     setModal(false);
   };
-
+  const [term, setTerm] = useState<string>("");
   return (
     <div>
       <button
@@ -46,6 +46,8 @@ export default function IBtnRolesRef(props: IBtnRolesRefProps) {
         roles={props.roles} 
         handleSelectRole={props.handleSelectRole}
         closeModal={closeModal}
+        setTerm={setTerm}
+        term={term}
         />
 
         {/* buttons */}

@@ -31,7 +31,6 @@ export default function BtnLegalEntitiesRef(props: IBtnLegalEntitiesRefProps) {
     setModal(false);
   };
   const [term, setTerm] = useState<string>("");
-
   return (
     <div>
       <button
