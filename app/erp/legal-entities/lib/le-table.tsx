@@ -32,40 +32,7 @@ export default async function LegalEntitiesTable({
         <div className="overflow-x-auto">
           <div className="inline-block min-w-full align-middle">
             <div className="overflow-hidden rounded-md bg-gray-50 p-2 md:pt-0">
-              <div className="md:hidden">
-                {legalEntities?.map((legalEntity) => (
-                  <div
-                    key={legalEntity.id}
-                    className="mb-2 w-full rounded-md bg-white p-4"
-                  >
-                    <div className="flex items-center justify-between border-b pb-4">
-                      <div>
-                        <div className="mb-2 flex items-center">
-                          <div className="flex items-center gap-3">
-                            <p>{legalEntity.name}</p>
-                          </div>
-                        </div>
-                        <p className="text-sm text-gray-500">
-                          {legalEntity.email}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex w-full items-center justify-between border-b py-5">
-                      <div className="flex w-1/2 flex-col">
-                        <p className="text-xs">Address</p>
-                        <p className="font-medium">{legalEntity.address_legal}</p>
-                      </div>
-                      <div className="flex w-1/2 flex-col">
-                        <p className="text-xs">Phone</p>
-                        <p className="font-medium">{legalEntity.phone}</p>
-                      </div>
-                    </div>
-                    <div className="pt-4 text-sm">
-                      <p>{legalEntity.inn} INN</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              {/* Desktop Table */}
               <table className="table-fixed hidden w-full rounded-md text-gray-900 md:table">
                 <thead className="rounded-md bg-gray-50 text-left text-sm font-normal">
                   <tr>
@@ -85,7 +52,7 @@ export default async function LegalEntitiesTable({
                       INN
                     </th>
                     <th scope="col" className="w-1/16 px-4 py-5 font-medium">
-                      
+
                     </th>
                   </tr>
                 </thead>
@@ -98,8 +65,8 @@ export default async function LegalEntitiesTable({
                         <div className="flex items-left gap-3">
                           {legalEntity.is_supplier ? <ChartPieIcon className="w-5" /> : <ChartBarIcon className="w-5" />}
                           <a
-                          href={"/erp/legal-entities/" + legalEntity.id + "/edit"}
-                          className="text-blue-800 underline"
+                            href={"/erp/legal-entities/" + legalEntity.id + "/edit"}
+                            className="text-blue-800 underline"
                           >{legalEntity.name.substring(0, 36)}</a>
                         </div>
                       </td>
@@ -126,6 +93,49 @@ export default async function LegalEntitiesTable({
                   ))}
                 </tbody>
               </table>
+
+
+              {/* Mobile Cards */}
+              <div className="block md:hidden">
+                {legalEntities.map((legalEntity) => (
+                  <div
+                    key={legalEntity.id}
+                    className="mb-4 rounded-lg bg-white p-4 shadow-sm"
+                  >
+                    <div className="flex items-center gap-3 mb-2">
+                      {legalEntity.is_supplier ? (
+                        <ChartPieIcon className="w-5" />
+                      ) : (
+                        <ChartBarIcon className="w-5" />
+                      )}
+                      <a
+                        href={"/erp/legal-entities/" + legalEntity.id + "/edit"}
+                        className="text-blue-800 underline"
+                      >
+                        {legalEntity.name.substring(0, 36)}
+                      </a>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-sm text-gray-600">
+                        <strong>Email:</strong> {legalEntity.email}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        <strong>Address:</strong> {legalEntity.address_legal}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        <strong>Phone:</strong> {legalEntity.phone}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        <strong>INN:</strong> {legalEntity.inn}
+                      </p>
+                    </div>
+                    <div className="mt-3 flex justify-end gap-3">
+                      <BtnDeleteLegalEntity id={legalEntity.id} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+
             </div>
           </div>
         </div>
@@ -133,3 +143,39 @@ export default async function LegalEntitiesTable({
     </div>
   );
 }
+
+
+// <div className="md:hidden">
+// {legalEntities?.map((legalEntity) => (
+//   <div
+//     key={legalEntity.id}
+//     className="mb-2 w-full rounded-md bg-white p-4"
+//   >
+//     <div className="flex items-center justify-between border-b pb-4">
+//       <div>
+//         <div className="mb-2 flex items-center">
+//           <div className="flex items-center gap-3">
+//             <p>{legalEntity.name}</p>
+//           </div>
+//         </div>
+//         <p className="text-sm text-gray-500">
+//           {legalEntity.email}
+//         </p>
+//       </div>
+//     </div>
+//     <div className="flex w-full items-center justify-between border-b py-5">
+//       <div className="flex w-1/2 flex-col">
+//         <p className="text-xs">Address</p>
+//         <p className="font-medium">{legalEntity.address_legal}</p>
+//       </div>
+//       <div className="flex w-1/2 flex-col">
+//         <p className="text-xs">Phone</p>
+//         <p className="font-medium">{legalEntity.phone}</p>
+//       </div>
+//     </div>
+//     <div className="pt-4 text-sm">
+//       <p>{legalEntity.inn} INN</p>
+//     </div>
+//   </div>
+// ))}
+// </div>

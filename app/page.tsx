@@ -24,7 +24,7 @@ export default function Page() {
           <p className={`${lusitana.className} text-xl text-gray-800 md:text-2xl md:leading-normal`}>
             <strong>Welcome to Next JS ERP</strong>
             <br />
-            Это демо-приложение для проекта{' '}
+            Это демо-приложение проекта{' '}
             <a href="https://github.com/levtrilev/nextjs-dashboard" className="text-blue-500">
               {"ERP-система с использованием React Server Components  "}
             </a>
@@ -64,15 +64,4 @@ export default function Page() {
   );
 }
 
-{/* <form
-action={async () => {
-  'use server';
-  await signOut();
-}}
->
-<button className="flex h-[48px] w-full grow items-center justify-center gap-2 rounded-md bg-gray-50 p-3 text-sm font-medium hover:bg-sky-100 hover:text-blue-600 md:flex-none md:justify-start md:p-2 md:px-3">
-  <PowerIcon className="w-6" />
-  <div className="hidden md:block">Sign Out</div>
-</button>
-</form> */}
 

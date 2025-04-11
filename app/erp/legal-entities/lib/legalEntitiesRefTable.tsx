@@ -80,33 +80,34 @@ export default function LegalEntitiesRefTable(props: ILegalEntitiesRefTableProps
                         </div>
                     </div>
                 </div>
-                {/* Список для маленьких экранов */}
-                <div className="block md:hidden">
+                {/* Версия для мобильных устройств */}
+                <div className="mt-4 block md:hidden">
                     <div className="max-h-[300px] overflow-y-auto rounded-md bg-gray-50 p-2">
                         {props.legalEntities
                             .filter((le) =>
-                                le.name.toLowerCase().includes(props.term.toLowerCase()) ||
-                                props.term.length === 0
+                                le.name.toLowerCase().includes(props.term.toLowerCase()) || props.term.length === 0
                             )
                             .map((le) => (
                                 <div
                                     key={le.id}
-                                    className="border-b border-gray-200 bg-white p-4 text-sm text-gray-900 last:border-b-0"
+                                    className="mb-2 rounded-md bg-white p-3 shadow-sm hover:bg-gray-50"
                                 >
-                                    <div className="font-medium text-black">
-                                        <a
-                                            onClick={(e) => {
-                                                props.handleSelectLE(le.id, le.name);
-                                                props.setTerm("");
-                                                props.closeModal();
-                                            }}
-                                            className="text-blue-800 underline cursor-pointer hover:text-blue-600"
-                                        >
-                                            {le.name.substring(0, 36)}
-                                        </a>
+                                    <div className="flex flex-col space-y-1">
+                                        <p className="text-sm font-medium text-gray-900">
+                                            <a
+                                                onClick={(e) => {
+                                                    props.handleSelectLE(le.id, le.name);
+                                                    props.setTerm("");
+                                                    props.closeModal();
+                                                }}
+                                                className="text-blue-800 underline cursor-pointer hover:text-blue-600"
+                                            >
+                                                {le.name.substring(0, 36)}
+                                            </a>
+                                        </p>
+                                        <p className="text-xs text-gray-500">{le.contact}</p>
+                                        <p className="text-xs text-gray-500">{le.email}</p>
                                     </div>
-                                    <div className="text-gray-500">{le.contact}</div>
-                                    <div className="text-gray-500">{le.email}</div>
                                 </div>
                             ))}
                     </div>

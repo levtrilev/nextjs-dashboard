@@ -90,7 +90,10 @@ export default function NavLinks() {
             {/* Submenu */}
             {activeMenu === link.name && subMenu.findIndex(obj => obj.mainItem === link.name) !== -1 && (
               <div ref={menuRef}
-                className="absolute left-60 top-full mt-2 w-48 rounded-md bg-white shadow-lg">
+                className="absolute left-0 top-full mt-2 w-48 rounded-md bg-white shadow-lg hover:bg-sky-100 hover:text-blue-600
+                  md:absolute md:left-60 md:top-full md:w-48 md:rounded-md md:shadow-lg
+                   sm:absolute sm:left-0 sm:top-0 sm:w-full sm:rounded-none sm:bg-gray-100 sm:shadow-none">
+                
                 <ul className="py-2">
                   {subMenu.map((item, index) => (link.name === item.mainItem &&
                     <li key={index}>
@@ -112,3 +115,16 @@ export default function NavLinks() {
     </>
   );
 }
+
+// className="absolute left-60 top-full mt-2 w-48 rounded-md bg-white shadow-lg">
+
+// className={`absolute left-60 top-full mt-2 w-48 rounded-md bg-white shadow-lg 
+//   md:absolute md:left-60 md:top-full md:w-48 
+//   sm:relative sm:left-0 sm:top-0 sm:w-full sm:rounded-none sm:bg-gray-100 sm:shadow-none`}
+
+{/* <div
+                className={`absolute top-full left-0 mt-2 w-48 rounded-md bg-white shadow-lg 
+                  md:absolute md:top-full md:left-0 md:w-48 md:rounded-md md:shadow-lg
+                  sm:relative sm:left-0 sm:top-0 sm:w-full sm:rounded-none sm:bg-gray-100 sm:shadow-none`}
+                style={{ left: `${menuPosition}px` }}
+              ></div> */}
