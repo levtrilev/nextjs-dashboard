@@ -1,48 +1,14 @@
-// legalEntities actions
-
 "use server";
-
 import { z } from "zod";
-import { sql } from "@vercel/postgres";
+import pool from "@/db"; // Импорт пула подключений
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { auth, signIn } from "@/auth";
 import { LegalEntity, LegalEntityForm } from "@/app/lib/definitions";
 
-// async function getCurrentSections(email: string): Promise<string | undefined> {
-//   if ( email === "" ) { return ""; }
-//   try {
-//     const user_sections = await sql<{id: string}>`    
-//     SELECT sections.id
-// FROM sections
-// WHERE sections.id = ANY (
-//     SELECT unnest(section_ids)
-//     FROM roles
-//     WHERE roles.id = ANY (
-//         SELECT unnest(role_ids)
-//         FROM users
-//         WHERE users.email = ${email}
-//     )
-// )
-//     `;
-//     // нужно вернуть значение как такое:
-//     // const current_sections = "{e21e9372-91c5-4856-a123-b6f3b53efc0f,05a57bc6-1dec-4c60-b430-f70166489422,fba0eac4-f2f8-497b-b15d-53c765eef16e}";
-//     const sections_id_array = user_sections.rows.map((section) => section.id);
-//     const sections_id_string = sections_id_array.join(",");
-//     return "{" + sections_id_string + "}";
-//   } catch (error) {
-//     console.error("Failed to fetch current_sections:", error);
-//     throw new Error("Failed to fetch current_sections.");
-//   }
-// }
-// const  session = await auth();
-// const email = session ? (session.user? session.user.email : "") : "";
-// const current_sections = await getCurrentSections(email as string);
-// console.log("current_sections: " + current_sections);
 const ITEMS_PER_PAGE = 8;
 
 //#region CreateLegalEntity
-
 export type LegalEntityState = {
   errors?: {
     name?: string[];
@@ -116,16 +82,15 @@ export async function createLegalEntity(
     region_id: formData.get("region_id"),
     section_id: formData.get("section_id"),
   });
-  // If form validation fails, return errors early. Otherwise, continue.
+
   if (!validatedFields.success) {
     console.log(validatedFields.error.flatten().fieldErrors);
-    console.log("section_id: " + formData.get("section_id"));
     return {
       errors: validatedFields.error.flatten().fieldErrors,
       message: "Неверные данные! Failed to Create newLegalEntity.",
     };
   }
-  // Prepare data for insertion into the database
+
   const {
     name,
     fullname,
@@ -140,41 +105,46 @@ export async function createLegalEntity(
     region_id,
     section_id,
   } = validatedFields.data;
-  // SELECT event_time_tz AT TIME ZONE 'Europe/Moscow' FROM example;
-  const date = new Date().toISOString(); //.split("T")[0]
-  // const is_customer = str_is_customer === "true" ? true : false;
-  // const is_supplier = str_is_supplier === "true" ? false : true;
 
+  const date = new Date().toISOString();
+  
   const session = await auth();
   const username = session?.user?.name;
+
   try {
-    await sql`
-      INSERT INTO legal_entities (name, fullname, inn, address_legal, phone, 
-      email, contact, is_customer, is_supplier, kpp, region_id, section_id, 
-      username, date)
-      VALUES (${name}, ${fullname}, ${inn}, ${address_legal}, ${phone}, ${email}, 
-      ${contact}, ${is_customer}, ${is_supplier}, ${kpp}, ${region_id}, ${section_id}, 
-      ${username}, ${date})
-    `;
+    await pool.query(
+      `INSERT INTO legal_entities (
+        name, fullname, inn, address_legal, phone, 
+        email, contact, is_customer, is_supplier, kpp, 
+        region_id, section_id, username, date
+      ) VALUES (
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14
+      )`,
+      [
+        name, fullname, inn, address_legal, phone, 
+        email, contact, is_customer, is_supplier, kpp, 
+        region_id, section_id, username, date
+      ]
+    );
   } catch (error) {
     console.error("Failed to create newLegalEntity:", error);
-    // throw new Error("Failed to create newLegalEntity.");
     return {
       message: "Database Error: Failed to Create newLegalEntity.",
-      // errors: undefined,
     };
   }
+
   revalidatePath("/erp/legal-entities");
   redirect("/erp/legal-entities");
 }
-
 //#endregion
 
 //#region Update Delete LegalEntity
-
 export async function deleteLegalEntity(id: string) {
   try {
-    await sql`DELETE FROM legal_entities WHERE id = ${id}`;
+    await pool.query(
+      `DELETE FROM legal_entities WHERE id = $1`,
+      [id]
+    );
   } catch (error) {
     console.error("Database Error, Failed to Delete LegaEntity:", error);
     throw new Error("Database Error: Failed to Delete LegaEntity");
@@ -183,73 +153,84 @@ export async function deleteLegalEntity(id: string) {
 }
 
 export async function updateLegalEntity(legalEntity: LegalEntity) {
-  const date = new Date().toISOString(); //.split("T")[0]
-  // const is_customer = str_is_customer === "true" ? true : false;
-  // const is_supplier = str_is_supplier === "true" ? true : false;
-
+  const date = new Date().toISOString();
+  
   const session = await auth();
   const username = session?.user?.name;
+
   try {
-    await sql`
-UPDATE legal_entities
-SET 
-    name = ${legalEntity.name},
-    fullname = ${legalEntity.fullname},
-    inn = ${legalEntity.inn},
-    address_legal = ${legalEntity.address_legal},
-    phone = ${legalEntity.phone},
-    email = ${legalEntity.email},
-    contact = ${legalEntity.contact},
-    is_customer = ${legalEntity.is_customer},
-    is_supplier = ${legalEntity.is_supplier},
-    kpp = ${legalEntity.kpp},
-    region_id = ${legalEntity.region_id},
-    section_id = ${legalEntity.section_id}, 
-    username = ${username},
-    date = ${date}
-WHERE id = ${legalEntity.id};
-    `;
-    // SET name = ${tenant.name}, active = ${tenant.active}, description = ${tenant.description}
+    await pool.query(
+      `UPDATE legal_entities
+       SET 
+         name = $1,
+         fullname = $2,
+         inn = $3,
+         address_legal = $4,
+         phone = $5,
+         email = $6,
+         contact = $7,
+         is_customer = $8,
+         is_supplier = $9,
+         kpp = $10,
+         region_id = $11,
+         section_id = $12, 
+         username = $13,
+         date = $14
+       WHERE id = $15`,
+      [
+        legalEntity.name,
+        legalEntity.fullname,
+        legalEntity.inn,
+        legalEntity.address_legal,
+        legalEntity.phone,
+        legalEntity.email,
+        legalEntity.contact,
+        legalEntity.is_customer,
+        legalEntity.is_supplier,
+        legalEntity.kpp,
+        legalEntity.region_id,
+        legalEntity.section_id,
+        username,
+        date,
+        legalEntity.id
+      ]
+    );
   } catch (error) {
     console.error("Failed to update legalEntity:", error);
     throw new Error("Failed to update legalEntity.");
   }
   revalidatePath("/erp/legal-entities");
 }
-
 //#endregion
 
 //#region LegalEntity
-
 export async function fetchLegalEntity(id: string, current_sections: string) {
   try {
-    const data = await sql<LegalEntity>`
-WITH your_legal_entities AS ( SELECT * FROM legal_entities where section_id = 
-ANY (${current_sections}::uuid[]))
+    const result = await pool.query<LegalEntity>(
+      `WITH your_legal_entities AS (
+         SELECT * FROM legal_entities 
+         WHERE section_id = ANY($1::uuid[])
+       )
+       SELECT
+         id,
+         name,
+         fullname,
+         inn,
+         address_legal,
+         phone,
+         email,
+         contact,
+         is_customer,
+         is_supplier,
+         kpp,
+         region_id,
+         section_id
+       FROM your_legal_entities
+       WHERE id = $2`,
+      [current_sections, id]
+    );
 
-      SELECT
-        id,
-        name,
-        fullname,
-        inn,
-        address_legal,
-        phone,
-        email,
-        contact,
-        is_customer,
-        is_supplier,
-        kpp,
-        region_id,
-        section_id
-      FROM your_legal_entities
-      WHERE id = ${id}
-    `;
-
-    const legalEntity = data.rows[0];
-    // после заполнения идентификаторов эти строки можно удалить
-    // if (!legalEntity.region_id) { legalEntity.region_id = ""; }
-    // if (!legalEntity.section_id) { legalEntity.section_id = ""; }
-    ////////////
+    const legalEntity = result.rows[0];
     return legalEntity;
   } catch (err) {
     console.error("Database Error:", err);
@@ -259,30 +240,31 @@ ANY (${current_sections}::uuid[]))
 
 export async function fetchLegalEntities(current_sections: string) {
   try {
-    const data = await sql<LegalEntity>`
-    WITH your_legal_entities AS ( SELECT * FROM legal_entities where section_id = 
-      ANY (${current_sections}::uuid[]))
+    const result = await pool.query<LegalEntity>(
+      `WITH your_legal_entities AS (
+         SELECT * FROM legal_entities 
+         WHERE section_id = ANY($1::uuid[])
+       )
+       SELECT
+         id,
+         name,
+         fullname,
+         inn,
+         address_legal,
+         phone,
+         email,
+         contact,
+         is_customer,
+         is_supplier,
+         kpp,
+         region_id,
+         section_id
+       FROM your_legal_entities
+       ORDER BY name ASC`,
+      [current_sections]
+    );
 
-      SELECT
-        id,
-        name,
-        fullname,
-        inn,
-        address_legal,
-        phone,
-        email,
-        contact,
-        is_customer,
-        is_supplier,
-        kpp,
-        region_id,
-        section_id
-      FROM your_legal_entities
-      ORDER BY name ASC
-    `;
-
-    const legalEntities = data.rows;
-    return legalEntities;
+    return result.rows;
   } catch (err) {
     console.error("Database Error:", err);
     throw new Error("Failed to fetch all legal_entities.");
@@ -295,40 +277,42 @@ export async function fetchFilteredLegalEntities(
   current_sections: string
 ) {
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
-
+  
   try {
-    const legal_entities = await sql<LegalEntity>`
-    WITH your_legal_entities AS ( SELECT * FROM legal_entities where section_id = 
-      ANY (${current_sections}::uuid[]))
+    const result = await pool.query<LegalEntity>(
+      `WITH your_legal_entities AS (
+         SELECT * FROM legal_entities 
+         WHERE section_id = ANY($1::uuid[])
+       )
+       SELECT
+         id,
+         name,
+         fullname,
+         inn,
+         address_legal,
+         phone,
+         email,
+         contact,
+         is_customer,
+         is_supplier,
+         kpp,
+         region_id,
+         section_id
+       FROM your_legal_entities legal_entities
+       WHERE
+         legal_entities.name ILIKE $2 OR
+         legal_entities.email ILIKE $2 OR
+         legal_entities.fullname ILIKE $2 OR
+         legal_entities.address_legal ILIKE $2 OR
+         legal_entities.phone ILIKE $2 OR
+         legal_entities.inn ILIKE $2 OR
+         legal_entities.contact ILIKE $2
+       ORDER BY name ASC
+       LIMIT $3 OFFSET $4`,
+      [current_sections, `%${query}%`, ITEMS_PER_PAGE, offset]
+    ) as {rows: LegalEntity[]};
 
-      SELECT
-        id,
-        name,
-        fullname,
-        inn,
-        address_legal,
-        phone,
-        email,
-        contact,
-        is_customer,
-        is_supplier,
-        kpp,
-        region_id,
-        section_id
-      FROM your_legal_entities legal_entities
-      WHERE
-        legal_entities.name ILIKE ${`%${query}%`} OR
-        legal_entities.email ILIKE ${`%${query}%`} OR
-        legal_entities.fullname ILIKE ${`%${query}%`} OR
-        legal_entities.address_legal ILIKE ${`%${query}%`} OR
-        legal_entities.phone ILIKE ${`%${query}%`} OR
-        legal_entities.inn ILIKE ${`%${query}%`} OR
-        legal_entities.contact ILIKE ${`%${query}%`}
-      ORDER BY name ASC
-      LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
-    `;
-
-    return legal_entities.rows;
+    return result.rows;
   } catch (error) {
     console.error("Database Error:", error);
     throw new Error("Failed to fetch Legal Entities.");
@@ -337,23 +321,25 @@ export async function fetchFilteredLegalEntities(
 
 export async function fetchLegalEntitiesPages(query: string, current_sections: string) {
   try {
-    const count = await sql`
-    WITH your_legal_entities AS ( SELECT * FROM legal_entities where section_id = 
-      ANY (${current_sections}::uuid[]))
-    
-    SELECT COUNT(*)
-    FROM your_legal_entities legal_entities
-    WHERE
-        legal_entities.name ILIKE ${`%${query}%`} OR
-        legal_entities.email ILIKE ${`%${query}%`} OR
-        legal_entities.fullname ILIKE ${`%${query}%`} OR
-        legal_entities.address_legal ILIKE ${`%${query}%`} OR
-        legal_entities.phone ILIKE ${`%${query}%`} OR
-        legal_entities.inn ILIKE ${`%${query}%`} OR
-        legal_entities.contact ILIKE ${`%${query}%`}
-  `;
+    const result = await pool.query(
+      `WITH your_legal_entities AS (
+         SELECT * FROM legal_entities 
+         WHERE section_id = ANY($1::uuid[])
+       )
+       SELECT COUNT(*)
+       FROM your_legal_entities legal_entities
+       WHERE
+         legal_entities.name ILIKE $2 OR
+         legal_entities.email ILIKE $2 OR
+         legal_entities.fullname ILIKE $2 OR
+         legal_entities.address_legal ILIKE $2 OR
+         legal_entities.phone ILIKE $2 OR
+         legal_entities.inn ILIKE $2 OR
+         legal_entities.contact ILIKE $2`,
+      [current_sections, `%${query}%`]
+    );
 
-    const totalPages = Math.ceil(Number(count.rows[0].count) / ITEMS_PER_PAGE);
+    const totalPages = Math.ceil(Number(result.rows[0].count) / ITEMS_PER_PAGE);
     return totalPages;
   } catch (error) {
     console.error("Database Error:", error);
@@ -363,40 +349,38 @@ export async function fetchLegalEntitiesPages(query: string, current_sections: s
 
 export async function fetchLegalEntityForm(id: string, current_sections: string) {
   try {
-    const data = await sql<LegalEntityForm>`
-    WITH your_legal_entities AS ( SELECT * FROM legal_entities where section_id = 
-      ANY (${current_sections}::uuid[]))
+    const result = await pool.query<LegalEntityForm>(
+      `WITH your_legal_entities AS (
+         SELECT * FROM legal_entities 
+         WHERE section_id = ANY($1::uuid[])
+       )
+       SELECT
+         le.id,
+         le.name,
+         le.fullname,
+         le.inn,
+         le.address_legal,
+         le.phone,
+         le.email,
+         le.contact,
+         le.is_customer,
+         le.is_supplier,
+         le.kpp,
+         le.region_id,
+         le.section_id,
+         r.name as region_name,
+         s.name as section_name
+       FROM your_legal_entities le 
+       LEFT JOIN regions r ON le.region_id = r.id
+       LEFT JOIN sections s ON le.section_id = s.id
+       WHERE le.id = $2`,
+      [current_sections, id]
+    );
 
-      SELECT
-        le.id,
-        le.name,
-        le.fullname,
-        le.inn,
-        le.address_legal,
-        le.phone,
-        le.email,
-        le.contact,
-        le.is_customer,
-        le.is_supplier,
-        le.kpp,
-        le.region_id,
-        le.section_id,
-        r.name as region_name,
-        s.name as section_name
-      FROM your_legal_entities le 
-      LEFT JOIN regions r ON le.region_id = r.id
-      LEFT JOIN sections s ON le.section_id = s.id
-      WHERE le.id = ${id}
-    `;
-
-    const legalEntity = data.rows[0];
-
-    return legalEntity;
+    return result.rows[0];
   } catch (err) {
     console.error("Database Error:", err);
     throw new Error("Failed to fetch legalEntity by id.");
   }
 }
-
-
 //#endregion

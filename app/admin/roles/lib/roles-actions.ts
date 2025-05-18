@@ -2,7 +2,7 @@
 
 "use server";
 import { Role, RoleForm } from "@/app/lib/definitions";
-import { sql } from "@vercel/postgres";
+import pool from "@/db"; // Импорт пула подключений
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -10,20 +10,19 @@ import { redirect } from "next/navigation";
 
 export async function fetchRoles() {
   try {
-    const data = await sql<Role>`
-      SELECT
+    const data = await pool.query<Role>(
+      `SELECT 
         id,
         tenant_id,
         name,
         section_ids,
         section_names,
-      COALESCE(description, '') AS description
+        COALESCE(description, '') AS description
       FROM roles
-      ORDER BY name ASC
-    `;
-
-    const roles = data.rows;
-    return roles;
+      ORDER BY name ASC`
+    );
+    
+    return data.rows;
   } catch (err) {
     console.error("Database Error:", err);
     throw new Error("Failed to fetch all roles.");
@@ -32,20 +31,20 @@ export async function fetchRoles() {
 
 export async function fetchRole(id: string) {
   try {
-    const data = await sql<Role>`
-      SELECT
+    const data = await pool.query<Role>(
+      `SELECT 
         id,
         name,
         tenant_id,
         section_ids,
         section_names,
-      COALESCE(description, '') AS description
+        COALESCE(description, '') AS description
       FROM roles
-      WHERE id = ${id}
-    `;
-
-    const role = data.rows[0];
-    return role;
+      WHERE id = $1`,
+      [id]
+    );
+    
+    return data.rows[0];
   } catch (err) {
     console.error("Database Error:", err);
     throw new Error("Failed to fetch role");
@@ -54,22 +53,22 @@ export async function fetchRole(id: string) {
 
 export async function fetchRoleForm(id: string) {
   try {
-    const data = await sql<RoleForm>`
-      SELECT
+    const data = await pool.query<RoleForm>(
+      `SELECT 
         r.id,
         r.name,
         r.tenant_id,
         r.section_ids,
         r.section_names,
         t.name as tenant_name,
-      COALESCE(r.description, '') AS description
+        COALESCE(r.description, '') AS description
       FROM roles r
       LEFT JOIN tenants t on r.tenant_id = t.id
-      WHERE r.id = ${id}
-    `;
-
-    const role = data.rows[0];
-    return role;
+      WHERE r.id = $1`,
+      [id]
+    );
+    
+    return data.rows[0];
   } catch (err) {
     console.error("Database Error:", err);
     throw new Error("Failed to fetch roleForm");
@@ -78,22 +77,21 @@ export async function fetchRoleForm(id: string) {
 
 export async function fetchRolesFormSuperadmin() {
   try {
-    const data = await sql<RoleForm>`
-      SELECT
+    const data = await pool.query<RoleForm>(
+      `SELECT 
         r.id,
         r.name,
         r.tenant_id,
         r.section_ids,
         array_to_string(r.section_names, ', ') AS section_names,
         t.name as tenant_name,
-      COALESCE(r.description, '') AS description
+        COALESCE(r.description, '') AS description
       FROM roles r
       LEFT JOIN tenants t on r.tenant_id = t.id
-      ORDER BY t.name
-    `;
-
-    const roles = data.rows;
-    return roles;
+      ORDER BY t.name`
+    );
+    
+    return data.rows;
   } catch (err) {
     console.error("Database Error:", err);
     throw new Error("Failed to fetch all roles (Form)");
@@ -102,23 +100,23 @@ export async function fetchRolesFormSuperadmin() {
 
 export async function fetchRolesFormAdmin(tenant_id: string) {
   try {
-    const data = await sql<RoleForm>`
-      SELECT
+    const data = await pool.query<RoleForm>(
+      `SELECT 
         r.id,
         r.name,
         r.tenant_id,
         r.section_ids,
         array_to_string(r.section_names, ', ') AS section_names,
         t.name as tenant_name,
-      COALESCE(r.description, '') AS description
+        COALESCE(r.description, '') AS description
       FROM roles r
       LEFT JOIN tenants t on r.tenant_id = t.id
-      WHERE r.tenant_id = ${tenant_id}
-      ORDER BY t.name
-    `;
-
-    const roles = data.rows;
-    return roles;
+      WHERE r.tenant_id = $1
+      ORDER BY t.name`,
+      [tenant_id]
+    );
+    
+    return data.rows;
   } catch (err) {
     console.error("Database Error:", err);
     throw new Error("Failed to fetch all roles (Form)");
@@ -134,50 +132,49 @@ export async function createRole(
   section_ids: string,
   section_names: string
 ) {
-  // const newRole: Role = {
-  //   id: '',
-  //   tenant_id: tenant_id,
-  //   name: name,
-  //   description: description,
-  //   section_ids: '{}',
-  // };
   try {
-    await sql`
-        INSERT INTO roles (name, description, tenant_id, section_ids)
-        VALUES (${name}, ${description}, ${tenant_id}, ${section_ids})
-      `;
+    await pool.query(
+      `INSERT INTO roles (name, description, tenant_id, section_ids, section_names)
+       VALUES ($1, $2, $3, $4, $5)`,
+      [name, description, tenant_id, section_ids, section_names]
+    );
   } catch (error) {
     console.error("Failed to create role:", error);
     throw new Error("Failed to create role.");
   }
+  
   revalidatePath("/admin/roles");
-  // redirect("/admin/roles");
 }
 
 export async function updateRole(role: Role) {
-  // console.log("at updateRole: role.section_ids: ", role.section_ids);
   try {
-    await sql`
-        UPDATE roles
-        SET name = ${role.name}, description = ${role.description}, tenant_id = ${role.tenant_id}
-        , section_ids = ${role.section_ids}, section_names = ${role.section_names}
-        WHERE id = ${role.id}
-      `;
+    await pool.query(
+      `UPDATE roles
+       SET name = $1, description = $2, tenant_id = $3,
+           section_ids = $4, section_names = $5
+       WHERE id = $6`,
+      [role.name, role.description, role.tenant_id, role.section_ids, role.section_names, role.id]
+    );
   } catch (error) {
     console.error("Failed to update role:", error);
     throw new Error("Failed to update role.");
   }
+  
   revalidatePath("/admin/roles");
   redirect("/admin/roles");
 }
 
 export async function deleteRole(id: string) {
   try {
-    await sql`DELETE FROM roles WHERE id = ${id}`;
+    await pool.query(
+      `DELETE FROM roles WHERE id = $1`,
+      [id]
+    );
   } catch (error) {
     console.error("Database Error, Failed to delete role:", error);
     throw new Error("Database Error: Failed to delete role");
   }
+  
   revalidatePath("/admin/roles");
 }
 //#endregion

@@ -2,7 +2,7 @@
 
 "use server";
 import { Section, SectionForm } from "@/app/lib/definitions";
-import { sql } from "@vercel/postgres";
+import pool from "@/db"; // Импорт пула
 import { revalidatePath } from "next/cache";
 
 //#region Section
@@ -13,10 +13,10 @@ export async function createSection(name: string, tenant_id: string) {
     tenant_id: tenant_id,
   };
   try {
-    await sql`
+    await pool.query(`
         INSERT INTO sections (name, tenant_id)
-        VALUES (${newSection.name}, ${newSection.tenant_id})
-      `;
+        VALUES ($1, $2)
+      `, [newSection.name, newSection.tenant_id]); // Параметры $1, $2
   } catch (error) {
     console.error("Failed to create section:", error);
     throw new Error("Failed to create section.");
@@ -26,11 +26,11 @@ export async function createSection(name: string, tenant_id: string) {
 
 export async function updateSection(section: Section) {
   try {
-    await sql`
+    await pool.query(`
         UPDATE sections
-        SET name = ${section.name}, tenant_id = ${section.tenant_id}
-        WHERE id = ${section.id}
-      `;
+        SET name = $1, tenant_id = $2
+        WHERE id = $3
+      `, [section.name, section.tenant_id, section.id]); // Параметры $1-$3
   } catch (error) {
     console.error("Failed to update section:", error);
     throw new Error("Failed to update section.");
@@ -39,64 +39,64 @@ export async function updateSection(section: Section) {
 }
 
 export async function deleteSection(name: string, tenantId: string) {
-  // const id = '5bce9a5e-73b8-40e1-b8e5-c681b0ef2c2b';
   try {
-    await sql`DELETE FROM sections WHERE name = ${name} AND tenant_id = ${tenantId}`;
+    await pool.query(`
+      DELETE FROM sections 
+      WHERE name = $1 AND tenant_id = $2
+    `, [name, tenantId]); // Параметры $1, $2
   } catch (error) {
     console.error("Database Error, Failed to Delete Section:", error);
     throw new Error("Database Error: Failed to Delete Section");
   }
   revalidatePath("/admin");
-  // redirect("/admin");
 }
 
 export async function deleteSectionById(id: string) {
   try {
-    await sql`DELETE FROM sections WHERE id = ${id}`;
+    await pool.query(`
+      DELETE FROM sections 
+      WHERE id = $1
+    `, [id]); // Параметр $1
   } catch (error) {
     console.error("Database Error, Failed to Delete Section by id:", error);
     throw new Error("Database Error: Failed to Delete Section by id");
   }
   revalidatePath("/admin");
-  // redirect("/admin");
 }
 //#endregion
 
 export async function fetchSections_deprecated() {
   try {
-    const data = await sql<Section>`
-              SELECT
-          s.id as id,
-          s.name as name,
-          s.tenant_id as tenant_id
-        FROM sections s 
-        ORDER BY name ASC
-      `;
+    const result = await pool.query<Section>(`
+      SELECT
+        s.id as id,
+        s.name as name,
+        s.tenant_id as tenant_id
+      FROM sections s 
+      ORDER BY name ASC
+    `); // Простой SELECT без параметров
 
-    const sections = data.rows;
-    return sections;
+    return result.rows;
   } catch (err) {
     console.error("Database Error:", err);
     throw new Error("Failed to fetch all sections.");
   }
 }
 
-
 export async function fetchSectionsFormSuperadmin() {
   try {
+    const result = await pool.query<SectionForm>(`
+      SELECT
+        s.id as id,
+        s.name as name,
+        s.tenant_id as tenant_id,
+        t.name as tenant_name
+      FROM sections s 
+      LEFT JOIN tenants t ON s.tenant_id = t.id
+      ORDER BY tenant_name ASC
+    `); // Простой JOIN без параметров
 
-    const data = await sql<SectionForm>`
-        SELECT
-          s.id as id,
-          s.name as name,
-          s.tenant_id as tenant_id,
-          t.name as tenant_name
-        FROM sections s LEFT JOIN tenants t ON s.tenant_id = t.id
-        ORDER BY tenant_name ASC
-      `;
-
-    const sections = data.rows;
-    return sections;
+    return result.rows;
   } catch (err) {
     console.error("Database Error:", err);
     throw new Error("Failed to fetch all sections with fetchSectionsForm.");
@@ -105,41 +105,40 @@ export async function fetchSectionsFormSuperadmin() {
 
 export async function fetchSectionsFormAdmin(tenant_id: string) {
   try {
+    const result = await pool.query<SectionForm>(`
+      SELECT
+        s.id as id,
+        s.name as name,
+        s.tenant_id as tenant_id,
+        t.name as tenant_name
+      FROM sections s 
+      LEFT JOIN tenants t ON s.tenant_id = t.id
+      WHERE s.tenant_id = $1
+      ORDER BY tenant_name ASC
+    `, [tenant_id]); // Параметр $1
 
-    const data = await sql<SectionForm>`
-        SELECT
-          s.id as id,
-          s.name as name,
-          s.tenant_id as tenant_id,
-          t.name as tenant_name
-        FROM sections s LEFT JOIN tenants t ON s.tenant_id = t.id
-        WHERE s.tenant_id = ${tenant_id}
-        ORDER BY tenant_name ASC
-      `;
-
-    const sections = data.rows;
-    return sections;
+    return result.rows;
   } catch (err) {
     console.error("Database Error:", err);
     throw new Error("Failed to fetch all sections with fetchSectionsForm.");
   }
 }
+
 export async function fetchSectionsForm(current_sections: string) {
   try {
+    const result = await pool.query<SectionForm>(`
+      SELECT
+        s.id as id,
+        s.name as name,
+        s.tenant_id as tenant_id,
+        t.name as tenant_name
+      FROM sections s 
+      LEFT JOIN tenants t ON s.tenant_id = t.id
+      WHERE s.id = ANY ($1::uuid[])
+      ORDER BY tenant_name ASC
+    `, [current_sections]); // Параметр $1 с кастом
 
-    const data = await sql<SectionForm>`
-        SELECT
-          s.id as id,
-          s.name as name,
-          s.tenant_id as tenant_id,
-          t.name as tenant_name
-        FROM sections s LEFT JOIN tenants t ON s.tenant_id = t.id
-        WHERE s.id = ANY (${current_sections}::uuid[])
-        ORDER BY tenant_name ASC
-      `;
-
-    const sections = data.rows;
-    return sections;
+    return result.rows;
   } catch (err) {
     console.error("Database Error:", err);
     throw new Error("Failed to fetch all sections with fetchSectionsForm.");
@@ -148,18 +147,18 @@ export async function fetchSectionsForm(current_sections: string) {
 
 export async function fetchSectionById(id: string) {
   try {
-    const data = await sql<SectionForm>`
-        SELECT
-          s.id as id,
-          s.name as name,
-          s.tenant_id as tenant_id,
-          t.name as tenant_name
-        FROM sections s JOIN tenants t ON s.tenant_id = t.id
-        WHERE s.id = ${id}
-      `;
+    const result = await pool.query<SectionForm>(`
+      SELECT
+        s.id as id,
+        s.name as name,
+        s.tenant_id as tenant_id,
+        t.name as tenant_name
+      FROM sections s 
+      JOIN tenants t ON s.tenant_id = t.id
+      WHERE s.id = $1
+    `, [id]); // Параметр $1
 
-    const section = data.rows[0];
-    return section;
+    return result.rows[0];
   } catch (err) {
     console.error("Database Error:", err);
     throw new Error("Failed to fetch section by id.");

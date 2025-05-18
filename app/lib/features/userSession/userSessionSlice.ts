@@ -2,7 +2,6 @@ import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { createAppSlice } from "@/app/lib/createAppSlice";
 import { auth } from "@/auth";
 import { getCurrentSections } from "../../actions";
-// import { fetchTenants } from "./actions";
 
 export interface UserSessionState {
   userName: string;

@@ -1,13 +1,14 @@
-import { sql } from "@vercel/postgres";
+// import { sql } from "@vercel/postgres";
+import pool from "@/db";
 import { User } from "@/app/lib/definitions";
 
 export async function UsersCount() {
   try {
-    const data = await sql<User>`
+    const data = await pool.query<User>(`
       SELECT
         *
       FROM users
-    `;
+    `);
     const user = data.rows[0];
     return <span>{user.id}</span>;
   } catch (err) {
