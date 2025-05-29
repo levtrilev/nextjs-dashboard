@@ -23,7 +23,7 @@ const links = [
     href: '/erp/invoices',
     icon: DocumentDuplicateIcon,
   },
-  
+
   { name: 'Справочники', href: '#', icon: BookOpenIcon },
   { name: 'Помещения', href: '#', icon: BuildingOfficeIcon }, //premise
   { name: 'Администрирование', href: '/admin', icon: UserGroupIcon },
@@ -38,6 +38,7 @@ const subMenu = [
   { mainItem: 'Справочники', name: 'Регионы', href: '/erp/regions' },
   { mainItem: 'Помещения', name: 'Помещения', href: '/erp/premises' },
   { mainItem: 'Помещения', name: 'Планы обслуживания', href: '/erp/task-schedules' },
+  { mainItem: 'Помещения', name: 'Задачи обслуживания', href: '/erp/tasks' },
   // { mainItem: 'Home', name: 'About', href: '/dashboard' },
   // { mainItem: 'Home', name: 'Contacts', href: '/dashboard' },
   // { mainItem: 'Home', name: 'Support', href: '/dashboard' },
@@ -93,7 +94,7 @@ export default function NavLinks() {
                 className="absolute left-0 top-full mt-2 w-48 rounded-md bg-white shadow-lg hover:bg-sky-100 hover:text-blue-600
                   md:absolute md:left-60 md:top-full md:w-48 md:rounded-md md:shadow-lg
                    sm:absolute sm:left-0 sm:top-0 sm:w-full sm:rounded-none sm:bg-gray-100 sm:shadow-none">
-                
+
                 <ul className="py-2">
                   {subMenu.map((item, index) => (link.name === item.mainItem &&
                     <li key={index}>

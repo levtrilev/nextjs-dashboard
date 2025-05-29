@@ -42,3 +42,38 @@
 26.03.25 При изменении в форме Роли поля Описание или изменении Организации не работает Сохранить 
  (работает, если поменять что-то в разделах)
 
+
+вот структура компонента для образца:
+/regions
+  page.tsx
+  /[id]
+    page.tsx
+    /edit
+      editForm.tsx
+      page.tsx
+  /create
+    create-form.tsx
+    page.tsx
+  /lib
+    btnRegionsRef.tsx
+    region-actions.ts
+    region-buttons.ts
+    region-table.tsx
+    regionsRefTable.tsx
+
+файл /regions/page.tsx :
+файл /regions/[id]/page.tsx :
+файл /regions/[id]/edit/editForm.tsx :
+файл /regions/[id]/edit/page.tsx :
+файл /regions/[id]/create/create-form.tsx :
+файл /regions/[id]/create/page.tsx :
+файл /regions/lib/btnRegionsRef.tsx :
+файл /regions/lib/region-actions.ts :
+файл /regions/lib/region-buttons.tsx :
+файл /regions/lib/region-table.tsx :
+файл /regions/lib/regionsRefTable.tsx :
+
+на основе предоставленного выше образца создай компонент (CRUD-приложение) для сущности (определена в definitioms.ts):
+
+строго следуй всем приемам и наименованиям, предоставленным в образце
+

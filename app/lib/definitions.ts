@@ -3,6 +3,31 @@
 
 import { DateTime } from "next-auth/providers/kakao";
 
+export type Task ={
+  id: string;
+  name: string;
+  date_start: Date | string;
+  date_end: Date | string;
+  task_schedule_id: string | null;
+  is_periodic: boolean;
+  period_days: number | null;
+  username?: string;
+  timestamptz?: string;
+  date_created?: Date;
+};
+export type TaskForm ={
+  id: string;
+  name: string;
+  date_start: Date | string;
+  date_end: Date | string;
+  task_schedule_id: string | null;
+  is_periodic: boolean;
+  period_days: number | null;
+  username?: string;
+  timestamptz?: string;
+  date_created?: Date;
+};
+
 export type TaskSchedule = {
   id: string;
   name: string;
@@ -34,8 +59,8 @@ export type TaskScheduleForm = {
   schedule_owner_name: string;
   section_name: string;
   premise_name: string;
+  // tasks: Task[];
 };
-
 
 export type Premise = {
   id: string;

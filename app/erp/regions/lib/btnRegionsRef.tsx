@@ -70,5 +70,3 @@ export default function BtnRegionsRef(props: IBtnRegionsRefProps) {
     </div>
   );
 }
-
-// export default BtnRefLegalEntity;

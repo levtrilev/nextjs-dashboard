@@ -10,7 +10,7 @@ const pool = new Pool({
   idleTimeoutMillis: 300000, // время ожидания перед закрытием неактивного соединения
 });
 
-
+//   sslmode: require,
 
 
 export default pool;

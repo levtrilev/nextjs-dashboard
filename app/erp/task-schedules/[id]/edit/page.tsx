@@ -15,6 +15,7 @@ import { getCurrentSections } from "@/app/lib/actions";
 import { fetchPremiseForm, fetchPremisesForm } from "@/app/erp/premises/lib/premisesActions";
 import TaskScheduleEditForm from "./editForm";
 import { fetchTaskScheduleForm } from "../../lib/taskSchedulesActions";
+import { fetchScheduleTasksForm, fetchTasksForm } from "@/app/erp/tasks/lib/task-actions";
 
 async function Page(props: { params: Promise<{ id: string }> }) {
 
@@ -27,23 +28,25 @@ async function Page(props: { params: Promise<{ id: string }> }) {
     const current_sections = await getCurrentSections(email as string);
 
     const taskSchedule: TaskScheduleForm = await fetchTaskScheduleForm(id, current_sections);
-        if (!taskSchedule) {
-            return (<h3 className="text-xs font-medium text-gray-400">Not found! id: {id}</h3>);
-        }
+    if (!taskSchedule) {
+        return (<h3 className="text-xs font-medium text-gray-400">Not found! id: {id}</h3>);
+    }
     const sections = await fetchSectionsForm(current_sections);
     const premises = await fetchPremisesForm(current_sections);
     const legalEntities = await fetchLegalEntities(current_sections);
+    const tasks = await fetchScheduleTasksForm(id);
     return (
         <div className="w-full">
             <div className="flex w-full items-center justify-between">
                 <h1 className={`${lusitana.className} text-2xl`}>План обслуживания</h1>
             </div>
             <h3 className="text-xs font-medium text-gray-400">id: {id}</h3>
-            <TaskScheduleEditForm 
-            taskSchedule={taskSchedule} 
-            sections={sections} 
-            premises={premises}
-            legalEntities={legalEntities}
+            <TaskScheduleEditForm
+                taskSchedule={taskSchedule}
+                sections={sections}
+                premises={premises}
+                legalEntities={legalEntities}
+                tasks={tasks}
             />
         </div>
 

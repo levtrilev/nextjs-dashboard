@@ -12,12 +12,13 @@ import Breadcrumbs from '@/app/ui/invoices/breadcrumbs';
 import { DateTime } from "next-auth/providers/kakao";
 import { formatDateForInput } from "@/app/lib/utils";
 import { fetchPremisesForm } from "../../premises/lib/premisesActions";
+import { fetchTasksForm } from "../../tasks/lib/task-actions";
 
 export default async function Page() {
   const session = await auth();
   const email = session ? (session.user ? session.user.email : "") : "";
   const current_sections = await getCurrentSections(email as string);
-
+  const tasks = await fetchTasksForm();
   const taskSchedule: TaskScheduleForm = {
     id: "",
     name: "",
@@ -60,6 +61,7 @@ export default async function Page() {
         sections={sections}
         premises={premises}
         legalEntities={legalEntities}
+        tasks={tasks}
       />
     </main>
   );

@@ -3,7 +3,7 @@
 
 'use client';
 import { useState } from "react";
-import { LegalEntity, TaskScheduleForm, RegionForm, SectionForm, PremiseForm, TaskForm } from "@/app/lib/definitions";
+import { LegalEntity, TaskScheduleForm, RegionForm, SectionForm, PremiseForm } from "@/app/lib/definitions";
 import { createTaskSchedule, updateTaskSchedule } from "../../lib/taskSchedulesActions";
 import Link from "next/link";
 import { formatDateForInput } from "@/app/lib/utils";
@@ -22,7 +22,6 @@ interface IEditFormProps {
   sections: SectionForm[],
   premises: PremiseForm[],
   legalEntities: LegalEntity[],
-  tasks: TaskForm[],
 }
 
 const TaskScheduleFormSchemaFull = z.object({
@@ -67,10 +66,6 @@ export default function TaskScheduleEditForm(props: IEditFormProps) {
   const [showErrors, setShowErrors] = useState(false);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [formData, setFormData] = useState<FormData>(props.taskSchedule);
-  // const [formData, setFormData] = useState<FormData>({
-  //   ...props.taskSchedule,
-  //   tasks: props.taskSchedule.tasks || [],
-  // });
 
   const validate = () => {
     const res = TaskScheduleFormSchema.safeParse({
@@ -99,6 +94,9 @@ export default function TaskScheduleEditForm(props: IEditFormProps) {
     }
 
   }
+  const handleDeleteTask = (id: string) => {
+    alert("Удаление задачи: " + id);
+  }
   const handleSelectSection = (new_section_id: string, new_section_name: string) => {
     setFormData((prev) => ({
       ...prev,
@@ -120,9 +118,6 @@ export default function TaskScheduleEditForm(props: IEditFormProps) {
       schedule_owner_name: new_le_name,
     }));
   };
-  const handleDeleteTask = (id: string) => {
-    alert("Удаление задачи: " + id);
-  }
   const handleRedirectBack = () => {
     window.history.back(); // Возвращает пользователя на предыдущую страницу
   };
@@ -156,31 +151,31 @@ export default function TaskScheduleEditForm(props: IEditFormProps) {
 
   const errors = showErrors ? validate() : undefined;
 
-  // const tasks = [
-  //   {
-  //     id: "222ed6f8-1eb0-4759-9e62-633d0e1dfa88",
-  //     name: "Задача 1",
-  //     is_periodic: true,
-  //     task_schedule_id: "adc189c1-d34a-4175-983a-217b61196a4c",
-  //     date_start: new Date(),
-  //     date_end: new Date(),
-  //     username: "admin",
-  //     date_created: new Date(),
-  //     timestamptz: new Date().toISOString(),
-  //   },
-  //   {
-  //     id: "c7f45051-4cae-4791-bc15-e4101b6e7113",
-  //     name: "Задача 2",
-  //     is_periodic: false,
-  //     task_schedule_id: "adc189c1-d34a-4175-983a-217b61196a4c",
-  //     date_start: new Date(),
-  //     date_end: new Date(),
-  //     username: "admin",
-  //     date_created: new Date(),
-  //     timestamptz: new Date().toISOString(),
-  //   },
-  // ];
-  const tasks = props.tasks
+  const tasks = [
+    {
+      id: "1",
+      name: "Задача 1",
+      is_periodic: true,
+      task_schedule_id: "222ed6f8-1eb0-4759-9e62-633d0e1dfa88",
+      date_start: new Date(),
+      date_end: new Date(),
+      username: "admin",
+      date_created: new Date(),
+      timestamptz: new Date().toISOString(),
+    },
+    {
+      id: "2",
+      name: "Задача 2",
+      is_periodic: false,
+      task_schedule_id: "222ed6f8-1eb0-4759-9e62-633d0e1dfa88",
+      date_start: new Date(),
+      date_end: new Date(),
+      username: "admin",
+      date_created: new Date(),
+      timestamptz: new Date().toISOString(),
+    },
+  ];
+
   return (
     <div>
       {!pdfUrl && (
@@ -249,6 +244,7 @@ export default function TaskScheduleEditForm(props: IEditFormProps) {
 
             </div>
           </div>
+
           {/* table part */}
           <div id="table_part" className="mt-2">
             <div className="flex flex-row gap-4 w-full md:w-1/2">
@@ -281,7 +277,7 @@ export default function TaskScheduleEditForm(props: IEditFormProps) {
                       pr-3 text-sm text-black group-first-of-type:rounded-md group-last-of-type:rounded-md sm:pl-6">
                         <div className="flex items-left gap-3">
                           <a
-                            href={"/erp/tasks/" + task.id + "/edit"}
+                            href={"/admin/sections/" + task.id + "/edit"}
                             className="text-blue-800 underline"
                           >{task.name.substring(0, 36)}</a>
                         </div>
@@ -305,6 +301,7 @@ export default function TaskScheduleEditForm(props: IEditFormProps) {
               </table>
             </div>
           </div>
+
 
           {/* button area */}
           <div className="flex justify-between mt-4 mr-4">
