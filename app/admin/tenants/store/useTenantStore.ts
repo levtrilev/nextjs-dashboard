@@ -1,8 +1,8 @@
 import { create, type StateCreator } from 'zustand';
 import { createJSONStorage, devtools, persist } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
-import { Tenant, User } from "@/app/lib/definitions";
-import { deleteTenant } from '../lib/tenants-actions';
+import { Tenant } from "@/app/lib/definitions";
+import { createTenant, deleteTenant } from '../lib/tenants-actions';
 // import { auth, getUser } from "@/auth";
 
 // const session = await auth();
@@ -19,9 +19,10 @@ interface IInitialState {
 
 interface IActions {
   fillTenants: (tenants: Tenant[]) => void;
-  crtTenant: (newTenant: Tenant) => void;
+  // addTenant: (newTenant: Tenant) => void;
+  addTenant: (name: string, description: string) => void;
   updTenant: (id: string, newTenant: Tenant) => void;
-  delTenant: (id: string) => void;
+  delTenant: (id: string, name: string) => void;
 }
 
 interface ITenantState extends IInitialState, IActions { }
@@ -49,19 +50,27 @@ const tenantStore: StateCreator<
   //   const items = isSuperadmin ? await fetchTenantsSuperadmin() : await fetchTenantsAdmin(tenant_id);
   //   set({ tenants: items }, false, "fetchTenants/success");
   // },
-  crtTenant: (newTenant: Tenant) => {
-
+  addTenant: async (name: string, description: string) => {
+    const newTenantId = await createTenant(name, description);
+    const newTenant: Tenant = { id: newTenantId, active: true, name: name, description: description };
+    set((state: ITenantState) => {
+      // const index = state.tenants.findIndex((tenant: Tenant) => tenant.id === id);
+      // if (index !== -1) {
+        state.tenants.push(newTenant);
+        // console.log("splice tenants index: " + index);
+      // }
+    }, false, "addTenant");
   },
   updTenant: (id: string, newTenant: Tenant) => { },
-  delTenant: (id: string) => {
-    deleteTenant(id);
+  delTenant: (id: string, name: string) => {
+    deleteTenant(name);
     set((state: ITenantState) => {
       const index = state.tenants.findIndex((tenant: Tenant) => tenant.id === id);
       if (index !== -1) {
         state.tenants.splice(index, 1);
         console.log("splice tenants index: " + index);
       }
-    }, false, "deleteTenant");
+    }, false, "delTenant");
   },
   // deleteTenant: (id: string) => {
   //   set(
@@ -104,6 +113,6 @@ const useTenantStore = create<ITenantState>()(
 
 export const useTenants = () => useTenantStore((state) => state.tenants);
 export const fillTenants = (tenants: Tenant[]) => useTenantStore.getState().fillTenants(tenants);
-export const crtTenant = (newTenant: Tenant) => useTenantStore.getState().crtTenant(newTenant);
+export const addTenant = (name: string, description: string) => useTenantStore.getState().addTenant(name, description);
 export const updTenant = (id: string, newTenant: Tenant) => useTenantStore.getState().updTenant(id, newTenant);
-export const delTenant = (id: string) => useTenantStore.getState().delTenant(id);
+export const delTenant = (id: string, name: string) => useTenantStore.getState().delTenant(id, name);

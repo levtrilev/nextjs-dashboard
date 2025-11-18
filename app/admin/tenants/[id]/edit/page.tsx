@@ -5,8 +5,8 @@ import InputForm from "./inputForm";
 import { fetchTenantById } from "../../lib/tenants-actions";
 import { Tenant, User } from "@/app/lib/definitions";
 import { lusitana } from "@/app/ui/fonts";
-import TenantsTestTable from "../../lib/TenantsTestTable";
 import { auth, getUser } from "@/auth";
+import TenantsTable from "../../lib/tenants-table";
 
 async function Page(props: { params: Promise<{ id: string }> }) {
     const session = await auth();
@@ -26,7 +26,7 @@ async function Page(props: { params: Promise<{ id: string }> }) {
             </div>
             <h3 className="text-xs font-medium text-gray-400">id: {id}</h3>
             <InputForm tenant={tenant} admin={ isAdmin || isSuperadmin } />
-            <TenantsTestTable />
+            {/* <TenantsTable tenants={tenants} superadmin={isSuperadmin} /> */}
         </div>
 
     );

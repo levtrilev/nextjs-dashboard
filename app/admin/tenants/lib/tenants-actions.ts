@@ -70,7 +70,7 @@ export async function fetchTenantById(id: string) {
 //#endregion
 
 //#region Tenants
-export async function createTenant(name: string, description: string) {
+export async function createTenant(name: string, description: string): Promise<string> {
   const newTenant: Tenant = {
     id: "",
     active: true,
@@ -78,13 +78,16 @@ export async function createTenant(name: string, description: string) {
     description: description,
   };
   try {
-    await pool.query(
+    const result = await pool.query(
       `
       INSERT INTO tenants (name, description)
       VALUES ($1, $2)
+      RETURNING id
       `,
       [newTenant.name, newTenant.description]
     );
+    newTenant.id = result.rows[0].id;
+    return (newTenant.id);
   } catch (error) {
     console.error("Failed to create tenant:", error);
     throw new Error("Failed to create tenant.");

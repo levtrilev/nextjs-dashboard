@@ -1,5 +1,4 @@
 import SideNav from '@/app/ui/sidenav';
-import { StoreProvider } from '../StoreProvider';
 
 //export const experimental_ppr = true;
 

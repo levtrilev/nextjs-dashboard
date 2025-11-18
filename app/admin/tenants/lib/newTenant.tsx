@@ -1,7 +1,8 @@
 'use client';
 import { useState } from 'react';
 import { PlusIcon } from '@heroicons/react/24/outline';
-import { createTenant } from './tenants-actions';
+// import { createTenant } from './tenants-actions';
+import { addTenant } from '../store/useTenantStore';
 
 export const NewTenant = () => {
 
@@ -16,7 +17,8 @@ export const NewTenant = () => {
   return (
     <div className="flex items-center p-4">
       <form
-        action={() => { createTenant(name, description); setName(''); setDescription('') }}
+        // action={() => { createTenant(name, description); setName(''); setDescription('') }}
+        action={() => { addTenant(name, description); setName(''); setDescription('') }}
         className="flex gap-2">
         <div className="flex-2 flex items-center">
           <input
