@@ -1,17 +1,16 @@
 'use client';
 
-import { TrashIcon } from '@heroicons/react/24/outline';
-import { FaceSmileIcon } from '@heroicons/react/20/solid';
 import { deleteTenant } from './tenants-actions';
 import { useState } from 'react';
 
 export default function DeleteTenant() {
-  const [tenantToDelete, changeTenantToDelete] = useState<string>("");
+  const [tenantToDelete, setTenantToDelete] = useState<string>("");
   function handleChangeName(event: any) {
-    changeTenantToDelete(event.target.value);
+    setTenantToDelete(event.target.value);
   }
   return (
     <div className="flex items-center p-4">
+      {/* <form action={() => {deleteTenant(tenantToDelete); fetchTenants()}} className="flex space-x-2"> */}
       <form action={() => deleteTenant(tenantToDelete)} className="flex space-x-2">
         <div className="flex-2">
           <input

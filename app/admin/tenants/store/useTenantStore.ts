@@ -1,0 +1,109 @@
+import { create, type StateCreator } from 'zustand';
+import { createJSONStorage, devtools, persist } from 'zustand/middleware';
+import { immer } from 'zustand/middleware/immer';
+import { Tenant, User } from "@/app/lib/definitions";
+import { deleteTenant } from '../lib/tenants-actions';
+// import { auth, getUser } from "@/auth";
+
+// const session = await auth();
+// const email = session ? (session.user ? session.user.email : "") : "";
+// // const current_sections = await getCurrentSections(email as string);
+// const user = await getUser(email as string) as User;
+// const isSuperadmin = user.is_superadmin;
+// const isAdmin = user.is_admin;
+const isSuperadmin = true;
+
+interface IInitialState {
+  tenants: Tenant[];
+}
+
+interface IActions {
+  fillTenants: (tenants: Tenant[]) => void;
+  crtTenant: (newTenant: Tenant) => void;
+  updTenant: (id: string, newTenant: Tenant) => void;
+  delTenant: (id: string) => void;
+}
+
+interface ITenantState extends IInitialState, IActions { }
+
+const initialState = {
+  tenants: [],
+}
+
+
+
+const tenantStore: StateCreator<
+  ITenantState,
+  [
+    ['zustand/immer', never],
+    ['zustand/devtools', never],
+    ['zustand/persist', unknown]
+  ]
+> = ((set) => ({
+  ...initialState,
+  fillTenants: async (tenants: Tenant[]) => {
+    set({ tenants: tenants }, false, "fillTenants");
+  },
+  // fetchTenants: async (tenant_id: string) => {
+  //   set({ isLoading: true }, false, "fetchTenants");
+  //   const items = isSuperadmin ? await fetchTenantsSuperadmin() : await fetchTenantsAdmin(tenant_id);
+  //   set({ tenants: items }, false, "fetchTenants/success");
+  // },
+  crtTenant: (newTenant: Tenant) => {
+
+  },
+  updTenant: (id: string, newTenant: Tenant) => { },
+  delTenant: (id: string) => {
+    deleteTenant(id);
+    set((state: ITenantState) => {
+      const index = state.tenants.findIndex((tenant: Tenant) => tenant.id === id);
+      if (index !== -1) {
+        state.tenants.splice(index, 1);
+        console.log("splice tenants index: " + index);
+      }
+    }, false, "deleteTenant");
+  },
+  // deleteTenant: (id: string) => {
+  //   set(
+  //     (state: ITodoState) => {
+  //       const todo = state.todos.find((todo) => todo.id === id);
+  //       if (todo) {
+  //         todo.completed = !todo.completed;
+  //       }
+  //     },
+  //     false,
+  //     "completeTodo"
+  //   );
+  // },
+  // deleteTodo: (id: number) => {
+  //   set(
+  //     (state: ITodoState) => {
+  //       const index = state.todos.findIndex((todo: ITodo) => todo.id === id);
+  //       if (index !== -1) {
+  //         state.todos.splice(index, 1);
+  //       }
+  //     },
+  //     false,
+  //     "deleteTodo"
+  //   );
+  // },
+}));
+
+const useTenantStore = create<ITenantState>()(
+  immer(
+    devtools(
+      persist(tenantStore,
+        {
+          name: 'tenant-storage',
+          storage: createJSONStorage(() => localStorage),
+          partialize: (state) => ({ tenants: state.tenants })
+        })
+    )
+  )
+);
+
+export const useTenants = () => useTenantStore((state) => state.tenants);
+export const fillTenants = (tenants: Tenant[]) => useTenantStore.getState().fillTenants(tenants);
+export const crtTenant = (newTenant: Tenant) => useTenantStore.getState().crtTenant(newTenant);
+export const updTenant = (id: string, newTenant: Tenant) => useTenantStore.getState().updTenant(id, newTenant);
+export const delTenant = (id: string) => useTenantStore.getState().delTenant(id);
