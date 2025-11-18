@@ -120,7 +120,7 @@ export async function deleteTenant(name: string) {
     );
   } catch (error) {
     console.error("Database Error, Failed to Delete Tenant:", error);
-    throw new Error("Database Error: Failed to Delete Tenant");
+    throw new Error("Database Error: Failed to Delete Tenant " + error);
   }
   revalidatePath("/admin");
 }

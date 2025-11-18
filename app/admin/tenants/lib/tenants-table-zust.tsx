@@ -3,11 +3,12 @@ import { formatDateToLocal } from "@/app/lib/utils";
 import dynamic from 'next/dynamic';
 import { Tenant } from '@/app/lib/definitions';
 import { BtnDeleteTenant, BtnEditTenantLink } from "./tenants-buttons";
-import { delTenant, fillTenants, useTenants } from "../store/useTenantStore";
-import { useEffect } from "react";
+import { delTenant, fillTenants, setIsMessageBoxOpen, useIsMessageBoxOpen, useMessageBoxText, useTenants } from "../store/useTenantStore";
+import { useEffect, useState } from "react";
 import { User } from "@/app/lib/definitions";
 import { deleteTenant } from "./tenants-actions";
 import { TrashIcon } from '@heroicons/react/24/outline';
+import MessageBoxOKCancel from "@/app/erp/tasks/lib/MessageBoxOKCancel";
 
 const BtnEditTenantModal = dynamic(() => import('./btnEditTenantModal'), { ssr: false });
 
@@ -20,6 +21,8 @@ export const TenantsTable: React.FC<ITenantsTableProps> = (props: ITenantsTableP
     const datePlaceHolder = "01.01.2025";
     const items = props.tenants.length !== 0 ? props.tenants : [];
     const tenants = useTenants();
+    const isMessageBoxOpen = useIsMessageBoxOpen();
+    const messageBoxText = useMessageBoxText();
     useEffect(
         () => {
             fillTenants(items);
@@ -109,7 +112,7 @@ export const TenantsTable: React.FC<ITenantsTableProps> = (props: ITenantsTableP
                                             <button className="rounded-md border border-gray-200 p-2 h-10 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                                 onClick={() => {
                                                     // deleteTenant(tenant.name);
-                                                    delTenant(tenant.id, tenant.name)
+                                                        delTenant(tenant.id, tenant.name);
                                                 }}>
                                                 <TrashIcon className="w-5 h-5 text-gray-800" />
                                             </button>
@@ -122,6 +125,12 @@ export const TenantsTable: React.FC<ITenantsTableProps> = (props: ITenantsTableP
                     </table>
                 </div>
             </div>
+            <MessageBoxOKCancel
+                isOpen={isMessageBoxOpen}
+                message={String(messageBoxText)}
+                // onConfirm={()=>setIsMessageBoxOpen(false)}
+                onCancel={()=>setIsMessageBoxOpen(false)}
+            />
         </div>
     );
 }

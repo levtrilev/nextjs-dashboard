@@ -6,7 +6,9 @@ import { fetchTenantById } from "../../lib/tenants-actions";
 import { Tenant, User } from "@/app/lib/definitions";
 import { lusitana } from "@/app/ui/fonts";
 import { auth, getUser } from "@/auth";
-import TenantsTable from "../../lib/tenants-table";
+import UsersTable from "@/app/admin/users/lib/users-table";
+import { getTenantUsers, useTenantUsers } from "../../store/useTenantStore";
+import { fetchUsersAdmin } from "@/app/admin/users/lib/users-actions";
 
 async function Page(props: { params: Promise<{ id: string }> }) {
     const session = await auth();
@@ -19,6 +21,9 @@ async function Page(props: { params: Promise<{ id: string }> }) {
     const params = await props.params;
     const id = params.id;
     const tenant: Tenant = await fetchTenantById(id);
+    const tenantUsers = await fetchUsersAdmin(id);
+    // const tenantUsers = useTenantUsers();
+    // getTenantUsers(id);
     return (
         <div className="w-full">
             <div className="flex w-full items-center justify-between">
@@ -27,6 +32,7 @@ async function Page(props: { params: Promise<{ id: string }> }) {
             <h3 className="text-xs font-medium text-gray-400">id: {id}</h3>
             <InputForm tenant={tenant} admin={ isAdmin || isSuperadmin } />
             {/* <TenantsTable tenants={tenants} superadmin={isSuperadmin} /> */}
+            <UsersTable users={tenantUsers} admin={false}/>
         </div>
 
     );
