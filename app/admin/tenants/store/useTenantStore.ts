@@ -6,21 +6,11 @@ import { immer } from "zustand/middleware/immer";
 import { Tenant, User } from "@/app/lib/definitions";
 import { createTenant, deleteTenant } from "../lib/tenants-actions";
 import { fetchUsersAdmin } from "../../users/lib/users-actions";
-// import { auth, getUser } from "@/auth";
-
-// const session = await auth();
-// const email = session ? (session.user ? session.user.email : "") : "";
-// // const current_sections = await getCurrentSections(email as string);
-// const user = await getUser(email as string) as User;
-// const isSuperadmin = user.is_superadmin;
-// const isAdmin = user.is_admin;
-const isSuperadmin = true;
+import { setIsMessageBoxOpen, setMessageBoxText } from "@/app/store/useMessageBoxStore";
 
 interface IInitialState {
   tenants: Tenant[];
   tenantUsers: User[];
-  isMessageBoxOpen: boolean;
-  messageBoxText: string;
 }
 
 interface IActions {
@@ -29,8 +19,6 @@ interface IActions {
   updTenant: (id: string, newTenant: Tenant) => void;
   delTenant: (id: string, name: string) => void;
   getTenantUsers: (TenantId: string) => void;
-  setIsMessageBoxOpen: (isMessageBoxOpen: boolean) => void;
-  setMessageBoxText: (messageBoxText: string) => void;
 }
 
 interface ITenantState extends IInitialState, IActions {}
@@ -38,8 +26,6 @@ interface ITenantState extends IInitialState, IActions {}
 const initialState = {
   tenants: [],
   tenantUsers: [],
-  isMessageBoxOpen: false,
-  messageBoxText: "",
 };
 
 const tenantStore: StateCreator<
@@ -89,23 +75,13 @@ const tenantStore: StateCreator<
         "delTenant"
       );
     } catch (error) {
-      set(
-        { messageBoxText: String(error) },
-        false,
-        "delTenant/error-message"
-      );
-      set({ isMessageBoxOpen: true }, false, "delTenant/error");
+      setMessageBoxText(String(error));
+      setIsMessageBoxOpen(true);
     }
   },
   getTenantUsers: async (TenantId: string) => {
     const tenantUsers: User[] = await fetchUsersAdmin(TenantId);
     set({ tenantUsers: tenantUsers }, false, "getTenantUsers");
-  },
-  setIsMessageBoxOpen: (isMessageBoxOpen: boolean) => {
-    set({ isMessageBoxOpen: isMessageBoxOpen }, false, "setIsMessageBoxOpen");
-  },
-  setMessageBoxText: (messageBoxText: string) => {
-    set({ messageBoxText: messageBoxText }, false, "setMessageBoxText");
   },
 });
 
@@ -118,8 +94,6 @@ const useTenantStore = create<ITenantState>()(
         partialize: (state) => ({
           tenants: state.tenants,
           tenantUsers: state.tenantUsers,
-          isMessageBoxOpen: state.isMessageBoxOpen,
-          messageBoxText: state.messageBoxText,
         }),
       })
     )
@@ -127,10 +101,6 @@ const useTenantStore = create<ITenantState>()(
 );
 
 export const useTenants = () => useTenantStore((state) => state.tenants);
-export const useIsMessageBoxOpen = () =>
-  useTenantStore((state) => state.isMessageBoxOpen);
-export const useMessageBoxText = () =>
-  useTenantStore((state) => state.messageBoxText);
 
 export const fillTenants = (tenants: Tenant[]) =>
   useTenantStore.getState().fillTenants(tenants);
@@ -144,9 +114,3 @@ export const useTenantUsers = () =>
   useTenantStore((state) => state.tenantUsers);
 export const getTenantUsers = (TenantId: string) =>
   useTenantStore.getState().getTenantUsers(TenantId);
-export const setIsMessageBoxOpen = (isMessageBoxOpen: boolean) =>
-  useTenantStore.getState().setIsMessageBoxOpen(isMessageBoxOpen);
-export const setMessageBoxText = (messageBoxText: string) =>
-  useTenantStore.getState().setMessageBoxText(messageBoxText);
-
-// export default useTenantStore;

@@ -2,8 +2,7 @@
 // tenants list Page
 
 'use server';
-// import TenantsTable from "./lib/tenants-table";
-import TenantsTable from "./lib/tenants-table-zust";
+import TenantsTable from "./lib/tenants-table";
 import { Tenant, User } from "@/app/lib/definitions";
 import { fetchTenantsAdmin, fetchTenantsSuperadmin } from "./lib/tenants-actions";
 import { NewTenant } from "./lib/newTenant";

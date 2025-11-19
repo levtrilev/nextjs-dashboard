@@ -1,10 +1,13 @@
 'use client';
 import { formatDateToLocal } from "@/app/lib/utils";
-import { Tenant } from '@/app/lib/definitions';
-// import { BtnDeleteTenant } from "./buttons";
-// import { BtnEditTenantLink } from "./buttons";
 import dynamic from 'next/dynamic';
-import { BtnDeleteTenant, BtnEditTenantLink } from "./tenants-buttons";
+import { Tenant } from '@/app/lib/definitions';
+import { BtnEditTenantLink } from "./tenants-buttons";
+import { delTenant, fillTenants, useTenants } from "../store/useTenantStore";
+import { useEffect, useState } from "react";
+import { TrashIcon } from '@heroicons/react/24/outline';
+import MessageBoxOKCancel from "@/app/erp/tasks/lib/MessageBoxOKCancel";
+
 const BtnEditTenantModal = dynamic(() => import('./btnEditTenantModal'), { ssr: false });
 
 interface ITenantsTableProps {
@@ -14,7 +17,14 @@ interface ITenantsTableProps {
 export const TenantsTable: React.FC<ITenantsTableProps> = (props: ITenantsTableProps) => {
 
     const datePlaceHolder = "01.01.2025";
-    const tenants = props.tenants.length !== 0 ? props.tenants : [];
+    const items = props.tenants.length !== 0 ? props.tenants : [];
+    const tenants = useTenants();
+    useEffect(
+        () => {
+            fillTenants(items);
+        },
+        []
+    );
 
     return (
         <div className="mt-6 flow-root">
@@ -94,9 +104,15 @@ export const TenantsTable: React.FC<ITenantsTableProps> = (props: ITenantsTableP
                                     </td>
                                     <td className="whitespace-nowrap py-3 pl-6 pr-3">
                                         <div className="flex justify-end gap-3">
-                                            { props.superadmin && <BtnEditTenantModal tenant={tenant} /> }
-                                            { props.superadmin && <BtnDeleteTenant name={tenant.name} /> }
-                                            { props.superadmin && <BtnEditTenantLink id={tenant.id} /> }
+                                            {props.superadmin && <BtnEditTenantModal tenant={tenant} />}
+                                            <button className="rounded-md border border-gray-200 p-2 h-10 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                onClick={() => {
+                                                    // deleteTenant(tenant.name);
+                                                    delTenant(tenant.id, tenant.name);
+                                                }}>
+                                                <TrashIcon className="w-5 h-5 text-gray-800" />
+                                            </button>
+                                            {props.superadmin && <BtnEditTenantLink id={tenant.id} />}
                                         </div>
                                     </td>
                                 </tr>
@@ -105,6 +121,7 @@ export const TenantsTable: React.FC<ITenantsTableProps> = (props: ITenantsTableP
                     </table>
                 </div>
             </div>
+            <MessageBoxOKCancel />
         </div>
     );
 }
