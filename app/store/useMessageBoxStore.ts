@@ -7,6 +7,7 @@ import { immer } from "zustand/middleware/immer";
 interface IInitialState {
   isMessageBoxOpen: boolean;
   messageBoxText: string;
+  isShowMessageBoxCancel: boolean;
   isOKButtonPressed: boolean;
   isCancelButtonPressed: boolean;
   isDocumentChanged: boolean;
@@ -18,6 +19,7 @@ interface IActions {
   setIsDocumentChanged: (isDocumentChanged: boolean) => void;
   setIsOKButtonPressed: (isOKButtonPressed: boolean) => void;
   setIsCancelButtonPressed: (isCancelButtonPressed: boolean) => void;
+  setIsShowMessageBoxCancel: (isShowMessageBoxCancel: boolean) => void;
 }
 
 interface IMessageBoxState extends IInitialState, IActions {}
@@ -27,6 +29,7 @@ const initialState = {
   messageBoxText: "",
   isOKButtonPressed: false,
   isCancelButtonPressed: false,
+  isShowMessageBoxCancel: false,
   isDocumentChanged: false,
 };
 
@@ -50,6 +53,9 @@ const messageBoxStore: StateCreator<
   },
     setIsCancelButtonPressed: (isCancelButtonPressed: boolean) => {
     set({ isCancelButtonPressed: isCancelButtonPressed }, false, "setIsCancelButtonPressed");
+  },
+      setIsShowMessageBoxCancel: (isShowMessageBoxCancel: boolean) => {
+    set({ isShowMessageBoxCancel: isShowMessageBoxCancel }, false, "setIsShowMessageBoxCancel");
   },
   setIsDocumentChanged: (isDocumentChanged: boolean) => {
     set(
@@ -88,6 +94,8 @@ export const useIsOKButtonPressed = () =>
   useMessageBoxStore((state) => state.isOKButtonPressed);
 export const useIsCancelButtonPressed = () =>
   useMessageBoxStore((state) => state.isCancelButtonPressed);
+export const useIsShowMessageBoxCancel = () =>
+  useMessageBoxStore((state) => state.isShowMessageBoxCancel);
 
 export const setIsMessageBoxOpen = (isMessageBoxOpen: boolean) =>
   useMessageBoxStore.getState().setIsMessageBoxOpen(isMessageBoxOpen);
@@ -97,5 +105,7 @@ export const setIsOKButtonPressed = (isOKButtonPressed: boolean) =>
   useMessageBoxStore.getState().setIsOKButtonPressed(isOKButtonPressed);
 export const setIsCancelButtonPressed = (isCancelButtonPressed: boolean) =>
   useMessageBoxStore.getState().setIsCancelButtonPressed(isCancelButtonPressed);
+export const setIsShowMessageBoxCancel = (isShowMessageBoxCancel: boolean) =>
+  useMessageBoxStore.getState().setIsShowMessageBoxCancel(isShowMessageBoxCancel);
 export const setIsDocumentChanged = (isDocumentChanged: boolean) =>
   useMessageBoxStore.getState().setIsDocumentChanged(isDocumentChanged);

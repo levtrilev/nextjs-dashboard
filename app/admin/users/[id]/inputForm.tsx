@@ -1,11 +1,14 @@
 'use client';
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { KeyboardEvent } from "react";
 import { RoleForm, SectionForm, Tenant, UserForm } from "@/app/lib/definitions";
 import { updateUser } from "../lib/users-actions";
 import Link from "next/link";
 import { TrashIcon } from "@heroicons/react/24/outline";
 import BtnRolesRef from "@/app/admin/roles/lib/btnRolesRef";
+import { setIsCancelButtonPressed, setIsDocumentChanged, setIsMessageBoxOpen, setIsOKButtonPressed, setIsShowMessageBoxCancel, setMessageBoxText, useIsDocumentChanged, useIsOKButtonPressed, useIsShowMessageBoxCancel, useMessageBoxText } from "@/app/store/useMessageBoxStore";
+import { useRouter } from 'next/navigation';
+import MessageBoxOKCancel from "@/app/erp/tasks/lib/MessageBoxOKCancel";
 
 
 interface IInputFormProps {
@@ -21,7 +24,11 @@ export default function InputForm(props: IInputFormProps) {
   const [user, setUser] = useState<UserForm>(props.user);
   const [userRoles, setUserRoles] = useState<RoleForm[]>(props.user_roles);
 
-  // console.log("name: "+section.name);
+  const router = useRouter();
+  const isDocumentChanged = useIsDocumentChanged();
+  const isOKButtonPressed = useIsOKButtonPressed();
+  const messageBoxText = useMessageBoxText();
+  const isShowMessageBoxCancel = useIsShowMessageBoxCancel();
 
   const handleSelectRole = (
     new_role_id: string,
@@ -44,15 +51,14 @@ export default function InputForm(props: IInputFormProps) {
       tenant_name: new_role_tenant_name,
       description: new_role_description,
     }));
+    setIsDocumentChanged(true);
+    setMessageBoxText('Документ изменен. Закрыть без сохранения?');
   };
   const prepareUserRoleIds = (user_roles: RoleForm[]) => {
     setUser((prev) => ({
       ...prev,
       role_ids: "{" + user_roles.map((role) => role.id).join(",") + "}",
-      // role_names: "{" + user_roles.map((role) => role.name).join(",") + "}",
     }));
-    // console.log("role_sections_ids: " + "{" + role_sections.map((section) => section.id).join(",") + "}");
-    // console.log("role.section_ids: " + role.section_ids);
   };
   const handleChangeName = (event: any) => {
     setUser((prev) => ({
@@ -60,17 +66,65 @@ export default function InputForm(props: IInputFormProps) {
       name: event.target.value,
       email: event.target.value,
     }));
+    setIsDocumentChanged(true);
+    setMessageBoxText('Документ изменен. Закрыть без сохранения?');
   };
   const handleSelectTenant = (event: any) => {
     setUser((prev) => ({
       ...prev,
       tenant_id: event.target.value,
     }));
+    setIsDocumentChanged(true);
+    setMessageBoxText('Документ изменен. Закрыть без сохранения?');
   };
   const handleDeleteUserRole = (role_id: string) => {
     setUserRoles(userRoles.filter((role) => role.id !== role_id));
     prepareUserRoleIds(userRoles.filter((role) => role.id !== role_id));
+    setIsDocumentChanged(true);
+    setMessageBoxText('Документ изменен. Закрыть без сохранения?');
   }
+  const handleBackClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (isDocumentChanged && !isOKButtonPressed) {
+      setIsMessageBoxOpen(true);
+    } else if (isDocumentChanged && isOKButtonPressed) {
+    } else if (!isDocumentChanged) {
+      router.push('/admin/users/');
+    }
+  };
+  const handleSaveClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    updateUser({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      is_admin: user.is_admin,
+      is_superadmin: user.is_superadmin,
+      tenant_id: user.tenant_id,
+      role_ids: user.role_ids,
+    });
+    setIsDocumentChanged(false);
+    setMessageBoxText('Документ сохранен.');
+    setIsShowMessageBoxCancel(false);
+    setIsMessageBoxOpen(true);
+  }
+  useEffect(() => {
+    setIsDocumentChanged(false);
+    setIsMessageBoxOpen(false);
+    setIsOKButtonPressed(false);
+    setIsCancelButtonPressed(false);
+    setMessageBoxText('');
+  }, []);
+
+  useEffect(() => {
+    if (isOKButtonPressed && messageBoxText === 'Документ изменен. Закрыть без сохранения?') {
+      router.push('/admin/users/');
+    }
+    setIsOKButtonPressed(false);
+    setIsCancelButtonPressed(false);
+    setIsDocumentChanged(false);
+    setIsMessageBoxOpen(false);
+  }, [isOKButtonPressed, router]);
   return (
     <div >
       {/* className="max-w-md mx-auto p-6 bg-white shadow-md rounded-md" */}
@@ -86,24 +140,10 @@ export default function InputForm(props: IInputFormProps) {
             className="control rounded-md border border-gray-200"
             value={user.name}
             onChange={(e) => handleChangeName(e)}
-          // onKeyDown={(e) => handleKeyDown(e)}
           />
         </div>
-        {/* <div className="flex justify-between mt-6">
-          <label htmlFor="description" className="text-sm font-medium">
-            Description:
-          </label>
-          <input
-            id="description"
-            type="text"
-            className="control rounded-md border border-gray-200"
-            value={section.tenant_id}
-            onChange={(e) => handleChangeTenant(e)}
-            onKeyDown={(e) => handleKeyDown(e)}
-          />
-        </div> */}
+
         <div></div>
-        {/* <RadioActive tenant={tenant} handleChangeActive={handleChangeActive}/> */}
         <div className="flex-1">
           <select
             id="selectTenant"
@@ -191,31 +231,28 @@ export default function InputForm(props: IInputFormProps) {
 
       {/* кнопки */}
       <div className="flex justify-between mt-6">
-        <button
-          disabled={!props.admin}
-          onClick={() => {
-            updateUser({
-              id: user.id,
-              name: user.name,
-              email: user.email,
-              is_admin: user.is_admin,
-              is_superadmin: user.is_superadmin,
-              tenant_id: user.tenant_id,
-              role_ids: user.role_ids,
-            });
-          }}
-          className="bg-blue-400 text-white w-full rounded-md border p-2 hover:bg-blue-100 hover:text-gray-500"
-        >
-          Save
-        </button>
-        <Link href={"/admin/users/"} className="w-full">
-          <button
-            className="bg-blue-400 text-white w-full rounded-md border p-2 hover:bg-blue-100 hover:text-gray-500"
-          >
-            Back to list
-          </button>
-        </Link>
+        <div className="flex w-1/2">
+          <div className="w-1/4">
+            <button
+              disabled={!props.admin}
+              onClick={handleSaveClick}
+              className="bg-blue-400 text-white w-full rounded-md border p-2 hover:bg-blue-100 hover:text-gray-500"
+            >
+              Save
+            </button>
+          </div>
+          <div className="w-1/4">
+            <button
+              onClick={handleBackClick}
+              className="bg-blue-400 text-white w-full rounded-md border p-2
+                 hover:bg-blue-100 hover:text-gray-500 cursor-pointer"
+            >
+              Back to list
+            </button>
+          </div>
+        </div>
       </div>
+      <MessageBoxOKCancel />
     </div>
   );
 }

@@ -3,7 +3,7 @@ import { FC, useEffect, useState } from "react";
 import { Tenant } from "@/app/lib/definitions";
 import { updateTenant } from "../../lib/tenants-actions";
 import RadioActive from "../../lib/radioActive";
-import { setIsCancelButtonPressed, setIsDocumentChanged, setIsMessageBoxOpen, setIsOKButtonPressed, setMessageBoxText, useIsDocumentChanged, useIsOKButtonPressed, useMessageBoxText } from "@/app/store/useMessageBoxStore";
+import { setIsCancelButtonPressed, setIsDocumentChanged, setIsMessageBoxOpen, setIsOKButtonPressed, setIsShowMessageBoxCancel, setMessageBoxText, useIsDocumentChanged, useIsOKButtonPressed, useIsShowMessageBoxCancel, useMessageBoxText } from "@/app/store/useMessageBoxStore";
 import { useRouter } from 'next/navigation';
 import MessageBoxOKCancel from "@/app/erp/tasks/lib/MessageBoxOKCancel";
 
@@ -18,6 +18,7 @@ export const InputForm: FC<IInputFormProps> = (props: IInputFormProps) => {
   const isDocumentChanged = useIsDocumentChanged();
   const isOKButtonPressed = useIsOKButtonPressed();
   const messageBoxText = useMessageBoxText();
+  const isShowMessageBoxCancel = useIsShowMessageBoxCancel();
 
   const handleChangeName = (event: any) => {
     setTenant((prev) => ({
@@ -49,19 +50,24 @@ export const InputForm: FC<IInputFormProps> = (props: IInputFormProps) => {
     if (isDocumentChanged && !isOKButtonPressed) {
       setIsMessageBoxOpen(true);
     } else if (isDocumentChanged && isOKButtonPressed) {
-      // router.push('/admin/tenants/');
-      // return;
     } else if (!isDocumentChanged) {
       router.push('/admin/tenants/');
-      // return;
     }
   };
-
+  const handleSaveClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    updateTenant(tenant);
+    setIsDocumentChanged(false);
+    setMessageBoxText('Документ сохранен.');
+    setIsShowMessageBoxCancel(false);
+    setIsMessageBoxOpen(true);
+  }
   useEffect(() => {
     setIsDocumentChanged(false);
     setIsMessageBoxOpen(false);
     setIsOKButtonPressed(false);
     setIsCancelButtonPressed(false);
+    setIsShowMessageBoxCancel(true);
     setMessageBoxText('');
   }, []);
 
@@ -73,6 +79,7 @@ export const InputForm: FC<IInputFormProps> = (props: IInputFormProps) => {
     setIsCancelButtonPressed(false);
     setIsDocumentChanged(false);
     setIsMessageBoxOpen(false);
+    setIsShowMessageBoxCancel(true);
   }, [isOKButtonPressed, router]);
 
   return (
@@ -117,12 +124,7 @@ export const InputForm: FC<IInputFormProps> = (props: IInputFormProps) => {
           <div className="w-1/4">
             <button
               disabled={!props.admin}
-              onClick={() => {
-                updateTenant(tenant);
-                setIsDocumentChanged(false);
-                setMessageBoxText('Документ сохранен.');
-                setIsMessageBoxOpen(true);
-              }}
+              onClick={handleSaveClick}
               className="bg-blue-400 text-white w-full rounded-md border p-2 
               hover:bg-blue-100 hover:text-gray-500 cursor-pointer"
             >
@@ -140,7 +142,7 @@ export const InputForm: FC<IInputFormProps> = (props: IInputFormProps) => {
           </div>
         </div>
       </div>
-      <MessageBoxOKCancel showCancel={true} />
+      <MessageBoxOKCancel />
     </div>
   );
 }

@@ -7,6 +7,7 @@ import { delTenant, fillTenants, useTenants } from "../store/useTenantStore";
 import { useEffect, useState } from "react";
 import { TrashIcon } from '@heroicons/react/24/outline';
 import MessageBoxOKCancel from "@/app/erp/tasks/lib/MessageBoxOKCancel";
+import { setIsShowMessageBoxCancel } from "@/app/store/useMessageBoxStore";
 
 const BtnEditTenantModal = dynamic(() => import('./btnEditTenantModal'), { ssr: false });
 
@@ -22,6 +23,7 @@ export const TenantsTable: React.FC<ITenantsTableProps> = (props: ITenantsTableP
     useEffect(
         () => {
             fillTenants(items);
+            setIsShowMessageBoxCancel(false);
         },
         []
     );
@@ -121,7 +123,7 @@ export const TenantsTable: React.FC<ITenantsTableProps> = (props: ITenantsTableP
                     </table>
                 </div>
             </div>
-            <MessageBoxOKCancel  showCancel={false} />
+            <MessageBoxOKCancel />
         </div>
     );
 }

@@ -57,17 +57,17 @@ export const BtnEditTenantModal: React.FC<ITenantProps> = (props: ITenantProps) 
         <h2>Edit Tenant. id : {tenant.id}</h2>
         <div>name : {tenant.name}</div>
         <input
-          id={tenant.name} 
+          id={tenant.name || 'name-input'} 
           onChange={(e) => handleChangeName(e)} 
-          value={tenant.name ? tenant.name : undefined} type="text"
+          value={tenant.name ?? ''} type="text"
           className="w-full rounded-md border p-2 hover:bg-gray-100" 
           placeholder='Tenant name'
         />
         <div>description : {tenant.description}</div>
         <input
-          id={tenant.description} 
+          id={tenant.description || 'description-input'} 
           onChange={(e) => handleChangeDescription(e)} 
-          value={tenant.description ? tenant.description : undefined} 
+          value={tenant.description ?? ''} 
           type="text"
           className="w-full rounded-md border p-2 hover:bg-gray-100" 
           placeholder='Tenant description'

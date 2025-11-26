@@ -1,13 +1,10 @@
 import React, { FC } from 'react';
-import { setIsCancelButtonPressed, setIsMessageBoxOpen, setIsOKButtonPressed, useIsMessageBoxOpen, useMessageBoxText } from "@/app/store/useMessageBoxStore";
+import { setIsCancelButtonPressed, setIsMessageBoxOpen, setIsOKButtonPressed, useIsMessageBoxOpen, useIsShowMessageBoxCancel, useMessageBoxText } from "@/app/store/useMessageBoxStore";
 
-interface IMessageBoxProps {
-  showCancel: boolean,
-}
-
-const MessageBoxOKCancel: FC<IMessageBoxProps> = (props: IMessageBoxProps) => {
+const MessageBoxOKCancel: FC = () => {
   const isMessageBoxOpen = useIsMessageBoxOpen();
   const messageBoxText = useMessageBoxText();
+  const isShowMessageBoxCancel = useIsShowMessageBoxCancel();
   if (!isMessageBoxOpen) return null;
 
   return (
@@ -15,7 +12,7 @@ const MessageBoxOKCancel: FC<IMessageBoxProps> = (props: IMessageBoxProps) => {
       <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
         <p className="text-lg mb-4">{String(messageBoxText)}</p>
         <div className="flex justify-end space-x-3">
-          {props.showCancel && <button
+          {isShowMessageBoxCancel && <button
             onClick={() => {setIsMessageBoxOpen(false); setIsOKButtonPressed(false); setIsCancelButtonPressed(true)}}
             className="px-4 py-2 bg-gray-300 rounded-md hover:bg-gray-400 focus:outline-none"
           >
