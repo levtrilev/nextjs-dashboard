@@ -1,7 +1,11 @@
-import React from 'react';
-import { setIsMessageBoxOpen, useIsMessageBoxOpen, useMessageBoxText } from "@/app/store/useMessageBoxStore";
+import React, { FC } from 'react';
+import { setIsCancelButtonPressed, setIsMessageBoxOpen, setIsOKButtonPressed, useIsMessageBoxOpen, useMessageBoxText } from "@/app/store/useMessageBoxStore";
 
-const MessageBoxOKCancel: React.FC = () => {
+interface IMessageBoxProps {
+  showCancel: boolean,
+}
+
+const MessageBoxOKCancel: FC<IMessageBoxProps> = (props: IMessageBoxProps) => {
   const isMessageBoxOpen = useIsMessageBoxOpen();
   const messageBoxText = useMessageBoxText();
   if (!isMessageBoxOpen) return null;
@@ -11,15 +15,15 @@ const MessageBoxOKCancel: React.FC = () => {
       <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
         <p className="text-lg mb-4">{String(messageBoxText)}</p>
         <div className="flex justify-end space-x-3">
-          <button
-            onClick={() => setIsMessageBoxOpen(false)}
+          {props.showCancel && <button
+            onClick={() => {setIsMessageBoxOpen(false); setIsOKButtonPressed(false); setIsCancelButtonPressed(true)}}
             className="px-4 py-2 bg-gray-300 rounded-md hover:bg-gray-400 focus:outline-none"
           >
             Cancel
-          </button>
+          </button>}
           <button
-            onClick={() => setIsMessageBoxOpen(false)}
-            className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none"
+            onClick={() => {setIsMessageBoxOpen(false); setIsOKButtonPressed(true); setIsCancelButtonPressed(false)}}
+            className="px-4 py-2 bg-red-300 text-white rounded-md hover:bg-red-700 focus:outline-none"
           >
             OK
           </button>

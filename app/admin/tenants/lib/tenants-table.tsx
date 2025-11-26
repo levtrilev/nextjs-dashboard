@@ -121,7 +121,7 @@ export const TenantsTable: React.FC<ITenantsTableProps> = (props: ITenantsTableP
                     </table>
                 </div>
             </div>
-            <MessageBoxOKCancel />
+            <MessageBoxOKCancel  showCancel={false} />
         </div>
     );
 }
