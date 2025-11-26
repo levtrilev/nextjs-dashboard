@@ -3,12 +3,13 @@ import { useEffect, useState } from "react";
 import { KeyboardEvent } from "react";
 import { RoleForm, SectionForm, Tenant, UserForm } from "@/app/lib/definitions";
 import { updateUser } from "../lib/users-actions";
-import Link from "next/link";
 import { TrashIcon } from "@heroicons/react/24/outline";
 import BtnRolesRef from "@/app/admin/roles/lib/btnRolesRef";
 import { setIsCancelButtonPressed, setIsDocumentChanged, setIsMessageBoxOpen, setIsOKButtonPressed, setIsShowMessageBoxCancel, setMessageBoxText, useIsDocumentChanged, useIsOKButtonPressed, useIsShowMessageBoxCancel, useMessageBoxText } from "@/app/store/useMessageBoxStore";
 import { useRouter } from 'next/navigation';
 import MessageBoxOKCancel from "@/app/erp/tasks/lib/MessageBoxOKCancel";
+import RadioActive from "../lib/radioAdmin";
+import RadioAdmin from "../lib/radioAdmin";
 
 
 interface IInputFormProps {
@@ -69,6 +70,14 @@ export default function InputForm(props: IInputFormProps) {
     setIsDocumentChanged(true);
     setMessageBoxText('Документ изменен. Закрыть без сохранения?');
   };
+    const handleChangeAdminStatus = (event: any) => {
+    setUser((prev) => ({
+      ...prev,
+      is_admin: !prev.is_admin,
+    }));
+    setIsDocumentChanged(true);
+    setMessageBoxText('Документ изменен. Закрыть без сохранения?');
+  };
   const handleSelectTenant = (event: any) => {
     setUser((prev) => ({
       ...prev,
@@ -113,6 +122,7 @@ export default function InputForm(props: IInputFormProps) {
     setIsMessageBoxOpen(false);
     setIsOKButtonPressed(false);
     setIsCancelButtonPressed(false);
+    setIsShowMessageBoxCancel(true);
     setMessageBoxText('');
   }, []);
 
@@ -122,6 +132,7 @@ export default function InputForm(props: IInputFormProps) {
     }
     setIsOKButtonPressed(false);
     setIsCancelButtonPressed(false);
+    setIsShowMessageBoxCancel(true);
     setIsDocumentChanged(false);
     setIsMessageBoxOpen(false);
   }, [isOKButtonPressed, router]);
@@ -162,6 +173,11 @@ export default function InputForm(props: IInputFormProps) {
             ))}
           </select>
         </div>
+
+        <div className="w-1/2"></div>
+        <RadioAdmin user={user} handleChangeAdminStatus={handleChangeAdminStatus} />
+        <div></div>
+
         <div></div>
       </div>
 

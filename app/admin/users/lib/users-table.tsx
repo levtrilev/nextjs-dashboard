@@ -1,6 +1,9 @@
+'use client';
 import { formatDateToLocal } from "@/app/lib/utils";
 import { User, UserForm } from '@/app/lib/definitions';
 import { BtnDeleteUser, BtnEditUserLink } from "./users-buttons";
+import { setIsShowMessageBoxCancel } from "@/app/store/useMessageBoxStore";
+import { useEffect } from "react";
 
 interface IUsersTableProps {
     users: UserForm[],
@@ -12,6 +15,12 @@ export const UsersTable: React.FC<IUsersTableProps> = (props: IUsersTableProps) 
     const datePlaceHolder = "01.01.2025";
     // const users = await fetchUsers();
     const users = props.users;
+        useEffect(
+            () => {
+                setIsShowMessageBoxCancel(false);
+            },
+            []
+        );
     return (
         <div className="mt-6 flow-root">
             <div className="inline-block min-w-full align-middle">
