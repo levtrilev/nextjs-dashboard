@@ -101,8 +101,8 @@ export const UsersTable: React.FC<IUsersTableProps> = (props: IUsersTableProps) 
                                     </td>
                                     <td className="whitespace-nowrap py-3 pl-6 pr-3">
                                         <div className="flex justify-end gap-3">
-                                            { props.admin && <BtnDeleteUser id={user.id} /> }
-                                            { props.admin && <BtnEditUserLink id={user.id} /> }
+                                            { props.admin && !user.is_superadmin && <BtnDeleteUser id={user.id} /> }
+                                            { props.admin && !user.is_superadmin && <BtnEditUserLink id={user.id} /> }
                                         </div>
                                     </td>
                                 </tr>

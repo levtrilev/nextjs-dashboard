@@ -121,7 +121,7 @@ export const InputForm: FC<IInputFormProps> = (props: IInputFormProps) => {
       </div>
       <div className="flex justify-between mt-1">
         <div className="flex w-1/2">
-          <div className="w-1/4">
+          <div className="w-1/2">
             <button
               disabled={!props.admin}
               onClick={handleSaveClick}
@@ -131,7 +131,7 @@ export const InputForm: FC<IInputFormProps> = (props: IInputFormProps) => {
               Save
             </button>
           </div>
-          <div className="w-1/4">
+          <div className="w-1/2">
             <button
               onClick={handleBackClick}
               className="bg-blue-400 text-white w-full rounded-md border p-2

@@ -106,15 +106,15 @@ export const TenantsTable: React.FC<ITenantsTableProps> = (props: ITenantsTableP
                                     </td>
                                     <td className="whitespace-nowrap py-3 pl-6 pr-3">
                                         <div className="flex justify-end gap-3">
-                                            {props.superadmin && <BtnEditTenantModal tenant={tenant} />}
-                                            <button className="rounded-md border border-gray-200 p-2 h-10 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            {props.superadmin && tenant.name !== "superadmin" && <BtnEditTenantModal tenant={tenant} />}
+                                            {props.superadmin && tenant.name !== "superadmin" && <button className="rounded-md border border-gray-200 p-2 h-10 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                                 onClick={() => {
                                                     // deleteTenant(tenant.name);
                                                     delTenant(tenant.id, tenant.name);
                                                 }}>
                                                 <TrashIcon className="w-5 h-5 text-gray-800" />
-                                            </button>
-                                            {props.superadmin && <BtnEditTenantLink id={tenant.id} />}
+                                            </button>}
+                                            {props.superadmin && tenant.name !== "superadmin" && <BtnEditTenantLink id={tenant.id} />}
                                         </div>
                                     </td>
                                 </tr>
