@@ -141,7 +141,31 @@ export async function fetchUsersAdmin(tenant_id: string) {
     throw new Error("Failed to fetch all users.");
   }
 }
+export async function fetchUsersWithRoleAdmin(tenant_id: string, role_id: string) {
+  try {
+    const result = await pool.query<UserForm>(
+      `SELECT
+         u.id as id,
+         u.name as name,
+         u.email as email,
+         u.is_admin as is_admin,
+         u.is_superadmin as is_superadmin,
+         u.tenant_id as tenant_id,
+         t.name as tenant_name,
+         u.role_ids as role_ids
+       FROM users u 
+       JOIN tenants t ON u.tenant_id = t.id
+       WHERE u.tenant_id = $1 AND u.role_ids @> ARRAY[$2::varchar]
+       ORDER BY tenant_id ASC`,
+      [tenant_id, role_id]
+    );
 
+    return result.rows;
+  } catch (err) {
+    console.error("Database Error:", err);
+    throw new Error("Failed to fetch users with role: " + err);
+  }
+}
 export async function fetchUsersUser(email: string) {
   try {
     const result = await pool.query<UserForm>(
