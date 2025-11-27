@@ -2,8 +2,8 @@
 import { formatDateToLocal } from "@/app/lib/utils";
 import { User, UserForm } from '@/app/lib/definitions';
 import { BtnDeleteUser, BtnEditUserLink } from "./users-buttons";
-import { setIsShowMessageBoxCancel } from "@/app/store/useMessageBoxStore";
 import { useEffect } from "react";
+import { setIsShowMessageBoxCancel } from "@/app/store/useDocumentStore";
 
 interface IUsersTableProps {
     users: UserForm[],

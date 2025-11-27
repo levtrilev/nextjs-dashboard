@@ -1,4 +1,5 @@
 'use client';
+
 import { formatDateToLocal } from "@/app/lib/utils";
 import dynamic from 'next/dynamic';
 import { Tenant } from '@/app/lib/definitions';
@@ -6,8 +7,8 @@ import { BtnEditTenantLink } from "./tenants-buttons";
 import { delTenant, fillTenants, useTenants } from "../store/useTenantStore";
 import { useEffect, useState } from "react";
 import { TrashIcon } from '@heroicons/react/24/outline';
-import MessageBoxOKCancel from "@/app/erp/tasks/lib/MessageBoxOKCancel";
-import { setIsShowMessageBoxCancel } from "@/app/store/useMessageBoxStore";
+import MessageBoxOKCancel from "@/app/lib/MessageBoxOKCancel";
+import { setIsShowMessageBoxCancel } from "@/app/store/useDocumentStore";
 
 const BtnEditTenantModal = dynamic(() => import('./btnEditTenantModal'), { ssr: false });
 
@@ -109,7 +110,6 @@ export const TenantsTable: React.FC<ITenantsTableProps> = (props: ITenantsTableP
                                             {props.superadmin && tenant.name !== "superadmin" && <BtnEditTenantModal tenant={tenant} />}
                                             {props.superadmin && tenant.name !== "superadmin" && <button className="rounded-md border border-gray-200 p-2 h-10 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                                 onClick={() => {
-                                                    // deleteTenant(tenant.name);
                                                     delTenant(tenant.id, tenant.name);
                                                 }}>
                                                 <TrashIcon className="w-5 h-5 text-gray-800" />

@@ -3,9 +3,12 @@ import { FC, useEffect, useState } from "react";
 import { Tenant } from "@/app/lib/definitions";
 import { updateTenant } from "../../lib/tenants-actions";
 import RadioActive from "../../lib/radioActive";
-import { setIsCancelButtonPressed, setIsDocumentChanged, setIsMessageBoxOpen, setIsOKButtonPressed, setIsShowMessageBoxCancel, setMessageBoxText, useIsDocumentChanged, useIsOKButtonPressed, useIsShowMessageBoxCancel, useMessageBoxText } from "@/app/store/useMessageBoxStore";
-import { useRouter } from 'next/navigation';
-import MessageBoxOKCancel from "@/app/erp/tasks/lib/MessageBoxOKCancel";
+import {
+  setIsCancelButtonPressed, setIsDocumentChanged, setIsMessageBoxOpen,
+  setIsOKButtonPressed, setIsShowMessageBoxCancel, setMessageBoxText, useIsDocumentChanged,
+  useMessageBox
+} from "@/app/store/useDocumentStore";import { useRouter } from 'next/navigation';
+import MessageBoxOKCancel from "@/app/lib/MessageBoxOKCancel";
 
 interface IInputFormProps {
   tenant: Tenant,
@@ -16,9 +19,8 @@ export const InputForm: FC<IInputFormProps> = (props: IInputFormProps) => {
   const router = useRouter();
   const [tenant, setTenant] = useState(props.tenant);
   const isDocumentChanged = useIsDocumentChanged();
-  const isOKButtonPressed = useIsOKButtonPressed();
-  const messageBoxText = useMessageBoxText();
-  const isShowMessageBoxCancel = useIsShowMessageBoxCancel();
+  const msgBox = useMessageBox();
+
 
   const handleChangeName = (event: any) => {
     setTenant((prev) => ({
@@ -47,9 +49,10 @@ export const InputForm: FC<IInputFormProps> = (props: IInputFormProps) => {
   };
   const handleBackClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    if (isDocumentChanged && !isOKButtonPressed) {
+        setIsShowMessageBoxCancel(true);
+    if (isDocumentChanged && !msgBox.isOKButtonPressed) {
       setIsMessageBoxOpen(true);
-    } else if (isDocumentChanged && isOKButtonPressed) {
+    } else if (isDocumentChanged && msgBox.isOKButtonPressed) {
     } else if (!isDocumentChanged) {
       router.push('/admin/tenants/');
     }
@@ -72,7 +75,7 @@ export const InputForm: FC<IInputFormProps> = (props: IInputFormProps) => {
   }, []);
 
   useEffect(() => {
-    if (isOKButtonPressed && messageBoxText === 'Документ изменен. Закрыть без сохранения?') {
+    if (msgBox.isOKButtonPressed && msgBox.messageBoxText === 'Документ изменен. Закрыть без сохранения?') {
       router.push('/admin/tenants/');
     }
     setIsOKButtonPressed(false);
@@ -80,7 +83,7 @@ export const InputForm: FC<IInputFormProps> = (props: IInputFormProps) => {
     setIsDocumentChanged(false);
     setIsMessageBoxOpen(false);
     setIsShowMessageBoxCancel(true);
-  }, [isOKButtonPressed, router]);
+  }, [msgBox.isOKButtonPressed, router]);
 
   return (
     <div >

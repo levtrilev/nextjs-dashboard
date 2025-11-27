@@ -1,14 +1,15 @@
 'use client';
 import { useEffect, useState } from "react";
-import { KeyboardEvent } from "react";
 import { RoleForm, SectionForm, Tenant, UserForm } from "@/app/lib/definitions";
 import { updateUser } from "../lib/users-actions";
 import { TrashIcon } from "@heroicons/react/24/outline";
 import BtnRolesRef from "@/app/admin/roles/lib/btnRolesRef";
-import { setIsCancelButtonPressed, setIsDocumentChanged, setIsMessageBoxOpen, setIsOKButtonPressed, setIsShowMessageBoxCancel, setMessageBoxText, useIsDocumentChanged, useIsOKButtonPressed, useIsShowMessageBoxCancel, useMessageBoxText } from "@/app/store/useMessageBoxStore";
-import { useRouter } from 'next/navigation';
-import MessageBoxOKCancel from "@/app/erp/tasks/lib/MessageBoxOKCancel";
-import RadioActive from "../lib/radioAdmin";
+import {
+  setIsCancelButtonPressed, setIsDocumentChanged, setIsMessageBoxOpen,
+  setIsOKButtonPressed, setIsShowMessageBoxCancel, setMessageBoxText, useIsDocumentChanged,
+  useMessageBox
+} from "@/app/store/useDocumentStore";import { useRouter } from 'next/navigation';
+import MessageBoxOKCancel from "@/app/lib/MessageBoxOKCancel";
 import RadioAdmin from "../lib/radioAdmin";
 
 
@@ -27,9 +28,8 @@ export default function InputForm(props: IInputFormProps) {
 
   const router = useRouter();
   const isDocumentChanged = useIsDocumentChanged();
-  const isOKButtonPressed = useIsOKButtonPressed();
-  const messageBoxText = useMessageBoxText();
-  const isShowMessageBoxCancel = useIsShowMessageBoxCancel();
+  const msgBox = useMessageBox();
+
 
   const handleSelectRole = (
     new_role_id: string,
@@ -94,9 +94,9 @@ export default function InputForm(props: IInputFormProps) {
   }
   const handleBackClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    if (isDocumentChanged && !isOKButtonPressed) {
+    if (isDocumentChanged && !msgBox.isOKButtonPressed) {
       setIsMessageBoxOpen(true);
-    } else if (isDocumentChanged && isOKButtonPressed) {
+    } else if (isDocumentChanged && msgBox.isOKButtonPressed) {
     } else if (!isDocumentChanged) {
       router.push('/admin/users/');
     }
@@ -127,7 +127,7 @@ export default function InputForm(props: IInputFormProps) {
   }, []);
 
   useEffect(() => {
-    if (isOKButtonPressed && messageBoxText === 'Документ изменен. Закрыть без сохранения?') {
+    if (msgBox.isOKButtonPressed && msgBox.messageBoxText === 'Документ изменен. Закрыть без сохранения?') {
       router.push('/admin/users/');
     }
     setIsOKButtonPressed(false);
@@ -135,7 +135,7 @@ export default function InputForm(props: IInputFormProps) {
     setIsShowMessageBoxCancel(true);
     setIsDocumentChanged(false);
     setIsMessageBoxOpen(false);
-  }, [isOKButtonPressed, router]);
+  }, [msgBox.isOKButtonPressed, router]);
   return (
     <div >
       {/* className="max-w-md mx-auto p-6 bg-white shadow-md rounded-md" */}

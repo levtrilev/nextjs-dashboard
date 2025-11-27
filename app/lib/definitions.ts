@@ -3,6 +3,13 @@
 
 import { DateTime } from "next-auth/providers/kakao";
 
+export type MessageBox = {
+  isMessageBoxOpen: boolean;
+  messageBoxText: string;
+  isShowMessageBoxCancel: boolean;
+  isOKButtonPressed: boolean;
+  isCancelButtonPressed: boolean;
+}
 export type Task ={
   id: string;
   name: string;

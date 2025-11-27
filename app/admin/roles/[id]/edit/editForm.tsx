@@ -1,29 +1,35 @@
 // Role EditForm
 
 'use client';
-import { useState } from "react";
-import { RoleForm, Section, SectionForm, Tenant } from "@/app/lib/definitions";
-import { updateRole } from "../../lib/roles-actions";
+import { useEffect, useState } from "react";
+import { RoleForm, SectionForm, Tenant } from "@/app/lib/definitions";
 import Link from "next/link";
 import BtnTenantsRef from "@/app/admin/tenants/lib/btnTenantsRef";
 import BtnSectionsRef from "@/app/admin/sections/lib/btnSectionsRef";
 import { TrashIcon } from "@heroicons/react/24/outline";
 import { lusitana } from "@/app/ui/fonts";
+import MessageBoxOKCancel from "@/app/lib/MessageBoxOKCancel";
+import { useRouter } from 'next/navigation';
+import {
+  setIsCancelButtonPressed, setIsDocumentChanged, setIsMessageBoxOpen,
+  setIsOKButtonPressed, setIsShowMessageBoxCancel, setMessageBoxText, useIsDocumentChanged,
+  useMessageBox
+} from "@/app/store/useDocumentStore";
+import { updRole } from "../../lib/store/useRoleStore";
 
 interface IRoleEditFormProps {
   role: RoleForm,
   role_sections: SectionForm[],
-
   tenants: Tenant[],
   sections: SectionForm[],
 }
 
 export default function RoleEditForm(props: IRoleEditFormProps) {
   const [role, setRole] = useState(props.role);
-  const [newSection, setNewSection] = useState<Section>({ id: "", name: "", tenant_id: "" });
   const [role_sections, setRoleSections] = useState<SectionForm[]>(props.role_sections);
-  // const sections = props.role.section_ids;
-  // console.log("sections: " + sections);
+  const router = useRouter();
+  const isDocumentChanged = useIsDocumentChanged();
+  const msgBox = useMessageBox();
 
   const handleSelectSection = (
     new_section_id: string,
@@ -43,23 +49,27 @@ export default function RoleEditForm(props: IRoleEditFormProps) {
       tenant_id: new_section_tenant_id,
       tenant_name: new_section_tenant_name
     }));
+    setIsDocumentChanged(true);
+    setMessageBoxText('Документ изменен. Закрыть без сохранения?');
   };
-
-  const handleRedirectBack = () => {
-    window.history.back(); // Возвращает пользователя на предыдущую страницу
-  };
-
+  // const handleRedirectBack = () => {
+  //   window.history.back(); // Возвращает пользователя на предыдущую страницу
+  // };
   const handleChangeName = (event: any) => {
     setRole((prev) => ({
       ...prev,
       name: event.target.value,
     }));
+    setIsDocumentChanged(true);
+    setMessageBoxText('Документ изменен. Закрыть без сохранения?');
   };
   const handleChangeDescription = (event: any) => {
     setRole((prev) => ({
       ...prev,
       description: event.target.value,
     }));
+    setIsDocumentChanged(true);
+    setMessageBoxText('Документ изменен. Закрыть без сохранения?');
   };
   const handleSelectTenant = (tenant_id: string, tenant_name: string) => {
     setRole((prev) => ({
@@ -67,6 +77,8 @@ export default function RoleEditForm(props: IRoleEditFormProps) {
       tenant_id: tenant_id,
       tenant_name: tenant_name,
     }));
+    setIsDocumentChanged(true);
+    setMessageBoxText('Документ изменен. Закрыть без сохранения?');
   }
   const prepareRoleSectionIds = (role_sections: SectionForm[]) => {
     setRole((prev) => ({
@@ -74,13 +86,59 @@ export default function RoleEditForm(props: IRoleEditFormProps) {
       section_ids: "{" + role_sections.map((section) => section.id).join(",") + "}",
       section_names: "{" + role_sections.map((section) => section.name).join(",") + "}",
     }));
-    // console.log("role_sections_ids: " + "{" + role_sections.map((section) => section.id).join(",") + "}");
-    // console.log("role.section_ids: " + role.section_ids);
+    setIsDocumentChanged(true);
+    setMessageBoxText('Документ изменен. Закрыть без сохранения?');
   };
   const handleDeleteRoleSection = (section_id: string) => {
     setRoleSections(role_sections.filter((section) => section.id !== section_id));
     prepareRoleSectionIds(role_sections.filter((section) => section.id !== section_id));
+
+    setIsDocumentChanged(true);
+    setMessageBoxText('Документ изменен. Закрыть без сохранения?');
   }
+  const handleBackClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (isDocumentChanged && !msgBox.isOKButtonPressed) {
+      setIsMessageBoxOpen(true);
+    } else if (isDocumentChanged && msgBox.isOKButtonPressed) {
+    } else if (!isDocumentChanged) {
+      router.push('/admin/roles');
+      // window.history.back(); // Возвращает пользователя на предыдущую страницу
+    }
+  };
+  const handleSaveClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    updRole(role.id, {
+      ...role,
+      section_ids: role.section_ids ? role.section_ids : "{}",
+      section_names: role.section_names ? role.section_names : "{}"
+    });
+    setIsDocumentChanged(false);
+
+    setMessageBoxText('Документ сохранен.');
+    setIsShowMessageBoxCancel(false);
+    setIsMessageBoxOpen(true);
+  };
+  useEffect(() => {
+    setIsDocumentChanged(false);
+    
+    setIsMessageBoxOpen(false);
+    setIsOKButtonPressed(false);
+    setIsCancelButtonPressed(false);
+    setIsShowMessageBoxCancel(true);
+    setMessageBoxText('');
+  }, []);
+
+  useEffect(() => {
+    if (msgBox.isOKButtonPressed && msgBox.messageBoxText === 'Документ изменен. Закрыть без сохранения?') {
+      router.push('/admin/roles/');
+    }
+    setIsOKButtonPressed(false);
+    setIsCancelButtonPressed(false);
+    setIsShowMessageBoxCancel(true);
+    setIsDocumentChanged(false);
+    setIsMessageBoxOpen(false);
+  }, [msgBox.isOKButtonPressed, router]);
   return (
 
     <div >
@@ -210,10 +268,7 @@ export default function RoleEditForm(props: IRoleEditFormProps) {
         <div className="flex w-full md:w-1/2">
           <div className="w-full md:w-1/2">
             <button
-              onClick={() => {
-                updateRole({ ...role, section_ids: role.section_ids ? role.section_ids : "{}", section_names: role.section_names ? role.section_names : "{}" });
-                // handleRedirectBack();
-              }}
+              onClick={handleSaveClick}
               className="bg-blue-400 text-white w-full rounded-md border p-2 
               hover:bg-blue-100 hover:text-gray-500 cursor-pointer"
             >
@@ -223,17 +278,17 @@ export default function RoleEditForm(props: IRoleEditFormProps) {
           <div className="w-full md:w-1/2">
             <Link href={"#"} >
               <button
-                onClick={() => handleRedirectBack()}
+                onClick={handleBackClick}
                 className="bg-blue-400 text-white w-full rounded-md border p-2
                  hover:bg-blue-100 hover:text-gray-500 cursor-pointer"
               >
-                Отмена
+                Закрыть
               </button>
             </Link>
           </div>
         </div>
       </div>
-
+      <MessageBoxOKCancel />
     </div >
 
   );

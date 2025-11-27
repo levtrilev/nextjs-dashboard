@@ -6,8 +6,7 @@ import { immer } from "zustand/middleware/immer";
 import { Tenant, User } from "@/app/lib/definitions";
 import { createTenant, deleteTenant } from "../lib/tenants-actions";
 import { fetchUsersAdmin } from "../../users/lib/users-actions";
-import { setIsMessageBoxOpen, setMessageBoxText } from "@/app/store/useMessageBoxStore";
-
+import { setIsMessageBoxOpen, setMessageBoxText } from "@/app/store/useDocumentStore"
 interface IInitialState {
   tenants: Tenant[];
   tenantUsers: User[];

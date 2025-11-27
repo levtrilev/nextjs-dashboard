@@ -1,6 +1,10 @@
 'use client';
 import { RoleForm } from '@/app/lib/definitions';
 import { BtnDeleteRole } from "./roles-buttons";
+import MessageBoxOKCancel from '@/app/lib/MessageBoxOKCancel';
+import { useEffect } from 'react';
+import { fillRoles, useRoles } from './store/useRoleStore';
+import { setIsShowMessageBoxCancel } from '@/app/store/useDocumentStore';
 
 interface IRolesTableProps {
     roles: RoleForm[],
@@ -8,8 +12,16 @@ interface IRolesTableProps {
 }
 export const RolesTable: React.FC<IRolesTableProps> = (props: IRolesTableProps) => {
     const datePlaceHolder = "01.01.2025";
-    const roles = props.roles.length !== 0 ? props.roles : [];
-
+    // const roles = props.roles.length !== 0 ? props.roles : [];
+    const items = props.roles.length !== 0 ? props.roles : [];
+    const roles = useRoles();
+    useEffect(
+        () => {
+            fillRoles(items);
+            setIsShowMessageBoxCancel(false);
+        },
+        []
+    );
     return (
         <div className="mt-6 flow-root">
             <div className="inline-block min-w-full align-middle">
@@ -112,6 +124,7 @@ export const RolesTable: React.FC<IRolesTableProps> = (props: IRolesTableProps) 
                     </div>
                 </div>
             </div>
+            <MessageBoxOKCancel />
         </div>
     );
 }

@@ -92,7 +92,7 @@ export async function createTenant(name: string, description: string): Promise<s
     console.error("Failed to create tenant:", error);
     throw new Error("Failed to create tenant.");
   }
-  revalidatePath("/admin");
+  revalidatePath("/admin/tenants");
 }
 
 export async function updateTenant(tenant: Tenant) {

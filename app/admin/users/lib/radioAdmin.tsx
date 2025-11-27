@@ -13,7 +13,7 @@ export default function RadioAdmin(props: IRadioAdminProps) {
     return (
         <div className="flex justify-between mt-1">
             <legend className="text-sm font-medium flex items-center p-2">
-                Is Admin status:
+                Admin status:
             </legend>
             <div>
                 <div className="rounded-md border border-gray-200 bg-white px-[14px] py-3">

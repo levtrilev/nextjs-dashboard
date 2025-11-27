@@ -6,22 +6,25 @@ import pool from "@/db"; // Импорт пула
 import { revalidatePath } from "next/cache";
 
 //#region Section
-export async function createSection(name: string, tenant_id: string) {
+export async function createSection(name: string, tenant_id: string): Promise<string> {
   const newSection: Section = {
     id: "",
     name: name,
     tenant_id: tenant_id,
   };
   try {
-    await pool.query(`
+    const result = await pool.query(`
         INSERT INTO sections (name, tenant_id)
         VALUES ($1, $2)
-      `, [newSection.name, newSection.tenant_id]); // Параметры $1, $2
+        RETURNING id
+      `, [newSection.name, newSection.tenant_id]);
+    newSection.id = result.rows[0].id;
+    return (newSection.id);  
   } catch (error) {
     console.error("Failed to create section:", error);
     throw new Error("Failed to create section.");
   }
-  revalidatePath("/dashboard/admin/sections");
+  revalidatePath("/admin/sections");
 }
 
 export async function updateSection(section: Section) {
@@ -46,7 +49,7 @@ export async function deleteSection(name: string, tenantId: string) {
     `, [name, tenantId]); // Параметры $1, $2
   } catch (error) {
     console.error("Database Error, Failed to Delete Section:", error);
-    throw new Error("Database Error: Failed to Delete Section");
+    throw new Error("Database Error: Failed to Delete Section:" + error);
   }
   revalidatePath("/admin");
 }

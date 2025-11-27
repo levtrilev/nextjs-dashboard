@@ -1,6 +1,13 @@
+'use client';
+
 import { formatDateToLocal } from "@/app/lib/utils";
 import { SectionForm } from '@/app/lib/definitions';
 import { BtnDeleteSection, BtnEditSectionLink } from "./sections-buttons";
+import { delSection, fillSections, useSections } from "./store/useSectionStore";
+import { useEffect } from "react";
+import { setIsShowMessageBoxCancel } from "@/app/store/useDocumentStore";
+import { TrashIcon } from '@heroicons/react/24/outline';
+import MessageBoxOKCancel from "@/app/lib/MessageBoxOKCancel";
 
 interface ISectionsTableProps {
     sections: SectionForm[],
@@ -8,10 +15,16 @@ interface ISectionsTableProps {
 }
 export const SectionsTable: React.FC<ISectionsTableProps> = (props: ISectionsTableProps) => {
 
-    // export default async function UsersTable() {
     const datePlaceHolder = "01.01.2025";
-    // const users = await fetchUsers();
-    const sections = props.sections;
+    const items = props.sections.length !== 0 ? props.sections : [];
+    const sections = useSections();
+    useEffect(
+        () => {
+            fillSections(items);
+            setIsShowMessageBoxCancel(false);
+        },
+        []
+    );
     return (
         <div className="mt-6 flow-root">
             <div className="inline-block min-w-full align-middle">
@@ -85,8 +98,14 @@ export const SectionsTable: React.FC<ISectionsTableProps> = (props: ISectionsTab
                                     </td>
                                     <td className="whitespace-nowrap py-3 pl-6 pr-3">
                                         <div className="flex justify-end gap-3">
-                                            { props.admin && <BtnDeleteSection id={sec.id} /> }
-                                            { props.admin && <BtnEditSectionLink id={sec.id} /> }
+                                            {/* { props.admin && <BtnDeleteSection id={sec.id} /> } */}
+                                            {props.admin && <button className="rounded-md border border-gray-200 p-2 h-10 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                onClick={() => {
+                                                    delSection(sec.name, sec.tenant_id);
+                                                }}>
+                                                <TrashIcon className="w-5 h-5 text-gray-800" />
+                                            </button>}
+                                            {props.admin && <BtnEditSectionLink id={sec.id} />}
 
                                         </div>
                                     </td>
@@ -96,6 +115,7 @@ export const SectionsTable: React.FC<ISectionsTableProps> = (props: ISectionsTab
                     </table>
                 </div>
             </div>
+            <MessageBoxOKCancel />
         </div>
     );
 }
