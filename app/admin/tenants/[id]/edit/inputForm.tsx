@@ -7,7 +7,7 @@ import {
   setIsCancelButtonPressed, setIsDocumentChanged, setIsMessageBoxOpen,
   setIsOKButtonPressed, setIsShowMessageBoxCancel, setMessageBoxText, useIsDocumentChanged,
   useMessageBox
-} from "@/app/store/useDocumentStore";import { useRouter } from 'next/navigation';
+} from "@/app/store/useDocumentStore"; import { useRouter } from 'next/navigation';
 import MessageBoxOKCancel from "@/app/lib/MessageBoxOKCancel";
 
 interface IInputFormProps {
@@ -49,8 +49,8 @@ export const InputForm: FC<IInputFormProps> = (props: IInputFormProps) => {
   };
   const handleBackClick = (e: React.MouseEvent) => {
     e.preventDefault();
-        setIsShowMessageBoxCancel(true);
     if (isDocumentChanged && !msgBox.isOKButtonPressed) {
+      setIsShowMessageBoxCancel(true);
       setIsMessageBoxOpen(true);
     } else if (isDocumentChanged && msgBox.isOKButtonPressed) {
     } else if (!isDocumentChanged) {

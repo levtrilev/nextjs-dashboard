@@ -22,7 +22,7 @@ export async function createSection(name: string, tenant_id: string): Promise<st
     return (newSection.id);  
   } catch (error) {
     console.error("Failed to create section:", error);
-    throw new Error("Failed to create section.");
+    throw new Error("Failed to create section: " + error);
   }
   revalidatePath("/admin/sections");
 }
@@ -36,7 +36,7 @@ export async function updateSection(section: Section) {
       `, [section.name, section.tenant_id, section.id]); // Параметры $1-$3
   } catch (error) {
     console.error("Failed to update section:", error);
-    throw new Error("Failed to update section.");
+    throw new Error("Failed to update section: " + error);
   }
   revalidatePath("/admin/sections");
 }

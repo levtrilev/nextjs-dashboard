@@ -1,17 +1,19 @@
 'use client';
 
 import { formatDateToLocal } from "@/app/lib/utils";
-import { SectionForm } from '@/app/lib/definitions';
+import { SectionForm, Tenant } from '@/app/lib/definitions';
 import { BtnDeleteSection, BtnEditSectionLink } from "./sections-buttons";
 import { delSection, fillSections, useSections } from "./store/useSectionStore";
 import { useEffect } from "react";
 import { setIsShowMessageBoxCancel } from "@/app/store/useDocumentStore";
 import { TrashIcon } from '@heroicons/react/24/outline';
 import MessageBoxOKCancel from "@/app/lib/MessageBoxOKCancel";
+import { NewSection } from "./newSection";
 
 interface ISectionsTableProps {
     sections: SectionForm[],
     admin: boolean,
+    tenants: Tenant[]
 }
 export const SectionsTable: React.FC<ISectionsTableProps> = (props: ISectionsTableProps) => {
 
@@ -27,6 +29,7 @@ export const SectionsTable: React.FC<ISectionsTableProps> = (props: ISectionsTab
     );
     return (
         <div className="mt-6 flow-root">
+            {props.admin && <NewSection tenants={props.tenants} />}
             <div className="inline-block min-w-full align-middle">
                 <div className="rounded-lg bg-gray-50 p-2 md:pt-0">
                     <div className="md:hidden">

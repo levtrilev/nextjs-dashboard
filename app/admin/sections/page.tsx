@@ -25,20 +25,14 @@ async function Page() {
         : isAdmin ? await fetchSectionsFormAdmin(current_user.tenant_id)
             : await fetchSectionsForm(current_sections);
     const tenants = isSuperadmin ? await fetchTenantsSuperadmin() : await fetchTenantsAdmin(current_user.tenant_id);
-    // const users = isSuperadmin ? await fetchUsersSuperadmin()
-    //     : isAdmin ? await fetchUsersAdmin(current_user.tenant_id)
-    //         : await fetchUsersUser(email as string);
-
-    // const sections: Section[] = await fetchSections();
-    // const tenants: Tenant[] = await fetchTenants();
 
     return (
         <div className="w-full">
             <div className="flex w-full items-center justify-between">
                 <h1 className={`${lusitana.className} text-2xl`}>Разделы</h1>
             </div>
-            { (isSuperadmin || isAdmin) && <NewSection tenants={tenants} /> }
-            <SectionsTable sections={sections} admin={ isSuperadmin || isAdmin } />
+            {/* { (isSuperadmin || isAdmin) && <NewSection tenants={tenants} /> } */}
+            <SectionsTable sections={sections} admin={ isSuperadmin || isAdmin } tenants={tenants}/>
         </div>
     );
 }

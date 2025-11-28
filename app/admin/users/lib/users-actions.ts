@@ -4,7 +4,6 @@
 
 import pool from "@/db";
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import type { User, UserForm } from "@/app/lib/definitions";
 import bcrypt from "bcrypt";
 
@@ -14,7 +13,7 @@ export async function createUser(
   password: string,
   tenant_id: string,
   is_admin: boolean = false
-) {
+): Promise<string> {
   const saltOrRounds = 10;
   const hash = await bcrypt.hash(password, saltOrRounds);
 
@@ -25,22 +24,24 @@ export async function createUser(
     password: hash,
     tenant_id: tenant_id,
     is_admin: is_admin,
-    is_superadmin: is_admin,
+    is_superadmin: false,
     role_ids: "{}",
   };
 
   try {
-    await pool.query(
+    const result = await pool.query(
       `INSERT INTO users (name, email, password, is_admin, tenant_id)
-       VALUES ($1, $2, $3, $4, $5)`,
+       VALUES ($1, $2, $3, $4, $5)
+       RETURNING id`,
       [newUser.name, newUser.email, newUser.password, newUser.is_admin, newUser.tenant_id]
     );
+    const id = result.rows[0].id;
+    return id;  
   } catch (error) {
     console.error("Failed to create user:", error);
-    throw new Error("Failed to create user.");
+    throw new Error("Failed to create user: " + error);
   }
-  revalidatePath("/admin");
-  redirect("/admin");
+  revalidatePath("/admin/users");
 }
 
 export async function updateUser(user: User) {
@@ -73,7 +74,6 @@ export async function deleteUser(email: string) {
     throw new Error("Database Error: Failed to Delete User");
   }
   revalidatePath("/admin");
-  redirect("/admin");
 }
 
 export async function deleteUserById(id: string) {
@@ -86,8 +86,7 @@ export async function deleteUserById(id: string) {
     console.error("Database Error, Failed to Delete User by id:", error);
     throw new Error("Database Error: Failed to Delete User by id");
   }
-  revalidatePath("/admin");
-  redirect("/admin");
+  revalidatePath("/admin/users");
 }
 //#endregion
 
@@ -141,7 +140,7 @@ export async function fetchUsersAdmin(tenant_id: string) {
     throw new Error("Failed to fetch all users.");
   }
 }
-export async function fetchUsersWithRoleAdmin(tenant_id: string, role_id: string) {
+export async function fetchUsersWithRoleAdmin(role_id: string, tenant_id: string) {
   try {
     const result = await pool.query<UserForm>(
       `SELECT
@@ -155,7 +154,7 @@ export async function fetchUsersWithRoleAdmin(tenant_id: string, role_id: string
          u.role_ids as role_ids
        FROM users u 
        JOIN tenants t ON u.tenant_id = t.id
-       WHERE u.tenant_id = $1 AND u.role_ids @> ARRAY[$2::varchar]
+       WHERE u.tenant_id = $1 AND u.role_ids @> ARRAY[$2::uuid]
        ORDER BY tenant_id ASC`,
       [tenant_id, role_id]
     );

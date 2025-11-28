@@ -1,9 +1,12 @@
 'use client';
 import { formatDateToLocal } from "@/app/lib/utils";
-import { User, UserForm } from '@/app/lib/definitions';
-import { BtnDeleteUser, BtnEditUserLink } from "./users-buttons";
+import { UserForm } from '@/app/lib/definitions';
+import { BtnEditUserLink } from "./users-buttons";
 import { useEffect } from "react";
 import { setIsShowMessageBoxCancel } from "@/app/store/useDocumentStore";
+import { delUser, fillUsers, useUsers } from "./store/useUserStore";
+import { TrashIcon } from "@heroicons/react/24/outline";
+import MessageBoxOKCancel from "@/app/lib/MessageBoxOKCancel";
 
 interface IUsersTableProps {
     users: UserForm[],
@@ -11,16 +14,16 @@ interface IUsersTableProps {
 }
 export const UsersTable: React.FC<IUsersTableProps> = (props: IUsersTableProps) => {
 
-    // export default async function UsersTable() {
     const datePlaceHolder = "01.01.2025";
-    // const users = await fetchUsers();
-    const users = props.users;
-        useEffect(
-            () => {
-                setIsShowMessageBoxCancel(false);
-            },
-            []
-        );
+    const items = props.users.length !== 0 ? props.users : [];
+    const users = useUsers();
+    useEffect(
+        () => {
+            fillUsers(items);
+            setIsShowMessageBoxCancel(false);
+        },
+        []
+    );
     return (
         <div className="mt-6 flow-root">
             <div className="inline-block min-w-full align-middle">
@@ -61,7 +64,7 @@ export const UsersTable: React.FC<IUsersTableProps> = (props: IUsersTableProps) 
                             <tr>
                                 <th scope="col" className="px-3 py-5 font-medium">
                                     Email
-                                </th>                                
+                                </th>
                                 <th scope="col" className="px-4 py-5 font-medium sm:pl-6">
                                     Организация
                                 </th>
@@ -101,8 +104,13 @@ export const UsersTable: React.FC<IUsersTableProps> = (props: IUsersTableProps) 
                                     </td>
                                     <td className="whitespace-nowrap py-3 pl-6 pr-3">
                                         <div className="flex justify-end gap-3">
-                                            { props.admin && !user.is_superadmin && <BtnDeleteUser id={user.id} /> }
-                                            { props.admin && !user.is_superadmin && <BtnEditUserLink id={user.id} /> }
+                                            {/* {props.admin && !user.is_superadmin && <BtnDeleteUser id={user.id} />} */}
+                                            {props.admin&& !user.is_superadmin  && <button className="rounded-md border border-gray-200 p-2 h-10 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                onClick={() => {
+                                                    delUser(user.email);
+                                                }}>
+                                                <TrashIcon className="w-5 h-5 text-gray-800" />
+                                            </button>}                                            {props.admin && !user.is_superadmin && <BtnEditUserLink id={user.id} />}
                                         </div>
                                     </td>
                                 </tr>
@@ -111,6 +119,7 @@ export const UsersTable: React.FC<IUsersTableProps> = (props: IUsersTableProps) 
                     </table>
                 </div>
             </div>
+            <MessageBoxOKCancel />
         </div>
     );
 }

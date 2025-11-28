@@ -94,7 +94,8 @@ const useTenantStore = create<ITenantState>()(
           tenants: state.tenants,
           tenantUsers: state.tenantUsers,
         }),
-      })
+      }),
+      { name: "Tenants" }
     )
   )
 );

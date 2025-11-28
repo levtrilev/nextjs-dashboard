@@ -82,7 +82,8 @@ const useDocumentStore = create<IDocumentState>()(
           messageBox: state.messageBox,
           isDocumentChanged: state.isDocumentChanged,
         }),
-      })
+      },),
+      { name: "Document" }
     )
   )
 );

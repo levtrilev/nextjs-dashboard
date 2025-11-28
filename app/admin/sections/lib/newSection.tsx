@@ -2,26 +2,30 @@
 import { useState } from 'react';
 import { Tenant } from '@/app/lib/definitions';
 import { PlusIcon } from '@heroicons/react/24/outline';
-import { createSection } from './sections-actions';
+// import { createSection } from './sections-actions';
+import { addSection, useSections } from './store/useSectionStore';
 
 interface INewSectionProps {
   tenants: Tenant[],
 }
 export const NewSection: React.FC<INewSectionProps> = (props: INewSectionProps) => {
-
+  const sections = useSections();
   const [name, setName] = useState<string>("");
   const [tenantId, setTenantId] = useState<string>("");
+  const [tenantName, setTenantName] = useState<string>("");
   function handleChangeName(event: any) {
     setName(event.target.value);
   }
   function handleSelectTenant(event: any) {
     setTenantId(event.target.value);
+    setTenantName(event.target.selectedOptions[0].text);
   }
   return (
     <div className="flex items-center p-4">
       <form
         action={() => {
-          createSection(name, tenantId);
+          // createSection(name, tenantId);
+          addSection(name, tenantId, tenantName);
           setName('');
           setTenantId('');
         }}

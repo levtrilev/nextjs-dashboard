@@ -41,6 +41,7 @@ export default function InputForm(props: IInputFormProps) {
   const handleBackClick = (e: React.MouseEvent) => {
     e.preventDefault();
     if (isDocumentChanged && !msgBox.isOKButtonPressed) {
+      setIsShowMessageBoxCancel(true);
       setIsMessageBoxOpen(true);
     } else if (isDocumentChanged && msgBox.isOKButtonPressed) {
     } else if (!isDocumentChanged) {
@@ -50,10 +51,10 @@ export default function InputForm(props: IInputFormProps) {
   const handleSaveClick = (e: React.MouseEvent) => {
     e.preventDefault();
     updSection(section.id, {
-       ...section, 
-       name: section.name, 
-       tenant_id: section.tenant_id 
-      });
+      ...section,
+      name: section.name,
+      tenant_id: section.tenant_id
+    });
     setIsDocumentChanged(false);
     setMessageBoxText('Документ сохранен.');
     setIsShowMessageBoxCancel(false);
@@ -61,7 +62,7 @@ export default function InputForm(props: IInputFormProps) {
   };
   useEffect(() => {
     setIsDocumentChanged(false);
-    
+
     setIsMessageBoxOpen(false);
     setIsOKButtonPressed(false);
     setIsCancelButtonPressed(false);

@@ -4,8 +4,12 @@ import { create, type StateCreator } from "zustand";
 import { createJSONStorage, devtools, persist } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 import { Role, RoleForm } from "@/app/lib/definitions";
-import { setIsMessageBoxOpen, setMessageBoxText } from "@/app/store/useDocumentStore";
+import {
+  setIsMessageBoxOpen,
+  setMessageBoxText,
+} from "@/app/store/useDocumentStore";
 import { createRole, deleteRole, updateRole } from "../roles-actions";
+import { fetchUsersWithRoleAdmin } from "@/app/admin/users/lib/users-actions";
 
 interface IInitialState {
   roles: RoleForm[];
@@ -13,9 +17,16 @@ interface IInitialState {
 
 interface IActions {
   fillRoles: (roles: RoleForm[]) => void;
-  addRole: (name: string, description: string, tenantId: string, sectionIds: string, sectionNames: string) => void;
+  addRole: (
+    name: string,
+    description: string,
+    tenantId: string,
+    tenantName: string,
+    sectionIds: string,
+    sectionNames: string
+  ) => void;
   updRole: (id: string, newRole: RoleForm) => void;
-  delRole: (roleName: string, tenantId: string) => void;
+  delRole: (role_id: string, tenant_id: string) => void;
 }
 
 interface IRoleState extends IInitialState, IActions {}
@@ -40,11 +51,18 @@ const roleStore: StateCreator<
     name: string,
     description: string,
     tenantId: string,
+    tenantName: string,
     sectionIds: string,
     sectionNames: string
   ) => {
     try {
-      const newRoleId = await createRole(name, description, tenantId, sectionIds, sectionNames);
+      const newRoleId = await createRole(
+        name,
+        description,
+        tenantId,
+        sectionIds,
+        sectionNames
+      );
       const newRole: Role = {
         id: newRoleId,
         name,
@@ -55,7 +73,7 @@ const roleStore: StateCreator<
       };
       set(
         (state: IRoleState) => {
-          state.roles.push({ ...newRole, tenant_name: "" });
+          state.roles.push({ ...newRole, tenant_name: tenantName });
           state.roles.sort((a, b) => (a.name > b.name ? 1 : -1));
         },
         false,
@@ -79,15 +97,23 @@ const roleStore: StateCreator<
       "updRole"
     );
   },
-  delRole: async (id: string): Promise<void> => {
+  delRole: async (role_id: string, tenant_id: string): Promise<void> => {
     try {
-      await deleteRole(id);
+            const users = await fetchUsersWithRoleAdmin(role_id, tenant_id); 
+            if (users.length > 0) {
+              setMessageBoxText(
+                `Нельзя удалить Роль, используемую Пользователем: ${users[0].email} в Организации: ${users[0].tenant_name}`
+              );
+              setIsMessageBoxOpen(true);
+              return;
+            }
+      await deleteRole(role_id);
       set(
         (state: IRoleState) => {
-          const index = state.roles.findIndex((role) => role.id === id);
+          const index = state.roles.findIndex((role) => role.id === role_id);
           if (index !== -1) {
             state.roles.splice(index, 1);
-            console.log("splice roles index: " + index);
+            // console.log("splice roles index: " + index);
           }
         },
         false,
@@ -109,7 +135,8 @@ const useRoleStore = create<IRoleState>()(
         partialize: (state) => ({
           roles: state.roles,
         }),
-      })
+      }),
+      { name: "Roles" }
     )
   )
 );
@@ -123,13 +150,17 @@ export const addRole = (
   name: string,
   description: string,
   tenantId: string,
+  tenantName: string,
   sectionIds: string,
   sectionNames: string
-) => useRoleStore.getState().addRole(name, description, tenantId, sectionIds, sectionNames);
+) =>
+  useRoleStore
+    .getState()
+    .addRole(name, description, tenantId, tenantName, sectionIds, sectionNames);
 export const updRole = (id: string, newRole: RoleForm) =>
   useRoleStore.getState().updRole(id, newRole);
-export const delRole = async (roleName: string, tenantId: string) =>
-  useRoleStore.getState().delRole(roleName, tenantId);
+export const delRole = async (roleId: string, tenantId: string) =>
+  useRoleStore.getState().delRole(roleId, tenantId);
 
 // (конец образца)
 // // вот как определены типы Role и RoleForm

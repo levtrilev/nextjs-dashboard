@@ -1,16 +1,16 @@
 'use client';
 import { useEffect, useState } from "react";
 import { RoleForm, SectionForm, Tenant, UserForm } from "@/app/lib/definitions";
-import { updateUser } from "../lib/users-actions";
 import { TrashIcon } from "@heroicons/react/24/outline";
 import BtnRolesRef from "@/app/admin/roles/lib/btnRolesRef";
 import {
   setIsCancelButtonPressed, setIsDocumentChanged, setIsMessageBoxOpen,
   setIsOKButtonPressed, setIsShowMessageBoxCancel, setMessageBoxText, useIsDocumentChanged,
   useMessageBox
-} from "@/app/store/useDocumentStore";import { useRouter } from 'next/navigation';
+} from "@/app/store/useDocumentStore"; import { useRouter } from 'next/navigation';
 import MessageBoxOKCancel from "@/app/lib/MessageBoxOKCancel";
 import RadioAdmin from "../lib/radioAdmin";
+import { updUser } from "../lib/store/useUserStore";
 
 
 interface IInputFormProps {
@@ -70,7 +70,7 @@ export default function InputForm(props: IInputFormProps) {
     setIsDocumentChanged(true);
     setMessageBoxText('Документ изменен. Закрыть без сохранения?');
   };
-    const handleChangeAdminStatus = (event: any) => {
+  const handleChangeAdminStatus = (event: any) => {
     setUser((prev) => ({
       ...prev,
       is_admin: !prev.is_admin,
@@ -95,6 +95,7 @@ export default function InputForm(props: IInputFormProps) {
   const handleBackClick = (e: React.MouseEvent) => {
     e.preventDefault();
     if (isDocumentChanged && !msgBox.isOKButtonPressed) {
+      setIsShowMessageBoxCancel(true);
       setIsMessageBoxOpen(true);
     } else if (isDocumentChanged && msgBox.isOKButtonPressed) {
     } else if (!isDocumentChanged) {
@@ -103,15 +104,7 @@ export default function InputForm(props: IInputFormProps) {
   };
   const handleSaveClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    updateUser({
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      is_admin: user.is_admin,
-      is_superadmin: user.is_superadmin,
-      tenant_id: user.tenant_id,
-      role_ids: user.role_ids,
-    });
+    updUser(user.id, user);
     setIsDocumentChanged(false);
     setMessageBoxText('Документ сохранен.');
     setIsShowMessageBoxCancel(false);

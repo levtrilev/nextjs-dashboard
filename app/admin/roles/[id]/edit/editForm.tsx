@@ -99,6 +99,7 @@ export default function RoleEditForm(props: IRoleEditFormProps) {
   const handleBackClick = (e: React.MouseEvent) => {
     e.preventDefault();
     if (isDocumentChanged && !msgBox.isOKButtonPressed) {
+      setIsShowMessageBoxCancel(true);
       setIsMessageBoxOpen(true);
     } else if (isDocumentChanged && msgBox.isOKButtonPressed) {
     } else if (!isDocumentChanged) {
@@ -121,7 +122,7 @@ export default function RoleEditForm(props: IRoleEditFormProps) {
   };
   useEffect(() => {
     setIsDocumentChanged(false);
-    
+
     setIsMessageBoxOpen(false);
     setIsOKButtonPressed(false);
     setIsCancelButtonPressed(false);
@@ -132,6 +133,7 @@ export default function RoleEditForm(props: IRoleEditFormProps) {
   useEffect(() => {
     if (msgBox.isOKButtonPressed && msgBox.messageBoxText === 'Документ изменен. Закрыть без сохранения?') {
       router.push('/admin/roles/');
+      // window.history.back();
     }
     setIsOKButtonPressed(false);
     setIsCancelButtonPressed(false);

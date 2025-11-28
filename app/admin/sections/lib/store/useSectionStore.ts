@@ -4,8 +4,15 @@ import { create, type StateCreator } from "zustand";
 import { createJSONStorage, devtools, persist } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 import { Section, SectionForm } from "@/app/lib/definitions";
-import { setIsMessageBoxOpen, setMessageBoxText } from "@/app/store/useDocumentStore";
-import { createSection, deleteSection, updateSection } from "../sections-actions";
+import {
+  setIsMessageBoxOpen,
+  setMessageBoxText,
+} from "@/app/store/useDocumentStore";
+import {
+  createSection,
+  deleteSection,
+  updateSection,
+} from "../sections-actions";
 import { fetchRolesFormWithSectionSuperadmin } from "@/app/admin/roles/lib/roles-actions";
 
 interface IInitialState {
@@ -14,7 +21,7 @@ interface IInitialState {
 
 interface IActions {
   fillSections: (sections: SectionForm[]) => void;
-  addSection: (name: string, tenantId: string) => void;
+  addSection: (name: string, tenantId: string, tenantName: string) => void;
   updSection: (id: string, newSection: SectionForm) => void;
   delSection: (sectionName: string, tenantId: string) => void;
 }
@@ -37,7 +44,7 @@ const sectionStore: StateCreator<
   fillSections: (sections: SectionForm[]) => {
     set({ sections }, false, "fillSections");
   },
-  addSection: async (name: string, tenantId: string) => {
+  addSection: async (name: string, tenantId: string, tenantName: string) => {
     try {
       const newSectionId = await createSection(name, tenantId);
       const newSection: Section = {
@@ -47,7 +54,7 @@ const sectionStore: StateCreator<
       };
       set(
         (state: ISectionState) => {
-          state.sections.push({...newSection, tenant_name: ""});
+          state.sections.push({ ...newSection, tenant_name: tenantName });
           state.sections.sort((a, b) => (a.name > b.name ? 1 : -1));
         },
         false,
@@ -73,19 +80,27 @@ const sectionStore: StateCreator<
   },
   delSection: async (sectionName: string, tenantId: string): Promise<void> => {
     try {
-      const roles = await fetchRolesFormWithSectionSuperadmin(sectionName, tenantId);
+      const roles = await fetchRolesFormWithSectionSuperadmin(
+        sectionName,
+        tenantId
+      );
       if (roles.length > 0) {
-        setMessageBoxText("Нельзя удалить Раздел, используемый в Роли. см. Роль: " + roles[0].name);
+        setMessageBoxText(
+          "Нельзя удалить Раздел, используемый в Роли. см. Роль: " +
+            roles[0].name
+        );
         setIsMessageBoxOpen(true);
         return;
       }
       await deleteSection(sectionName, tenantId);
       set(
         (state: ISectionState) => {
-          const index = state.sections.findIndex((section) => section.name === sectionName);
+          const index = state.sections.findIndex(
+            (section) => section.name === sectionName
+          );
           if (index !== -1) {
             state.sections.splice(index, 1);
-            console.log("splice sections index: " + index);
+            // console.log("splice sections index: " + index);
           }
         },
         false,
@@ -107,7 +122,8 @@ const useSectionStore = create<ISectionState>()(
         partialize: (state) => ({
           sections: state.sections,
         }),
-      })
+      }),
+      { name: "Sections" }
     )
   )
 );
@@ -117,8 +133,11 @@ export const useSections = () => useSectionStore((state) => state.sections);
 
 export const fillSections = (sections: SectionForm[]) =>
   useSectionStore.getState().fillSections(sections);
-export const addSection = (name: string, tenantId: string) =>
-  useSectionStore.getState().addSection(name, tenantId);
+export const addSection = (
+  name: string,
+  tenantId: string,
+  tenantName: string
+) => useSectionStore.getState().addSection(name, tenantId, tenantName);
 export const updSection = (id: string, newSection: SectionForm) =>
   useSectionStore.getState().updSection(id, newSection);
 export const delSection = async (sectionName: string, tenantId: string) =>

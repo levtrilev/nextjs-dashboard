@@ -1,8 +1,8 @@
 'use client';
 import { useState } from 'react';
-import { createUser } from './users-actions';
 import { Tenant } from '@/app/lib/definitions';
 import { PlusIcon } from '@heroicons/react/24/outline';
+import { addUser } from './store/useUserStore';
 
 interface INewUserProps {
   tenants: Tenant[],
@@ -12,6 +12,7 @@ export const NewUser: React.FC<INewUserProps> = (props: INewUserProps) => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [tenantId, setTenantId] = useState<string>("");
+  const [tenantName, setTenantName] = useState<string>("");
   function handleChangeEmail(event: any) {
     setEmail(event.target.value);
   }
@@ -20,13 +21,15 @@ export const NewUser: React.FC<INewUserProps> = (props: INewUserProps) => {
   }
   function handleSelectTenant(event: any) {
     setTenantId(event.target.value);
+    setTenantName(event.target.selectedOptions[0].text);
   }
   return (
     <div className="flex items-center p-4">
       <form
-        action={() => {
-          createUser(email, password, tenantId, false);
-          setEmail(''); setPassword(''); setTenantId('');
+        action={() => { 
+                    // createUser(email, password, tenantId, false);
+          addUser(email, password, false, tenantId, tenantName); 
+          setEmail(''); setPassword(''); setTenantId(''); setTenantName('');
         }}
         className="flex gap-2">
         <div className="flex-1 flex items-center">

@@ -1,10 +1,10 @@
 'use client';
 import { RoleForm } from '@/app/lib/definitions';
-import { BtnDeleteRole } from "./roles-buttons";
 import MessageBoxOKCancel from '@/app/lib/MessageBoxOKCancel';
 import { useEffect } from 'react';
-import { fillRoles, useRoles } from './store/useRoleStore';
+import { delRole, fillRoles, useRoles } from './store/useRoleStore';
 import { setIsShowMessageBoxCancel } from '@/app/store/useDocumentStore';
+import { TrashIcon } from '@heroicons/react/24/outline';
 
 interface IRolesTableProps {
     roles: RoleForm[],
@@ -12,7 +12,6 @@ interface IRolesTableProps {
 }
 export const RolesTable: React.FC<IRolesTableProps> = (props: IRolesTableProps) => {
     const datePlaceHolder = "01.01.2025";
-    // const roles = props.roles.length !== 0 ? props.roles : [];
     const items = props.roles.length !== 0 ? props.roles : [];
     const roles = useRoles();
     useEffect(
@@ -72,8 +71,13 @@ export const RolesTable: React.FC<IRolesTableProps> = (props: IRolesTableProps) 
                                     </td>
                                     <td className="w-1/16 whitespace-nowrap pl-4 py-1 pr-3">
                                         <div className="flex justify-end gap-3">
-                                            {props.admin && <BtnDeleteRole id={role.id} />}
-                                            {/* <BtnEditRoleLink id={role.id} /> */}
+                                            {/* {props.admin && <BtnDeleteRole id={role.id} />} */}
+                                            {props.admin && <button className="rounded-md border border-gray-200 p-2 h-10 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                onClick={() => {
+                                                    delRole(role.id, role.tenant_id);
+                                                }}>
+                                                <TrashIcon className="w-5 h-5 text-gray-800" />
+                                            </button>}
                                         </div>
                                     </td>
                                 </tr>
@@ -102,7 +106,13 @@ export const RolesTable: React.FC<IRolesTableProps> = (props: IRolesTableProps) 
                                             )}
                                         </div>
                                         <div className="flex justify-end">
-                                            {props.admin && <BtnDeleteRole id={role.id} />}
+                                            {/* {props.admin && <BtnDeleteRole id={role.id} />} */}
+                                            {props.admin && <button className="rounded-md border border-gray-200 p-2 h-10 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                onClick={() => {
+                                                    delRole(role.id, role.tenant_id);
+                                                }}>
+                                                <TrashIcon className="w-5 h-5 text-gray-800" />
+                                            </button>}
                                         </div>
                                     </div>
                                     <div>
@@ -130,34 +140,3 @@ export const RolesTable: React.FC<IRolesTableProps> = (props: IRolesTableProps) 
 }
 
 export default RolesTable;
-
-
-// <div className="md:hidden">
-// {roles.length > 0 && roles.map((role) => (
-//     <div
-//         key={role.id}
-//         className="mb-2 w-full rounded-md bg-white p-4"
-//     >
-//         <div className="flex items-center justify-between border-b pb-4">
-//             <div>
-//                 <div className="mb-2 flex items-center">
-//                     <p>{role.name}</p>
-//                 </div>
-//                 <p className="text-sm text-gray-500">tenant_id: {" " + role.tenant_id}</p>
-//             </div>
-//         </div>
-//         <div className="flex w-full items-center justify-between pt-4">
-//             <div>
-//                 <p className="text-xl font-medium">
-//                     {role.description}
-//                 </p>
-//             </div>
-//             <div className="flex justify-end gap-2">
-//                 <p className="text-xl font-medium">
-//                     Delete
-//                 </p>
-//             </div>
-//         </div>
-//     </div>
-// ))}
-// </div>

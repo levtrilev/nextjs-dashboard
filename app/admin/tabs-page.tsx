@@ -39,7 +39,7 @@ export const TabsPage: React.FC<ITabsPageProps> = (props: ITabsPageProps) => {
             {tab === 'sections' &&
                 <>
                     { (props.isSuperadmin || props.isAdmin) && <NewSection tenants={props.tenants} /> }
-                    <SectionsTable sections={props.sections} admin={ (props.isSuperadmin || props.isAdmin) }/>
+                    <SectionsTable sections={props.sections} admin={ (props.isSuperadmin || props.isAdmin) } tenants={props.tenants}/>
                 </>
             }
         </>
