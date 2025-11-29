@@ -2,8 +2,8 @@
 import { formatDateToLocal } from "@/app/lib/utils";
 import { UserForm } from '@/app/lib/definitions';
 import { BtnEditUserLink } from "./users-buttons";
-import { useEffect } from "react";
-import { setIsShowMessageBoxCancel } from "@/app/store/useDocumentStore";
+import { useEffect, useState } from "react";
+import { setIsCancelButtonPressed, setIsDocumentChanged, setIsMessageBoxOpen, setIsOKButtonPressed, setIsShowMessageBoxCancel, setMessageBoxText, useMessageBox } from "@/app/store/useDocumentStore";
 import { delUser, fillUsers, useUsers } from "./store/useUserStore";
 import { TrashIcon } from "@heroicons/react/24/outline";
 import MessageBoxOKCancel from "@/app/lib/MessageBoxOKCancel";
@@ -17,6 +17,14 @@ export const UsersTable: React.FC<IUsersTableProps> = (props: IUsersTableProps) 
     const datePlaceHolder = "01.01.2025";
     const items = props.users.length !== 0 ? props.users : [];
     const users = useUsers();
+    const msgBox = useMessageBox();
+    const [userToDelete, setUserToDelete] = useState<UserForm>({} as UserForm);
+    const handleDelete = (user: UserForm) => {
+        setMessageBoxText(`Пользователь: ${user.email} \nУдалить Пользователя?`);
+        setIsShowMessageBoxCancel(true);
+        setIsMessageBoxOpen(true);
+        setUserToDelete(user);
+    }
     useEffect(
         () => {
             fillUsers(items);
@@ -24,6 +32,18 @@ export const UsersTable: React.FC<IUsersTableProps> = (props: IUsersTableProps) 
         },
         []
     );
+    useEffect(() => {
+        if (msgBox.isOKButtonPressed && msgBox.messageBoxText.includes('Удалить Пользователя?')) {
+            delUser(userToDelete);
+            // delRole(roleToDelete);
+            setIsCancelButtonPressed(false);
+            setIsShowMessageBoxCancel(false);
+            setIsDocumentChanged(false);
+            setIsMessageBoxOpen(false);
+        }
+        setIsOKButtonPressed(false);
+
+    }, [msgBox.isOKButtonPressed, msgBox.messageBoxText, userToDelete]);
     return (
         <div className="mt-6 flow-root">
             <div className="inline-block min-w-full align-middle">
@@ -105,9 +125,10 @@ export const UsersTable: React.FC<IUsersTableProps> = (props: IUsersTableProps) 
                                     <td className="whitespace-nowrap py-3 pl-6 pr-3">
                                         <div className="flex justify-end gap-3">
                                             {/* {props.admin && !user.is_superadmin && <BtnDeleteUser id={user.id} />} */}
-                                            {props.admin&& !user.is_superadmin  && <button className="rounded-md border border-gray-200 p-2 h-10 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            {props.admin && !user.is_superadmin && <button className="rounded-md border border-gray-200 p-2 h-10 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                                 onClick={() => {
-                                                    delUser(user.email);
+                                                    // delUser(user.email);
+                                                    handleDelete(user);
                                                 }}>
                                                 <TrashIcon className="w-5 h-5 text-gray-800" />
                                             </button>}                                            {props.admin && !user.is_superadmin && <BtnEditUserLink id={user.id} />}

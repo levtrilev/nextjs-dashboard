@@ -8,7 +8,7 @@ import { delTenant, fillTenants, useTenants } from "../store/useTenantStore";
 import { useEffect, useState } from "react";
 import { TrashIcon } from '@heroicons/react/24/outline';
 import MessageBoxOKCancel from "@/app/lib/MessageBoxOKCancel";
-import { setIsShowMessageBoxCancel } from "@/app/store/useDocumentStore";
+import { setIsCancelButtonPressed, setIsDocumentChanged, setIsMessageBoxOpen, setIsOKButtonPressed, setIsShowMessageBoxCancel, setMessageBoxText, useMessageBox } from "@/app/store/useDocumentStore";
 
 const BtnEditTenantModal = dynamic(() => import('./btnEditTenantModal'), { ssr: false });
 
@@ -21,6 +21,14 @@ export const TenantsTable: React.FC<ITenantsTableProps> = (props: ITenantsTableP
     const datePlaceHolder = "01.01.2025";
     const items = props.tenants.length !== 0 ? props.tenants : [];
     const tenants = useTenants();
+    const [tenantToDelete, setTenantToDelete] = useState<Tenant>({} as Tenant);
+    const msgBox = useMessageBox();
+        const handleDelete = (tenant: Tenant) => {
+            setMessageBoxText(`Организация: ${tenant.name} \nУдалить Организацию?`);
+            setIsShowMessageBoxCancel(true);
+            setIsMessageBoxOpen(true);
+            setTenantToDelete(tenant);
+        }
     useEffect(
         () => {
             fillTenants(items);
@@ -28,7 +36,18 @@ export const TenantsTable: React.FC<ITenantsTableProps> = (props: ITenantsTableP
         },
         []
     );
+    useEffect(() => {
+        if (msgBox.isOKButtonPressed && msgBox.messageBoxText.includes('Удалить Организацию?')) {
+            delTenant(tenantToDelete);
+            // delRole(roleToDelete);
+            setIsCancelButtonPressed(false);
+            setIsShowMessageBoxCancel(false);
+            setIsDocumentChanged(false);
+            setIsMessageBoxOpen(false);
+        }
+        setIsOKButtonPressed(false);
 
+    }, [msgBox.isOKButtonPressed, msgBox.messageBoxText, tenantToDelete]);
     return (
         <div className="mt-6 flow-root">
             <div className="inline-block min-w-full align-middle">
@@ -110,7 +129,8 @@ export const TenantsTable: React.FC<ITenantsTableProps> = (props: ITenantsTableP
                                             {props.superadmin && tenant.name !== "superadmin" && <BtnEditTenantModal tenant={tenant} />}
                                             {props.superadmin && tenant.name !== "superadmin" && <button className="rounded-md border border-gray-200 p-2 h-10 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                                 onClick={() => {
-                                                    delTenant(tenant.id, tenant.name);
+                                                    // delTenant(tenant.id, tenant.name);
+                                                    handleDelete(tenant);
                                                 }}>
                                                 <TrashIcon className="w-5 h-5 text-gray-800" />
                                             </button>}

@@ -24,7 +24,7 @@ interface IActions {
     tenantName: string,
   ) => void;
   updUser: (id: string, newUser: UserForm) => void;
-  delUser: (email: string) => void;
+  delUser: (user: UserForm) => void;
 }
 
 interface IUserState extends IInitialState, IActions {}
@@ -95,12 +95,12 @@ const userStore: StateCreator<
       "updUser"
     );
   },
-  delUser: async (email: string): Promise<void> => {
+  delUser: async (user: UserForm): Promise<void> => {
     try {
-      await deleteUser(email);
+      await deleteUser(user.email);
       set(
         (state: IUserState) => {
-          const index = state.users.findIndex((user) => user.email === email);
+          const index = state.users.findIndex((user) => user.email === user.email);
           if (index !== -1) {
             state.users.splice(index, 1);
           }
@@ -147,5 +147,5 @@ export const addUser = (
     .addUser(email, password, isAdmin, tenantId, tenantName);
 export const updUser = (id: string, newUser: UserForm) =>
   useUserStore.getState().updUser(id, newUser);
-export const delUser = async (email: string) =>
-  useUserStore.getState().delUser(email);
+export const delUser = async (user: UserForm) =>
+  useUserStore.getState().delUser(user);

@@ -16,7 +16,7 @@ interface IActions {
   fillTenants: (tenants: Tenant[]) => void;
   addTenant: (name: string, description: string) => void;
   updTenant: (id: string, newTenant: Tenant) => void;
-  delTenant: (id: string, name: string) => void;
+  delTenant: (tenant: Tenant) => void;
   getTenantUsers: (TenantId: string) => void;
 }
 
@@ -57,13 +57,13 @@ const tenantStore: StateCreator<
     );
   },
   updTenant: (id: string, newTenant: Tenant) => {},
-  delTenant: async (id: string, name: string): Promise<void> => {
+  delTenant: async (tenant: Tenant): Promise<void> => {
     try {
-      await deleteTenant(name);
+      await deleteTenant(tenant.name);
       set(
         (state: ITenantState) => {
           const index = state.tenants.findIndex(
-            (tenant: Tenant) => tenant.id === id
+            (tenant: Tenant) => tenant.id === tenant.id
           );
           if (index !== -1) {
             state.tenants.splice(index, 1);
@@ -108,8 +108,8 @@ export const addTenant = (name: string, description: string) =>
   useTenantStore.getState().addTenant(name, description);
 export const updTenant = (id: string, newTenant: Tenant) =>
   useTenantStore.getState().updTenant(id, newTenant);
-export const delTenant = async (id: string, name: string) =>
-  useTenantStore.getState().delTenant(id, name);
+export const delTenant = async (tenant: Tenant) =>
+  useTenantStore.getState().delTenant(tenant);
 export const useTenantUsers = () =>
   useTenantStore((state) => state.tenantUsers);
 export const getTenantUsers = (TenantId: string) =>
