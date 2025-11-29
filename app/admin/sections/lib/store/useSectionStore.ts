@@ -23,7 +23,7 @@ interface IActions {
   fillSections: (sections: SectionForm[]) => void;
   addSection: (name: string, tenantId: string, tenantName: string) => void;
   updSection: (id: string, newSection: SectionForm) => void;
-  delSection: (sectionName: string, tenantId: string) => void;
+  delSection: (section: SectionForm) => void;
 }
 
 interface ISectionState extends IInitialState, IActions {}
@@ -78,25 +78,24 @@ const sectionStore: StateCreator<
       "updSection"
     );
   },
-  delSection: async (sectionName: string, tenantId: string): Promise<void> => {
+  delSection: async (section: SectionForm): Promise<void> => {
     try {
       const roles = await fetchRolesFormWithSectionSuperadmin(
-        sectionName,
-        tenantId
+        section.name,
+        section.tenant_id
       );
       if (roles.length > 0) {
         setMessageBoxText(
-          "Нельзя удалить Раздел, используемый в Роли. см. Роль: " +
-            roles[0].name
+          `Раздел: ${section.name} \nНельзя удалить Раздел, используемый в Роли: ${roles[0].name}`
         );
         setIsMessageBoxOpen(true);
         return;
       }
-      await deleteSection(sectionName, tenantId);
+      await deleteSection(section.name, section.tenant_id);
       set(
         (state: ISectionState) => {
           const index = state.sections.findIndex(
-            (section) => section.name === sectionName
+            (section) => section.name === section.name
           );
           if (index !== -1) {
             state.sections.splice(index, 1);
@@ -140,5 +139,5 @@ export const addSection = (
 ) => useSectionStore.getState().addSection(name, tenantId, tenantName);
 export const updSection = (id: string, newSection: SectionForm) =>
   useSectionStore.getState().updSection(id, newSection);
-export const delSection = async (sectionName: string, tenantId: string) =>
-  useSectionStore.getState().delSection(sectionName, tenantId);
+export const delSection = async (section: SectionForm) =>
+  useSectionStore.getState().delSection(section);

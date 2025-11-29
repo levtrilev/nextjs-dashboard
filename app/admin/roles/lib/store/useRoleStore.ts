@@ -26,7 +26,7 @@ interface IActions {
     sectionNames: string
   ) => void;
   updRole: (id: string, newRole: RoleForm) => void;
-  delRole: (role_id: string, tenant_id: string) => void;
+  delRole: (role: RoleForm) => void;
 }
 
 interface IRoleState extends IInitialState, IActions {}
@@ -97,20 +97,20 @@ const roleStore: StateCreator<
       "updRole"
     );
   },
-  delRole: async (role_id: string, tenant_id: string): Promise<void> => {
+  delRole: async (role: RoleForm): Promise<void> => {
     try {
-            const users = await fetchUsersWithRoleAdmin(role_id, tenant_id); 
+            const users = await fetchUsersWithRoleAdmin(role.id, role.tenant_id); 
             if (users.length > 0) {
               setMessageBoxText(
-                `Нельзя удалить Роль, используемую Пользователем: ${users[0].email} в Организации: ${users[0].tenant_name}`
+                `Роль: ${role.name} \nНельзя удалить Роль, используемую Пользователем: ${users[0].email} в Организации: ${users[0].tenant_name}`
               );
               setIsMessageBoxOpen(true);
               return;
             }
-      await deleteRole(role_id);
+      await deleteRole(role.id);
       set(
         (state: IRoleState) => {
-          const index = state.roles.findIndex((role) => role.id === role_id);
+          const index = state.roles.findIndex((role) => role.id === role.id);
           if (index !== -1) {
             state.roles.splice(index, 1);
             // console.log("splice roles index: " + index);
@@ -159,8 +159,8 @@ export const addRole = (
     .addRole(name, description, tenantId, tenantName, sectionIds, sectionNames);
 export const updRole = (id: string, newRole: RoleForm) =>
   useRoleStore.getState().updRole(id, newRole);
-export const delRole = async (roleId: string, tenantId: string) =>
-  useRoleStore.getState().delRole(roleId, tenantId);
+export const delRole = async (role: RoleForm) =>
+  useRoleStore.getState().delRole(role);
 
 // (конец образца)
 // // вот как определены типы Role и RoleForm

@@ -1,9 +1,9 @@
 'use client';
 import { RoleForm } from '@/app/lib/definitions';
 import MessageBoxOKCancel from '@/app/lib/MessageBoxOKCancel';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { delRole, fillRoles, useRoles } from './store/useRoleStore';
-import { setIsShowMessageBoxCancel } from '@/app/store/useDocumentStore';
+import { setIsCancelButtonPressed, setIsDocumentChanged, setIsMessageBoxOpen, setIsOKButtonPressed, setIsShowMessageBoxCancel, setMessageBoxText, useMessageBox } from '@/app/store/useDocumentStore';
 import { TrashIcon } from '@heroicons/react/24/outline';
 
 interface IRolesTableProps {
@@ -14,6 +14,14 @@ export const RolesTable: React.FC<IRolesTableProps> = (props: IRolesTableProps) 
     const datePlaceHolder = "01.01.2025";
     const items = props.roles.length !== 0 ? props.roles : [];
     const roles = useRoles();
+    const msgBox = useMessageBox();
+    const [roleToDelete, setRoleToDelete] = useState<RoleForm>({} as RoleForm);
+    const handleDelete = (role: RoleForm) => {
+        setMessageBoxText(`Роль: ${role.name} \nУдалить Роль?`);
+        setIsShowMessageBoxCancel(true);
+        setIsMessageBoxOpen(true);
+        setRoleToDelete(role);
+    }
     useEffect(
         () => {
             fillRoles(items);
@@ -21,6 +29,17 @@ export const RolesTable: React.FC<IRolesTableProps> = (props: IRolesTableProps) 
         },
         []
     );
+    useEffect(() => {
+        if (msgBox.isOKButtonPressed && msgBox.messageBoxText.includes('Удалить Роль?')) {
+            delRole(roleToDelete);
+            setIsCancelButtonPressed(false);
+            setIsShowMessageBoxCancel(false);
+            setIsDocumentChanged(false);
+            setIsMessageBoxOpen(false);
+        }
+        setIsOKButtonPressed(false);
+
+    }, [msgBox.isOKButtonPressed, msgBox.messageBoxText, roleToDelete]);
     return (
         <div className="mt-6 flow-root">
             <div className="inline-block min-w-full align-middle">
@@ -74,7 +93,8 @@ export const RolesTable: React.FC<IRolesTableProps> = (props: IRolesTableProps) 
                                             {/* {props.admin && <BtnDeleteRole id={role.id} />} */}
                                             {props.admin && <button className="rounded-md border border-gray-200 p-2 h-10 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                                 onClick={() => {
-                                                    delRole(role.id, role.tenant_id);
+                                                    handleDelete(role);
+                                                    // delRole(role.id, role.tenant_id);
                                                 }}>
                                                 <TrashIcon className="w-5 h-5 text-gray-800" />
                                             </button>}
@@ -109,7 +129,7 @@ export const RolesTable: React.FC<IRolesTableProps> = (props: IRolesTableProps) 
                                             {/* {props.admin && <BtnDeleteRole id={role.id} />} */}
                                             {props.admin && <button className="rounded-md border border-gray-200 p-2 h-10 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                                 onClick={() => {
-                                                    delRole(role.id, role.tenant_id);
+                                                    delRole(role);
                                                 }}>
                                                 <TrashIcon className="w-5 h-5 text-gray-800" />
                                             </button>}

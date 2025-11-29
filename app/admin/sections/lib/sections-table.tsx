@@ -2,10 +2,10 @@
 
 import { formatDateToLocal } from "@/app/lib/utils";
 import { SectionForm, Tenant } from '@/app/lib/definitions';
-import { BtnDeleteSection, BtnEditSectionLink } from "./sections-buttons";
+import { BtnEditSectionLink } from "./sections-buttons";
 import { delSection, fillSections, useSections } from "./store/useSectionStore";
-import { useEffect } from "react";
-import { setIsShowMessageBoxCancel } from "@/app/store/useDocumentStore";
+import { useEffect, useState } from "react";
+import { setIsCancelButtonPressed, setIsDocumentChanged, setIsMessageBoxOpen, setIsOKButtonPressed, setIsShowMessageBoxCancel, setMessageBoxText, useMessageBox } from "@/app/store/useDocumentStore";
 import { TrashIcon } from '@heroicons/react/24/outline';
 import MessageBoxOKCancel from "@/app/lib/MessageBoxOKCancel";
 import { NewSection } from "./newSection";
@@ -20,6 +20,14 @@ export const SectionsTable: React.FC<ISectionsTableProps> = (props: ISectionsTab
     const datePlaceHolder = "01.01.2025";
     const items = props.sections.length !== 0 ? props.sections : [];
     const sections = useSections();
+    const msgBox = useMessageBox();
+    const [sectionToDelete, setSectionToDelete] = useState<SectionForm>({} as SectionForm);
+    const handleDelete = (section: SectionForm) => {
+        setMessageBoxText(`Раздел: ${section.name} \nУдалить Раздел?`);
+        setIsShowMessageBoxCancel(true);
+        setIsMessageBoxOpen(true);
+        setSectionToDelete(section);
+    }
     useEffect(
         () => {
             fillSections(items);
@@ -27,6 +35,18 @@ export const SectionsTable: React.FC<ISectionsTableProps> = (props: ISectionsTab
         },
         []
     );
+    useEffect(() => {
+        if (msgBox.isOKButtonPressed && msgBox.messageBoxText.includes('Удалить Раздел?')) {
+            delSection(sectionToDelete);
+            // delRole(roleToDelete);
+            setIsCancelButtonPressed(false);
+            setIsShowMessageBoxCancel(false);
+            setIsDocumentChanged(false);
+            setIsMessageBoxOpen(false);
+        }
+        setIsOKButtonPressed(false);
+
+    }, [msgBox.isOKButtonPressed, msgBox.messageBoxText, sectionToDelete]);
     return (
         <div className="mt-6 flow-root">
             {props.admin && <NewSection tenants={props.tenants} />}
@@ -104,7 +124,8 @@ export const SectionsTable: React.FC<ISectionsTableProps> = (props: ISectionsTab
                                             {/* { props.admin && <BtnDeleteSection id={sec.id} /> } */}
                                             {props.admin && <button className="rounded-md border border-gray-200 p-2 h-10 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                                 onClick={() => {
-                                                    delSection(sec.name, sec.tenant_id);
+                                                    // delSection(sec.name, sec.tenant_id);
+                                                    handleDelete(sec);
                                                 }}>
                                                 <TrashIcon className="w-5 h-5 text-gray-800" />
                                             </button>}
