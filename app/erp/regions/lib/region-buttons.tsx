@@ -1,10 +1,12 @@
 
 // Region buttons.tsx
-
+'use client';
 import { PencilIcon, PlusIcon, TrashIcon, ServerIcon } from '@heroicons/react/24/outline';
 import { deleteRegion, updateRegion } from './region-actions';
 import Link from "next/link";
 import { Region } from '@/app/lib/definitions';
+import MessageBoxSrv from '@/app/lib/MessageBoxSrv';
+import { useEffect, useRef, useState } from 'react';
 
 export function CreateRegion() {
   return (
@@ -28,15 +30,32 @@ export function BtnUpdateRegion({ region }: { region: Region }) {
   );
 }
 
-export function BtnDeleteRegion({ id }: { id: string }) {
-  const deleteRegionWithId = deleteRegion.bind(null, id);
 
+export function BtnDeleteRegion({ region }: { region: Region }) {
+  const [isMessageBoxOpen, setIsMessageBoxOpen] = useState(false);
+  const [messageBoxText, setMessageBoxText] = useState('');
+  const idToDelete = useRef('');
+  const askUserForDeleting = (id: string) => {
+    setIsMessageBoxOpen(true);
+    idToDelete.current = id;
+    setMessageBoxText(`Регион: ${region.name} \nУдалить Регион?`);
+  };
+  const deleteRegionWithId = askUserForDeleting.bind(null, region.id);
+
+  const handleOK = () => {
+    deleteRegion(idToDelete.current);
+    setIsMessageBoxOpen(false);
+  }
+  const handleCancel = () => {
+    setIsMessageBoxOpen(false);
+  }
   return (
     <form action={deleteRegionWithId}>
       <button className="rounded-md border border-gray-200 p-2 h-10 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
         <span className="sr-only">Delete</span>
         <TrashIcon className="w-5 h-5 text-gray-800" />
       </button>
+      <MessageBoxSrv isMessageBoxOpen={isMessageBoxOpen} messageBoxText={messageBoxText} isShowCancel={true} isShowOk={true} cbOk={handleOK} cbCancel={handleCancel} />
     </form>
   );
 }

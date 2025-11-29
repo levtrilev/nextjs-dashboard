@@ -23,7 +23,7 @@ export default async function Page(props: {
   const current_sections = await getCurrentSections(email as string);
 
 
-  console.log("current_sections: " + current_sections);
+  // console.log("current_sections: " + current_sections);
 
   const searchParams = await props.searchParams;
   const query = searchParams?.query || '';

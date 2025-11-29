@@ -1,15 +1,8 @@
 
 // Regions Table
 
-import Image from 'next/image';
-import { lusitana } from '@/app/ui/fonts';
-import Search from '@/app/ui/search';
-import {
-  CustomersTableType,
-  FormattedCustomersTable,
-} from '@/app/lib/definitions';
+import MessageBoxSrv from '@/app/lib/MessageBoxSrv';
 import { fetchFilteredRegions } from './region-actions';
-import { ChartBarIcon, ChartPieIcon } from '@heroicons/react/20/solid';
 import { BtnDeleteRegion, BtnEditRegionLink } from './region-buttons';
 
 export default async function RegionsTable({
@@ -23,7 +16,8 @@ export default async function RegionsTable({
 }) {
 
   const regions = await fetchFilteredRegions(query, currentPage, current_sections);
-
+  // console.log('fetchFilteredRegions');
+  
   return (
     <div className="w-full">
       <div className="mt-6 flow-root">
@@ -83,7 +77,7 @@ export default async function RegionsTable({
                       <td className="w-1/16 whitespace-nowrap pl-4 py-1 pr-3">
                         <div className="flex justify-end gap-3">
                           {/* <BtnEditTenantModal tenant={tenant} /> */}
-                          <BtnDeleteRegion id={region.id} />
+                          <BtnDeleteRegion region={region} />
                           {/* <BtnEditLegalEntityLink id={legalEntity.id} /> */}
                         </div>
                       </td>
@@ -106,7 +100,7 @@ export default async function RegionsTable({
                         </a>
                       </h3>
                       <div className="flex gap-2">
-                        <BtnDeleteRegion id={region.id} />
+                        <BtnDeleteRegion region={region} />
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-2">
@@ -130,7 +124,6 @@ export default async function RegionsTable({
                   </div>
                 ))}
               </div>
-
             </div>
           </div>
         </div>
@@ -138,36 +131,3 @@ export default async function RegionsTable({
     </div>
   );
 }
-
-
-{/* <div className="md:hidden">
-{regions?.map((region) => (
-  <div
-    key={region.id}
-    className="mb-2 w-full rounded-md bg-white p-4"
-  >
-    <div className="flex items-center justify-between border-b pb-4">
-      <div>
-        <div className="mb-2 flex items-center">
-          <div className="flex items-center gap-3">
-            <p>{region.name}</p>
-          </div>
-        </div>
-        <p className="text-sm text-gray-500">
-          {region.capital}
-        </p>
-      </div>
-    </div>
-    <div className="flex w-full items-center justify-between border-b py-5">
-      <div className="flex w-1/2 flex-col">
-        <p className="text-xs">Округ</p>
-        <p className="font-medium">{region.area}</p>
-      </div>
-      <div className="flex w-1/2 flex-col">
-        <p className="text-xs">Код</p>
-        <p className="font-medium">{region.code}</p>
-      </div>
-    </div>
-  </div>
-))}
-</div> */}

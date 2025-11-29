@@ -22,13 +22,13 @@ export const RolesTable: React.FC<IRolesTableProps> = (props: IRolesTableProps) 
         setIsMessageBoxOpen(true);
         setRoleToDelete(role);
     }
-    useEffect(
-        () => {
-            fillRoles(items);
-            setIsShowMessageBoxCancel(false);
-        },
-        []
-    );
+        useEffect(
+            () => {
+                fillRoles(items);
+                setIsShowMessageBoxCancel(false);
+            },
+            []
+        );
     useEffect(() => {
         if (msgBox.isOKButtonPressed && msgBox.messageBoxText.includes('Удалить Роль?')) {
             delRole(roleToDelete);

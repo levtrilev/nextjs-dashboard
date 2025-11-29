@@ -1,19 +1,10 @@
 
 // LegalEntities Table
 
-import Image from 'next/image';
-import { lusitana } from '@/app/ui/fonts';
-import Search from '@/app/ui/search';
-import {
-  CustomersTableType,
-  FormattedCustomersTable,
-  LegalEntity,
-} from '@/app/lib/definitions';
 import { fetchFilteredLegalEntities } from './le-actions';
 import { ChartBarIcon, ChartPieIcon } from '@heroicons/react/20/solid';
-import { BtnDeleteLegalEntity, BtnEditLegalEntityLink } from './le-buttons';
-// import { useSelector } from 'react-redux';
-// import { userSessionSlice, UserSessionState } from '@/app/lib/features/userSession/userSessionSlice';
+import { BtnDeleteLegalEntity } from './le-btn-delete';
+
 
 export default async function LegalEntitiesTable({
   query,
@@ -85,7 +76,7 @@ export default async function LegalEntitiesTable({
                       <td className="w-1/16 whitespace-nowrap pl-4 py-1 pr-3">
                         <div className="flex justify-end gap-3">
                           {/* <BtnEditTenantModal tenant={tenant} /> */}
-                          <BtnDeleteLegalEntity id={legalEntity.id} />
+                          <BtnDeleteLegalEntity legalEntity={legalEntity} />
                           {/* <BtnEditLegalEntityLink id={legalEntity.id} /> */}
                         </div>
                       </td>
@@ -130,7 +121,7 @@ export default async function LegalEntitiesTable({
                       </p>
                     </div>
                     <div className="mt-3 flex justify-end gap-3">
-                      <BtnDeleteLegalEntity id={legalEntity.id} />
+                      <BtnDeleteLegalEntity legalEntity={legalEntity} />
                     </div>
                   </div>
                 ))}
@@ -144,38 +135,3 @@ export default async function LegalEntitiesTable({
   );
 }
 
-
-// <div className="md:hidden">
-// {legalEntities?.map((legalEntity) => (
-//   <div
-//     key={legalEntity.id}
-//     className="mb-2 w-full rounded-md bg-white p-4"
-//   >
-//     <div className="flex items-center justify-between border-b pb-4">
-//       <div>
-//         <div className="mb-2 flex items-center">
-//           <div className="flex items-center gap-3">
-//             <p>{legalEntity.name}</p>
-//           </div>
-//         </div>
-//         <p className="text-sm text-gray-500">
-//           {legalEntity.email}
-//         </p>
-//       </div>
-//     </div>
-//     <div className="flex w-full items-center justify-between border-b py-5">
-//       <div className="flex w-1/2 flex-col">
-//         <p className="text-xs">Address</p>
-//         <p className="font-medium">{legalEntity.address_legal}</p>
-//       </div>
-//       <div className="flex w-1/2 flex-col">
-//         <p className="text-xs">Phone</p>
-//         <p className="font-medium">{legalEntity.phone}</p>
-//       </div>
-//     </div>
-//     <div className="pt-4 text-sm">
-//       <p>{legalEntity.inn} INN</p>
-//     </div>
-//   </div>
-// ))}
-// </div>
