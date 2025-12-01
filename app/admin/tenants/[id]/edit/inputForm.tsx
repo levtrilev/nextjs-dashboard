@@ -55,7 +55,8 @@ export const InputForm: FC<IInputFormProps> = (props: IInputFormProps) => {
       setIsMessageBoxOpen(true);
     } else if (isDocumentChanged && msgBox.isOKButtonPressed) {
     } else if (!isDocumentChanged) {
-      router.push('/admin/tenants/');
+      // router.push('/admin/tenants/');
+      window.history.back();
     }
   };
   const handleSaveClick = (e: React.MouseEvent) => {
@@ -80,7 +81,8 @@ useEffect(() => {
 
   useEffect(() => {
     if (msgBox.isOKButtonPressed && msgBox.messageBoxText === 'Документ изменен. Закрыть без сохранения?') {
-      router.push('/admin/tenants/');
+      // router.push('/admin/tenants/');
+      window.history.back();
     }
     setIsOKButtonPressed(false);
     setIsCancelButtonPressed(false);

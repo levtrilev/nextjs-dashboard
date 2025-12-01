@@ -38,7 +38,8 @@ export default function EditForm(props: IEditFormProps) {
       setIsMessageBoxOpen(true);
     } else if (isDocumentChanged && msgBox.isOKButtonPressed) {
     } else if (!isDocumentChanged) {
-      router.push('/erp/regions/');
+      // router.push('/erp/regions/');
+      window.history.back();
     }
   };
   const handleSaveClick = (e: React.MouseEvent) => {
@@ -63,7 +64,8 @@ export default function EditForm(props: IEditFormProps) {
 
   useEffect(() => {
     if (msgBox.isOKButtonPressed && msgBox.messageBoxText === 'Документ изменен. Закрыть без сохранения?') {
-      router.push('/erp/regions/');
+      // router.push('/erp/regions/');
+      window.history.back();
     }
     setIsOKButtonPressed(false);
     setIsCancelButtonPressed(false);

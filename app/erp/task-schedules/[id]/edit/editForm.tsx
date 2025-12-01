@@ -2,7 +2,7 @@
 // TaskSchedules EditForm
 
 'use client';
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { LegalEntity, TaskScheduleForm, RegionForm, SectionForm, PremiseForm, TaskForm } from "@/app/lib/definitions";
 import { createTaskSchedule, updateTaskSchedule } from "../../lib/taskSchedulesActions";
 import Link from "next/link";
@@ -15,8 +15,12 @@ import { pdf, PDFViewer } from '@react-pdf/renderer';
 import PdfDocument from "./pdfDocument";
 import InputField from "./inputField";
 import { TrashIcon } from "@heroicons/react/24/outline";
-// import TextLabelInput from "./textLabelInput";
-
+import MessageBoxOKCancel from "@/app/lib/MessageBoxOKCancel";
+import {
+  setIsCancelButtonPressed, setIsDocumentChanged, setIsMessageBoxOpen, setIsOKButtonPressed,
+  setIsShowMessageBoxCancel, setMessageBoxText, useIsDocumentChanged, useMessageBox
+} from "@/app/store/useDocumentStore";
+import { useRouter } from "next/navigation";
 interface IEditFormProps {
   taskSchedule: TaskScheduleForm,
   sections: SectionForm[],
@@ -63,14 +67,61 @@ export type FormData = z.infer<typeof TaskScheduleFormSchemaFull>;
 
 
 export default function TaskScheduleEditForm(props: IEditFormProps) {
+  //#region msgBox
+  //================================================================
+  const isDocumentChanged = useIsDocumentChanged();
+  const msgBox = useMessageBox();
+  const router = useRouter();
+
+  const docChanged = () => {
+    setIsDocumentChanged(true);
+    setMessageBoxText('Документ изменен. Закрыть без сохранения?');
+  };
+
+  const handleBackClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (isDocumentChanged && !msgBox.isOKButtonPressed) {
+      setIsShowMessageBoxCancel(true);
+      setIsMessageBoxOpen(true);
+    } else if (isDocumentChanged && msgBox.isOKButtonPressed) {
+    } else if (!isDocumentChanged) {
+      window.history.back();
+    }
+  };
+  const showMsgSaved = () => {
+    setIsDocumentChanged(false);
+    setMessageBoxText('Документ сохранен.');
+    setIsShowMessageBoxCancel(false);
+    setIsMessageBoxOpen(true);
+  }
+  useEffect(() => {
+    return () => {
+      // Сброс при уходе со страницы
+      setIsDocumentChanged(false);
+      setIsMessageBoxOpen(false);
+      setIsOKButtonPressed(false);
+      setIsCancelButtonPressed(false);
+      setIsShowMessageBoxCancel(true);
+      setMessageBoxText('');
+    };
+  }, []);
+
+  useEffect(() => {
+    if (msgBox.isOKButtonPressed && msgBox.messageBoxText === 'Документ изменен. Закрыть без сохранения?') {
+      window.history.back();
+    }
+    setIsOKButtonPressed(false);
+    setIsCancelButtonPressed(false);
+    setIsDocumentChanged(false);
+    setIsMessageBoxOpen(false);
+    setIsShowMessageBoxCancel(true);
+  }, [msgBox.isOKButtonPressed, router]);
+  //================================================================
+  //#endregion
 
   const [showErrors, setShowErrors] = useState(false);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [formData, setFormData] = useState<FormData>(props.taskSchedule);
-  // const [formData, setFormData] = useState<FormData>({
-  //   ...props.taskSchedule,
-  //   tasks: props.taskSchedule.tasks || [],
-  // });
 
   const validate = () => {
     const res = TaskScheduleFormSchema.safeParse({
@@ -93,9 +144,11 @@ export default function TaskScheduleEditForm(props: IEditFormProps) {
     }
     if (formData.id === "") {
       await createTaskSchedule(formData);
+      showMsgSaved();
     } else {
       await updateTaskSchedule(formData);
-      handleRedirectBack();
+      showMsgSaved();
+      // handleRedirectBack();
     }
 
   }
@@ -105,6 +158,7 @@ export default function TaskScheduleEditForm(props: IEditFormProps) {
       section_id: new_section_id,
       section_name: new_section_name,
     }));
+    docChanged();
   };
   const handleSelectPremise = (new_premise_id: string, new_premise_name: string) => {
     setFormData((prev) => ({
@@ -112,6 +166,7 @@ export default function TaskScheduleEditForm(props: IEditFormProps) {
       premise_id: new_premise_id,
       premise_name: new_premise_name,
     }));
+    docChanged();
   };
   const handleSelectOwner = (new_le_id: string, new_le_name: string) => {
     setFormData((prev) => ({
@@ -119,9 +174,11 @@ export default function TaskScheduleEditForm(props: IEditFormProps) {
       schedule_owner_id: new_le_id,
       schedule_owner_name: new_le_name,
     }));
+    docChanged();
   };
   const handleDeleteTask = (id: string) => {
     alert("Удаление задачи: " + id);
+    docChanged();
   }
   const handleRedirectBack = () => {
     window.history.back(); // Возвращает пользователя на предыдущую страницу
@@ -151,6 +208,7 @@ export default function TaskScheduleEditForm(props: IEditFormProps) {
   };
   const handleInputChange = (field: string, value: string | Date) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+    docChanged();
   };
   //#endregion
 
@@ -318,7 +376,14 @@ export default function TaskScheduleEditForm(props: IEditFormProps) {
                 </button>
               </div>
               <div className="w-full md:w-1/2">
-                <Link href={"#"} >
+                <button
+                  onClick={handleBackClick}
+                  className="bg-blue-400 text-white w-full rounded-md border p-2
+                 hover:bg-blue-100 hover:text-gray-500 cursor-pointer"
+                >
+                  Закрыть
+                </button>
+                {/* <Link href={"#"} >
                   <button
                     onClick={() => handleRedirectBack()}
                     className="bg-blue-400 text-white w-full rounded-md border p-2
@@ -326,7 +391,7 @@ export default function TaskScheduleEditForm(props: IEditFormProps) {
                   >
                     Отмена
                   </button>
-                </Link>
+                </Link> */}
               </div>
               <div className="w-full md:w-1/2">
                 <button
@@ -374,6 +439,7 @@ export default function TaskScheduleEditForm(props: IEditFormProps) {
           title="PDF Preview"
         />
       )}
+      <MessageBoxOKCancel />
     </div>
   );
 }

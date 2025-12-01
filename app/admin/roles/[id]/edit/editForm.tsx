@@ -103,8 +103,8 @@ export default function RoleEditForm(props: IRoleEditFormProps) {
       setIsMessageBoxOpen(true);
     } else if (isDocumentChanged && msgBox.isOKButtonPressed) {
     } else if (!isDocumentChanged) {
-      router.push('/admin/roles');
-      // window.history.back(); // Возвращает пользователя на предыдущую страницу
+      // router.push('/admin/roles');
+      window.history.back(); // Возвращает пользователя на предыдущую страницу
     }
   };
   const handleSaveClick = (e: React.MouseEvent) => {
@@ -132,8 +132,8 @@ export default function RoleEditForm(props: IRoleEditFormProps) {
 
   useEffect(() => {
     if (msgBox.isOKButtonPressed && msgBox.messageBoxText === 'Документ изменен. Закрыть без сохранения?') {
-      router.push('/admin/roles/');
-      // window.history.back();
+      // router.push('/admin/roles/');
+      window.history.back();
     }
     setIsOKButtonPressed(false);
     setIsCancelButtonPressed(false);

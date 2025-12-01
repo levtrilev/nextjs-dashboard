@@ -1,6 +1,8 @@
 import type { NextAuthConfig } from 'next-auth';
  
 export const authConfig = {
+  // Удалить в продуктивной конфигурации!
+  trustHost: true,
   pages: {
     signIn: '/login',
   },

@@ -45,7 +45,8 @@ export default function InputForm(props: IInputFormProps) {
       setIsMessageBoxOpen(true);
     } else if (isDocumentChanged && msgBox.isOKButtonPressed) {
     } else if (!isDocumentChanged) {
-      router.push('/admin/sections/');
+      // router.push('/admin/sections/');
+      window.history.back();
     }
   };
   const handleSaveClick = (e: React.MouseEvent) => {
@@ -72,7 +73,8 @@ export default function InputForm(props: IInputFormProps) {
 
   useEffect(() => {
     if (msgBox.isOKButtonPressed && msgBox.messageBoxText === 'Документ изменен. Закрыть без сохранения?') {
-      router.push('/admin/sections/');
+      // router.push('/admin/sections/');
+      window.history.back();
     }
     setIsOKButtonPressed(false);
     setIsCancelButtonPressed(false);

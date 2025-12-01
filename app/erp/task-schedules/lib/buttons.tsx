@@ -28,19 +28,6 @@ export function BtnUpdateTaskSchedule({ taskSchedule }: { taskSchedule: TaskSche
   );
 }
 
-export function BtnDeleteTaskSchedule({ id }: { id: string }) {
-  const deleteTaskScheduleWithId = deleteTaskSchedule.bind(null, id);
-
-  return (
-    <form action={deleteTaskScheduleWithId}>
-      <button className="rounded-md border border-gray-200 p-2 h-10 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
-        <span className="sr-only">Delete</span>
-        <TrashIcon className="w-5 h-5 text-gray-800" />
-      </button>
-    </form>
-  );
-}
-
 export function BtnEditTaskScheduleLink({ id }: { id: string }) {
   const LinkIcon = PencilIcon;
   return (

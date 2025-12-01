@@ -39,7 +39,8 @@ export default function EditForm(props: IEditFormProps) {
       setIsMessageBoxOpen(true);
     } else if (isDocumentChanged && msgBox.isOKButtonPressed) {
     } else if (!isDocumentChanged) {
-      router.push('/erp/legal-entities/');
+      // router.push('/erp/legal-entities/');
+      window.history.back();
     }
   };
   const handleSaveClick = (e: React.MouseEvent) => {
@@ -50,21 +51,22 @@ export default function EditForm(props: IEditFormProps) {
     setIsShowMessageBoxCancel(false);
     setIsMessageBoxOpen(true);
   }
-useEffect(() => {
-  return () => {
-    // Сброс при уходе со страницы
-    setIsDocumentChanged(false);
-    setIsMessageBoxOpen(false);
-    setIsOKButtonPressed(false);
-    setIsCancelButtonPressed(false);
-    setIsShowMessageBoxCancel(true);
-    setMessageBoxText('');
-  };
-}, []);
+  useEffect(() => {
+    return () => {
+      // Сброс при уходе со страницы
+      setIsDocumentChanged(false);
+      setIsMessageBoxOpen(false);
+      setIsOKButtonPressed(false);
+      setIsCancelButtonPressed(false);
+      setIsShowMessageBoxCancel(true);
+      setMessageBoxText('');
+    };
+  }, []);
 
   useEffect(() => {
     if (msgBox.isOKButtonPressed && msgBox.messageBoxText === 'Документ изменен. Закрыть без сохранения?') {
-      router.push('/erp/regions/');
+      // router.push('/erp/regions/');
+      window.history.back();
     }
     setIsOKButtonPressed(false);
     setIsCancelButtonPressed(false);
@@ -72,11 +74,6 @@ useEffect(() => {
     setIsMessageBoxOpen(false);
     setIsShowMessageBoxCancel(true);
   }, [msgBox.isOKButtonPressed, router]);
-
-  // const handleRedirectBack = () => {
-  //   window.history.back(); // Возвращает пользователя на предыдущую страницу
-  // };
-
 
   const handleChangeIsCustomer = (event: any) => {
     setLegalEntity((prev) => ({
@@ -129,7 +126,7 @@ useEffect(() => {
               type="text"
               className="w-7/8 control rounded-md border border-gray-200 p-2"
               value={legalEntity.name}
-              onChange={(e) => { setLegalEntity((prev) => ({ ...prev, name: e.target.value, })); docChanged();}}
+              onChange={(e) => { setLegalEntity((prev) => ({ ...prev, name: e.target.value, })); docChanged(); }}
             />
           </div>
           {/* fullname */}
