@@ -10,6 +10,7 @@ import { CreateRegion } from "@/app/erp/regions/lib/region-buttons";
 import { lusitana } from "@/app/ui/fonts";
 import { auth } from "@/auth";
 import { getCurrentSections } from "@/app/lib/actions";
+import MsgboxPlaceholder from "./lib/MsgboxPlaceholder";
 
 export default async function Page(props: {
   searchParams?: Promise<{
@@ -48,5 +49,3 @@ export default async function Page(props: {
     </>
   );
 }
-
-//           <CustomersTable customers={legalEntities as any}/>

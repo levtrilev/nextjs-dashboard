@@ -17,7 +17,7 @@ export default async function RegionsTable({
 
   const regions = await fetchFilteredRegions(query, currentPage, current_sections);
   // console.log('fetchFilteredRegions');
-  
+
   return (
     <div className="w-full">
       <div className="mt-6 flow-root">

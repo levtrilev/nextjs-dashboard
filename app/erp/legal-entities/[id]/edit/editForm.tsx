@@ -2,16 +2,20 @@
 // LegalEntity EditForm
 
 'use client';
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { KeyboardEvent } from "react";
 import { LegalEntityForm, Region, Section, SectionForm } from "@/app/lib/definitions";
 import { updateLegalEntity } from "../../lib/le-actions";
-import Link from "next/link";
 import { RadioActiveIsSupplier } from "@/app/erp/legal-entities/lib/radioActive";
-import { redirect } from "next/navigation";
 import RadioActiveIsCustomer from "@/app/erp/legal-entities/lib/radioActive";
 import BtnRegionsRef from "@/app/erp/regions/lib/btnRegionsRef";
 import BtnSectionsRef from "@/app/admin/sections/lib/btnSectionsRef";
+import MessageBoxOKCancel from "@/app/lib/MessageBoxOKCancel";
+import {
+  setIsCancelButtonPressed, setIsDocumentChanged, setIsMessageBoxOpen, setIsOKButtonPressed,
+  setIsShowMessageBoxCancel, setMessageBoxText, useIsDocumentChanged, useMessageBox
+} from "@/app/store/useDocumentStore";
+import { useRouter } from "next/navigation";
 
 interface IEditFormProps {
   legalEntity: LegalEntityForm,
@@ -21,30 +25,72 @@ interface IEditFormProps {
 
 export default function EditForm(props: IEditFormProps) {
   const [legalEntity, setLegalEntity] = useState(props.legalEntity);
-  // после заполнения идентификаторов эти строки можно удалить
-  //if (!legalEntity.region_id) { setLegalEntity((prev) => ({ ...prev, region_id: "", })); }
-  //if (!legalEntity.section_id) { setLegalEntity((prev) => ({ ...prev, section_id: "", })); }
-  ////////////
-  const [show, setShow] = useState(false);
-  const handleKeyDown = (e: KeyboardEvent) => {
-    if (e.key === "Enter") {
-      setShow(true);
+  const isDocumentChanged = useIsDocumentChanged();
+  const msgBox = useMessageBox();
+  const router = useRouter();
+  const docChanged = () => {
+    setIsDocumentChanged(true);
+    setMessageBoxText('Документ изменен. Закрыть без сохранения?');
+  };
+  const handleBackClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (isDocumentChanged && !msgBox.isOKButtonPressed) {
+      setIsShowMessageBoxCancel(true);
+      setIsMessageBoxOpen(true);
+    } else if (isDocumentChanged && msgBox.isOKButtonPressed) {
+    } else if (!isDocumentChanged) {
+      router.push('/erp/legal-entities/');
     }
   };
-  const handleRedirectBack = () => {
-    window.history.back(); // Возвращает пользователя на предыдущую страницу
+  const handleSaveClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    updateLegalEntity(legalEntity);
+    setIsDocumentChanged(false);
+    setMessageBoxText('Документ сохранен.');
+    setIsShowMessageBoxCancel(false);
+    setIsMessageBoxOpen(true);
+  }
+useEffect(() => {
+  return () => {
+    // Сброс при уходе со страницы
+    setIsDocumentChanged(false);
+    setIsMessageBoxOpen(false);
+    setIsOKButtonPressed(false);
+    setIsCancelButtonPressed(false);
+    setIsShowMessageBoxCancel(true);
+    setMessageBoxText('');
   };
+}, []);
+
+  useEffect(() => {
+    if (msgBox.isOKButtonPressed && msgBox.messageBoxText === 'Документ изменен. Закрыть без сохранения?') {
+      router.push('/erp/regions/');
+    }
+    setIsOKButtonPressed(false);
+    setIsCancelButtonPressed(false);
+    setIsDocumentChanged(false);
+    setIsMessageBoxOpen(false);
+    setIsShowMessageBoxCancel(true);
+  }, [msgBox.isOKButtonPressed, router]);
+
+  // const handleRedirectBack = () => {
+  //   window.history.back(); // Возвращает пользователя на предыдущую страницу
+  // };
+
+
   const handleChangeIsCustomer = (event: any) => {
     setLegalEntity((prev) => ({
       ...prev,
       is_customer: !prev.is_customer,
     }));
+    docChanged();
   };
   const handleChangeIsSupplier = (event: any) => {
     setLegalEntity((prev) => ({
       ...prev,
       is_supplier: !prev.is_supplier,
     }));
+    docChanged();
   };
 
   const handleSelectRegion = (new_region_id: string, new_region_name: string) => {
@@ -53,6 +99,7 @@ export default function EditForm(props: IEditFormProps) {
       region_id: new_region_id,
       region_name: new_region_name,
     }));
+    docChanged();
   };
   const handleSelectSection = (new_section_id: string, new_section_name: string) => {
     setLegalEntity((prev) => ({
@@ -60,6 +107,7 @@ export default function EditForm(props: IEditFormProps) {
       section_id: new_section_id,
       section_name: new_section_name,
     }));
+    docChanged();
   };
   return (
     <div >
@@ -81,8 +129,7 @@ export default function EditForm(props: IEditFormProps) {
               type="text"
               className="w-7/8 control rounded-md border border-gray-200 p-2"
               value={legalEntity.name}
-              onChange={(e) => setLegalEntity((prev) => ({ ...prev, name: e.target.value, }))}
-              onKeyDown={(e) => handleKeyDown(e)}
+              onChange={(e) => { setLegalEntity((prev) => ({ ...prev, name: e.target.value, })); docChanged();}}
             />
           </div>
           {/* fullname */}
@@ -97,8 +144,7 @@ export default function EditForm(props: IEditFormProps) {
               type="text"
               className="w-13/16 control rounded-md border border-gray-200 p-2"
               value={legalEntity.fullname}
-              onChange={(e) => setLegalEntity((prev) => ({ ...prev, fullname: e.target.value, }))}
-              onKeyDown={(e) => handleKeyDown(e)}
+              onChange={(e) => { setLegalEntity((prev) => ({ ...prev, fullname: e.target.value, })); docChanged(); }}
             />
           </div>
           {/* address_leg */}
@@ -113,8 +159,7 @@ export default function EditForm(props: IEditFormProps) {
               type="text"
               className="w-13/16 control rounded-md border border-gray-200 p-2"
               value={legalEntity.address_legal}
-              onChange={(e) => setLegalEntity((prev) => ({ ...prev, address_legal: e.target.value, }))}
-              onKeyDown={(e) => handleKeyDown(e)}
+              onChange={(e) => { setLegalEntity((prev) => ({ ...prev, address_legal: e.target.value, })); docChanged(); }}
             />
           </div>
           {/* email */}
@@ -129,8 +174,7 @@ export default function EditForm(props: IEditFormProps) {
               type="text"
               className="w-13/16 control rounded-md border border-gray-200 p-2"
               value={legalEntity.email}
-              onChange={(e) => setLegalEntity((prev) => ({ ...prev, email: e.target.value, }))}
-              onKeyDown={(e) => handleKeyDown(e)}
+              onChange={(e) => { setLegalEntity((prev) => ({ ...prev, email: e.target.value, })); docChanged(); }}
             />
           </div>
           {/* phone */}
@@ -145,8 +189,7 @@ export default function EditForm(props: IEditFormProps) {
               type="text"
               className="w-13/16 control rounded-md border border-gray-200 p-2"
               value={legalEntity.phone}
-              onChange={(e) => setLegalEntity((prev) => ({ ...prev, phone: e.target.value, }))}
-              onKeyDown={(e) => handleKeyDown(e)}
+              onChange={(e) => { setLegalEntity((prev) => ({ ...prev, phone: e.target.value, })); docChanged(); }}
             />
           </div>
 
@@ -163,10 +206,9 @@ export default function EditForm(props: IEditFormProps) {
               type="text"
               name="region_name"
               className="w-13/16 pointer-events-none control rounded-md border border-gray-200 p-2"
-              value={legalEntity.region_name}
+              value={legalEntity.region_name ?? ''}
               readOnly
-              onChange={(e) => setLegalEntity((prev) => ({ ...prev, region_id: e.target.value, }))}
-              onKeyDown={(e) => handleKeyDown(e)}
+              onChange={(e) => { setLegalEntity((prev) => ({ ...prev, region_id: e.target.value, })); docChanged(); }}
             />
             <BtnRegionsRef
               regions={props.regions}
@@ -189,8 +231,7 @@ export default function EditForm(props: IEditFormProps) {
               type="text"
               className="w-13/16 control rounded-md border border-gray-200 p-2"
               value={legalEntity.contact}
-              onChange={(e) => setLegalEntity((prev) => ({ ...prev, contact: e.target.value, }))}
-              onKeyDown={(e) => handleKeyDown(e)}
+              onChange={(e) => { setLegalEntity((prev) => ({ ...prev, contact: e.target.value, })); docChanged(); }}
             />
           </div>
           {/* inn */}
@@ -205,8 +246,7 @@ export default function EditForm(props: IEditFormProps) {
               type="text"
               className="w-13/16 control rounded-md border border-gray-200 p-2"
               value={legalEntity.inn}
-              onChange={(e) => setLegalEntity((prev) => ({ ...prev, inn: e.target.value, }))}
-              onKeyDown={(e) => handleKeyDown(e)}
+              onChange={(e) => { setLegalEntity((prev) => ({ ...prev, inn: e.target.value, })); docChanged(); }}
             />
           </div>
           {/* kpp */}
@@ -221,8 +261,7 @@ export default function EditForm(props: IEditFormProps) {
               type="text"
               className="w-13/16 control rounded-md border border-gray-200 p-2"
               value={legalEntity.kpp}
-              onChange={(e) => setLegalEntity((prev) => ({ ...prev, kpp: e.target.value, }))}
-              onKeyDown={(e) => handleKeyDown(e)}
+              onChange={(e) => { setLegalEntity((prev) => ({ ...prev, kpp: e.target.value, })); docChanged(); }}
             />
           </div>
 
@@ -243,10 +282,10 @@ export default function EditForm(props: IEditFormProps) {
               className="w-13/16 pointer-events-none control rounded-md border border-gray-200 p-2"
               value={legalEntity.section_name}
               readOnly
-              onChange={(e) => setLegalEntity((prev) => ({ ...prev, section_id: e.target.value, }))}
-              // onKeyDown={(e) => handleKeyDown(e)}
+              onChange={(e) => { setLegalEntity((prev) => ({ ...prev, section_id: e.target.value, })); docChanged(); }}
+            // onKeyDown={(e) => handleKeyDown(e)}
             />
-            <BtnSectionsRef sections={props.sections} handleSelectSection={handleSelectSection}/>
+            <BtnSectionsRef sections={props.sections} handleSelectSection={handleSelectSection} />
           </div>
         </div>
       </div>
@@ -255,11 +294,7 @@ export default function EditForm(props: IEditFormProps) {
         <div className="flex w-full md:w-1/2">
           <div className="w-full md:w-1/2">
             <button
-              onClick={() => {
-                updateLegalEntity(legalEntity);
-                handleRedirectBack();
-                // redirect("/erp/legal-entities/");
-              }}
+              onClick={handleSaveClick}
               className="bg-blue-400 text-white w-full rounded-md border p-2 
               hover:bg-blue-100 hover:text-gray-500 cursor-pointer"
             >
@@ -267,31 +302,17 @@ export default function EditForm(props: IEditFormProps) {
             </button>
           </div>
           <div className="w-full md:w-1/2">
-            <Link href={"#"} >
-              <button
-                onClick={()=>handleRedirectBack()}
-                className="bg-blue-400 text-white w-full rounded-md border p-2
+            <button
+              onClick={handleBackClick}
+              className="bg-blue-400 text-white w-full rounded-md border p-2
                  hover:bg-blue-100 hover:text-gray-500 cursor-pointer"
-              >
-                Отмена
-              </button>
-            </Link>
+            >
+              Back to list
+            </button>
           </div>
         </div>
       </div>
-
-
+      <MessageBoxOKCancel />
     </div>
   );
 }
-
-{/* <div className="flex flex-col md:flex-row gap-4 w-full">
-<div className="flex flex-col gap-4 w-full md:w-1/2">
-  <div className="border px-3 py-1.5">Элемент 1 col 1</div>
-  <div className="border px-3 py-1.5">Элемент 2 col 1</div>
-</div>
-<div className="flex flex-col gap-4 w-full md:w-1/2">
-  <div className="border px-3 py-1.5">Элемент 3 col 2</div>
-  <div className="border px-3 py-1.5">Элемент 4 col 2</div>
-</div>
-</div> */}

@@ -2,12 +2,14 @@
 // Region EditForm
 
 'use client';
-import { useState } from "react";
-import { KeyboardEvent } from "react";
+import { useEffect, useState } from "react";
 import { RegionForm, SectionForm } from "@/app/lib/definitions";
 import { updateRegion } from "../../lib/region-actions";
-import Link from "next/link";
 import BtnSectionsRef from "@/app/admin/sections/lib/btnSectionsRef";
+import MessageBoxOKCancel from "@/app/lib/MessageBoxOKCancel";
+import { setIsCancelButtonPressed, setIsDocumentChanged, setIsMessageBoxOpen, setIsOKButtonPressed, 
+  setIsShowMessageBoxCancel, setMessageBoxText, useIsDocumentChanged, useMessageBox } from "@/app/store/useDocumentStore";
+import { useRouter } from "next/navigation";
 
 interface IEditFormProps {
   region: RegionForm,
@@ -16,23 +18,65 @@ interface IEditFormProps {
 
 export default function EditForm(props: IEditFormProps) {
   const [region, setRegion] = useState(props.region);
-  const [show, setShow] = useState(false);
-  const handleKeyDown = (e: KeyboardEvent) => {
-    if (e.key === "Enter") {
-      setShow(true);
-    }
-  };
+  const isDocumentChanged = useIsDocumentChanged();
+  const msgBox = useMessageBox();
+  const router = useRouter();
+
   const handleSelectSection = (new_section_id: string, new_section_name: string) => {
     setRegion((prev) => ({
       ...prev,
       section_id: new_section_id,
       section_name: new_section_name,
     }));
+    setIsDocumentChanged(true);
+    setMessageBoxText('Документ изменен. Закрыть без сохранения?');
+  };
+  const docChanged = () => {
+    setIsDocumentChanged(true);
+    setMessageBoxText('Документ изменен. Закрыть без сохранения?');
   };
 
-  const handleRedirectBack = () => {
-    window.history.back(); // Возвращает пользователя на предыдущую страницу
+  const handleBackClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (isDocumentChanged && !msgBox.isOKButtonPressed) {
+      setIsShowMessageBoxCancel(true);
+      setIsMessageBoxOpen(true);
+    } else if (isDocumentChanged && msgBox.isOKButtonPressed) {
+    } else if (!isDocumentChanged) {
+      router.push('/erp/regions/');
+    }
   };
+  const handleSaveClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    updateRegion(region);
+    setIsDocumentChanged(false);
+    setMessageBoxText('Документ сохранен.');
+    setIsShowMessageBoxCancel(false);
+    setIsMessageBoxOpen(true);
+  }
+useEffect(() => {
+  return () => {
+    // Сброс при уходе со страницы
+    setIsDocumentChanged(false);
+    setIsMessageBoxOpen(false);
+    setIsOKButtonPressed(false);
+    setIsCancelButtonPressed(false);
+    setIsShowMessageBoxCancel(true);
+    setMessageBoxText('');
+  };
+}, []);
+
+  useEffect(() => {
+    if (msgBox.isOKButtonPressed && msgBox.messageBoxText === 'Документ изменен. Закрыть без сохранения?') {
+      router.push('/erp/regions/');
+    }
+    setIsOKButtonPressed(false);
+    setIsCancelButtonPressed(false);
+    setIsDocumentChanged(false);
+    setIsMessageBoxOpen(false);
+    setIsShowMessageBoxCancel(true);
+  }, [msgBox.isOKButtonPressed, router]);
+
   return (
     <div>
       <div className="flex flex-col md:flex-row gap-4 w-full">
@@ -52,8 +96,7 @@ export default function EditForm(props: IEditFormProps) {
               type="text"
               className="w-7/8 control rounded-md border border-gray-200 p-2"
               value={region.name}
-              onChange={(e) => setRegion((prev) => ({ ...prev, name: e.target.value, }))}
-              onKeyDown={(e) => handleKeyDown(e)}
+              onChange={(e) => { setRegion((prev) => ({ ...prev, name: e.target.value, })); docChanged();}}
             />
           </div>
           {/* capital */}
@@ -68,8 +111,7 @@ export default function EditForm(props: IEditFormProps) {
               type="text"
               className="w-13/16 control rounded-md border border-gray-200 p-2"
               value={region.capital}
-              onChange={(e) => setRegion((prev) => ({ ...prev, capital: e.target.value, }))}
-              onKeyDown={(e) => handleKeyDown(e)}
+              onChange={(e) => { setRegion((prev) => ({ ...prev, capital: e.target.value, })); docChanged();}}
             />
           </div>
           {/* section_name */}
@@ -86,8 +128,8 @@ export default function EditForm(props: IEditFormProps) {
               className="w-13/16 pointer-events-none control rounded-md border border-gray-200 p-2"
               value={region.section_name}
               readOnly
-              onChange={(e) => setRegion((prev) => ({ ...prev, section_id: e.target.value, }))}
-              // onKeyDown={(e) => handleKeyDown(e)}
+              onChange={(e) => {setRegion((prev) => ({ ...prev, section_id: e.target.value, })); docChanged();}}
+            // onKeyDown={(e) => handleKeyDown(e)}
             />
             <BtnSectionsRef sections={props.sections} handleSelectSection={handleSelectSection} />
           </div>
@@ -106,8 +148,7 @@ export default function EditForm(props: IEditFormProps) {
               type="text"
               className="w-13/16 control rounded-md border border-gray-200 p-2"
               value={region.area}
-              onChange={(e) => setRegion((prev) => ({ ...prev, area: e.target.value, }))}
-              onKeyDown={(e) => handleKeyDown(e)}
+              onChange={(e) => { setRegion((prev) => ({ ...prev, area: e.target.value, })); docChanged();}}
             />
           </div>
           {/* code */}
@@ -122,8 +163,7 @@ export default function EditForm(props: IEditFormProps) {
               type="text"
               className="w-13/16 control rounded-md border border-gray-200 p-2"
               value={region.code}
-              onChange={(e) => setRegion((prev) => ({ ...prev, code: e.target.value, }))}
-              onKeyDown={(e) => handleKeyDown(e)}
+              onChange={(e) => { setRegion((prev) => ({ ...prev, code: e.target.value, })); docChanged();}}
             />
           </div>
         </div>
@@ -133,11 +173,7 @@ export default function EditForm(props: IEditFormProps) {
         <div className="flex w-full md:w-1/2">
           <div className="w-full md:w-1/2">
             <button
-              onClick={() => {
-                updateRegion(region);
-                handleRedirectBack();
-                // redirect("/erp/regions/");
-              }}
+              onClick={handleSaveClick}
               className="bg-blue-400 text-white w-full rounded-md border p-2 
               hover:bg-blue-100 hover:text-gray-500 cursor-pointer"
             >
@@ -145,18 +181,17 @@ export default function EditForm(props: IEditFormProps) {
             </button>
           </div>
           <div className="w-full md:w-1/2">
-            <Link href={"#"} >
-              <button
-                onClick={() => handleRedirectBack()}
-                className="bg-blue-400 text-white w-full rounded-md border p-2
+            <button
+              onClick={handleBackClick}
+              className="bg-blue-400 text-white w-full rounded-md border p-2
                  hover:bg-blue-100 hover:text-gray-500 cursor-pointer"
-              >
-                Отмена
-              </button>
-            </Link>
+            >
+              Back to list
+            </button>
           </div>
         </div>
       </div>
+      <MessageBoxOKCancel />
     </div>
   );
 }

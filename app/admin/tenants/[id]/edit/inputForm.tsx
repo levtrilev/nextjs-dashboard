@@ -7,7 +7,8 @@ import {
   setIsCancelButtonPressed, setIsDocumentChanged, setIsMessageBoxOpen,
   setIsOKButtonPressed, setIsShowMessageBoxCancel, setMessageBoxText, useIsDocumentChanged,
   useMessageBox
-} from "@/app/store/useDocumentStore"; import { useRouter } from 'next/navigation';
+} from "@/app/store/useDocumentStore"; 
+import { useRouter } from 'next/navigation';
 import MessageBoxOKCancel from "@/app/lib/MessageBoxOKCancel";
 
 interface IInputFormProps {
@@ -65,14 +66,17 @@ export const InputForm: FC<IInputFormProps> = (props: IInputFormProps) => {
     setIsShowMessageBoxCancel(false);
     setIsMessageBoxOpen(true);
   }
-  useEffect(() => {
+useEffect(() => {
+  return () => {
+    // Сброс при уходе со страницы
     setIsDocumentChanged(false);
     setIsMessageBoxOpen(false);
     setIsOKButtonPressed(false);
     setIsCancelButtonPressed(false);
     setIsShowMessageBoxCancel(true);
     setMessageBoxText('');
-  }, []);
+  };
+}, []);
 
   useEffect(() => {
     if (msgBox.isOKButtonPressed && msgBox.messageBoxText === 'Документ изменен. Закрыть без сохранения?') {
