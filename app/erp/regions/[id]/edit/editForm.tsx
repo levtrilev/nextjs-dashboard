@@ -7,8 +7,10 @@ import { RegionForm, SectionForm } from "@/app/lib/definitions";
 import { updateRegion } from "../../lib/region-actions";
 import BtnSectionsRef from "@/app/admin/sections/lib/btnSectionsRef";
 import MessageBoxOKCancel from "@/app/lib/MessageBoxOKCancel";
-import { setIsCancelButtonPressed, setIsDocumentChanged, setIsMessageBoxOpen, setIsOKButtonPressed, 
-  setIsShowMessageBoxCancel, setMessageBoxText, useIsDocumentChanged, useMessageBox } from "@/app/store/useDocumentStore";
+import {
+  setIsCancelButtonPressed, setIsDocumentChanged, setIsMessageBoxOpen, setIsOKButtonPressed,
+  setIsShowMessageBoxCancel, setMessageBoxText, useIsDocumentChanged, useMessageBox
+} from "@/app/store/useDocumentStore";
 import { useRouter } from "next/navigation";
 
 interface IEditFormProps {
@@ -18,19 +20,12 @@ interface IEditFormProps {
 
 export default function EditForm(props: IEditFormProps) {
   const [region, setRegion] = useState(props.region);
+  //#region msgBox
+  //================================================================
   const isDocumentChanged = useIsDocumentChanged();
   const msgBox = useMessageBox();
   const router = useRouter();
 
-  const handleSelectSection = (new_section_id: string, new_section_name: string) => {
-    setRegion((prev) => ({
-      ...prev,
-      section_id: new_section_id,
-      section_name: new_section_name,
-    }));
-    setIsDocumentChanged(true);
-    setMessageBoxText('Документ изменен. Закрыть без сохранения?');
-  };
   const docChanged = () => {
     setIsDocumentChanged(true);
     setMessageBoxText('Документ изменен. Закрыть без сохранения?');
@@ -54,17 +49,17 @@ export default function EditForm(props: IEditFormProps) {
     setIsShowMessageBoxCancel(false);
     setIsMessageBoxOpen(true);
   }
-useEffect(() => {
-  return () => {
-    // Сброс при уходе со страницы
-    setIsDocumentChanged(false);
-    setIsMessageBoxOpen(false);
-    setIsOKButtonPressed(false);
-    setIsCancelButtonPressed(false);
-    setIsShowMessageBoxCancel(true);
-    setMessageBoxText('');
-  };
-}, []);
+  useEffect(() => {
+    return () => {
+      // Сброс при уходе со страницы
+      setIsDocumentChanged(false);
+      setIsMessageBoxOpen(false);
+      setIsOKButtonPressed(false);
+      setIsCancelButtonPressed(false);
+      setIsShowMessageBoxCancel(true);
+      setMessageBoxText('');
+    };
+  }, []);
 
   useEffect(() => {
     if (msgBox.isOKButtonPressed && msgBox.messageBoxText === 'Документ изменен. Закрыть без сохранения?') {
@@ -76,7 +71,17 @@ useEffect(() => {
     setIsMessageBoxOpen(false);
     setIsShowMessageBoxCancel(true);
   }, [msgBox.isOKButtonPressed, router]);
-
+  //================================================================
+  //#endregion
+  const handleSelectSection = (new_section_id: string, new_section_name: string) => {
+    setRegion((prev) => ({
+      ...prev,
+      section_id: new_section_id,
+      section_name: new_section_name,
+    }));
+    setIsDocumentChanged(true);
+    setMessageBoxText('Документ изменен. Закрыть без сохранения?');
+  };
   return (
     <div>
       <div className="flex flex-col md:flex-row gap-4 w-full">
@@ -96,7 +101,7 @@ useEffect(() => {
               type="text"
               className="w-7/8 control rounded-md border border-gray-200 p-2"
               value={region.name}
-              onChange={(e) => { setRegion((prev) => ({ ...prev, name: e.target.value, })); docChanged();}}
+              onChange={(e) => { setRegion((prev) => ({ ...prev, name: e.target.value, })); docChanged(); }}
             />
           </div>
           {/* capital */}
@@ -111,7 +116,7 @@ useEffect(() => {
               type="text"
               className="w-13/16 control rounded-md border border-gray-200 p-2"
               value={region.capital}
-              onChange={(e) => { setRegion((prev) => ({ ...prev, capital: e.target.value, })); docChanged();}}
+              onChange={(e) => { setRegion((prev) => ({ ...prev, capital: e.target.value, })); docChanged(); }}
             />
           </div>
           {/* section_name */}
@@ -128,7 +133,7 @@ useEffect(() => {
               className="w-13/16 pointer-events-none control rounded-md border border-gray-200 p-2"
               value={region.section_name}
               readOnly
-              onChange={(e) => {setRegion((prev) => ({ ...prev, section_id: e.target.value, })); docChanged();}}
+              onChange={(e) => { setRegion((prev) => ({ ...prev, section_id: e.target.value, })); docChanged(); }}
             // onKeyDown={(e) => handleKeyDown(e)}
             />
             <BtnSectionsRef sections={props.sections} handleSelectSection={handleSelectSection} />
@@ -148,7 +153,7 @@ useEffect(() => {
               type="text"
               className="w-13/16 control rounded-md border border-gray-200 p-2"
               value={region.area}
-              onChange={(e) => { setRegion((prev) => ({ ...prev, area: e.target.value, })); docChanged();}}
+              onChange={(e) => { setRegion((prev) => ({ ...prev, area: e.target.value, })); docChanged(); }}
             />
           </div>
           {/* code */}
@@ -163,7 +168,7 @@ useEffect(() => {
               type="text"
               className="w-13/16 control rounded-md border border-gray-200 p-2"
               value={region.code}
-              onChange={(e) => { setRegion((prev) => ({ ...prev, code: e.target.value, })); docChanged();}}
+              onChange={(e) => { setRegion((prev) => ({ ...prev, code: e.target.value, })); docChanged(); }}
             />
           </div>
         </div>
@@ -186,7 +191,7 @@ useEffect(() => {
               className="bg-blue-400 text-white w-full rounded-md border p-2
                  hover:bg-blue-100 hover:text-gray-500 cursor-pointer"
             >
-              Back to list
+              Закрыть
             </button>
           </div>
         </div>

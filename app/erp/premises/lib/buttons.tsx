@@ -4,8 +4,7 @@
 import { PencilIcon, PlusIcon, TrashIcon, ServerIcon } from '@heroicons/react/24/outline';
 import { deletePremise, updatePremise } from './premisesActions';
 import Link from "next/link";
-import { Premise, Region } from '@/app/lib/definitions';
-
+import { Premise } from '@/app/lib/definitions';
 export function CreatePremise() {
   return (
     <Link
@@ -28,18 +27,18 @@ export function BtnUpdatePremise({ premise }: { premise: Premise }) {
   );
 }
 
-export function BtnDeletePremise({ id }: { id: string }) {
-  const deletePremiseWithId = deletePremise.bind(null, id);
+// export function BtnDeletePremise({ id }: { id: string }) {
+//   const deletePremiseWithId = deletePremise.bind(null, id);
 
-  return (
-    <form action={deletePremiseWithId}>
-      <button className="rounded-md border border-gray-200 p-2 h-10 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
-        <span className="sr-only">Delete</span>
-        <TrashIcon className="w-5 h-5 text-gray-800" />
-      </button>
-    </form>
-  );
-}
+//   return (
+//     <form action={deletePremiseWithId}>
+//       <button className="rounded-md border border-gray-200 p-2 h-10 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
+//         <span className="sr-only">Delete</span>
+//         <TrashIcon className="w-5 h-5 text-gray-800" />
+//       </button>
+//     </form>
+//   );
+// }
 
 export function BtnEditPremiseLink({ id }: { id: string }) {
   const LinkIcon = PencilIcon;

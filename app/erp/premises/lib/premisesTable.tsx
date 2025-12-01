@@ -1,16 +1,8 @@
 
 // Premises Table
 
-import Image from 'next/image';
-import { lusitana } from '@/app/ui/fonts';
-import Search from '@/app/ui/search';
-import {
-  CustomersTableType,
-  FormattedCustomersTable,
-} from '@/app/lib/definitions';
+import BtnDeletePremise from './BtnDeletePremise';
 import { fetchFilteredPremises } from './premisesActions';
-import { ChartBarIcon, ChartPieIcon } from '@heroicons/react/20/solid';
-import { BtnDeletePremise, BtnEditPremiseLink } from './buttons';
 
 export default async function PremisesTable({
   query,
@@ -30,7 +22,6 @@ export default async function PremisesTable({
         <div className="overflow-x-auto">
           <div className="inline-block min-w-full align-middle">
             <div className="overflow-hidden rounded-md bg-gray-50 p-2 md:pt-0">
-
               <table className="table-fixed hidden w-full rounded-md text-gray-900 md:table">
                 <thead className="rounded-md bg-gray-50 text-left text-sm font-normal">
                   <tr>
@@ -82,7 +73,7 @@ export default async function PremisesTable({
                       <td className="w-1/16 whitespace-nowrap pl-4 py-1 pr-3">
                         <div className="flex justify-end gap-3">
                           {/* <BtnEditTenantModal tenant={tenant} /> */}
-                          <BtnDeletePremise id={premise.id} />
+                          <BtnDeletePremise id={premise.id} name={premise.name}/>
                           {/* <BtnEditLegalEntityLink id={legalEntity.id} /> */}
                         </div>
                       </td>
@@ -123,7 +114,7 @@ export default async function PremisesTable({
                       <div className="flex justify-between">
                         <span className="font-medium">Раздел:</span>
                         <span>{premise.section_name}</span>
-                        <BtnDeletePremise id={premise.id} />
+                        <BtnDeletePremise id={premise.id} name={premise.name}/>
                       </div>
 
                     </div>
