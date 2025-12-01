@@ -5,7 +5,6 @@
 import { useEffect, useState } from "react";
 import { LegalEntity, TaskScheduleForm, RegionForm, SectionForm, PremiseForm, TaskForm } from "@/app/lib/definitions";
 import { createTaskSchedule, updateTaskSchedule } from "../../lib/taskSchedulesActions";
-import Link from "next/link";
 import { formatDateForInput } from "@/app/lib/utils";
 import BtnSectionsRef from "@/app/admin/sections/lib/btnSectionsRef";
 import BtnLegalEntitiesRef from "@/app/erp/legal-entities/lib/btnLegalEntitiesRef";
@@ -383,15 +382,6 @@ export default function TaskScheduleEditForm(props: IEditFormProps) {
                 >
                   Закрыть
                 </button>
-                {/* <Link href={"#"} >
-                  <button
-                    onClick={() => handleRedirectBack()}
-                    className="bg-blue-400 text-white w-full rounded-md border p-2
-                 hover:bg-blue-100 hover:text-gray-500 cursor-pointer"
-                  >
-                    Отмена
-                  </button>
-                </Link> */}
               </div>
               <div className="w-full md:w-1/2">
                 <button

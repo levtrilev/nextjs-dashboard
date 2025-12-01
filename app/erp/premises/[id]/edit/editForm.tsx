@@ -13,7 +13,6 @@ import {
   setIsCancelButtonPressed, setIsDocumentChanged, setIsMessageBoxOpen, setIsOKButtonPressed,
   setIsShowMessageBoxCancel, setMessageBoxText, useIsDocumentChanged, useMessageBox
 } from "@/app/store/useDocumentStore";
-import { useRouter } from "next/navigation";
 
 interface IEditFormProps {
   premise: PremiseForm,
@@ -89,7 +88,7 @@ export default function PremiseEditForm(props: IEditFormProps) {
   //================================================================
   const isDocumentChanged = useIsDocumentChanged();
   const msgBox = useMessageBox();
-  const router = useRouter();
+  // const router = useRouter();
 
   const docChanged = () => {
     setIsDocumentChanged(true);
@@ -135,7 +134,7 @@ export default function PremiseEditForm(props: IEditFormProps) {
     setIsDocumentChanged(false);
     setIsMessageBoxOpen(false);
     setIsShowMessageBoxCancel(true);
-  }, [msgBox.isOKButtonPressed, router]);
+  }, [msgBox.isOKButtonPressed]);
   //================================================================
   //#endregion
 

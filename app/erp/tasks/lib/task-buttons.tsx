@@ -1,7 +1,7 @@
 // TaskButtons.tsx
 
 import { PencilIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
-import { deleteTask, updateTask } from './task-actions'; // Предполагается, что экшены определены
+import { updateTask } from './task-actions'; // Предполагается, что экшены определены
 import Link from 'next/link';
 import { Task } from '@/app/lib/definitions';
 
@@ -26,22 +26,6 @@ export function BtnUpdateTask({ task }: { task: Task }) {
         className="bg-blue-400 text-white w-full rounded-md border p-2 hover:bg-blue-100 hover:text-gray-500"
       >
         Save
-      </button>
-    </form>
-  );
-}
-
-export function BtnDeleteTask({ id }: { id: string }) {
-  const deleteTaskWithId = deleteTask.bind(null, id);
-
-  return (
-    <form action={deleteTaskWithId}>
-      <button
-        type="submit"
-        className="rounded-md border border-gray-200 p-2 h-10 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-      >
-        <span className="sr-only">Delete</span>
-        <TrashIcon className="w-5 h-5 text-gray-800" />
       </button>
     </form>
   );
