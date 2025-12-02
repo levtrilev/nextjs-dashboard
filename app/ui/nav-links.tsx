@@ -14,7 +14,6 @@ import clsx from 'clsx';
 import { useEffect, useRef, useState } from 'react';
 
 // Map of links to display in the side navigation.
-// Depending on the size of the application, this would be stored in a database.
 const links = [
   { name: 'Главное', href: '/erp', icon: HomeIcon },
   { name: 'Руководителю', href: '/dashboard', icon: ArrowRightCircleIcon },
@@ -34,6 +33,7 @@ const subMenu = [
   { mainItem: 'Администрирование', name: 'Организации', href: '/admin/tenants' },
   { mainItem: 'Администрирование', name: 'Разделы', href: '/admin/sections' },
   { mainItem: 'Администрирование', name: 'Роли', href: '/admin/roles' },
+  { mainItem: 'Администрирование', name: 'Полномочия', href: '/admin/permissions' },
   { mainItem: 'Справочники', name: 'Юридические лица', href: '/erp/legal-entities' },
   { mainItem: 'Справочники', name: 'Регионы', href: '/erp/regions' },
   { mainItem: 'Помещения', name: 'Помещения', href: '/erp/premises' },
@@ -116,16 +116,3 @@ export default function NavLinks() {
     </>
   );
 }
-
-// className="absolute left-60 top-full mt-2 w-48 rounded-md bg-white shadow-lg">
-
-// className={`absolute left-60 top-full mt-2 w-48 rounded-md bg-white shadow-lg 
-//   md:absolute md:left-60 md:top-full md:w-48 
-//   sm:relative sm:left-0 sm:top-0 sm:w-full sm:rounded-none sm:bg-gray-100 sm:shadow-none`}
-
-{/* <div
-                className={`absolute top-full left-0 mt-2 w-48 rounded-md bg-white shadow-lg 
-                  md:absolute md:top-full md:left-0 md:w-48 md:rounded-md md:shadow-lg
-                  sm:relative sm:left-0 sm:top-0 sm:w-full sm:rounded-none sm:bg-gray-100 sm:shadow-none`}
-                style={{ left: `${menuPosition}px` }}
-              ></div> */}

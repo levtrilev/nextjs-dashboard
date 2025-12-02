@@ -2,7 +2,24 @@
 // These types may be generated automatically if you're using an ORM such as Prisma.
 
 import { DateTime } from "next-auth/providers/kakao";
-
+export type Permission = {
+  id: string;
+  role_id: string;
+  role_name: string;
+  doctype: string;
+  doctype_name: string;
+  full_access: boolean;
+  author: boolean;
+  can_delete: boolean;
+  can_recall: boolean;
+  reader: boolean;
+  access_by_tags: boolean;
+  or_tags: string[];
+  and_tags: string[];
+  no_tags: string[];
+  tenant_id: string;
+  tenant_name: string;
+}
 export type MessageBox = {
   isMessageBoxOpen: boolean;
   messageBoxText: string;

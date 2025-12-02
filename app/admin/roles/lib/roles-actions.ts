@@ -25,7 +25,7 @@ export async function fetchRoles() {
     return data.rows;
   } catch (err) {
     console.error("Database Error:", err);
-    throw new Error("Failed to fetch all roles.");
+    throw new Error("Failed to fetch all roles " + err);
   }
 }
 
@@ -47,7 +47,7 @@ export async function fetchRole(id: string) {
     return data.rows[0];
   } catch (err) {
     console.error("Database Error:", err);
-    throw new Error("Failed to fetch role");
+    throw new Error("Failed to fetch role " + err);
   }
 }
 
@@ -196,7 +196,7 @@ export async function updateRole(role: Role) {
     );
   } catch (error) {
     console.error("Failed to update role:", error);
-    throw new Error("Failed to update role.");
+    throw new Error("Failed to update role: " + error);
   }
 
   // revalidatePath("/admin/roles");
