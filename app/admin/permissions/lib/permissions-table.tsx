@@ -80,9 +80,17 @@ export const PermissionsTable: React.FC<IDoctypeTableProps> = (props: IDoctypeTa
                                         {perm.role_name}
                                     </td>
                                     <td className="w-3/8 overflow-hidden whitespace-nowrap bg-white px-4 py-1 text-sm">
-                                        {perm.full_access ? ' Владелец' : ''}
-                                        {perm.author ? ' Автор' : ''}
-                                        {perm.reader ? ' Читатель' : ''}
+                                        {perm.full_access ? ' Полный доступ' 
+                                        : perm.author && perm.can_recall && perm.can_delete ? ' Автор(с правом отзывать/удалять)' 
+                                        : perm.author && perm.can_recall ? ' Автор(с правом отзывать)' 
+                                        : perm.author && perm.can_delete ? ' Автор(с правом удалять)' 
+                                        : perm.author ? ' Автор' 
+                                        : perm.reader && perm.can_recall && perm.can_delete ? ' Читатель(с правом отзывать/удалять)' 
+                                        : perm.reader && perm.can_delete ? ' Читатель(с правом удалять)'
+                                        : perm.reader && perm.can_recall ? ' Читатель(с правом отзывать)' 
+                                        : perm.reader ? ' Читатель' 
+                                        : ''}
+
                                     </td>
                                     <td className="w-2/8 overflow-hidden whitespace-nowrap bg-white px-4 py-1 text-sm">
                                         {perm.tenant_name}

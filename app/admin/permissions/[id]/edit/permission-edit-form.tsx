@@ -1,21 +1,19 @@
-// Role EditForm
+// Permission EditForm
 
 'use client';
 import { useEffect, useState } from "react";
 import { Permission, RoleForm, SectionForm, Tenant } from "@/app/lib/definitions";
 import Link from "next/link";
 import BtnTenantsRef from "@/app/admin/tenants/lib/btn-tenants-ref";
-import { TrashIcon } from "@heroicons/react/24/outline";
 import { lusitana } from "@/app/ui/fonts";
 import MessageBoxOKCancel from "@/app/lib/message-box-ok-cancel";
-import { useRouter } from 'next/navigation';
 import {
   setIsCancelButtonPressed, setIsDocumentChanged, setIsMessageBoxOpen,
   setIsOKButtonPressed, setIsShowMessageBoxCancel, setMessageBoxText, useIsDocumentChanged,
   useMessageBox
 } from "@/app/store/useDocumentStore";
 import { updatePermission } from "../../lib/permissios-actions";
-import BtnRolesRef from "../../../roles/lib/btnRolesRef";
+import BtnRolesRef from "../../../roles/lib/btn-roles-ref";
 
 interface IPermissionEditFormProps {
   permission: Permission,
@@ -26,13 +24,9 @@ interface IPermissionEditFormProps {
 
 export default function PermissionEditForm(props: IPermissionEditFormProps) {
   const [permission, setPermission] = useState(props.permission);
-  const router = useRouter();
   const isDocumentChanged = useIsDocumentChanged();
   const msgBox = useMessageBox();
 
-  // const handleRedirectBack = () => {
-  //   window.history.back(); // Возвращает пользователя на предыдущую страницу
-  // };
   const docChanged = () => {
     setIsDocumentChanged(true);
     setMessageBoxText('Документ изменен. Закрыть без сохранения?');
@@ -68,14 +62,6 @@ export default function PermissionEditForm(props: IPermissionEditFormProps) {
     }));
     docChanged();
   }
-  const prepareRoleSectionIds = (role_sections: SectionForm[]) => {
-    setPermission((prev) => ({
-      ...prev,
-      section_ids: "{" + role_sections.map((section) => section.id).join(",") + "}",
-      section_names: "{" + role_sections.map((section) => section.name).join(",") + "}",
-    }));
-    docChanged();
-  };
 
   const handleBackClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -84,19 +70,34 @@ export default function PermissionEditForm(props: IPermissionEditFormProps) {
       setIsMessageBoxOpen(true);
     } else if (isDocumentChanged && msgBox.isOKButtonPressed) {
     } else if (!isDocumentChanged) {
-      // router.push('/admin/roles');
       window.history.back(); // Возвращает пользователя на предыдущую страницу
     }
   };
-  const handleSaveClick = (e: React.MouseEvent) => {
+  const handleSaveClick = async (e: React.MouseEvent) => {
     e.preventDefault();
-    updatePermission(permission);
-    setIsDocumentChanged(false);
-
-    setMessageBoxText('Документ сохранен.');
+    if (permission.can_recall && !(permission.reader || permission.author)) {
+      setMessageBoxText('Право отзывать не имеет смысла если нет прав Автор или Читатель.');
+      setIsShowMessageBoxCancel(false);
+      setIsMessageBoxOpen(true);
+      return;
+    }
+    if (permission.can_delete && !(permission.reader || permission.author)) {
+      setMessageBoxText('Право удалять не имеет смысла если нет прав Автор или Читатель.');
+      setIsShowMessageBoxCancel(false);
+      setIsMessageBoxOpen(true);
+      return;
+    }
+    try {
+      await updatePermission(permission);
+      setIsDocumentChanged(false);
+      setMessageBoxText('Документ сохранен.');
+    } catch (error) {
+      setMessageBoxText('Документ не сохранен.' + String(error));
+    }
     setIsShowMessageBoxCancel(false);
     setIsMessageBoxOpen(true);
   };
+
   useEffect(() => {
     setIsDocumentChanged(false);
 
@@ -117,7 +118,7 @@ export default function PermissionEditForm(props: IPermissionEditFormProps) {
     setIsShowMessageBoxCancel(true);
     setIsDocumentChanged(false);
     setIsMessageBoxOpen(false);
-  }, [msgBox.isOKButtonPressed, router]);
+  }, [msgBox.isOKButtonPressed]);
   return (
 
     <div >
@@ -128,7 +129,7 @@ export default function PermissionEditForm(props: IPermissionEditFormProps) {
           <div className="flex justify-between mt-1">
             <label
               htmlFor="role_name"
-              className={`${lusitana.className} w-2/8 font-medium flex items-center p-2 text-gray-400`}>
+              className={`${lusitana.className} w-2/8 font-medium flex items-center p-2 text-gray-500`}>
               Роль (выберите):
             </label>
             <input
@@ -145,7 +146,7 @@ export default function PermissionEditForm(props: IPermissionEditFormProps) {
           <div className="flex justify-between mt-1">
             <label
               htmlFor="doctype_name"
-              className={`${lusitana.className} w-2/8 font-medium flex items-center p-2 text-gray-400`}
+              className={`${lusitana.className} w-2/8 font-medium flex items-center p-2 text-gray-500`}
             >
               Тип документа:
             </label>
@@ -162,7 +163,7 @@ export default function PermissionEditForm(props: IPermissionEditFormProps) {
           <div className="flex justify-between mt-1">
             <label
               htmlFor="tenant_name"
-              className={`${lusitana.className} w-2/8 font-medium flex items-center p-2 text-gray-400`}>
+              className={`${lusitana.className} w-2/8 font-medium flex items-center p-2 text-gray-500`}>
               Организация:
             </label>
             <input
@@ -180,21 +181,76 @@ export default function PermissionEditForm(props: IPermissionEditFormProps) {
         {/* second column */}
         <div className="flex flex-col gap-2 w-full md:w-1/2">
           {/* full_access */}
-          <div className="flex justify-between mt-1">
+          <div className="flex justify-between w-1/2 mt-1">
             <label
               htmlFor="full_access"
-              className={`${lusitana.className} w-2/8 font-medium flex items-center p-2 text-gray-400`}>
+              className={`${lusitana.className} w-7/10 font-medium flex items-center p-2 text-gray-500`}>
               Полный доступ:
             </label>
             <input
               id="full_access"
-              type="сheckbox"
-              className="w-13/16 control rounded-md border border-gray-200 p-2"
-              value={permission.full_access ? "checked" : "unchecked"}
-              onChange={(e) => setPermission((prev) => ({ ...prev, full_access: e.target.value === "checked" ? true : false, }))}
+              type="checkbox"
+              className="w-3/10 control rounded-md p-2"
+              checked={permission.full_access}
+              onChange={(e) => { setPermission((prev) => ({ ...prev, full_access: e.target.checked, })); docChanged(); }}
             />
           </div>
-
+          <div className="flex justify-between w-1/2 mt-1">
+            <label
+              htmlFor="author"
+              className={`${lusitana.className} w-7/10 font-medium flex items-center p-2 text-gray-500`}>
+              Автор:
+            </label>
+            <input
+              id="author"
+              type="checkbox"
+              className="w-3/10 control rounded-md p-2"
+              checked={permission.author}
+              onChange={(e) => { setPermission((prev) => ({ ...prev, author: e.target.checked, })); docChanged(); }}
+            />
+          </div>
+          <div className="flex justify-between w-1/2 mt-1">
+            <label
+              htmlFor="reader"
+              className={`${lusitana.className} w-7/10 font-medium flex items-center p-2 text-gray-500`}>
+              Читатель:
+            </label>
+            <input
+              id="reader"
+              type="checkbox"
+              className="w-3/10 control rounded-md p-2"
+              checked={permission.reader}
+              onChange={(e) => { setPermission((prev) => ({ ...prev, reader: e.target.checked, })); docChanged(); }}
+            />
+          </div>
+          <div className="flex justify-between w-1/2 mt-1">
+            <label
+              htmlFor="can_recall"
+              className={`${lusitana.className} w-7/10 font-medium flex items-center p-2 text-gray-500`}>
+              Право отзывать:
+            </label>
+            <input
+              id="can_recall"
+              type="checkbox"
+              className="w-3/10 control rounded-md p-2"
+              checked={permission.can_recall}
+              onChange={(e) => { setPermission((prev) => ({ ...prev, can_recall: e.target.checked, })); docChanged(); }}
+            />
+          </div>
+          <div className="flex justify-between w-1/2 mt-1">
+            <label
+              htmlFor="can_delete"
+              className={`${lusitana.className} w-7/10 font-medium flex items-center p-2 text-gray-500`}>
+              Право удалять:
+            </label>
+            <input
+              id="can_delete"
+              type="checkbox"
+              className="w-3/10 control rounded-md p-2"
+              checked={permission.can_delete}
+              onChange={(e) => { setPermission((prev) => ({ ...prev, can_delete: e.target.checked, })); docChanged(); }}
+            />
+          </div>
         </div>
       </div>
 

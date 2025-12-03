@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import { Tenant } from '@/app/lib/definitions';
-import { addRole } from './store/useRoleStore';
+import { addRole } from './store/use-role-store';
 interface INewRoleProps {
   tenants: Tenant[],
 }

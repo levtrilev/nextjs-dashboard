@@ -4,9 +4,9 @@
 'use server';
 import { RoleForm, User } from "@/app/lib/definitions";
 import { lusitana } from "@/app/ui/fonts";
-import { RolesTable } from "./lib/rolesTable";
+import { RolesTable } from "./lib/roles-table";
 import { fetchRolesFormAdmin, fetchRolesFormSuperadmin } from "./lib/roles-actions";
-import { NewRole } from "./lib/newRole";
+import { NewRole } from "./lib/new-role";
 import { auth, getUser } from "@/auth";
 import { getUserRoles } from "@/app/lib/common-actions";
 import { fetchTenantsAdmin, fetchTenantsSuperadmin } from "../tenants/lib/tenants-actions";

@@ -31,7 +31,7 @@ async function Page() {
             <div className="flex w-full items-center justify-between">
                 <h1 className={`${lusitana.className} text-2xl`}>Роли и полномочия</h1>
             </div>
-            {(isSuperadmin || isAdmin) && <NewPermission doctypes={doctypes} tenants={tenants} roles={roles} />}
+            {(isSuperadmin || isAdmin) && <NewPermission doctypes={doctypes} tenants={tenants} />}
             <PermissionsTable permissions={permissions} admin={isSuperadmin || isAdmin} />
         </div>
     );

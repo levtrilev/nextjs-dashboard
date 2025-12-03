@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { RoleForm, SectionForm, Tenant, UserForm } from "@/app/lib/definitions";
 import { TrashIcon } from "@heroicons/react/24/outline";
-import BtnRolesRef from "@/app/admin/roles/lib/btnRolesRef";
+import BtnRolesRef from "@/app/admin/roles/lib/btn-roles-ref";
 import {
   setIsCancelButtonPressed, setIsDocumentChanged, setIsMessageBoxOpen,
   setIsOKButtonPressed, setIsShowMessageBoxCancel, setMessageBoxText, useIsDocumentChanged,

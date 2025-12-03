@@ -4,7 +4,7 @@ import { PencilIcon, EyeIcon, BookOpenIcon, BriefcaseIcon, BookmarkIcon } from "
 import { RoleForm } from "@/app/lib/definitions";
 
 import dynamic from 'next/dynamic';
-import RolesRefTable from "./rolesRefTable";
+import RolesRefTable from "./roles-ref-table";
 const Modal = dynamic(() => import('@/app/lib/common-modal'), { ssr: false });
 
 

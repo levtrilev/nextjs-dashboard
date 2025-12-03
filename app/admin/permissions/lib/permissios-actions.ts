@@ -87,6 +87,12 @@ export async function createDocRolePermission(
   tenant_id: string,
   tenant_name: string
 ) {
+  if (doctype === "") {
+    throw new Error("doctype is required! Необходно указать Тип документа!");
+  }
+  if (role_id === "") {
+    throw new Error("role is required! Необходно указать Роль!");
+  }
   try {
     const result = await pool.query(
       `INSERT INTO doctype_role_permissions (doctype, doctype_name, role_id, role_name, tenant_id, tenant_name)
@@ -102,8 +108,6 @@ export async function createDocRolePermission(
     console.error("Failed to create DocRolePermission:", error);
     throw new Error("Failed to create DocRolePermission:" + error);
   }
-
-  revalidatePath("/admin/doctypes");
 }
 
 export async function deletePermission(id: string) {

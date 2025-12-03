@@ -19,10 +19,10 @@ export default function Page() {
         <p>
           Нафиг все платные и закрытые системы и платформы! Нужно выбрать современный "модный-молодежный" стэк технологий. 
           Чтобы джуны в очереди стояли только дай поработать для портфолио. И чтобы глобальная поддержка Opensorce-сообщества. 
-          Чтобы AI уже прокачался на Stack Overflow.
-          Frontend? Нафиг выбирать между Windows/Linux/Mobile! React + Next.js + Tailwind CSS! (заодно нафиг Redux и MobX! - Zustand!).
-          Backend? Нафиг Backend! React Server Components! Всё в единой кодовой базе, силами одного fullstack-разработчика. 
-          СУБД? Нафиг Oracle и MS SQl! Только Postgres. 
+          Чтобы AI уже прокачался на Stack Overflow.<br />
+          Frontend? Нафиг выбирать между Windows/Linux/Mobile! React + Next.js + Tailwind CSS! (заодно нафиг Redux и MobX! - Zustand!).<br />
+          Backend? Нафиг Backend! React Server Components! Всё в единой кодовой базе, силами одного fullstack-разработчика. <br />
+          СУБД? Нафиг Oracle и MS SQL! Только Postgres. 
         </p>
       </div>
     </>

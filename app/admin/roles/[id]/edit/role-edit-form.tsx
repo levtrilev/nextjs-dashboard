@@ -15,7 +15,7 @@ import {
   setIsOKButtonPressed, setIsShowMessageBoxCancel, setMessageBoxText, useIsDocumentChanged,
   useMessageBox
 } from "@/app/store/useDocumentStore";
-import { updRole } from "../../lib/store/useRoleStore";
+import { updRole } from "../../lib/store/use-role-store";
 
 interface IRoleEditFormProps {
   role: RoleForm,
