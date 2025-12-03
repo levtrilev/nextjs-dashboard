@@ -22,7 +22,7 @@ export default function Page() {
             className="relative w-0 h-0 border-l-[15px] border-r-[15px] border-b-[26px] border-l-transparent border-r-transparent border-b-black"
           />
           <p className={`${lusitana.className} text-xl text-gray-800 md:text-2xl md:leading-normal`}>
-            <strong>Welcome to Next JS ERP</strong>
+            <strong>Welcome to No way ERP (нафиг ERP)</strong>
             <br />
             Это демо-приложение проекта{' '}
             <a href="https://github.com/levtrilev/nextjs-dashboard" className="text-blue-500">

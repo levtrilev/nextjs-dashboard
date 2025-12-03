@@ -1,7 +1,7 @@
 
 // Regions Table
 
-import MessageBoxSrv from '@/app/lib/MessageBoxSrv';
+import MessageBoxSrv from '@/app/lib/message-box-srv';
 import { fetchFilteredRegions } from './region-actions';
 import { BtnDeleteRegion, BtnEditRegionLink } from './region-buttons';
 

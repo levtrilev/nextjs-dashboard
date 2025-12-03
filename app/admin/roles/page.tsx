@@ -8,7 +8,7 @@ import { RolesTable } from "./lib/rolesTable";
 import { fetchRolesFormAdmin, fetchRolesFormSuperadmin } from "./lib/roles-actions";
 import { NewRole } from "./lib/newRole";
 import { auth, getUser } from "@/auth";
-import { getUserRoles } from "@/app/lib/actions";
+import { getUserRoles } from "@/app/lib/common-actions";
 import { fetchTenantsAdmin, fetchTenantsSuperadmin } from "../tenants/lib/tenants-actions";
 // import { User } from "next-auth";
 // import { fetchTenants } from "../tenants/lib/actions";

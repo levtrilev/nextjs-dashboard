@@ -4,8 +4,8 @@
 import { fetchRoleForm } from "../../lib/roles-actions";
 import { RoleForm, User } from "@/app/lib/definitions";
 import { lusitana } from "@/app/ui/fonts";
-import RoleEditForm from "./editForm";
-import { getCurrentSections, getRoleSections } from "@/app/lib/actions";
+import RoleEditForm from "./role-edit-form";
+import { getCurrentSections, getRoleSections } from "@/app/lib/common-actions";
 import { fetchTenantsAdmin, fetchTenantsSuperadmin } from "@/app/admin/tenants/lib/tenants-actions";
 import { fetchSectionsForm, fetchSectionsFormAdmin, fetchSectionsFormSuperadmin } from "@/app/admin/sections/lib/sections-actions";
 import { auth, getUser } from "@/auth";

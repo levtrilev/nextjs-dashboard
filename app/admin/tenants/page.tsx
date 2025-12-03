@@ -5,7 +5,7 @@
 import TenantsTable from "./lib/tenants-table";
 import { Tenant, User } from "@/app/lib/definitions";
 import { fetchTenantsAdmin, fetchTenantsSuperadmin } from "./lib/tenants-actions";
-import { NewTenant } from "./lib/newTenant";
+import { NewTenant } from "./lib/new-tenant";
 import { lusitana } from "@/app/ui/fonts";
 import { auth, getUser } from "@/auth";
 

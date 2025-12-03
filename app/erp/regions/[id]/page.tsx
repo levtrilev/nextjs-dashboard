@@ -1,12 +1,12 @@
 
 // LegalEntity Page
 
-import EditForm from "./edit/editForm";
+import EditForm from "./edit/region-edit-form";
 import { Region } from "@/app/lib/definitions";
 import { lusitana } from "@/app/ui/fonts";
 import { fetchRegion } from "../lib/region-actions";
 import { auth } from "@/auth";
-import { getCurrentSections } from "@/app/lib/actions";
+import { getCurrentSections } from "@/app/lib/common-actions";
 
 async function Page(props: { params: Promise<{ id: string }> }) {
     const session = await auth();

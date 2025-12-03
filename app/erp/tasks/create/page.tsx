@@ -6,13 +6,13 @@ import { lusitana } from "@/app/ui/fonts";
 import { fetchSectionsForm } from "@/app/admin/sections/lib/sections-actions";
 import { fetchLegalEntities } from "@/app/erp/legal-entities/lib/le-actions";
 import { auth } from "@/auth";
-import { getCurrentSections } from "@/app/lib/actions";
+import { getCurrentSections } from "@/app/lib/common-actions";
 import Breadcrumbs from '@/app/ui/invoices/breadcrumbs';
 import { DateTime } from "next-auth/providers/kakao";
-import { formatDateForInput } from "@/app/lib/utils";
-import { fetchPremisesForm } from "../../premises/lib/premisesActions";
-import TaskEditForm from "../[id]/edit/editForm";
-import { fetchTaskSchedulesForm } from "../../task-schedules/lib/taskSchedulesActions";
+import { formatDateForInput } from "@/app/lib/common-utils";
+import { fetchPremisesForm } from "../../premises/lib/premises-actions";
+import TaskEditForm from "../[id]/edit/task-edit-form";
+import { fetchTaskSchedulesForm } from "../../task-schedules/lib/tsch-actions";
 
 export default async function Page() {
 

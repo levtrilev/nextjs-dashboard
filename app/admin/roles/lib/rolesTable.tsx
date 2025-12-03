@@ -1,6 +1,6 @@
 'use client';
 import { RoleForm } from '@/app/lib/definitions';
-import MessageBoxOKCancel from '@/app/lib/MessageBoxOKCancel';
+import MessageBoxOKCancel from '@/app/lib/message-box-ok-cancel';
 import { useEffect, useState } from 'react';
 import { delRole, fillRoles, useRoles } from './store/useRoleStore';
 import { setIsCancelButtonPressed, setIsDocumentChanged, setIsMessageBoxOpen, setIsOKButtonPressed, setIsShowMessageBoxCancel, setMessageBoxText, useMessageBox } from '@/app/store/useDocumentStore';

@@ -1,17 +1,17 @@
 
 // LegalEntity Page
 
-import EditForm from "./editForm";
-import { fetchPremise, fetchPremiseForm } from "../../lib/premisesActions";
+import EditForm from "./premise-edit-form";
+import { fetchPremise, fetchPremiseForm } from "../../lib/premises-actions";
 import { Region, PremiseForm } from "@/app/lib/definitions";
 import { lusitana } from "@/app/ui/fonts";
 import { fetchSectionsForm } from "@/app/admin/sections/lib/sections-actions";
 import { fetchRegionsForm } from "@/app/erp/regions/lib/region-actions";
-import PremiseEditForm from "./editForm";
+import PremiseEditForm from "./premise-edit-form";
 import { fetchLegalEntities } from "@/app/erp/legal-entities/lib/le-actions";
 import { current } from "@reduxjs/toolkit";
 import { auth } from "@/auth";
-import { getCurrentSections } from "@/app/lib/actions";
+import { getCurrentSections } from "@/app/lib/common-actions";
 
 async function Page(props: { params: Promise<{ id: string }> }) {
 

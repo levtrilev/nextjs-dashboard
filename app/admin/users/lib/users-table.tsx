@@ -1,12 +1,12 @@
 'use client';
-import { formatDateToLocal } from "@/app/lib/utils";
+import { formatDateToLocal } from "@/app/lib/common-utils";
 import { UserForm } from '@/app/lib/definitions';
 import { BtnEditUserLink } from "./users-buttons";
 import { useEffect, useState } from "react";
 import { setIsCancelButtonPressed, setIsDocumentChanged, setIsMessageBoxOpen, setIsOKButtonPressed, setIsShowMessageBoxCancel, setMessageBoxText, useMessageBox } from "@/app/store/useDocumentStore";
 import { delUser, fillUsers, useUsers } from "./store/useUserStore";
 import { TrashIcon } from "@heroicons/react/24/outline";
-import MessageBoxOKCancel from "@/app/lib/MessageBoxOKCancel";
+import MessageBoxOKCancel from "@/app/lib/message-box-ok-cancel";
 
 interface IUsersTableProps {
     users: UserForm[],

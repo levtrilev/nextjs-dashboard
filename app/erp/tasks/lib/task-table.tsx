@@ -6,7 +6,7 @@ import Search from '@/app/ui/search';
 import { Task } from '@/app/lib/definitions';
 import { fetchFilteredTasks } from './task-actions';
 import { BtnEditTaskLink } from './task-buttons';
-import BtnDeleteTask from './BtnDeleteTask';
+import BtnDeleteTask from './btn-delete-task';
 
 export default async function TasksTable({
   query,

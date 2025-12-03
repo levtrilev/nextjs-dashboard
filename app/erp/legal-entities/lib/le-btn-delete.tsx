@@ -3,7 +3,7 @@ import { TrashIcon } from '@heroicons/react/24/outline';
 import { deleteLegalEntity, updateLegalEntity } from './le-actions';
 import { LegalEntity } from '@/app/lib/definitions';
 import { useRef, useState } from 'react';
-import MessageBoxSrv from '@/app/lib/MessageBoxSrv';
+import MessageBoxSrv from '@/app/lib/message-box-srv';
 
 export function BtnDeleteLegalEntity({ legalEntity }: { legalEntity: LegalEntity }) {
   const [isMessageBoxOpen, setIsMessageBoxOpen] = useState(false);

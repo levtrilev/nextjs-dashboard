@@ -10,7 +10,7 @@ import {
   Revenue,
   UserForm,
 } from "./definitions";
-import { formatCurrency } from "./utils";
+import { formatCurrency } from "./common-utils";
 
 //#region Dashboard
 

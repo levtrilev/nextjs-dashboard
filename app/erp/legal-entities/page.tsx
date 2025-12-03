@@ -8,8 +8,8 @@ import Search from "@/app/ui/search";
 import { CreateLegalEntity } from "@/app/erp/legal-entities/lib/le-buttons";
 import { lusitana } from "@/app/ui/fonts";
 import { auth } from "@/auth";
-import { getCurrentSections } from "@/app/lib/actions";
-import UserSessionComponent from "./userSessionComponent";
+import { getCurrentSections } from "@/app/lib/common-actions";
+import UserSessionComponent from "./user-session-component";
 
 export default async function Page(props: {
   searchParams?: Promise<{

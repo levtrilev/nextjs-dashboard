@@ -7,9 +7,9 @@ import { lusitana } from "@/app/ui/fonts";
 // import { CreateTaskSchedule } from "./lib/buttons";
 // import TaskSchedulesTable from "./lib/taskSchedulesTable";
 import { auth } from "@/auth";
-import { getCurrentSections } from "@/app/lib/actions";
-import { fetchTaskSchedulesPages } from "./lib/taskSchedulesActions";
-import { CreateTaskSchedule } from "./lib/buttons";
+import { getCurrentSections } from "@/app/lib/common-actions";
+import { fetchTaskSchedulesPages } from "./lib/tsch-actions";
+import { CreateTaskSchedule } from "./lib/tsch-buttons";
 import TaskSchedulesTable from "./lib/taskSchedulesTable";
 
 export default async function Page(props: {

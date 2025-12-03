@@ -4,10 +4,10 @@ import { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: {
-    template: '%s | Next ERP',
-    default: 'Next ERP',
+    template: '%s | нафиг ERP',
+    default: 'нафиг ERP',
   },
-  description: 'Based on Next.js ERP system, built with App Router.',
+  description: 'Based on Next.js light ERP system, built with Tailwind & Zustand.',
   metadataBase: new URL('https://next-erp-tau.vercel.app/'),
 };
 

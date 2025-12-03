@@ -6,10 +6,10 @@ import { RoleForm, User } from "@/app/lib/definitions";
 import { lusitana } from "@/app/ui/fonts";
 // import { NewRole } from "./lib/newRole";
 import { auth, getUser } from "@/auth";
-import { fetchPermissionsSuperadmin, fetchPermissionsAdmin, fetchDoctypes } from "./lib/permissiosActions";
-import PermissionsTable from "./lib/PermissionsTable";
+import { fetchPermissionsSuperadmin, fetchPermissionsAdmin, fetchDoctypes } from "./lib/permissios-actions";
+import PermissionsTable from "./lib/permissions-table";
 import { fetchTenantsAdmin, fetchTenantsSuperadmin } from "../tenants/lib/tenants-actions";
-import { NewPermission } from "./lib/newPermission";
+import { NewPermission } from "./lib/new-permission";
 import { fetchRolesFormSuperadmin } from "../roles/lib/roles-actions";
 
 async function Page() {

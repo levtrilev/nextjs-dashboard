@@ -1,13 +1,13 @@
 
 // tenant Page
 
-import InputForm from "./inputForm";
+import TenantEditForm from "./tenant-edit-form";
 import { fetchTenantById } from "../../lib/tenants-actions";
 import { Tenant, User } from "@/app/lib/definitions";
 import { lusitana } from "@/app/ui/fonts";
 import { auth, getUser } from "@/auth";
 import UsersTable from "@/app/admin/users/lib/users-table";
-import { getTenantUsers, useTenantUsers } from "../../store/useTenantStore";
+import { getTenantUsers, useTenantUsers } from "../../store/use-tenant-store";
 import { fetchUsersAdmin } from "@/app/admin/users/lib/users-actions";
 
 async function Page(props: { params: Promise<{ id: string }> }) {
@@ -30,7 +30,7 @@ async function Page(props: { params: Promise<{ id: string }> }) {
                 <h1 className={`${lusitana.className} text-2xl`}>Tenant</h1>
             </div>
             <h3 className="text-xs font-medium text-gray-400">id: {id}</h3>
-            <InputForm tenant={tenant} admin={ isAdmin || isSuperadmin } />
+            <TenantEditForm tenant={tenant} admin={ isAdmin || isSuperadmin } />
             {/* <TenantsTable tenants={tenants} superadmin={isSuperadmin} /> */}
             <UsersTable users={tenantUsers} admin={false}/>
         </div>

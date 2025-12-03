@@ -2,11 +2,11 @@
 import TabsSection from "./tabs-section";
 import { useState } from "react";
 import { Tenant, User, Section, UserForm, SectionForm } from '@/app/lib/definitions';
-import { NewSection } from "./sections/lib/newSection";
+import { NewSection } from "./sections/lib/new-section";
 import SectionsTable from "./sections/lib/sections-table";
-import { NewTenant } from "./tenants/lib/newTenant";
+import { NewTenant } from "./tenants/lib/new-tenant";
 import TenantsTable from "./tenants/lib/tenants-table";
-import { NewUser } from "./users/lib/newUser";
+import { NewUser } from "./users/lib/new-user";
 import UsersTable from "./users/lib/users-table";
 
 interface ITabsPageProps {

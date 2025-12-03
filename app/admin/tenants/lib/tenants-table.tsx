@@ -1,16 +1,16 @@
 'use client';
 
-import { formatDateToLocal } from "@/app/lib/utils";
+import { formatDateToLocal } from "@/app/lib/common-utils";
 import dynamic from 'next/dynamic';
 import { Tenant } from '@/app/lib/definitions';
 import { BtnEditTenantLink } from "./tenants-buttons";
-import { delTenant, fillTenants, useTenants } from "../store/useTenantStore";
+import { delTenant, fillTenants, useTenants } from "../store/use-tenant-store";
 import { useEffect, useState } from "react";
 import { TrashIcon } from '@heroicons/react/24/outline';
-import MessageBoxOKCancel from "@/app/lib/MessageBoxOKCancel";
+import MessageBoxOKCancel from "@/app/lib/message-box-ok-cancel";
 import { setIsCancelButtonPressed, setIsDocumentChanged, setIsMessageBoxOpen, setIsOKButtonPressed, setIsShowMessageBoxCancel, setMessageBoxText, useMessageBox } from "@/app/store/useDocumentStore";
 
-const BtnEditTenantModal = dynamic(() => import('./btnEditTenantModal'), { ssr: false });
+const BtnEditTenantModal = dynamic(() => import('./btn-edit-tenant-modal'), { ssr: false });
 
 interface ITenantsTableProps {
     tenants: Tenant[],

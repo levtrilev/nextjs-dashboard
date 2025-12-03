@@ -1,20 +1,20 @@
 
 // LegalEntity Page
 
-import EditForm from "./editForm";
+import EditForm from "./tsch-edit-form";
 // import { fetchPremise, fetchPremiseForm } from "../../lib/premisesActions";
 import { Region, PremiseForm, TaskScheduleForm } from "@/app/lib/definitions";
 import { lusitana } from "@/app/ui/fonts";
 import { fetchSectionsForm } from "@/app/admin/sections/lib/sections-actions";
 import { fetchRegionsForm } from "@/app/erp/regions/lib/region-actions";
-import PremiseEditForm from "./editForm";
+import PremiseEditForm from "./tsch-edit-form";
 import { fetchLegalEntities } from "@/app/erp/legal-entities/lib/le-actions";
 import { current } from "@reduxjs/toolkit";
 import { auth } from "@/auth";
-import { getCurrentSections } from "@/app/lib/actions";
-import { fetchPremiseForm, fetchPremisesForm } from "@/app/erp/premises/lib/premisesActions";
-import TaskScheduleEditForm from "./editForm";
-import { fetchTaskScheduleForm } from "../../lib/taskSchedulesActions";
+import { getCurrentSections } from "@/app/lib/common-actions";
+import { fetchPremiseForm, fetchPremisesForm } from "@/app/erp/premises/lib/premises-actions";
+import TaskScheduleEditForm from "./tsch-edit-form";
+import { fetchTaskScheduleForm } from "../../lib/tsch-actions";
 import { fetchScheduleTasksForm, fetchTasksForm } from "@/app/erp/tasks/lib/task-actions";
 
 async function Page(props: { params: Promise<{ id: string }> }) {

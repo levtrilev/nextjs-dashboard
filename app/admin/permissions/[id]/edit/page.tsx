@@ -3,11 +3,11 @@
 
 import { Permission, RoleForm, User } from "@/app/lib/definitions";
 import { lusitana } from "@/app/ui/fonts";
-import { getCurrentSections } from "@/app/lib/actions";
+import { getCurrentSections } from "@/app/lib/common-actions";
 import { fetchTenantsAdmin, fetchTenantsSuperadmin } from "@/app/admin/tenants/lib/tenants-actions";
 import { auth, getUser } from "@/auth";
-import { fetchDoctypes, fetchPermission } from "../../lib/permissiosActions";
-import PermissionEditForm from "./PermissionEditForm";
+import { fetchDoctypes, fetchPermission } from "../../lib/permissios-actions";
+import PermissionEditForm from "./permission-edit-form";
 import { fetchRolesFormSuperadmin } from "../../../roles/lib/roles-actions";
 
 async function Page(props: { params: Promise<{ id: string }> }) {
@@ -28,7 +28,7 @@ async function Page(props: { params: Promise<{ id: string }> }) {
     return (
         <div className="w-full">
             <div className="flex w-full items-center justify-between">
-                <h1 className={`${lusitana.className} text-2xl`}>Роль</h1>
+                <h1 className={`${lusitana.className} text-2xl`}>Полномочия Роли при работе с Типом документа</h1>
             </div>
             <h3 className="text-xs font-medium text-gray-400">id: {id}</h3>
             <PermissionEditForm permission={permission} doctypes={doctypes} tenants={tenants} roles={roles} />

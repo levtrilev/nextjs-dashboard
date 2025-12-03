@@ -5,7 +5,7 @@ import { PencilIcon, PlusIcon, TrashIcon, ServerIcon } from '@heroicons/react/24
 import { deleteRegion, updateRegion } from './region-actions';
 import Link from "next/link";
 import { Region } from '@/app/lib/definitions';
-import MessageBoxSrv from '@/app/lib/MessageBoxSrv';
+import MessageBoxSrv from '@/app/lib/message-box-srv';
 import { useEffect, useRef, useState } from 'react';
 
 export function CreateRegion() {

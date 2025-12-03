@@ -5,7 +5,7 @@ import { RoleForm } from "@/app/lib/definitions";
 
 import dynamic from 'next/dynamic';
 import RolesRefTable from "./rolesRefTable";
-const Modal = dynamic(() => import('@/app/lib/modal'), { ssr: false });
+const Modal = dynamic(() => import('@/app/lib/common-modal'), { ssr: false });
 
 
 interface IBtnRolesRefProps {

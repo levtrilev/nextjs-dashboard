@@ -1,14 +1,14 @@
 'use client';
 
-import { formatDateToLocal } from "@/app/lib/utils";
+import { formatDateToLocal } from "@/app/lib/common-utils";
 import { SectionForm, Tenant } from '@/app/lib/definitions';
 import { BtnEditSectionLink } from "./sections-buttons";
-import { delSection, fillSections, useSections } from "./store/useSectionStore";
+import { delSection, fillSections, useSections } from "./store/use-section-store";
 import { useEffect, useState } from "react";
 import { setIsCancelButtonPressed, setIsDocumentChanged, setIsMessageBoxOpen, setIsOKButtonPressed, setIsShowMessageBoxCancel, setMessageBoxText, useMessageBox } from "@/app/store/useDocumentStore";
 import { TrashIcon } from '@heroicons/react/24/outline';
-import MessageBoxOKCancel from "@/app/lib/MessageBoxOKCancel";
-import { NewSection } from "./newSection";
+import MessageBoxOKCancel from "@/app/lib/message-box-ok-cancel";
+import { NewSection } from "./new-section";
 
 interface ISectionsTableProps {
     sections: SectionForm[],

@@ -1,14 +1,14 @@
 
 // Premises Page
 
-import { fetchPremisesForm, fetchPremisesPages } from "./lib/premisesActions";
+import { fetchPremisesForm, fetchPremisesPages } from "./lib/premises-actions";
 import Pagination from "@/app/ui/pagination";
 import Search from "@/app/ui/search";
 import { lusitana } from "@/app/ui/fonts";
-import { CreatePremise } from "./lib/buttons";
-import PremisesTable from "./lib/premisesTable";
+import { CreatePremise } from "./lib/premises-buttons";
+import PremisesTable from "./lib/premises-table";
 import { auth } from "@/auth";
-import { getCurrentSections } from "@/app/lib/actions";
+import { getCurrentSections } from "@/app/lib/common-actions";
 
 export default async function Page(props: {
   searchParams?: Promise<{

@@ -8,7 +8,7 @@ import Search from "@/app/ui/search";
 import { CreateRegion } from "@/app/erp/regions/lib/region-buttons";
 import { lusitana } from "@/app/ui/fonts";
 import { auth } from "@/auth";
-import { getCurrentSections } from "@/app/lib/actions";
+import { getCurrentSections } from "@/app/lib/common-actions";
 
 export default async function Page(props: {
   searchParams?: Promise<{

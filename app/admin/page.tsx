@@ -6,7 +6,7 @@ import { fetchSectionsForm, fetchSectionsFormAdmin, fetchSectionsFormSuperadmin 
 import TabsPage from "./tabs-page";
 import { fetchTenantsAdmin, fetchTenantsSuperadmin } from './tenants/lib/tenants-actions';
 import { fetchUsersAdmin, fetchUsersSuperadmin, fetchUsersUser } from './users/lib/users-actions';
-import { getCurrentSections } from '../lib/actions';
+import { getCurrentSections } from '../lib/common-actions';
 import { User } from '../lib/definitions';
 // import { Suspense } from 'react';
 

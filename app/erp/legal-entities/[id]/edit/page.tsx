@@ -1,14 +1,14 @@
 
 // LegalEntity Page
 
-import EditForm from "./editForm";
+import LegalEntitiesEditForm from "./le-edit-form";
 import { fetchLegalEntityForm } from "../../lib/le-actions";
 import { LegalEntityForm } from "@/app/lib/definitions";
 import { lusitana } from "@/app/ui/fonts";
 import { fetchRegions } from "@/app/erp/regions/lib/region-actions";
 import { fetchSectionsForm } from "@/app/admin/sections/lib/sections-actions";
 import { auth } from "@/auth";
-import { getCurrentSections } from "@/app/lib/actions";
+import { getCurrentSections } from "@/app/lib/common-actions";
 // import { useSelector } from "react-redux";
 // import { userSessionSlice, UserSessionState } from "@/app/lib/features/userSession/userSessionSlice";
 
@@ -36,7 +36,7 @@ async function Page(props: { params: Promise<{ id: string }> }) {
                 <h1 className={`${lusitana.className} text-2xl`}>Юридическое лицо</h1>
             </div>
             <h3 className="text-xs font-medium text-gray-400">id: {id}</h3>
-            <EditForm legalEntity={legalEntity} regions={regions} sections={sections}></EditForm>
+            <LegalEntitiesEditForm legalEntity={legalEntity} regions={regions} sections={sections}></LegalEntitiesEditForm>
         </div>
 
     );

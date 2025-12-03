@@ -3,13 +3,13 @@
 
 'use server';
 import { Section, Tenant, User } from "@/app/lib/definitions";
-import { NewSection } from "./lib/newSection";
+import { NewSection } from "./lib/new-section";
 import SectionsTable from "./lib/sections-table";
 import { lusitana } from "@/app/ui/fonts";
 import { fetchSectionsForm, fetchSectionsFormAdmin, fetchSectionsFormSuperadmin } from "./lib/sections-actions";
 import { fetchTenantsAdmin, fetchTenantsSuperadmin } from "../tenants/lib/tenants-actions";
 import { auth, getUser } from "@/auth";
-import { getCurrentSections } from "@/app/lib/actions";
+import { getCurrentSections } from "@/app/lib/common-actions";
 
 
 async function Page() {

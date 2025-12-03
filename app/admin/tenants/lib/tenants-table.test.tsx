@@ -30,7 +30,7 @@ jest.mock('@/app/lib/MessageBoxOKCancel', () => ({
 }));
 
 // Мокаем Zustand-сторы
-import * as useTenantStore from '@/app/admin/tenants/store/useTenantStore';
+import * as useTenantStore from '@/app/admin/tenants/store/use-tenant-store';
 import * as useDocumentStore from '@/app/store/useDocumentStore';
 
 // Тестовые данные

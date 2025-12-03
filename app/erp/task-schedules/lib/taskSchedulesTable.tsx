@@ -4,10 +4,10 @@
 import Image from 'next/image';
 import { lusitana } from '@/app/ui/fonts';
 import Search from '@/app/ui/search';
-import { fetchFilteredTaskSchedules } from './taskSchedulesActions';
+import { fetchFilteredTaskSchedules } from './tsch-actions';
 import { ChartBarIcon, ChartPieIcon } from '@heroicons/react/20/solid';
 import { TaskScheduleForm } from '@/app/lib/definitions';
-import BtnDeleteTaskSchedule from './BtnDeleteTaskSchedule';
+import BtnDeleteTaskSchedule from './btn-delete-task-schedule';
 
 export default async function TaskSchedulesTable({
   query,

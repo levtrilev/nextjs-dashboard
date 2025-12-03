@@ -9,7 +9,7 @@ import Search from "@/app/ui/search";
 import { CreateTask } from "@/app/erp/tasks/lib/task-buttons";
 import { lusitana } from "@/app/ui/fonts";
 import { auth } from "@/auth";
-import { getCurrentSections } from "@/app/lib/actions";
+import { getCurrentSections } from "@/app/lib/common-actions";
 
 export default async function Page(props: {
   searchParams?: Promise<{

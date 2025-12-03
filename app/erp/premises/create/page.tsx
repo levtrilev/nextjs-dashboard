@@ -1,17 +1,17 @@
 
 //premise create Page
 
-import PremiseEditForm from "../[id]/edit/editForm";
+import PremiseEditForm from "../[id]/edit/premise-edit-form";
 import { PremiseForm } from "@/app/lib/definitions";
 import { lusitana } from "@/app/ui/fonts";
 import { fetchSectionsForm } from "@/app/admin/sections/lib/sections-actions";
 import { fetchRegionsForm } from "@/app/erp/regions/lib/region-actions";
 import { fetchLegalEntities } from "@/app/erp/legal-entities/lib/le-actions";
 import { auth } from "@/auth";
-import { getCurrentSections } from "@/app/lib/actions";
+import { getCurrentSections } from "@/app/lib/common-actions";
 import Breadcrumbs from '@/app/ui/invoices/breadcrumbs';
 import { DateTime } from "next-auth/providers/kakao";
-import { formatDateForInput } from "@/app/lib/utils";
+import { formatDateForInput } from "@/app/lib/common-utils";
 
 export default async function Page() {
   const session = await auth();
