@@ -27,3 +27,13 @@ input[type='number']::-webkit-outer-spin-button {
   background-color: white; /* Устанавливаем базовый фон */
   color: black; /* Устанавливаем базовый текст */
 }
+
+/* Ширина viewport не меняется при появлении/исчезновении скролла */
+/* body {
+  scrollbar-gutter: stable;
+} */
+/*если нужна максимальная совместимость (включая старые браузеры)*/
+/* html {
+  overflow-y: scroll;
+} */
+

@@ -2,6 +2,8 @@
 // These types may be generated automatically if you're using an ORM such as Prisma.
 
 import { DateTime } from "next-auth/providers/kakao";
+
+export type Status = 'draft' | 'active' | 'deleted';
 export type Permission = {
   id: string;
   role_id: string;
@@ -9,9 +11,9 @@ export type Permission = {
   doctype: string;
   doctype_name: string;
   full_access: boolean;
+  editor: boolean;
   author: boolean;
   can_delete: boolean;
-  can_recall: boolean;
   reader: boolean;
   access_by_tags: boolean;
   or_tags: string[];

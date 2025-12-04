@@ -14,19 +14,20 @@ import {
 } from "@/app/store/useDocumentStore";
 import { updatePermission } from "../../lib/permissios-actions";
 import BtnRolesRef from "../../../roles/lib/btn-roles-ref";
+import { useRoles } from "@/app/admin/roles/lib/store/use-role-store";
+import CollapsibleSection from "@/app/lib/collapsible-section";
 
 interface IPermissionEditFormProps {
   permission: Permission,
   doctypes: { table_name: string }[],
   tenants: Tenant[],
-  roles: RoleForm[]
 }
 
 export default function PermissionEditForm(props: IPermissionEditFormProps) {
   const [permission, setPermission] = useState(props.permission);
   const isDocumentChanged = useIsDocumentChanged();
   const msgBox = useMessageBox();
-
+  const roles = useRoles().filter((role) => role.tenant_id === permission.tenant_id);
   const docChanged = () => {
     setIsDocumentChanged(true);
     setMessageBoxText('Документ изменен. Закрыть без сохранения?');
@@ -75,14 +76,9 @@ export default function PermissionEditForm(props: IPermissionEditFormProps) {
   };
   const handleSaveClick = async (e: React.MouseEvent) => {
     e.preventDefault();
-    if (permission.can_recall && !(permission.reader || permission.author)) {
-      setMessageBoxText('Право отзывать не имеет смысла если нет прав Автор или Читатель.');
-      setIsShowMessageBoxCancel(false);
-      setIsMessageBoxOpen(true);
-      return;
-    }
-    if (permission.can_delete && !(permission.reader || permission.author)) {
-      setMessageBoxText('Право удалять не имеет смысла если нет прав Автор или Читатель.');
+
+    if (permission.can_delete && !(permission.editor || permission.author) && !permission.full_access) {
+      setMessageBoxText('Право удалять (окончательно) не имеет смысла если нет прав Редактор или Автор.');
       setIsShowMessageBoxCancel(false);
       setIsMessageBoxOpen(true);
       return;
@@ -140,7 +136,23 @@ export default function PermissionEditForm(props: IPermissionEditFormProps) {
               readOnly
               onChange={(e) => setPermission((prev) => ({ ...prev, role_name: e.target.value, }))}
             />
-            <BtnRolesRef roles={props.roles} handleSelectRole={handleSelectRole} />
+            <BtnRolesRef roles={roles} handleSelectRole={handleSelectRole} />
+          </div>
+          {/* doctype */}
+          <div className="flex justify-between mt-1">
+            <label
+              htmlFor="doctype"
+              className={`${lusitana.className} w-2/8 font-medium flex items-center p-2 text-gray-500`}
+            >
+              Таблица (выберите):
+            </label>
+            <input
+              id="doctype"
+              type="text"
+              className="w-13/16 control rounded-md border border-gray-200 p-2"
+              value={permission.doctype_name}
+              onChange={(e) => handleChangeDoctype(e)}
+            />
           </div>
           {/* doctype_name */}
           <div className="flex justify-between mt-1">
@@ -149,11 +161,11 @@ export default function PermissionEditForm(props: IPermissionEditFormProps) {
               className={`${lusitana.className} w-2/8 font-medium flex items-center p-2 text-gray-500`}
             >
               Тип документа:
-            </label>
-            <input
+            </label >
+            <input disabled
               id="doctype_name"
               type="text"
-              className="w-13/16 control rounded-md border border-gray-200 p-2"
+              className="w-13/16 control rounded-md text-gray-400 border border-gray-200 p-2"
               value={permission.doctype_name}
               onChange={(e) => handleChangeDoctypeName(e)}
             />
@@ -166,10 +178,10 @@ export default function PermissionEditForm(props: IPermissionEditFormProps) {
               className={`${lusitana.className} w-2/8 font-medium flex items-center p-2 text-gray-500`}>
               Организация:
             </label>
-            <input
+            <input disabled
               id="tenant_name"
               type="text"
-              className="w-13/16 pointer-events-none control rounded-md border border-gray-200 p-2"
+              className="w-13/16 pointer-events-none control rounded-md text-gray-400 border border-gray-200 p-2"
               value={permission.tenant_name}
               readOnly
               onChange={(e) => setPermission((prev) => ({ ...prev, tenant_name: e.target.value, }))}
@@ -185,7 +197,7 @@ export default function PermissionEditForm(props: IPermissionEditFormProps) {
             <label
               htmlFor="full_access"
               className={`${lusitana.className} w-7/10 font-medium flex items-center p-2 text-gray-500`}>
-              Полный доступ:
+              Полные права:
             </label>
             <input
               id="full_access"
@@ -195,62 +207,75 @@ export default function PermissionEditForm(props: IPermissionEditFormProps) {
               onChange={(e) => { setPermission((prev) => ({ ...prev, full_access: e.target.checked, })); docChanged(); }}
             />
           </div>
-          <div className="flex justify-between w-1/2 mt-1">
+          {/* editor */}
+          {!permission.full_access && <div className="flex justify-between w-1/2 mt-1">
             <label
-              htmlFor="author"
+              htmlFor="editor"
               className={`${lusitana.className} w-7/10 font-medium flex items-center p-2 text-gray-500`}>
-              Автор:
+              Редактор:
             </label>
             <input
-              id="author"
+              id="editor"
               type="checkbox"
               className="w-3/10 control rounded-md p-2"
-              checked={permission.author}
-              onChange={(e) => { setPermission((prev) => ({ ...prev, author: e.target.checked, })); docChanged(); }}
+              checked={permission.editor}
+              onChange={(e) => { setPermission((prev) => ({ ...prev, editor: e.target.checked, })); docChanged(); }}
             />
-          </div>
-          <div className="flex justify-between w-1/2 mt-1">
-            <label
-              htmlFor="reader"
-              className={`${lusitana.className} w-7/10 font-medium flex items-center p-2 text-gray-500`}>
-              Читатель:
-            </label>
-            <input
-              id="reader"
-              type="checkbox"
-              className="w-3/10 control rounded-md p-2"
-              checked={permission.reader}
-              onChange={(e) => { setPermission((prev) => ({ ...prev, reader: e.target.checked, })); docChanged(); }}
-            />
-          </div>
-          <div className="flex justify-between w-1/2 mt-1">
-            <label
-              htmlFor="can_recall"
-              className={`${lusitana.className} w-7/10 font-medium flex items-center p-2 text-gray-500`}>
-              Право отзывать:
-            </label>
-            <input
-              id="can_recall"
-              type="checkbox"
-              className="w-3/10 control rounded-md p-2"
-              checked={permission.can_recall}
-              onChange={(e) => { setPermission((prev) => ({ ...prev, can_recall: e.target.checked, })); docChanged(); }}
-            />
-          </div>
-          <div className="flex justify-between w-1/2 mt-1">
-            <label
-              htmlFor="can_delete"
-              className={`${lusitana.className} w-7/10 font-medium flex items-center p-2 text-gray-500`}>
-              Право удалять:
-            </label>
-            <input
-              id="can_delete"
-              type="checkbox"
-              className="w-3/10 control rounded-md p-2"
-              checked={permission.can_delete}
-              onChange={(e) => { setPermission((prev) => ({ ...prev, can_delete: e.target.checked, })); docChanged(); }}
-            />
-          </div>
+          </div>}
+          {/* author */}
+          {!permission.full_access && !permission.editor &&
+            <div className="flex justify-between w-1/2 mt-1">
+              <label
+                htmlFor="author"
+                className={`${lusitana.className} w-7/10 font-medium flex items-center p-2 text-gray-500`}>
+                Автор:
+              </label>
+              <input
+                id="author"
+                type="checkbox"
+                className="w-3/10 control rounded-md p-2"
+                checked={permission.author}
+                onChange={(e) => { setPermission((prev) => ({ ...prev, author: e.target.checked, })); docChanged(); }}
+              />
+            </div>}
+          {/* reader */}
+          {!permission.full_access && !permission.editor &&
+            <div className="flex justify-between w-1/2 mt-1">
+              <label
+                htmlFor="reader"
+                className={`${lusitana.className} w-7/10 font-medium flex items-center p-2 text-gray-500`}>
+                Читатель:
+              </label>
+              <input
+                id="reader"
+                type="checkbox"
+                className="w-3/10 control rounded-md p-2"
+                checked={permission.reader}
+                onChange={(e) => { setPermission((prev) => ({ ...prev, reader: e.target.checked, })); docChanged(); }}
+              />
+            </div>}
+          {/* can_delete */}
+          {/* Имеет право физического удаления только тех документов, */}
+          {/* которые имеет право видеть, то есть Автор - свои, Редактор - все, Читателю нечего удалять - он не видит логически удаленные. */}
+          {(!permission.full_access && (permission.author || permission.reader) &&
+            !(permission.reader && !permission.full_access && !permission.editor && !permission.author) ||
+            (permission.editor && !permission.full_access && !permission.author) ||
+            (permission.can_delete && permission.reader && !permission.full_access && !permission.editor && !permission.author)) &&
+            <div className="flex justify-between w-1/2 mt-1">
+              <label
+                htmlFor="can_delete"
+                className={`${lusitana.className} w-7/10 font-medium flex items-center p-2 text-gray-500`}>
+                Физ.удаление:
+              </label>
+              <input
+                id="can_delete"
+                type="checkbox"
+                className="w-3/10 control rounded-md p-2"
+                checked={permission.can_delete}
+                onChange={(e) => { setPermission((prev) => ({ ...prev, can_delete: e.target.checked, })); docChanged(); }}
+              />
+            </div>}
+
         </div>
       </div>
 
@@ -278,6 +303,28 @@ export default function PermissionEditForm(props: IPermissionEditFormProps) {
             </Link>
           </div>
         </div>
+      </div>
+      <div className="max-w-[1150px] mt-4">
+        <CollapsibleSection
+          header={"Описание прав доступа"} >
+          <div>
+            <strong>Полные права</strong> - читает все записи. физически: создает/изменяет/удаляет. <br />
+            логически: делегирует, утверждает, отзывает статус утверждения, удаляет, восстанавливает удаленные<br />
+            <strong>Читатель</strong> - читает (только утвержденные!) документы всех Авторов, без возможности отзыва/редактирования/удаления/восстановления<br />
+            <strong>Автор</strong> - читает (только свои!) draft/active/deleted документы, <br />
+            создает draft/изменяет draft/утверждает draft/отзывает active/удаляет draft/восстанавливает deleted (только свои!) документы.<br />
+            Если Автор не является Читателем, - он не видит документы других Авторов.<br />
+            <strong>Редактор</strong> - имеет права Автора над документами других Авторов и сам является Автором своих документов. <br />
+            После изменения "чужого" документа не становится Автором - его имя (user_id) остается в поле "editor". <br />
+            Имеет право делегировать авторство другому пользователю, в том числе себе.<br />
+            <strong>Физическое удаление</strong> - без влияния на чтение. Имеет право физического удаления только логически-удаленных документов, 
+            тех, которые имеет право видеть, то есть Автор - свои, Редактор - все, Читателю нечего удалять - он не видит логически удаленные.<br />
+            <strong>Доступ по тэгам</strong> - при указанном данном признаке(tags-access) доступ осуществляется при наличии в документе
+            указанных тэгов - поле "tags" (тип JSONB). В полномочиях отдельно указываются тэги, учитывающиеся по "И", по "ИЛИ" и по "НЕ"<br />
+            Например доступ по ИЛИ-тэгам : SELECT * FROM records WHERE tags ? 'internal' OR tags ? 'спб'<br />
+            Доступ по НЕ-тэгам : SELECT * FROM records WHERE NOT (tags ? 'confidential')
+          </div>
+        </CollapsibleSection>
       </div>
       <MessageBoxOKCancel />
     </div >
