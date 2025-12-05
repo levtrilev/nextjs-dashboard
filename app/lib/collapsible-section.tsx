@@ -24,9 +24,9 @@ const CollapsibleSection = (props: ICollapsibleSectionProps) => {
                 className={`overflow-hidden transition-all duration-300 ease-in-out ${isCollapsed ? 'max-h-0 opacity-0' : 'max-h-96 opacity-100'
                     }`}
             >
-                <p className="mt-2 text-gray-700">
+                <div className="mt-2 text-gray-700">
                     {props.children}
-                </p>
+                </div>
             </div>
         </div>
     );

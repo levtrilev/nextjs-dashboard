@@ -16,18 +16,32 @@ import { updatePermission } from "../../lib/permissios-actions";
 import BtnRolesRef from "../../../roles/lib/btn-roles-ref";
 import { useRoles } from "@/app/admin/roles/lib/store/use-role-store";
 import CollapsibleSection from "@/app/lib/collapsible-section";
+import { createTagStore } from "@/app/lib/tags/tag-store";
+import { TagInput } from "@/app/lib/tags/tag-input";
+import { upsertTags } from "@/app/lib/tags/tags-actions";
 
 interface IPermissionEditFormProps {
   permission: Permission,
   doctypes: { table_name: string }[],
   tenants: Tenant[],
+  initialTags: string[]
 }
-
+export const useOrTagStore = createTagStore();
+export const useAndTagStore = createTagStore();
+export const useNoTagStore = createTagStore();
 export default function PermissionEditForm(props: IPermissionEditFormProps) {
   const [permission, setPermission] = useState(props.permission);
   const isDocumentChanged = useIsDocumentChanged();
   const msgBox = useMessageBox();
   const roles = useRoles().filter((role) => role.tenant_id === permission.tenant_id);
+
+  // const { setAllTags, addTag } = useOrTagStore();
+  const setAllOrTags = useOrTagStore().setAllTags;
+  const setAllAndTags = useAndTagStore().setAllTags;
+  const setAllNoTags = useNoTagStore().setAllTags;
+  const addOrTag = useOrTagStore().addTag;
+  const addAndTag = useAndTagStore().addTag;
+  const addNoTag = useNoTagStore().addTag;
   const docChanged = () => {
     setIsDocumentChanged(true);
     setMessageBoxText('Документ изменен. Закрыть без сохранения?');
@@ -43,6 +57,30 @@ export default function PermissionEditForm(props: IPermissionEditFormProps) {
     setPermission((prev) => ({
       ...prev,
       doctype: event.target.value,
+    }));
+    docChanged();
+  };
+  const handleChangeOrTags = (event: any) => {
+    const currentTags = useOrTagStore.getState().selectedTags
+    setPermission((prev) => ({
+      ...prev,
+      or_tags: currentTags,
+    }));
+    docChanged();
+  };
+  const handleChangeAndTags = (event: any) => {
+    const currentTags = useAndTagStore.getState().selectedTags
+    setPermission((prev) => ({
+      ...prev,
+      and_tags: currentTags,
+    }));
+    docChanged();
+  };
+  const handleChangeNoTags = (event: any) => {
+    const currentTags = useNoTagStore.getState().selectedTags
+    setPermission((prev) => ({
+      ...prev,
+      no_tags: currentTags,
     }));
     docChanged();
   };
@@ -84,6 +122,7 @@ export default function PermissionEditForm(props: IPermissionEditFormProps) {
       return;
     }
     try {
+      await upsertTags(permission.or_tags, permission.tenant_id);
       await updatePermission(permission);
       setIsDocumentChanged(false);
       setMessageBoxText('Документ сохранен.');
@@ -93,6 +132,11 @@ export default function PermissionEditForm(props: IPermissionEditFormProps) {
     setIsShowMessageBoxCancel(false);
     setIsMessageBoxOpen(true);
   };
+  useEffect(() => {
+    setAllOrTags(props.initialTags);
+    setAllNoTags(props.initialTags);
+    setAllAndTags(props.initialTags);
+  }, [props.initialTags, setAllOrTags, setAllAndTags, setAllNoTags]);
 
   useEffect(() => {
     setIsDocumentChanged(false);
@@ -278,7 +322,30 @@ export default function PermissionEditForm(props: IPermissionEditFormProps) {
 
         </div>
       </div>
-
+      <div className="flex max-w-[1150px] mt-4">
+        <label
+          htmlFor="or_tags"
+          className={`${lusitana.className} w-[110px] font-medium flex items-center p-2 text-gray-500`}>
+          OR-Тэги:
+        </label>
+        <TagInput id="or_tags" value={permission.or_tags} onAdd={addOrTag} handleFormInputChange={handleChangeOrTags} />
+      </div>
+      <div className="flex max-w-[1150px] mt-4">
+        <label
+          htmlFor="and_tags"
+          className={`${lusitana.className} w-[110px] font-medium flex items-center p-2 text-gray-500`}>
+          AND-Тэги:
+        </label>
+        <TagInput id="and_tags" value={permission.and_tags} onAdd={addAndTag} handleFormInputChange={handleChangeAndTags} />
+      </div>
+      <div className="flex max-w-[1150px] mt-4">
+        <label
+          htmlFor="no_tags"
+          className={`${lusitana.className} w-[110px] font-medium flex items-center p-2 text-gray-500`}>
+          NO-Тэги:
+        </label>
+        <TagInput id="no_tags" value={permission.no_tags} onAdd={addNoTag} handleFormInputChange={handleChangeNoTags} />
+      </div>
       {/* button area */}
       <div className="flex justify-between mt-4 mr-4">
         <div className="flex w-full md:w-1/2">
@@ -317,7 +384,7 @@ export default function PermissionEditForm(props: IPermissionEditFormProps) {
             <strong>Редактор</strong> - имеет права Автора над документами других Авторов и сам является Автором своих документов. <br />
             После изменения "чужого" документа не становится Автором - его имя (user_id) остается в поле "editor". <br />
             Имеет право делегировать авторство другому пользователю, в том числе себе.<br />
-            <strong>Физическое удаление</strong> - без влияния на чтение. Имеет право физического удаления только логически-удаленных документов, 
+            <strong>Физическое удаление</strong> - без влияния на чтение. Имеет право физического удаления только логически-удаленных документов,
             тех, которые имеет право видеть, то есть Автор - свои, Редактор - все, Читателю нечего удалять - он не видит логически удаленные.<br />
             <strong>Доступ по тэгам</strong> - при указанном данном признаке(tags-access) доступ осуществляется при наличии в документе
             указанных тэгов - поле "tags" (тип JSONB). В полномочиях отдельно указываются тэги, учитывающиеся по "И", по "ИЛИ" и по "НЕ"<br />

@@ -79,7 +79,7 @@ export async function fetchDoctypes() {
 
 // createPermission
 
-export async function createDocRolePermission(
+export async function createPermission(
   doctype: string,
   doctype_name: string,
   role_id: string,
@@ -123,6 +123,7 @@ export async function deletePermission(id: string) {
 
 //updatePermission
 export async function updatePermission(permission: Permission) {
+  console.log("permission.or_tags:", String(permission.or_tags));
   try {
     await pool.query(
       `UPDATE permissions
@@ -144,9 +145,9 @@ export async function updatePermission(permission: Permission) {
         permission.can_delete,
         permission.reader,
         permission.access_by_tags,
-        permission.or_tags,
-        permission.and_tags,
-        permission.no_tags,
+        JSON.stringify(permission.or_tags),
+        JSON.stringify(permission.and_tags),
+        JSON.stringify(permission.no_tags),
         permission.tenant_id,
         permission.tenant_name,
       ]

@@ -8,6 +8,7 @@ import { fetchTenantsAdmin, fetchTenantsSuperadmin } from "@/app/admin/tenants/l
 import { auth, getUser } from "@/auth";
 import { fetchDoctypes, fetchPermission } from "../../lib/permissios-actions";
 import PermissionEditForm from "./permission-edit-form";
+import { fetchAllTags } from "@/app/lib/tags/tags-actions";
 // import { fetchRolesFormSuperadmin } from "../../../roles/lib/roles-actions";
 
 async function Page(props: { params: Promise<{ id: string }> }) {
@@ -21,6 +22,8 @@ async function Page(props: { params: Promise<{ id: string }> }) {
     const params = await props.params;
     const id = params.id;
     const permission: Permission = await fetchPermission(id);
+    const existingTags = await fetchAllTags(permission.tenant_id);
+
     const doctypes: { table_name: string }[] = await fetchDoctypes();
     // const roles: RoleForm[] = await fetchRolesFormSuperadmin();
 
@@ -31,7 +34,7 @@ async function Page(props: { params: Promise<{ id: string }> }) {
                 <h1 className={`${lusitana.className} text-2xl`}>Полномочия Роли при работе с Типом документа</h1>
             </div>
             <h3 className="text-xs font-medium text-gray-400">id: {id}</h3>
-            <PermissionEditForm permission={permission} doctypes={doctypes} tenants={tenants} />
+            <PermissionEditForm permission={permission} doctypes={doctypes} tenants={tenants} initialTags={existingTags}/>
         </div>
 
     );

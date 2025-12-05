@@ -4,7 +4,7 @@
 import { use, useEffect, useRef, useState } from 'react';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import { RoleForm, Tenant } from '@/app/lib/definitions';
-import { createDocRolePermission } from './permissios-actions';
+import { createPermission } from './permissios-actions';
 import { fetchRole, fetchRoleForm } from '../../roles/lib/roles-actions';
 import { useRoles } from '../../roles/lib/store/use-role-store';
 import MessageBoxOKCancel from '@/app/lib/message-box-ok-cancel';
@@ -85,7 +85,7 @@ export const NewPermission = (props: INewDocRolePermissionProps) => {
             <form
                 action={ async () => {
                     try {
-                        await createDocRolePermission(doctype, doctypeName, roleId, roleName, tenantId, tenantName);
+                        await createPermission(doctype, doctypeName, roleId, roleName, tenantId, tenantName);
                         setDoctype('');
                     } catch (error) {
                         // console.error("Failed to create DocRolePermission:", error);

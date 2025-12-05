@@ -120,7 +120,7 @@ export const PermissionsTable: React.FC<IDoctypeTableProps> = (props: IDoctypeTa
                                             <span className="font-medium text-gray-700">Роль:{"  "}</span>
                                             {props.admin ? (
                                                 <a
-                                                    href={"/admin/doctypes/" + perm.id + "/edit"}
+                                                    href={"/admin/permissions/" + perm.id + "/edit"}
                                                     className="text-blue-800 underline font-bold"
                                                 >
                                                     {perm.doctype_name.substring(0, 20)}
