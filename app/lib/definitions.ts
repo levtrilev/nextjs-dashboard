@@ -187,6 +187,8 @@ export type LegalEntity = {
   kpp: string;
   region_id: string;
   section_id: string;
+  access_tags: string[];
+  user_tags: string[];
 };
 
 export type LegalEntityForm = {
@@ -205,6 +207,8 @@ export type LegalEntityForm = {
   section_id: string;
   region_name: string;
   section_name: string;
+  access_tags: string[];
+  user_tags: string[];
 };
 
 export type User = {

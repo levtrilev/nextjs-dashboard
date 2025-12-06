@@ -16,11 +16,17 @@ import {
   setIsShowMessageBoxCancel, setMessageBoxText, useIsDocumentChanged, useMessageBox
 } from "@/app/store/useDocumentStore";
 import { useRouter } from "next/navigation";
+import { useAccessTagStore, useUserTagStore } from "@/app/lib/tags/tag-store";
+import { upsertTags } from "@/app/lib/tags/tags-actions";
+import { TagInput } from "@/app/lib/tags/tag-input";
+import { lusitana } from "@/app/ui/fonts";
 
 interface IEditFormProps {
   legalEntity: LegalEntityForm,
   regions: Region[],
   sections: SectionForm[],
+  allTags: string[],
+  tenant_id: string
 }
 
 export default function LegalEntitiesEditForm(props: IEditFormProps) {
@@ -28,9 +34,29 @@ export default function LegalEntitiesEditForm(props: IEditFormProps) {
   const isDocumentChanged = useIsDocumentChanged();
   const msgBox = useMessageBox();
   const router = useRouter();
+  const setAllUserTags = useUserTagStore().setAllTags;
+  const setAllAccessTags = useAccessTagStore().setAllTags;
+  const addUserTag = useUserTagStore().addTag;
+  const addAccessTag = useAccessTagStore().addTag;
   const docChanged = () => {
     setIsDocumentChanged(true);
     setMessageBoxText('Документ изменен. Закрыть без сохранения?');
+  };
+  const handleChangeUserTags = (event: any) => {
+    const currentTags = useUserTagStore.getState().selectedTags
+    setLegalEntity((prev) => ({
+      ...prev,
+      user_tags: currentTags,
+    }));
+    docChanged();
+  };
+  const handleChangeAccessTags = (event: any) => {
+    const currentTags = useAccessTagStore.getState().selectedTags
+    setLegalEntity((prev) => ({
+      ...prev,
+      access_tags: currentTags,
+    }));
+    docChanged();
   };
   const handleBackClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -43,11 +69,19 @@ export default function LegalEntitiesEditForm(props: IEditFormProps) {
       window.history.back();
     }
   };
-  const handleSaveClick = (e: React.MouseEvent) => {
+  const handleSaveClick = async (e: React.MouseEvent) => {
     e.preventDefault();
-    updateLegalEntity(legalEntity);
-    setIsDocumentChanged(false);
-    setMessageBoxText('Документ сохранен.');
+    try {
+      await upsertTags(legalEntity.user_tags, props.tenant_id);
+      await upsertTags(legalEntity.access_tags, props.tenant_id);
+
+      await updateLegalEntity(legalEntity);
+      setIsDocumentChanged(false);
+      setMessageBoxText('Документ сохранен.');
+
+    } catch (error) {
+      setMessageBoxText('Документ не сохранен.' + String(error));
+    }
     setIsShowMessageBoxCancel(false);
     setIsMessageBoxOpen(true);
   }
@@ -74,7 +108,10 @@ export default function LegalEntitiesEditForm(props: IEditFormProps) {
     setIsMessageBoxOpen(false);
     setIsShowMessageBoxCancel(true);
   }, [msgBox.isOKButtonPressed, router]);
-
+  useEffect(() => {
+    setAllUserTags(props.allTags);
+    setAllAccessTags(props.allTags);
+  }, [props.allTags, setAllUserTags, setAllAccessTags]);
   const handleChangeIsCustomer = (event: any) => {
     setLegalEntity((prev) => ({
       ...prev,
@@ -285,6 +322,24 @@ export default function LegalEntitiesEditForm(props: IEditFormProps) {
             <BtnSectionsRef sections={props.sections} handleSelectSection={handleSelectSection} />
           </div>
         </div>
+      </div>
+      {/* user_tags */}
+      <div className="flex max-w-[1150] mt-4">
+        <label
+          htmlFor="user_tags"
+          className={`${lusitana.className} w-[130px] font-medium flex items-center p-2 text-gray-500`}>
+          Тэги:
+        </label>
+        <TagInput id="user_tags" value={legalEntity.user_tags} onAdd={addUserTag} handleFormInputChange={handleChangeUserTags} />
+      </div>
+      {/* access_tags */}
+      <div className="flex max-w-[1150] mt-4">
+        <label
+          htmlFor="access_tags"
+          className={`${lusitana.className} w-[130px] font-medium flex items-center p-2 text-gray-500`}>
+          Тэги доступа:
+        </label>
+        <TagInput id="access_tags" value={legalEntity.access_tags} onAdd={addAccessTag} handleFormInputChange={handleChangeAccessTags} />
       </div>
       {/* buttons area */}
       <div className="flex justify-between mt-4 mr-4">

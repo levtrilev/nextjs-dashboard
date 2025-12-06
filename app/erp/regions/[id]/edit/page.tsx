@@ -26,8 +26,8 @@ async function Page(props: { params: Promise<{ id: string }> }) {
     const sections = await fetchSectionsForm(current_sections);
     const tenant_id = (await fetchSectionById(region.section_id)).tenant_id;
     const allTags = await fetchAllTags(tenant_id);
-    console.log("region tenant: " + (await fetchSectionById(region.section_id)).tenant_name);
-    console.log("region tenant: " + JSON.stringify(allTags));
+    // console.log("region tenant: " + (await fetchSectionById(region.section_id)).tenant_name);
+    // console.log("region tenant: " + JSON.stringify(allTags));
     return (
         <div className="w-full">
             <div className="flex w-full items-center justify-between">

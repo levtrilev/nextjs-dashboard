@@ -107,7 +107,7 @@ export async function createLegalEntity(
   } = validatedFields.data;
 
   const date = new Date().toISOString();
-  
+
   const session = await auth();
   const username = session?.user?.name;
 
@@ -121,9 +121,20 @@ export async function createLegalEntity(
         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14
       )`,
       [
-        name, fullname, inn, address_legal, phone, 
-        email, contact, is_customer, is_supplier, kpp, 
-        region_id, section_id, username, date
+        name,
+        fullname,
+        inn,
+        address_legal,
+        phone,
+        email,
+        contact,
+        is_customer,
+        is_supplier,
+        kpp,
+        region_id,
+        section_id,
+        username,
+        date,
       ]
     );
   } catch (error) {
@@ -141,10 +152,7 @@ export async function createLegalEntity(
 //#region Update Delete LegalEntity
 export async function deleteLegalEntity(id: string) {
   try {
-    await pool.query(
-      `DELETE FROM legal_entities WHERE id = $1`,
-      [id]
-    );
+    await pool.query(`DELETE FROM legal_entities WHERE id = $1`, [id]);
   } catch (error) {
     console.error("Database Error, Failed to Delete LegaEntity:", error);
     throw new Error("Database Error: Failed to Delete LegaEntity");
@@ -154,7 +162,7 @@ export async function deleteLegalEntity(id: string) {
 
 export async function updateLegalEntity(legalEntity: LegalEntity) {
   const date = new Date().toISOString();
-  
+
   const session = await auth();
   const username = session?.user?.name;
 
@@ -173,10 +181,12 @@ export async function updateLegalEntity(legalEntity: LegalEntity) {
          is_supplier = $9,
          kpp = $10,
          region_id = $11,
-         section_id = $12, 
-         username = $13,
-         date = $14
-       WHERE id = $15`,
+         section_id = $12,
+         user_tags = $13,
+         access_tags = $14, 
+         username = $15,
+         date = $16
+       WHERE id = $17`,
       [
         legalEntity.name,
         legalEntity.fullname,
@@ -190,6 +200,8 @@ export async function updateLegalEntity(legalEntity: LegalEntity) {
         legalEntity.kpp,
         legalEntity.region_id,
         legalEntity.section_id,
+        JSON.stringify(legalEntity.user_tags),
+        JSON.stringify(legalEntity.access_tags),
         username,
         date,
         legalEntity.id
@@ -224,7 +236,9 @@ export async function fetchLegalEntity(id: string, current_sections: string) {
          is_supplier,
          kpp,
          region_id,
-         section_id
+         section_id,
+         user_tags,
+         access_tags
        FROM your_legal_entities
        WHERE id = $2`,
       [current_sections, id]
@@ -277,9 +291,9 @@ export async function fetchFilteredLegalEntities(
   current_sections: string
 ) {
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
-  
+
   try {
-    const result = await pool.query<LegalEntity>(
+    const result = (await pool.query<LegalEntity>(
       `WITH your_legal_entities AS (
          SELECT * FROM legal_entities 
          WHERE section_id = ANY($1::uuid[])
@@ -310,7 +324,7 @@ export async function fetchFilteredLegalEntities(
        ORDER BY name ASC
        LIMIT $3 OFFSET $4`,
       [current_sections, `%${query}%`, ITEMS_PER_PAGE, offset]
-    ) as {rows: LegalEntity[]};
+    )) as { rows: LegalEntity[] };
 
     return result.rows;
   } catch (error) {
@@ -319,7 +333,10 @@ export async function fetchFilteredLegalEntities(
   }
 }
 
-export async function fetchLegalEntitiesPages(query: string, current_sections: string) {
+export async function fetchLegalEntitiesPages(
+  query: string,
+  current_sections: string
+) {
   try {
     const result = await pool.query(
       `WITH your_legal_entities AS (
@@ -347,7 +364,10 @@ export async function fetchLegalEntitiesPages(query: string, current_sections: s
   }
 }
 
-export async function fetchLegalEntityForm(id: string, current_sections: string) {
+export async function fetchLegalEntityForm(
+  id: string,
+  current_sections: string
+) {
   try {
     const result = await pool.query<LegalEntityForm>(
       `WITH your_legal_entities AS (
@@ -368,6 +388,8 @@ export async function fetchLegalEntityForm(id: string, current_sections: string)
          le.kpp,
          le.region_id,
          le.section_id,
+          le.user_tags,
+          le.access_tags,
          r.name as region_name,
          s.name as section_name
        FROM your_legal_entities le 

@@ -177,7 +177,9 @@ export async function fetchRegion(id: string, current_sections: string) {
         section_id,
         username,
         timestamptz,
-        date
+        date,
+        user_tags,
+        access_tags
       FROM your_regions regions
       WHERE id = $2
     `,

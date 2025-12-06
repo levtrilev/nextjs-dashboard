@@ -6,9 +6,10 @@ import { fetchLegalEntityForm } from "../../lib/le-actions";
 import { LegalEntityForm } from "@/app/lib/definitions";
 import { lusitana } from "@/app/ui/fonts";
 import { fetchRegions } from "@/app/erp/regions/lib/region-actions";
-import { fetchSectionsForm } from "@/app/admin/sections/lib/sections-actions";
+import { fetchSectionById, fetchSectionsForm } from "@/app/admin/sections/lib/sections-actions";
 import { auth } from "@/auth";
 import { getCurrentSections } from "@/app/lib/common-actions";
+import { fetchAllTags } from "@/app/lib/tags/tags-actions";
 // import { useSelector } from "react-redux";
 // import { userSessionSlice, UserSessionState } from "@/app/lib/features/userSession/userSessionSlice";
 
@@ -30,13 +31,15 @@ async function Page(props: { params: Promise<{ id: string }> }) {
     if (!legalEntity) {
         return (<h3 className="text-xs font-medium text-gray-400">Not found! id: {id}</h3>);
     }
+        const tenant_id = (await fetchSectionById(legalEntity.section_id)).tenant_id;
+        const allTags = await fetchAllTags(tenant_id);
     return (
         <div className="w-full">
             <div className="flex w-full items-center justify-between">
                 <h1 className={`${lusitana.className} text-2xl`}>Юридическое лицо</h1>
             </div>
             <h3 className="text-xs font-medium text-gray-400">id: {id}</h3>
-            <LegalEntitiesEditForm legalEntity={legalEntity} regions={regions} sections={sections}></LegalEntitiesEditForm>
+            <LegalEntitiesEditForm legalEntity={legalEntity} regions={regions} sections={sections} allTags={allTags} tenant_id={tenant_id}></LegalEntitiesEditForm>
         </div>
 
     );
