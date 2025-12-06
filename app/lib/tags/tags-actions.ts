@@ -35,8 +35,7 @@ export async function upsertTags(
   tagNames: string[],
   tenant_id: string
 ): Promise<void> {
-  if (tagNames.length === 0) return;
-
+if (!tagNames || tagNames.length === 0) return;
   try {
     await pool.query(
       `

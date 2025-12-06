@@ -24,7 +24,7 @@ interface IPermissionEditFormProps {
   permission: Permission,
   doctypes: { table_name: string }[],
   tenants: Tenant[],
-  initialTags: string[]
+  allTags: string[]
 }
 export const useOrTagStore = createTagStore();
 export const useAndTagStore = createTagStore();
@@ -123,6 +123,9 @@ export default function PermissionEditForm(props: IPermissionEditFormProps) {
     }
     try {
       await upsertTags(permission.or_tags, permission.tenant_id);
+      await upsertTags(permission.and_tags, permission.tenant_id);
+      await upsertTags(permission.no_tags, permission.tenant_id);
+      
       await updatePermission(permission);
       setIsDocumentChanged(false);
       setMessageBoxText('Документ сохранен.');
@@ -133,10 +136,10 @@ export default function PermissionEditForm(props: IPermissionEditFormProps) {
     setIsMessageBoxOpen(true);
   };
   useEffect(() => {
-    setAllOrTags(props.initialTags);
-    setAllNoTags(props.initialTags);
-    setAllAndTags(props.initialTags);
-  }, [props.initialTags, setAllOrTags, setAllAndTags, setAllNoTags]);
+    setAllOrTags(props.allTags);
+    setAllNoTags(props.allTags);
+    setAllAndTags(props.allTags);
+  }, [props.allTags, setAllOrTags, setAllAndTags, setAllNoTags]);
 
   useEffect(() => {
     setIsDocumentChanged(false);
@@ -322,6 +325,7 @@ export default function PermissionEditForm(props: IPermissionEditFormProps) {
 
         </div>
       </div>
+      {/* or_tags */}
       <div className="flex max-w-[1150px] mt-4">
         <label
           htmlFor="or_tags"
@@ -330,6 +334,7 @@ export default function PermissionEditForm(props: IPermissionEditFormProps) {
         </label>
         <TagInput id="or_tags" value={permission.or_tags} onAdd={addOrTag} handleFormInputChange={handleChangeOrTags} />
       </div>
+      {/* and_tags */}
       <div className="flex max-w-[1150px] mt-4">
         <label
           htmlFor="and_tags"
@@ -338,6 +343,7 @@ export default function PermissionEditForm(props: IPermissionEditFormProps) {
         </label>
         <TagInput id="and_tags" value={permission.and_tags} onAdd={addAndTag} handleFormInputChange={handleChangeAndTags} />
       </div>
+      {/* no_tags */}
       <div className="flex max-w-[1150px] mt-4">
         <label
           htmlFor="no_tags"

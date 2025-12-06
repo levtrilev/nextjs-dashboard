@@ -50,3 +50,7 @@ export const createTagStore = () => create<TagStore>((set, get) => ({
     return filtered.slice(0, 5);
   },
 }));
+
+export const useTagStore = createTagStore();
+export const useAccessTagStore = createTagStore();
+export const useUserTagStore = createTagStore();

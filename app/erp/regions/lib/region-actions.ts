@@ -1,4 +1,3 @@
-
 // Regions actions
 
 "use server";
@@ -11,13 +10,12 @@ import { redirect } from "next/navigation";
 import { auth, signIn } from "@/auth";
 import { Region, RegionForm } from "@/app/lib/definitions";
 
-  // try {
-  //   const result = await pool.query('SELECT * FROM users');
-  //   console.log(result.rows);
-  // } catch (err) {
-  //   console.error('Ошибка выполнения запроса:', err);
-  // }
-
+// try {
+//   const result = await pool.query('SELECT * FROM users');
+//   console.log(result.rows);
+// } catch (err) {
+//   console.error('Ошибка выполнения запроса:', err);
+// }
 
 const ITEMS_PER_PAGE = 8;
 
@@ -56,10 +54,7 @@ const RegionFormSchema = z.object({
 const CreateRegion = RegionFormSchema.omit({ id: true });
 const UpdateRegion = RegionFormSchema.omit({ id: true });
 
-export async function createRegion(
-  prevState: RegionState,
-  formData: FormData
-) {
+export async function createRegion(prevState: RegionState, formData: FormData) {
   const validatedFields = CreateRegion.safeParse({
     name: formData.get("name"),
     capital: formData.get("capital"),
@@ -76,25 +71,23 @@ export async function createRegion(
     };
   }
   // Prepare data for insertion into the database
-  const {
-    name,
-    capital,
-    area,
-    code,
-  } = validatedFields.data;
+  const { name, capital, area, code } = validatedFields.data;
   // SELECT event_time_tz AT TIME ZONE 'Europe/Moscow' FROM example;
-  const date = new Date().toISOString();  //.split("T")[0]
+  const date = new Date().toISOString(); //.split("T")[0]
   // const is_customer = str_is_customer === "true" ? true : false;
   // const is_supplier = str_is_supplier === "true" ? false : true;
 
-  const  session = await auth();
+  const session = await auth();
   const username = session?.user?.name;
   const section_id = "e21e9372-91c5-4856-a123-b6f3b53efc0f";
   try {
-    await pool.query(`
+    await pool.query(
+      `
       INSERT INTO regions (name, capital, area, code, section_id, username, date)
       VALUES ($1, $2, $3, $4, $5, $6, $7) 
-    `, [name, capital, area, code, section_id, username, date]);
+    `,
+      [name, capital, area, code, section_id, username, date]
+    );
   } catch (error) {
     console.error("Failed to create newRegion:", error);
     // throw new Error("Failed to create newLegalEntity.");
@@ -129,7 +122,8 @@ export async function updateRegion(region: Region) {
   // const section_id = "e21e9372-91c5-4856-a123-b6f3b53efc0f";
 
   try {
-    await pool.query(`
+    await pool.query(
+      `
 UPDATE regions
 SET 
     name = $1,
@@ -138,9 +132,24 @@ SET
     code = $4,
     section_id = $5,
     username = $6,
-    date = $7
-WHERE id = $8;
-    `, [region.name, region.capital, region.area, region.code, region.section_id, username, date, region.id]);
+    date = $7,
+    user_tags = $8,
+    access_tags = $9
+WHERE id = $10;
+    `,
+      [
+        region.name,
+        region.capital,
+        region.area,
+        region.code,
+        region.section_id,
+        username,
+        date,
+        JSON.stringify(region.user_tags),
+        JSON.stringify(region.access_tags),
+        region.id,
+      ]
+    );
   } catch (error) {
     console.error("Failed to update region:", error);
     throw new Error("Failed to update region.");
@@ -154,7 +163,8 @@ WHERE id = $8;
 
 export async function fetchRegion(id: string, current_sections: string) {
   try {
-    const data = await pool.query<Region>(`
+    const data = await pool.query<Region>(
+      `
       WITH your_regions AS ( SELECT * FROM regions where section_id = 
         ANY ($1::uuid[]))
 
@@ -170,7 +180,9 @@ export async function fetchRegion(id: string, current_sections: string) {
         date
       FROM your_regions regions
       WHERE id = $2
-    `, [current_sections, id]);
+    `,
+      [current_sections, id]
+    );
 
     const region = data.rows[0];
     return region;
@@ -181,7 +193,8 @@ export async function fetchRegion(id: string, current_sections: string) {
 }
 export async function fetchRegionForm(id: string, current_sections: string) {
   try {
-    const data = await pool.query<RegionForm>(`
+    const data = await pool.query<RegionForm>(
+      `
       WITH your_regions AS ( SELECT * FROM regions where section_id = 
         ANY ($1::uuid[]))
 
@@ -195,11 +208,15 @@ export async function fetchRegionForm(id: string, current_sections: string) {
         regions.username,
         regions.timestamptz,
         regions.date,
+        regions.user_tags,
+        regions.access_tags,
         s.name as section_name
       FROM your_regions regions
       LEFT JOIN sections s on regions.section_id = s.id
       WHERE regions.id = $2
-    `, [current_sections, id]);
+    `,
+      [current_sections, id]
+    );
 
     const region = data.rows[0];
     return region;
@@ -210,7 +227,8 @@ export async function fetchRegionForm(id: string, current_sections: string) {
 }
 export async function fetchRegions(current_sections: string) {
   try {
-    const data = await pool.query<Region>(`
+    const data = await pool.query<Region>(
+      `
       WITH your_regions AS ( SELECT * FROM regions where section_id = 
         ANY ($1::uuid[]))
 
@@ -226,7 +244,9 @@ export async function fetchRegions(current_sections: string) {
         date
       FROM your_regions regions
       ORDER BY name ASC
-    `, [current_sections]);
+    `,
+      [current_sections]
+    );
 
     const regions = data.rows;
     return regions;
@@ -238,7 +258,8 @@ export async function fetchRegions(current_sections: string) {
 
 export async function fetchRegionsForm(current_sections: string) {
   try {
-    const data = await pool.query<RegionForm>(`
+    const data = await pool.query<RegionForm>(
+      `
       WITH your_regions AS ( SELECT * FROM regions where section_id = 
         ANY ($1::uuid[]))
 
@@ -256,7 +277,9 @@ export async function fetchRegionsForm(current_sections: string) {
       FROM your_regions regions
       LEFT JOIN sections s on regions.section_id = s.id
       ORDER BY name ASC
-    `, [current_sections]);
+    `,
+      [current_sections]
+    );
 
     const regions = data.rows;
     return regions;
@@ -273,7 +296,8 @@ export async function fetchFilteredRegions(
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
   try {
-    const regions = await pool.query<RegionForm>(`
+    const regions = (await pool.query<RegionForm>(
+      `
       WITH your_regions AS ( SELECT * FROM regions where section_id = 
         ANY ($1::uuid[]))
             
@@ -297,7 +321,9 @@ export async function fetchFilteredRegions(
         regions.code ILIKE $2
       ORDER BY name ASC
       LIMIT $3 OFFSET $4
-    `, [current_sections, `%${query}%`, ITEMS_PER_PAGE, offset]) as {rows: RegionForm[]};
+    `,
+      [current_sections, `%${query}%`, ITEMS_PER_PAGE, offset]
+    )) as { rows: RegionForm[] };
 
     return regions.rows;
   } catch (error) {
@@ -306,9 +332,13 @@ export async function fetchFilteredRegions(
   }
 }
 
-export async function fetchRegionsPages(query: string, current_sections: string) {
+export async function fetchRegionsPages(
+  query: string,
+  current_sections: string
+) {
   try {
-    const count = await pool.query(`
+    const count = await pool.query(
+      `
     WITH your_regions AS ( SELECT * FROM regions where section_id = 
       ANY ($1::uuid[])) 
 
@@ -320,7 +350,8 @@ export async function fetchRegionsPages(query: string, current_sections: string)
         regions.area ILIKE $2 OR
         regions.code ILIKE $2
   `,
-  [current_sections, `%${query}%`]);
+      [current_sections, `%${query}%`]
+    );
 
     const totalPages = Math.ceil(Number(count.rows[0].count) / ITEMS_PER_PAGE);
     return totalPages;

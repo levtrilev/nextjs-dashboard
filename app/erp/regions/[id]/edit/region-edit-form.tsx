@@ -12,25 +12,50 @@ import {
   setIsShowMessageBoxCancel, setMessageBoxText, useIsDocumentChanged, useMessageBox
 } from "@/app/store/useDocumentStore";
 import { useRouter } from "next/navigation";
+import { TagInput } from "@/app/lib/tags/tag-input";
+import { upsertTags } from "@/app/lib/tags/tags-actions";
+import { lusitana } from "@/app/ui/fonts";
+import { useAccessTagStore, useUserTagStore } from "@/app/lib/tags/tag-store";
+
 
 interface IEditFormProps {
   region: RegionForm,
   sections: SectionForm[],
+  allTags: string[],
+  tenant_id: string,
 }
 
 export default function EditForm(props: IEditFormProps) {
   const [region, setRegion] = useState(props.region);
-  //#region msgBox
+  //#region main
   //================================================================
   const isDocumentChanged = useIsDocumentChanged();
   const msgBox = useMessageBox();
   const router = useRouter();
-
+  const setAllUserTags = useUserTagStore().setAllTags;
+  const setAllAccessTags = useAccessTagStore().setAllTags;
+  const addUserTag = useUserTagStore().addTag;
+  const addAccessTag = useAccessTagStore().addTag;
   const docChanged = () => {
     setIsDocumentChanged(true);
     setMessageBoxText('Документ изменен. Закрыть без сохранения?');
   };
-
+  const handleChangeUserTags = (event: any) => {
+    const currentTags = useUserTagStore.getState().selectedTags
+    setRegion((prev) => ({
+      ...prev,
+      user_tags: currentTags,
+    }));
+    docChanged();
+  };
+  const handleChangeAccessTags = (event: any) => {
+    const currentTags = useAccessTagStore.getState().selectedTags
+    setRegion((prev) => ({
+      ...prev,
+      access_tags: currentTags,
+    }));
+    docChanged();
+  };
   const handleBackClick = (e: React.MouseEvent) => {
     e.preventDefault();
     if (isDocumentChanged && !msgBox.isOKButtonPressed) {
@@ -42,11 +67,18 @@ export default function EditForm(props: IEditFormProps) {
       window.history.back();
     }
   };
-  const handleSaveClick = (e: React.MouseEvent) => {
+  const handleSaveClick = async (e: React.MouseEvent) => {
     e.preventDefault();
-    updateRegion(region);
-    setIsDocumentChanged(false);
-    setMessageBoxText('Документ сохранен.');
+    try {
+      await upsertTags(region.user_tags, props.tenant_id);
+      await upsertTags(region.access_tags, props.tenant_id);
+
+      await updateRegion(region);
+      setIsDocumentChanged(false);
+      setMessageBoxText('Документ сохранен.');
+    } catch (error) {
+      setMessageBoxText('Документ не сохранен.' + String(error));
+    }
     setIsShowMessageBoxCancel(false);
     setIsMessageBoxOpen(true);
   }
@@ -73,17 +105,22 @@ export default function EditForm(props: IEditFormProps) {
     setIsMessageBoxOpen(false);
     setIsShowMessageBoxCancel(true);
   }, [msgBox.isOKButtonPressed, router]);
-  //================================================================
-  //#endregion
+
+  useEffect(() => {
+    setAllUserTags(props.allTags);
+    setAllAccessTags(props.allTags);
+  }, [props.allTags, setAllUserTags, setAllAccessTags]);
+
   const handleSelectSection = (new_section_id: string, new_section_name: string) => {
     setRegion((prev) => ({
       ...prev,
       section_id: new_section_id,
       section_name: new_section_name,
     }));
-    setIsDocumentChanged(true);
-    setMessageBoxText('Документ изменен. Закрыть без сохранения?');
+    docChanged();
   };
+  //================================================================
+  //#endregion
   return (
     <div>
       <div className="flex flex-col md:flex-row gap-4 w-full">
@@ -174,6 +211,24 @@ export default function EditForm(props: IEditFormProps) {
             />
           </div>
         </div>
+      </div>
+      {/* user_tags */}
+      <div className="flex max-w-[1150] mt-4">
+        <label
+          htmlFor="user_tags"
+          className={`${lusitana.className} w-[130px] font-medium flex items-center p-2 text-gray-500`}>
+          Тэги:
+        </label>
+        <TagInput id="user_tags" value={region.user_tags} onAdd={addUserTag} handleFormInputChange={handleChangeUserTags} />
+      </div>
+      {/* access_tags */}
+      <div className="flex max-w-[1150] mt-4">
+        <label
+          htmlFor="access_tags"
+          className={`${lusitana.className} w-[130px] font-medium flex items-center p-2 text-gray-500`}>
+          Тэги доступа:
+        </label>
+        <TagInput id="access_tags" value={region.access_tags} onAdd={addAccessTag} handleFormInputChange={handleChangeAccessTags} />
       </div>
       {/* button area */}
       <div className="flex justify-between mt-4 mr-4">

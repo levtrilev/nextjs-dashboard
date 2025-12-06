@@ -3,7 +3,7 @@
 
 import { DateTime } from "next-auth/providers/kakao";
 
-export type Status = 'draft' | 'active' | 'deleted';
+export type Status = "draft" | "active" | "deleted";
 export type Permission = {
   id: string;
   role_id: string;
@@ -21,15 +21,15 @@ export type Permission = {
   no_tags: string[];
   tenant_id: string;
   tenant_name: string;
-}
+};
 export type MessageBox = {
   isMessageBoxOpen: boolean;
   messageBoxText: string;
   isShowMessageBoxCancel: boolean;
   isOKButtonPressed: boolean;
   isCancelButtonPressed: boolean;
-}
-export type Task ={
+};
+export type Task = {
   id: string;
   name: string;
   date_start: Date | string;
@@ -41,7 +41,7 @@ export type Task ={
   timestamptz?: string;
   date_created?: Date;
 };
-export type TaskForm ={
+export type TaskForm = {
   id: string;
   name: string;
   date_start: Date | string;
@@ -156,6 +156,8 @@ export type Region = {
   username: string;
   timestamptz: string;
   date: DateTime;
+  access_tags: string[];
+  user_tags: string[];
 };
 export type RegionForm = {
   id: string;
@@ -168,6 +170,8 @@ export type RegionForm = {
   timestamptz: string;
   date: DateTime;
   section_name: string;
+  access_tags: string[];
+  user_tags: string[];
 };
 export type LegalEntity = {
   id: string;

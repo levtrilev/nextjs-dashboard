@@ -22,11 +22,11 @@ async function Page(props: { params: Promise<{ id: string }> }) {
     const params = await props.params;
     const id = params.id;
     const permission: Permission = await fetchPermission(id);
-    const existingTags = await fetchAllTags(permission.tenant_id);
+    const allTags = await fetchAllTags(permission.tenant_id);
 
     const doctypes: { table_name: string }[] = await fetchDoctypes();
-    // const roles: RoleForm[] = await fetchRolesFormSuperadmin();
-
+    console.log(" tenant: " + permission.tenant_name);
+    console.log(" alltags: " + JSON.stringify(allTags));
     const tenants = isSuperadmin ? await fetchTenantsSuperadmin() : await fetchTenantsAdmin(permission.tenant_id);
     return (
         <div className="w-full">
@@ -34,7 +34,7 @@ async function Page(props: { params: Promise<{ id: string }> }) {
                 <h1 className={`${lusitana.className} text-2xl`}>Полномочия Роли при работе с Типом документа</h1>
             </div>
             <h3 className="text-xs font-medium text-gray-400">id: {id}</h3>
-            <PermissionEditForm permission={permission} doctypes={doctypes} tenants={tenants} initialTags={existingTags}/>
+            <PermissionEditForm permission={permission} doctypes={doctypes} tenants={tenants} allTags={allTags}/>
         </div>
 
     );

@@ -2,6 +2,7 @@
 
 import { useOrTagStore, useAndTagStore, useNoTagStore } from '@/app/admin/permissions/[id]/edit/permission-edit-form';
 import { useState, useRef, useEffect } from 'react';
+import { useAccessTagStore, useTagStore, useUserTagStore } from './tag-store';
 // import { useTagStore } from './tag-store';
 
 export function TagInput({ id, value, onAdd, handleFormInputChange }: {
@@ -11,9 +12,12 @@ export function TagInput({ id, value, onAdd, handleFormInputChange }: {
     handleFormInputChange: (tags: string[]) => void
 }) {
     const { input, selectedTags, setInput, setSelectedTags, getSuggestions, removeTag } =
-        id === 'or_tags' ? useOrTagStore()
-            : id === 'and_tags' ? useAndTagStore()
-                : id === 'no_tags' ? useNoTagStore() : useOrTagStore();
+        id === 'user_tags' ? useUserTagStore()
+            : id === 'access_tags' ? useAccessTagStore()
+                : id === 'or_tags' ? useOrTagStore()
+                    : id === 'and_tags' ? useAndTagStore()
+                        : id === 'no_tags' ? useNoTagStore()
+                            : useTagStore();
     const [suggestions, setSuggestions] = useState<string[]>([]);
     const inputRef = useRef<HTMLInputElement>(null);
 
