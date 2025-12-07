@@ -8,6 +8,7 @@ import { MessageBox } from "../lib/definitions";
 interface IInitialState {
   messageBox: MessageBox;
   isDocumentChanged: boolean;
+  allTags: string[];
 }
 
 interface IActions {
@@ -17,6 +18,8 @@ interface IActions {
   setIsOKButtonPressed: (isOKButtonPressed: boolean) => void;
   setIsCancelButtonPressed: (isCancelButtonPressed: boolean) => void;
   setIsShowMessageBoxCancel: (isShowMessageBoxCancel: boolean) => void;
+  setAllTags: (tags: string[]) => void;
+  addAllTags: (newTags: string[]) => void;
 }
 
 interface IDocumentState extends IInitialState, IActions {}
@@ -30,6 +33,7 @@ const initialState = {
     isShowMessageBoxCancel: false,
   },
   isDocumentChanged: false,
+  allTags: [],
 };
 
 const messageBoxStore: StateCreator<
@@ -42,27 +46,47 @@ const messageBoxStore: StateCreator<
 > = (set) => ({
   ...initialState,
   setIsMessageBoxOpen: (isMessageBoxOpen) =>
-    set((state) => ({
-      messageBox: { ...state.messageBox, isMessageBoxOpen },
-    }), false, "setIsMessageBoxOpen"),
+    set(
+      (state) => ({
+        messageBox: { ...state.messageBox, isMessageBoxOpen },
+      }),
+      false,
+      "setIsMessageBoxOpen"
+    ),
   setMessageBoxText: (messageBoxText) =>
-    set((state) => ({
-      messageBox: { ...state.messageBox, messageBoxText },
-    }), false, "setMessageBoxText"),
+    set(
+      (state) => ({
+        messageBox: { ...state.messageBox, messageBoxText },
+      }),
+      false,
+      "setMessageBoxText"
+    ),
   setIsOKButtonPressed: (isOKButtonPressed) =>
-    set((state) => ({
-      messageBox: { ...state.messageBox, isOKButtonPressed },
-    }), false, "setIsOKButtonPressed"),
+    set(
+      (state) => ({
+        messageBox: { ...state.messageBox, isOKButtonPressed },
+      }),
+      false,
+      "setIsOKButtonPressed"
+    ),
 
   setIsCancelButtonPressed: (isCancelButtonPressed) =>
-    set((state) => ({
-      messageBox: { ...state.messageBox, isCancelButtonPressed },
-    }), false, "setIsCancelButtonPressed"),
+    set(
+      (state) => ({
+        messageBox: { ...state.messageBox, isCancelButtonPressed },
+      }),
+      false,
+      "setIsCancelButtonPressed"
+    ),
 
   setIsShowMessageBoxCancel: (isShowMessageBoxCancel) =>
-    set((state) => ({
-      messageBox: { ...state.messageBox, isShowMessageBoxCancel },
-    }), false, "setIsShowMessageBoxCancel"),
+    set(
+      (state) => ({
+        messageBox: { ...state.messageBox, isShowMessageBoxCancel },
+      }),
+      false,
+      "setIsShowMessageBoxCancel"
+    ),
   setIsDocumentChanged: (isDocumentChanged: boolean) => {
     set(
       { isDocumentChanged: isDocumentChanged },
@@ -70,9 +94,17 @@ const messageBoxStore: StateCreator<
       "setIsDocumentChanged"
     );
   },
+  setAllTags: (tags) => {set({ allTags: tags }), false, "setAllTags"},
+  // addAllTags: (newTags) => set((state) => ({ allTags: [...state.allTags, ...newTags] }), false, "addAllTags"),
+  addAllTags: (newTags: string[]) =>
+  set((state) => ({
+    allTags: Array.from(new Set([...state.allTags, ...newTags])).sort((a, b) =>
+      a.localeCompare(b, undefined, { sensitivity: 'base' })
+    ),
+  }), false, "addAllTags"),
 });
 
-const useDocumentStore = create<IDocumentState>()(
+export const useDocumentStore = create<IDocumentState>()(
   immer(
     devtools(
       persist(messageBoxStore, {
@@ -82,7 +114,7 @@ const useDocumentStore = create<IDocumentState>()(
           messageBox: state.messageBox,
           isDocumentChanged: state.isDocumentChanged,
         }),
-      },),
+      }),
       { name: "Document" }
     )
   )
@@ -93,7 +125,6 @@ export const useMessageBox = () =>
 export const useIsDocumentChanged = () =>
   useDocumentStore((state) => state.isDocumentChanged);
 
-
 export const setIsMessageBoxOpen = (isMessageBoxOpen: boolean) =>
   useDocumentStore.getState().setIsMessageBoxOpen(isMessageBoxOpen);
 export const setMessageBoxText = (messageBoxText: string) =>
@@ -103,8 +134,6 @@ export const setIsOKButtonPressed = (isOKButtonPressed: boolean) =>
 export const setIsCancelButtonPressed = (isCancelButtonPressed: boolean) =>
   useDocumentStore.getState().setIsCancelButtonPressed(isCancelButtonPressed);
 export const setIsShowMessageBoxCancel = (isShowMessageBoxCancel: boolean) =>
-  useDocumentStore
-    .getState()
-    .setIsShowMessageBoxCancel(isShowMessageBoxCancel);
+  useDocumentStore.getState().setIsShowMessageBoxCancel(isShowMessageBoxCancel);
 export const setIsDocumentChanged = (isDocumentChanged: boolean) =>
   useDocumentStore.getState().setIsDocumentChanged(isDocumentChanged);

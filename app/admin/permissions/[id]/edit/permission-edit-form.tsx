@@ -9,7 +9,7 @@ import { lusitana } from "@/app/ui/fonts";
 import MessageBoxOKCancel from "@/app/lib/message-box-ok-cancel";
 import {
   setIsCancelButtonPressed, setIsDocumentChanged, setIsMessageBoxOpen,
-  setIsOKButtonPressed, setIsShowMessageBoxCancel, setMessageBoxText, useIsDocumentChanged,
+  setIsOKButtonPressed, setIsShowMessageBoxCancel, setMessageBoxText, useDocumentStore, useIsDocumentChanged,
   useMessageBox
 } from "@/app/store/useDocumentStore";
 import { updatePermission } from "../../lib/permissios-actions";
@@ -36,9 +36,7 @@ export default function PermissionEditForm(props: IPermissionEditFormProps) {
   const roles = useRoles().filter((role) => role.tenant_id === permission.tenant_id);
 
   // const { setAllTags, addTag } = useOrTagStore();
-  const setAllOrTags = useOrTagStore().setAllTags;
-  const setAllAndTags = useAndTagStore().setAllTags;
-  const setAllNoTags = useNoTagStore().setAllTags;
+
   const addOrTag = useOrTagStore().addTag;
   const addAndTag = useAndTagStore().addTag;
   const addNoTag = useNoTagStore().addTag;
@@ -123,9 +121,12 @@ export default function PermissionEditForm(props: IPermissionEditFormProps) {
     }
     try {
       await upsertTags(permission.or_tags, permission.tenant_id);
+      useDocumentStore.getState().addAllTags(permission.or_tags);
       await upsertTags(permission.and_tags, permission.tenant_id);
+      useDocumentStore.getState().addAllTags(permission.and_tags);
       await upsertTags(permission.no_tags, permission.tenant_id);
-      
+      useDocumentStore.getState().addAllTags(permission.no_tags);
+
       await updatePermission(permission);
       setIsDocumentChanged(false);
       setMessageBoxText('Документ сохранен.');
@@ -136,11 +137,8 @@ export default function PermissionEditForm(props: IPermissionEditFormProps) {
     setIsMessageBoxOpen(true);
   };
   useEffect(() => {
-    setAllOrTags(props.allTags);
-    setAllNoTags(props.allTags);
-    setAllAndTags(props.allTags);
-  }, [props.allTags, setAllOrTags, setAllAndTags, setAllNoTags]);
-
+    useDocumentStore.getState().setAllTags(props.allTags);
+  }, [props.allTags]);
   useEffect(() => {
     setIsDocumentChanged(false);
 

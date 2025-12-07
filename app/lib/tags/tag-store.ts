@@ -1,12 +1,13 @@
 // Хранилище для автозаполнения и выбранных тегов
+import { useDocumentStore } from "@/app/store/useDocumentStore";
 import { create } from "zustand";
 
 type TagStore = {
-  allTags: string[];
+  // allTags: string[];
   selectedTags: string[];
   input: string;
 
-  setAllTags: (tags: string[]) => void;
+  // setAllTags: (tags: string[]) => void;
   addTag: (tag: string) => void;
   removeTag: (tag: string) => void;
   setInput: (input: string) => void;
@@ -15,11 +16,11 @@ type TagStore = {
 };
 
 export const createTagStore = () => create<TagStore>((set, get) => ({
-  allTags: [],
+  // allTags: [],
   selectedTags: [],
   input: "",
 
-  setAllTags: (tags) => set({ allTags: tags }),
+  // setAllTags: (tags) => set({ allTags: tags }),
   setInput: (input) => set({ input }),
 
   addTag: (tag) => {
@@ -42,7 +43,9 @@ export const createTagStore = () => create<TagStore>((set, get) => ({
   },
 
   getSuggestions: () => {
-    const { allTags, selectedTags, input } = get();
+    const allTags = useDocumentStore.getState().allTags; // добавлено
+    // const { allTags, selectedTags, input } = get();
+    const { selectedTags, input } = get(); // изменено
     if (!input) return [];
     const filtered = allTags
       .filter((tag) => !selectedTags.includes(tag))

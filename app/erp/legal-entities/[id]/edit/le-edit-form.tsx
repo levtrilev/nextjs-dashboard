@@ -13,7 +13,7 @@ import BtnSectionsRef from "@/app/admin/sections/lib/btn-sections-ref";
 import MessageBoxOKCancel from "@/app/lib/message-box-ok-cancel";
 import {
   setIsCancelButtonPressed, setIsDocumentChanged, setIsMessageBoxOpen, setIsOKButtonPressed,
-  setIsShowMessageBoxCancel, setMessageBoxText, useIsDocumentChanged, useMessageBox
+  setIsShowMessageBoxCancel, setMessageBoxText, useDocumentStore, useIsDocumentChanged, useMessageBox
 } from "@/app/store/useDocumentStore";
 import { useRouter } from "next/navigation";
 import { useAccessTagStore, useUserTagStore } from "@/app/lib/tags/tag-store";
@@ -34,8 +34,8 @@ export default function LegalEntitiesEditForm(props: IEditFormProps) {
   const isDocumentChanged = useIsDocumentChanged();
   const msgBox = useMessageBox();
   const router = useRouter();
-  const setAllUserTags = useUserTagStore().setAllTags;
-  const setAllAccessTags = useAccessTagStore().setAllTags;
+  // const setAllUserTags = useUserTagStore().setAllTags;
+  // const setAllAccessTags = useAccessTagStore().setAllTags;
   const addUserTag = useUserTagStore().addTag;
   const addAccessTag = useAccessTagStore().addTag;
   const docChanged = () => {
@@ -73,7 +73,9 @@ export default function LegalEntitiesEditForm(props: IEditFormProps) {
     e.preventDefault();
     try {
       await upsertTags(legalEntity.user_tags, props.tenant_id);
+      useDocumentStore.getState().addAllTags(legalEntity.user_tags);
       await upsertTags(legalEntity.access_tags, props.tenant_id);
+      useDocumentStore.getState().addAllTags(legalEntity.access_tags);
 
       await updateLegalEntity(legalEntity);
       setIsDocumentChanged(false);
@@ -109,9 +111,10 @@ export default function LegalEntitiesEditForm(props: IEditFormProps) {
     setIsShowMessageBoxCancel(true);
   }, [msgBox.isOKButtonPressed, router]);
   useEffect(() => {
-    setAllUserTags(props.allTags);
-    setAllAccessTags(props.allTags);
-  }, [props.allTags, setAllUserTags, setAllAccessTags]);
+    useDocumentStore.getState().setAllTags(props.allTags);
+    // setAllUserTags(props.allTags);
+    // setAllAccessTags(props.allTags);
+  }, [props.allTags]);
   const handleChangeIsCustomer = (event: any) => {
     setLegalEntity((prev) => ({
       ...prev,

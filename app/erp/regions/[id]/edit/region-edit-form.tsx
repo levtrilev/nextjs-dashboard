@@ -9,7 +9,7 @@ import BtnSectionsRef from "@/app/admin/sections/lib/btn-sections-ref";
 import MessageBoxOKCancel from "@/app/lib/message-box-ok-cancel";
 import {
   setIsCancelButtonPressed, setIsDocumentChanged, setIsMessageBoxOpen, setIsOKButtonPressed,
-  setIsShowMessageBoxCancel, setMessageBoxText, useIsDocumentChanged, useMessageBox
+  setIsShowMessageBoxCancel, setMessageBoxText, useDocumentStore, useIsDocumentChanged, useMessageBox
 } from "@/app/store/useDocumentStore";
 import { useRouter } from "next/navigation";
 import { TagInput } from "@/app/lib/tags/tag-input";
@@ -32,8 +32,9 @@ export default function EditForm(props: IEditFormProps) {
   const isDocumentChanged = useIsDocumentChanged();
   const msgBox = useMessageBox();
   const router = useRouter();
-  const setAllUserTags = useUserTagStore().setAllTags;
-  const setAllAccessTags = useAccessTagStore().setAllTags;
+
+  // const setAllUserTags = useUserTagStore().setAllTags;
+  // const setAllAccessTags = useAccessTagStore().setAllTags;
   const addUserTag = useUserTagStore().addTag;
   const addAccessTag = useAccessTagStore().addTag;
   const docChanged = () => {
@@ -71,7 +72,9 @@ export default function EditForm(props: IEditFormProps) {
     e.preventDefault();
     try {
       await upsertTags(region.user_tags, props.tenant_id);
+      useDocumentStore.getState().addAllTags(region.user_tags);
       await upsertTags(region.access_tags, props.tenant_id);
+      useDocumentStore.getState().addAllTags(region.access_tags);
 
       await updateRegion(region);
       setIsDocumentChanged(false);
@@ -106,10 +109,14 @@ export default function EditForm(props: IEditFormProps) {
     setIsShowMessageBoxCancel(true);
   }, [msgBox.isOKButtonPressed, router]);
 
+  // useEffect(() => {
+  //   setAllUserTags(allTags);
+  //   setAllAccessTags(allTags);
+  // }, [allTags, setAllUserTags, setAllAccessTags]);
+
   useEffect(() => {
-    setAllUserTags(props.allTags);
-    setAllAccessTags(props.allTags);
-  }, [props.allTags, setAllUserTags, setAllAccessTags]);
+    useDocumentStore.getState().setAllTags(props.allTags);
+  }, [props.allTags]);
 
   const handleSelectSection = (new_section_id: string, new_section_name: string) => {
     setRegion((prev) => ({
