@@ -25,8 +25,8 @@ async function Page(props: { params: Promise<{ id: string }> }) {
     const allTags = await fetchAllTags(permission.tenant_id);
 
     const doctypes: { table_name: string }[] = await fetchDoctypes();
-    console.log(" tenant: " + permission.tenant_name);
-    console.log(" alltags: " + JSON.stringify(allTags));
+    // console.log(" tenant: " + permission.tenant_name);
+    // console.log(" alltags: " + JSON.stringify(allTags));
     const tenants = isSuperadmin ? await fetchTenantsSuperadmin() : await fetchTenantsAdmin(permission.tenant_id);
     return (
         <div className="w-full">

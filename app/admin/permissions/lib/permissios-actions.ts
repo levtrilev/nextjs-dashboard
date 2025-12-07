@@ -123,7 +123,6 @@ export async function deletePermission(id: string) {
 
 //updatePermission
 export async function updatePermission(permission: Permission) {
-  console.log("permission.or_tags:", String(permission.or_tags));
   try {
     await pool.query(
       `UPDATE permissions
