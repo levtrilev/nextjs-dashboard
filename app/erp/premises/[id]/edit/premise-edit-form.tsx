@@ -11,14 +11,19 @@ import { z } from "zod";
 import MessageBoxOKCancel from "@/app/lib/message-box-ok-cancel";
 import {
   setIsCancelButtonPressed, setIsDocumentChanged, setIsMessageBoxOpen, setIsOKButtonPressed,
-  setIsShowMessageBoxCancel, setMessageBoxText, useIsDocumentChanged, useMessageBox
+  setIsShowMessageBoxCancel, setMessageBoxText, useDocumentStore, useIsDocumentChanged, useMessageBox
 } from "@/app/store/useDocumentStore";
+import { TagInput } from "@/app/lib/tags/tag-input";
+import { lusitana } from "@/app/ui/fonts";
+import { useAccessTagStore, useUserTagStore } from "@/app/lib/tags/tag-store";
 
 interface IEditFormProps {
   premise: PremiseForm,
   sections: SectionForm[],
   regions: RegionForm[],
   legalEntities: LegalEntity[],
+  allTags: string[], 
+  tenant_id: string,
 }
 
 const PremiseFormSchemaFull = z.object({
@@ -78,12 +83,32 @@ const PremiseFormSchemaFull = z.object({
   username: z.string().optional(),
   date_created: z.date().optional(),
   timestamptz: z.string().optional(),
+  user_tags: z.array(z.string()),
+  access_tags: z.array(z.string()),
 });
 const PremiseFormSchema = PremiseFormSchemaFull.omit({ id: true, address_alt: true, timestamptz: true, date_created: true, username: true });
 type FormData = z.infer<typeof PremiseFormSchemaFull>;
 
 
 export default function PremiseEditForm(props: IEditFormProps) {
+    const addUserTag = useUserTagStore().addTag;
+    const addAccessTag = useAccessTagStore().addTag;
+      const handleChangeUserTags = (event: any) => {
+    const currentTags = useUserTagStore.getState().selectedTags
+    setFormData((prev) => ({
+      ...prev,
+      user_tags: currentTags,
+    }));
+    docChanged();
+  };
+  const handleChangeAccessTags = (event: any) => {
+    const currentTags = useAccessTagStore.getState().selectedTags
+    setFormData((prev) => ({
+      ...prev,
+      access_tags: currentTags,
+    }));
+    docChanged();
+  };
   //#region msgBox
   //================================================================
   const isDocumentChanged = useIsDocumentChanged();
@@ -137,7 +162,9 @@ export default function PremiseEditForm(props: IEditFormProps) {
   }, [msgBox.isOKButtonPressed]);
   //================================================================
   //#endregion
-
+  useEffect(() => {
+    useDocumentStore.getState().setAllTags(props.allTags);
+  }, [props.allTags]);
   const [showErrors, setShowErrors] = useState(false);
   const [formData, setFormData] = useState<FormData>(props.premise);
   // const reset = setFormData(props.premise);
@@ -571,6 +598,24 @@ export default function PremiseEditForm(props: IEditFormProps) {
           </div>
         </div>
       </div>
+            {/* user_tags */}
+            <div className="flex max-w-[1150] mt-4">
+              <label
+                htmlFor="user_tags"
+                className={`${lusitana.className} w-[130px] font-medium flex items-center p-2 text-gray-500`}>
+                Тэги:
+              </label>
+              <TagInput id="user_tags" value={formData.user_tags} onAdd={addUserTag} handleFormInputChange={handleChangeUserTags} />
+            </div>
+            {/* access_tags */}
+            <div className="flex max-w-[1150] mt-4">
+              <label
+                htmlFor="access_tags"
+                className={`${lusitana.className} w-[130px] font-medium flex items-center p-2 text-gray-500`}>
+                Тэги доступа:
+              </label>
+              <TagInput id="access_tags" value={formData.access_tags} onAdd={addAccessTag} handleFormInputChange={handleChangeAccessTags} />
+            </div>
       {/* button area */}
       <div className="flex justify-between mt-4 mr-4">
         <div className="flex w-full md:w-1/2">

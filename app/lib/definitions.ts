@@ -106,6 +106,8 @@ export type Premise = {
   username?: string;
   timestamptz?: string;
   date_created?: Date;
+  user_tags: string[];
+  access_tags: string[];
 };
 export type PremiseForm = {
   id: string;
@@ -128,6 +130,8 @@ export type PremiseForm = {
   owner_name: string;
   operator_name: string;
   section_name: string;
+  user_tags: string[];
+  access_tags: string[];
 };
 export type Role = {
   id: string;
