@@ -4,6 +4,15 @@
 import { DateTime } from "next-auth/providers/kakao";
 
 export type Status = "draft" | "active" | "deleted";
+
+export type DocUserPermissions = {
+  full_access: boolean;
+  editor: boolean;
+  author: boolean;
+  can_delete: boolean;
+  reader: boolean;
+  access_by_tags: boolean;
+};
 export type Permission = {
   id: string;
   role_id: string;
@@ -104,10 +113,12 @@ export type Premise = {
   operator_id: string;
   section_id: string;
   username?: string;
+  author_id: string;
+  editor_id: string;
   timestamptz?: string;
   date_created?: Date;
-  user_tags: string[]|null;
-  access_tags: string[]|null;
+  user_tags: string[] | null;
+  access_tags: string[] | null;
 };
 export type PremiseForm = {
   id: string;
@@ -125,13 +136,15 @@ export type PremiseForm = {
   operator_id: string;
   section_id: string;
   username?: string;
+  author_id: string;
+  editor_id: string;
   date_created?: Date;
   region_name: string;
   owner_name: string;
   operator_name: string;
   section_name: string;
-  user_tags: string[]|null;
-  access_tags: string[]|null;
+  user_tags: string[] | null;
+  access_tags: string[] | null;
 };
 export type Role = {
   id: string;

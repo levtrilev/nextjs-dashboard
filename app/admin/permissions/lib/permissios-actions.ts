@@ -1,10 +1,79 @@
 // Roles actions.ts
 
 "use server";
-import { Permission } from "@/app/lib/definitions";
+import { DocUserPermissions, Permission } from "@/app/lib/definitions";
 import pool from "@/db"; // Импорт пула подключений
 import { revalidatePath } from "next/cache";
 // import { redirect } from "next/navigation";
+
+export async function fetchDocUserPermissions(
+  user_id: string,
+  doctype: string
+) {
+  try {
+    const data = await pool.query<DocUserPermissions>(
+      `
+      SELECT 
+        MAX(p.full_access::INT)::BOOLEAN AS full_access,
+        MAX(p.editor::INT)::BOOLEAN AS editor,
+        MAX(p.author::INT)::BOOLEAN AS author,
+        MAX(p.reader::INT)::BOOLEAN AS reader,
+        MAX(p.can_delete::INT)::BOOLEAN AS can_delete,
+        MAX(p.access_by_tags::INT)::BOOLEAN AS access_by_tags
+      FROM users u
+        LEFT JOIN roles r ON r.id = ANY(u.role_ids)
+        LEFT JOIN permissions p ON p.role_id = r.id
+      WHERE u.id = $1::uuid AND p.doctype = $2
+        GROUP BY u.id
+      `,
+      [user_id, doctype]
+    );
+    // SELECT u.id, u.email, r.name, p.doctype, p.full_access, p.editor, p.author,
+    // p.reader, p.can_delete, p.access_by_tags
+    // FROM users u
+    // LEFT JOIN roles r ON r.id = ANY(u.role_ids)
+    // LEFT JOIN permissions p ON p.role_id = r.id
+    // WHERE u.id = '4b17e04c-f186-4499-b0ea-4c7b5ee50072'::uuid AND p.doctype = 'posts'
+    // GROUP BY u.id
+    // ORDER BY u.id ASC;
+
+    // SELECT
+    //   MAX(p.full_access::INT)::BOOLEAN AS full_access,
+    //   MAX(p.editor::INT)::BOOLEAN AS editor,
+    //   MAX(p.author::INT)::BOOLEAN AS author,
+    //   MAX(p.reader::INT)::BOOLEAN AS reader,
+    //   MAX(p.can_delete::INT)::BOOLEAN AS can_delete,
+    //   MAX(p.access_by_tags::INT)::BOOLEAN AS access_by_tags
+    // FROM users u
+    // LEFT JOIN roles r ON r.id = ANY(u.role_ids)
+    // LEFT JOIN permissions p ON p.role_id = r.id
+    // WHERE u.id = '4b17e04c-f186-4499-b0ea-4c7b5ee50072'::uuid AND p.doctype = 'posts'
+    // GROUP BY u.id
+    // ORDER BY u.id ASC;
+    if (data.rows.length > 1) {
+      console.log(
+        "Multiple permissions found for user " +
+          user_id +
+          " and doctype " +
+          doctype
+      );
+    }
+    if (data.rows.length === 0 || data.rows.length > 1) {
+      return {
+        full_access: false,
+        editor: false,
+        author: false,
+        reader: false,
+        can_delete: false,
+        access_by_tags: false,
+      };
+    }
+    return data.rows[0];
+  } catch (err) {
+    console.error("Database Error:", err);
+    throw new Error("Failed to fetch permissions: " + err);
+  }
+}
 
 //#region fetchDoctypes
 

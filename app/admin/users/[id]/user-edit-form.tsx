@@ -249,7 +249,7 @@ export default function UserEditForm(props: IInputFormProps) {
               onClick={handleSaveClick}
               className="bg-blue-400 text-white w-full rounded-md border p-2 hover:bg-blue-100 hover:text-gray-500"
             >
-              Save
+              Сохранить
             </button>
           </div>
           <div className="w-1/2">
@@ -258,7 +258,7 @@ export default function UserEditForm(props: IInputFormProps) {
               className="bg-blue-400 text-white w-full rounded-md border p-2
                  hover:bg-blue-100 hover:text-gray-500 cursor-pointer"
             >
-              Back to list
+              Закрыть
             </button>
           </div>
         </div>

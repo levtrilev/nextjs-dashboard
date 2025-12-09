@@ -1,7 +1,7 @@
 // Premise EditForm
 'use client';
 import { useEffect, useState } from "react";
-import { LegalEntity, PremiseForm, RegionForm, SectionForm } from "@/app/lib/definitions";
+import { DocUserPermissions, LegalEntity, PremiseForm, RegionForm, SectionForm } from "@/app/lib/definitions";
 import { createPremise, updatePremise } from "../../lib/premises-actions";
 import BtnSectionsRef from "@/app/admin/sections/lib/btn-sections-ref";
 import BtnRegionsRef from "@/app/erp/regions/lib/btn-regions-ref";
@@ -20,6 +20,9 @@ import { formatDateForInput } from "@/app/lib/common-utils";
 
 interface IEditFormProps {
   premise: PremiseForm,
+  userPermissions: DocUserPermissions,
+  user_id: string,
+  readonly: boolean,
   sections: SectionForm[],
   regions: RegionForm[],
   legalEntities: LegalEntity[],
@@ -85,6 +88,8 @@ const PremiseFormSchemaFull = z.object({
   timestamptz: z.string().optional(),
   user_tags: z.array(z.string()).nullable(),
   access_tags: z.array(z.string()).nullable(),
+  author_id: z.string(), // z.string().uuid(),
+  editor_id: z.string(), // z.string().uuid(),
 });
 const PremiseFormSchema = PremiseFormSchemaFull.omit({ id: true, address_alt: true, timestamptz: true, date_created: true, username: true });
 type FormData = z.infer<typeof PremiseFormSchemaFull>;
@@ -113,6 +118,11 @@ export default function PremiseEditForm(props: IEditFormProps) {
     setIsMessageBoxOpen(true);
   }
   useEffect(() => {
+    setFormData((prev) => ({
+      ...prev,
+      author_id: props.user_id,
+      editor_id: props.user_id,
+    }));
     return () => {
       // Сброс при уходе со страницы
       setIsDocumentChanged(false);
@@ -174,6 +184,7 @@ export default function PremiseEditForm(props: IEditFormProps) {
     if (errors) {
       setShowErrors(true);
       console.log("ошибки есть: " + JSON.stringify(errors));
+      console.log(`author_id: ${formData.author_id}, editor_id: ${formData.editor_id}`);
       return;
     }
     if (formData.user_tags) {
@@ -277,6 +288,7 @@ export default function PremiseEditForm(props: IEditFormProps) {
                 name="name"
                 autoComplete="off"
                 className="w-7/8 control rounded-md border border-gray-200 p-2"
+                disabled={props.readonly}
                 value={formData.name}
                 onChange={(e) => { setFormData((prev) => ({ ...prev, name: e.target.value, })); docChanged(); }}
               />
@@ -305,6 +317,7 @@ export default function PremiseEditForm(props: IEditFormProps) {
                 name="type"
                 autoComplete="off"
                 className="w-5/8 control rounded-md border border-gray-200 p-2"
+                disabled={props.readonly}
                 value={formData.type}
                 onChange={(e) => { setFormData((prev) => ({ ...prev, type: e.target.value, })); docChanged(); }}
               />
@@ -331,6 +344,7 @@ export default function PremiseEditForm(props: IEditFormProps) {
                 type="text"
                 name="description"
                 className="w-13/16 control rounded-md border border-gray-200 p-2"
+                disabled={props.readonly}
                 value={formData.description}
                 onChange={(e) => { setFormData((prev) => ({ ...prev, description: e.target.value, })); docChanged(); }}
               />
@@ -357,6 +371,7 @@ export default function PremiseEditForm(props: IEditFormProps) {
                 type="text"
                 name="cadastral_number"
                 className="w-10/16 control rounded-md border border-gray-200 p-2"
+                disabled={props.readonly}
                 value={formData.cadastral_number}
                 onChange={(e) => { setFormData((prev) => ({ ...prev, cadastral_number: e.target.value, })); docChanged(); }}
               />
@@ -383,15 +398,16 @@ export default function PremiseEditForm(props: IEditFormProps) {
                 type="text"
                 name="operator_name"
                 className="w-13/16 pointer-events-none control rounded-md border border-gray-200 p-2"
+                disabled={props.readonly}
                 value={formData.operator_name}
                 readOnly
                 onChange={(e) => { setFormData((prev) => ({ ...prev, operator_name: e.target.value, })); docChanged(); }}
               />
-              <BtnLegalEntitiesRef
+              {!props.readonly && <BtnLegalEntitiesRef
                 legalEntities={props.legalEntities}
                 handleSelectLE={handleSelectOperator}
                 elementIdPrefix="operator_name_"
-              />
+              />}
             </div>
             <div id="operator_name-error" aria-live="polite" aria-atomic="true">
               {errors?.operator_name &&
@@ -415,15 +431,16 @@ export default function PremiseEditForm(props: IEditFormProps) {
                 type="text"
                 name="owner_name"
                 className="w-13/16 pointer-events-none control rounded-md border border-gray-200 p-2"
+                disabled={props.readonly}
                 value={formData.owner_name}
                 readOnly
                 onChange={(e) => { setFormData((prev) => ({ ...prev, owner_name: e.target.value, })); docChanged(); }}
               />
-              <BtnLegalEntitiesRef
+              {!props.readonly && <BtnLegalEntitiesRef
                 legalEntities={props.legalEntities}
                 handleSelectLE={handleSelectOwner}
                 elementIdPrefix="owner_name_"
-              />
+              />}
             </div>
             <div id="owner_name-error" aria-live="polite" aria-atomic="true">
               {errors?.owner_name &&
@@ -450,6 +467,7 @@ export default function PremiseEditForm(props: IEditFormProps) {
                 type="number"
                 name="square"
                 className="w-10/16 control rounded-md border border-gray-200 p-2"
+                disabled={props.readonly}
                 value={formData.square.toString()}
                 onChange={(e) => { setFormData((prev) => ({ ...prev, square: parseFloat(e.target.value), })); docChanged(); }}
               />
@@ -483,13 +501,14 @@ export default function PremiseEditForm(props: IEditFormProps) {
                 name="region_name"
                 readOnly
                 className="w-13/16 pointer-events-none control rounded-md border border-gray-200 p-2"
+                disabled={props.readonly}
                 value={formData.region_name}
                 onChange={(e) => { setFormData((prev) => ({ ...prev, region_name: e.target.value, })); docChanged(); }}
               />
-              <BtnRegionsRef
+              {!props.readonly && <BtnRegionsRef
                 regions={props.regions}
                 handleSelectRegion={handleSelectRegion}
-              />
+              />}
             </div>
             <div id="region_name-error" aria-live="polite" aria-atomic="true">
               {errors?.region_name &&
@@ -514,6 +533,7 @@ export default function PremiseEditForm(props: IEditFormProps) {
                 name="address"
                 autoComplete="off"
                 className="w-13/16 control rounded-md border border-gray-200 p-2"
+                disabled={props.readonly}
                 value={formData.address}
                 onChange={(e) => { setFormData((prev) => ({ ...prev, address: e.target.value, })); docChanged(); }}
               />
@@ -540,6 +560,7 @@ export default function PremiseEditForm(props: IEditFormProps) {
                 type="text"
                 name="status"
                 className="w-13/16 control rounded-md border border-gray-200 p-2"
+                disabled={props.readonly}
                 value={formData.status}
                 onChange={(e) => { setFormData((prev) => ({ ...prev, status: e.target.value, })); docChanged(); }}
               />
@@ -566,6 +587,7 @@ export default function PremiseEditForm(props: IEditFormProps) {
                 type="date"
                 name="status_until"
                 className="w-10/16 control rounded-md border border-gray-200 p-2"
+                disabled={props.readonly}
                 value={formatDateForInput(formData.status_until)} // Преобразуем дату в нужный формат
                 onChange={(e) => {
                   // console.log('New status_until:', formData.status_until);
@@ -596,11 +618,12 @@ export default function PremiseEditForm(props: IEditFormProps) {
                 type="text"
                 name="section_name"
                 className="w-13/16 pointer-events-none control rounded-md border border-gray-200 p-2"
+                disabled={props.readonly}
                 value={formData.section_name}
                 readOnly
                 onChange={(e) => { setFormData((prev) => ({ ...prev, section_name: e.target.value, })); docChanged(); }}
               />
-              <BtnSectionsRef sections={props.sections} handleSelectSection={handleSelectSection} />
+              {!props.readonly && <BtnSectionsRef sections={props.sections} handleSelectSection={handleSelectSection} />}
             </div>
             <div id="section_name-error" aria-live="polite" aria-atomic="true">
               {errors?.section_name &&
@@ -636,8 +659,13 @@ export default function PremiseEditForm(props: IEditFormProps) {
         <div className="flex w-full md:w-1/2">
           <div className="w-full md:w-1/2">
             <button
-              className="bg-blue-400 text-white w-full rounded-md border p-2 
-              hover:bg-blue-100 hover:text-gray-500 cursor-pointer"
+              disabled={props.readonly}
+              // className="bg-blue-400 text-white w-full rounded-md border p-2 
+              // hover:bg-blue-100 hover:text-gray-500 cursor-pointer"
+              className={`w-full rounded-md border p-2 ${props.readonly
+                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                : 'bg-blue-400 text-white hover:bg-blue-100 hover:text-gray-500 cursor-pointer'
+                }`}
               type="submit">
               Сохранить
             </button>

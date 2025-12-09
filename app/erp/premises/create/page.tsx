@@ -7,16 +7,19 @@ import { lusitana } from "@/app/ui/fonts";
 import { fetchSectionsForm } from "@/app/admin/sections/lib/sections-actions";
 import { fetchRegionsForm } from "@/app/erp/regions/lib/region-actions";
 import { fetchLegalEntities } from "@/app/erp/legal-entities/lib/le-actions";
-import { auth } from "@/auth";
+import { auth, getUser } from "@/auth";
 import { getCurrentSections } from "@/app/lib/common-actions";
 import Breadcrumbs from '@/app/ui/invoices/breadcrumbs';
 import { DateTime } from "next-auth/providers/kakao";
 import { formatDateForInput } from "@/app/lib/common-utils";
+import { fetchDocUserPermissions } from "@/app/admin/permissions/lib/permissios-actions";
 
 export default async function Page() {
   const session = await auth();
   const email = session ? (session.user ? session.user.email : "") : "";
+  const user = await getUser(email as string);
   const current_sections = await getCurrentSections(email as string);
+  const userPermissions = await fetchDocUserPermissions(session?.user?.id as string, 'premises');
   // const formatDateForInput = (date: Date | string): string => {
   //   if (!date) return ''; // Если дата пустая, возвращаем пустую строку
   //   const d = new Date(date);
@@ -40,7 +43,9 @@ export default async function Page() {
     owner_id: "",
     operator_id: "",
     section_id: "",
-    username: "",
+    username: user?.name as string,
+    author_id: user?.id as string,
+    editor_id: "00000000-0000-0000-0000-000000000000",
     // timestamptz: new Date().toISOString(),
     date_created: new Date(), //formatDateForInput(new Date()),
     section_name: "",
@@ -71,6 +76,9 @@ export default async function Page() {
       </div>
       <PremiseEditForm
         premise={premise}
+        userPermissions={userPermissions}
+        user_id={user?.id as string}
+        readonly={false}
         sections={sections}
         regions={regions}
         legalEntities={legalEntities}
