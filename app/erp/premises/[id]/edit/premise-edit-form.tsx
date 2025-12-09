@@ -1,5 +1,4 @@
 // Premise EditForm
-
 'use client';
 import { useEffect, useState } from "react";
 import { LegalEntity, PremiseForm, RegionForm, SectionForm } from "@/app/lib/definitions";
@@ -16,16 +15,17 @@ import {
 import { TagInput } from "@/app/lib/tags/tag-input";
 import { lusitana } from "@/app/ui/fonts";
 import { useAccessTagStore, useUserTagStore } from "@/app/lib/tags/tag-store";
+import { fetchAllTags, upsertTags } from "@/app/lib/tags/tags-actions";
+import { formatDateForInput } from "@/app/lib/common-utils";
 
 interface IEditFormProps {
   premise: PremiseForm,
   sections: SectionForm[],
   regions: RegionForm[],
   legalEntities: LegalEntity[],
-  allTags: string[], 
   tenant_id: string,
 }
-
+//#region zod schema
 const PremiseFormSchemaFull = z.object({
   id: z.string().uuid(),
   name: z.string().min(2, {
@@ -83,54 +83,29 @@ const PremiseFormSchemaFull = z.object({
   username: z.string().optional(),
   date_created: z.date().optional(),
   timestamptz: z.string().optional(),
-  user_tags: z.array(z.string()),
-  access_tags: z.array(z.string()),
+  user_tags: z.array(z.string()).nullable(),
+  access_tags: z.array(z.string()).nullable(),
 });
 const PremiseFormSchema = PremiseFormSchemaFull.omit({ id: true, address_alt: true, timestamptz: true, date_created: true, username: true });
 type FormData = z.infer<typeof PremiseFormSchemaFull>;
-
+//#endregion
 
 export default function PremiseEditForm(props: IEditFormProps) {
-    const addUserTag = useUserTagStore().addTag;
-    const addAccessTag = useAccessTagStore().addTag;
-      const handleChangeUserTags = (event: any) => {
-    const currentTags = useUserTagStore.getState().selectedTags
-    setFormData((prev) => ({
-      ...prev,
-      user_tags: currentTags,
-    }));
-    docChanged();
-  };
-  const handleChangeAccessTags = (event: any) => {
-    const currentTags = useAccessTagStore.getState().selectedTags
-    setFormData((prev) => ({
-      ...prev,
-      access_tags: currentTags,
-    }));
-    docChanged();
-  };
+  const addUserTag = useUserTagStore().addTag;
+  const addAccessTag = useAccessTagStore().addTag;
+  const docTenantId = useDocumentStore.getState().tenant_id;
+  const [showErrors, setShowErrors] = useState(false);
+  const [formData, setFormData] = useState<FormData>(props.premise);
+
   //#region msgBox
-  //================================================================
   const isDocumentChanged = useIsDocumentChanged();
   const msgBox = useMessageBox();
-  // const router = useRouter();
 
   const docChanged = () => {
     setIsDocumentChanged(true);
     setMessageBoxText('Документ изменен. Закрыть без сохранения?');
   };
 
-  const handleBackClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    if (isDocumentChanged && !msgBox.isOKButtonPressed) {
-      setIsShowMessageBoxCancel(true);
-      setIsMessageBoxOpen(true);
-    } else if (isDocumentChanged && msgBox.isOKButtonPressed) {
-    } else if (!isDocumentChanged) {
-      // router.push('/erp/premises/');
-      window.history.back();
-    }
-  };
   const showMsgSaved = () => {
     setIsDocumentChanged(false);
     setMessageBoxText('Документ сохранен.');
@@ -160,14 +135,25 @@ export default function PremiseEditForm(props: IEditFormProps) {
     setIsMessageBoxOpen(false);
     setIsShowMessageBoxCancel(true);
   }, [msgBox.isOKButtonPressed]);
-  //================================================================
   //#endregion
+
+  //#region tenant_id and tags  
   useEffect(() => {
-    useDocumentStore.getState().setAllTags(props.allTags);
-  }, [props.allTags]);
-  const [showErrors, setShowErrors] = useState(false);
-  const [formData, setFormData] = useState<FormData>(props.premise);
-  // const reset = setFormData(props.premise);
+    if (props.tenant_id) useDocumentStore.getState().setDocumentTenantId(props.tenant_id);
+  }, [props.tenant_id]);
+
+  useEffect(() => {
+    const fetchAndSetTags = async () => {
+      try {
+        const tags = await fetchAllTags(docTenantId);
+        useDocumentStore.getState().setAllTags(tags);
+      } catch (error) {
+        console.error('Failed to fetch all tags: ', error);
+      }
+    };
+    if (docTenantId) fetchAndSetTags();
+  }, [docTenantId]);
+  //#endregion
 
   const validate = () => {
     const res = PremiseFormSchema.safeParse({
@@ -180,13 +166,23 @@ export default function PremiseEditForm(props: IEditFormProps) {
     }
     return res.error.format();
   }
+
+  //#region handles
   const handleSubmit = async (e: React.MouseEvent<HTMLFormElement>) => {
     e.preventDefault();
     const errors = validate();
     if (errors) {
       setShowErrors(true);
-      // console.log("ошибки есть: " + JSON.stringify(errors));
+      console.log("ошибки есть: " + JSON.stringify(errors));
       return;
+    }
+    if (formData.user_tags) {
+      await upsertTags(formData.user_tags, docTenantId);
+      useDocumentStore.getState().addAllTags(formData.user_tags);
+    }
+    if (formData.access_tags) {
+      await upsertTags(formData.access_tags, docTenantId);
+      useDocumentStore.getState().addAllTags(formData.access_tags);
     }
     if (formData.id === "") {
       await createPremise(formData);
@@ -196,12 +192,24 @@ export default function PremiseEditForm(props: IEditFormProps) {
       showMsgSaved();
     }
   }
-  const handleSelectSection = (new_section_id: string, new_section_name: string) => {
+  const handleBackClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (isDocumentChanged && !msgBox.isOKButtonPressed) {
+      setIsShowMessageBoxCancel(true);
+      setIsMessageBoxOpen(true);
+    } else if (isDocumentChanged && msgBox.isOKButtonPressed) {
+    } else if (!isDocumentChanged) {
+      window.history.back();
+    }
+  };
+  const handleSelectSection = (new_section_id: string, new_section_name: string, new_section_tenant_id: string) => {
     setFormData((prev) => ({
       ...prev,
       section_id: new_section_id,
       section_name: new_section_name,
+      tenant_id: new_section_tenant_id,
     }));
+    useDocumentStore.getState().setDocumentTenantId(new_section_tenant_id);
     docChanged();
   };
   const handleSelectRegion = (new_region_id: string, new_region_name: string) => {
@@ -228,19 +236,26 @@ export default function PremiseEditForm(props: IEditFormProps) {
     }));
     docChanged();
   };
-
-  // Функция для преобразования даты в формат yyyy-MM-dd
-  const formatDateForInput = (date: Date | string): string => {
-    if (!date) return ''; // Если дата пустая, возвращаем пустую строку
-    const d = new Date(date);
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, '0'); // Месяцы начинаются с 0
-    const day = String(d.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
+  const handleChangeUserTags = (event: any) => {
+    const currentTags = useUserTagStore.getState().selectedTags;
+    setFormData((prev) => ({
+      ...prev,
+      user_tags: currentTags,
+    }));
+    docChanged();
   };
+  const handleChangeAccessTags = (event: any) => {
+    const currentTags = useAccessTagStore.getState().selectedTags;
+    setFormData((prev) => ({
+      ...prev,
+      access_tags: currentTags,
+    }));
+    docChanged();
+  };
+  //#endregion
 
   const errors = showErrors ? validate() : undefined;
-  // const errors = validate();
+  //#region render
   return (
     <form onSubmit={handleSubmit}>
       <div className="flex flex-col md:flex-row gap-4 w-full">
@@ -598,24 +613,24 @@ export default function PremiseEditForm(props: IEditFormProps) {
           </div>
         </div>
       </div>
-            {/* user_tags */}
-            <div className="flex max-w-[1150] mt-4">
-              <label
-                htmlFor="user_tags"
-                className={`${lusitana.className} w-[130px] font-medium flex items-center p-2 text-gray-500`}>
-                Тэги:
-              </label>
-              <TagInput id="user_tags" value={formData.user_tags} onAdd={addUserTag} handleFormInputChange={handleChangeUserTags} />
-            </div>
-            {/* access_tags */}
-            <div className="flex max-w-[1150] mt-4">
-              <label
-                htmlFor="access_tags"
-                className={`${lusitana.className} w-[130px] font-medium flex items-center p-2 text-gray-500`}>
-                Тэги доступа:
-              </label>
-              <TagInput id="access_tags" value={formData.access_tags} onAdd={addAccessTag} handleFormInputChange={handleChangeAccessTags} />
-            </div>
+      {/* user_tags */}
+      <div className="flex max-w-[1150] mt-4">
+        <label
+          htmlFor="user_tags"
+          className={`${lusitana.className} w-[130px] font-medium flex items-center p-2 text-gray-500`}>
+          Тэги:
+        </label>
+        <TagInput id="user_tags" value={formData.user_tags} onAdd={addUserTag} handleFormInputChange={handleChangeUserTags} />
+      </div>
+      {/* access_tags */}
+      <div className="flex max-w-[1150] mt-4">
+        <label
+          htmlFor="access_tags"
+          className={`${lusitana.className} w-[130px] font-medium flex items-center p-2 text-gray-500`}>
+          Тэги доступа:
+        </label>
+        <TagInput id="access_tags" value={formData.access_tags} onAdd={addAccessTag} handleFormInputChange={handleChangeAccessTags} />
+      </div>
       {/* button area */}
       <div className="flex justify-between mt-4 mr-4">
         <div className="flex w-full md:w-1/2">
@@ -641,4 +656,5 @@ export default function PremiseEditForm(props: IEditFormProps) {
       <MessageBoxOKCancel />
     </form>
   );
+  //#endregion
 }

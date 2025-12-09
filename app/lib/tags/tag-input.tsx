@@ -6,7 +6,7 @@ import { useAccessTagStore, useTagStore, useUserTagStore } from './tag-store';
 
 export function TagInput({ id, value, onAdd, handleFormInputChange }: {
     id: string;
-    value: string[];
+    value: string[]|null;
     onAdd: (tag: string) => void;
     handleFormInputChange: (tags: string[]) => void;
 }) {
@@ -31,7 +31,7 @@ export function TagInput({ id, value, onAdd, handleFormInputChange }: {
 
     // 🟢 Инициализируем selectedTags из value при монтировании (и при обновлении value)
     useEffect(() => {
-        setSelectedTags(value);
+        if (value) setSelectedTags(value);
     }, [value, setSelectedTags]);
 
     const selectSuggestion = (suggestion: string) => {

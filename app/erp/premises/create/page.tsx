@@ -47,7 +47,8 @@ export default async function Page() {
     region_name: "",
     owner_name: "",
     operator_name: "",
-
+    user_tags: [],
+    access_tags: []
   } as PremiseForm;
 
   const sections = await fetchSectionsForm(current_sections);
@@ -73,6 +74,7 @@ export default async function Page() {
         sections={sections}
         regions={regions}
         legalEntities={legalEntities}
+        tenant_id=""
       />
     </main>
   );

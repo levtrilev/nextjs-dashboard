@@ -31,8 +31,8 @@ async function Page(props: { params: Promise<{ id: string }> }) {
     const regions = await fetchRegionsForm(current_sections);
     const legalEntities = await fetchLegalEntities(current_sections);
     const tenant_id = (await fetchSectionById(premise.section_id)).tenant_id;
-    const allTags = await fetchAllTags(tenant_id);
-    //     console.log("premise tenant: " + (await fetchSectionById(premise.section_id)).tenant_name);
+    // const allTags = await fetchAllTags(tenant_id);
+    console.log("premise tenant: " + (await fetchSectionById(premise.section_id)).tenant_name);
     // console.log("premise allTags: " + JSON.stringify(allTags));
     return (
         <div className="w-full">
@@ -45,7 +45,7 @@ async function Page(props: { params: Promise<{ id: string }> }) {
                 sections={sections}
                 regions={regions}
                 legalEntities={legalEntities}
-                allTags={allTags} 
+                // allTags={allTags}
                 tenant_id={tenant_id}
             />
         </div>

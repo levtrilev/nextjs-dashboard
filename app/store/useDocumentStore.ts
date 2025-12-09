@@ -9,6 +9,7 @@ interface IInitialState {
   messageBox: MessageBox;
   isDocumentChanged: boolean;
   allTags: string[];
+  tenant_id: string;
 }
 
 interface IActions {
@@ -18,8 +19,9 @@ interface IActions {
   setIsOKButtonPressed: (isOKButtonPressed: boolean) => void;
   setIsCancelButtonPressed: (isCancelButtonPressed: boolean) => void;
   setIsShowMessageBoxCancel: (isShowMessageBoxCancel: boolean) => void;
-  setAllTags: (tags: string[]) => void;
-  addAllTags: (newTags: string[]) => void;
+  setAllTags: (tags: string[] | null) => void;
+  addAllTags: (newTags: string[] | null) => void;
+  setDocumentTenantId: (tenant_id: string) => void;
 }
 
 interface IDocumentState extends IInitialState, IActions {}
@@ -34,6 +36,7 @@ const initialState = {
   },
   isDocumentChanged: false,
   allTags: [],
+  tenant_id: "",
 };
 
 const messageBoxStore: StateCreator<
@@ -94,14 +97,26 @@ const messageBoxStore: StateCreator<
       "setIsDocumentChanged"
     );
   },
-  setAllTags: (tags) => {set({ allTags: tags }), false, "setAllTags"},
+  setAllTags: (tags) => {
+    if (tags) set({ allTags: tags }), false, "setAllTags";
+  },
   // addAllTags: (newTags) => set((state) => ({ allTags: [...state.allTags, ...newTags] }), false, "addAllTags"),
-  addAllTags: (newTags: string[]) =>
-  set((state) => ({
-    allTags: Array.from(new Set([...state.allTags, ...newTags])).sort((a, b) =>
-      a.localeCompare(b, undefined, { sensitivity: 'base' })
-    ),
-  }), false, "addAllTags"),
+  addAllTags: (newTags: string[] | null) => {
+    if (newTags) {
+      set(
+        (state) => ({
+          allTags: Array.from(new Set([...state.allTags, ...newTags])).sort(
+            (a, b) => a.localeCompare(b, undefined, { sensitivity: "base" })
+          ),
+        }),
+        false,
+        "addAllTags"
+      );
+    }
+  },
+  setDocumentTenantId: (tenant_id: string) => {
+    set({ tenant_id: tenant_id }, false, "setDocumentTenantId");
+  },  
 });
 
 export const useDocumentStore = create<IDocumentState>()(

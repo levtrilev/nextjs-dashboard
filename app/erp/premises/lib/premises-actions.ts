@@ -52,7 +52,7 @@ export async function createPremise(premise: PremiseForm) {
       INSERT INTO premises (
         name, description, cadastral_number, square, address, address_alt, 
         type, status, status_until, region_id, owner_id, operator_id, section_id, 
-        username, p.user_tags, p.access_tags, date_created
+        username, user_tags, access_tags, date_created
       ) VALUES (
         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17
       )`,
