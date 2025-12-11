@@ -1,4 +1,12 @@
-import { Revenue } from './definitions';
+import { DocUserPermissions, Revenue } from './definitions';
+
+export const checkReadonly = (userPermissions: DocUserPermissions, document: { author_id?: string }, pageUserId?: string): boolean => {
+    return userPermissions.full_access ? false
+        : userPermissions.editor ? false
+            : (userPermissions.author && document.author_id === pageUserId) ? false
+                : userPermissions.reader ? true
+                    : true
+}
 
 export const formatCurrency = (amount: number) => {
   return (amount / 100).toLocaleString('en-US', {

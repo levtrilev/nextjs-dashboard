@@ -3,13 +3,14 @@
 import { create, type StateCreator } from "zustand";
 import { createJSONStorage, devtools, persist } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
-import { MessageBox } from "../lib/definitions";
+import { MessageBox, User } from "../lib/definitions";
 
 interface IInitialState {
   messageBox: MessageBox;
   isDocumentChanged: boolean;
   allTags: string[];
-  tenant_id: string;
+  documentTenantId: string;
+  sessionUser: User;
 }
 
 interface IActions {
@@ -21,7 +22,8 @@ interface IActions {
   setIsShowMessageBoxCancel: (isShowMessageBoxCancel: boolean) => void;
   setAllTags: (tags: string[] | null) => void;
   addAllTags: (newTags: string[] | null) => void;
-  setDocumentTenantId: (tenant_id: string) => void;
+  setDocumentTenantId: (docTenantId: string) => void;
+  setSessionUser: (user: User) => void;
 }
 
 interface IDocumentState extends IInitialState, IActions {}
@@ -36,7 +38,8 @@ const initialState = {
   },
   isDocumentChanged: false,
   allTags: [],
-  tenant_id: "",
+  documentTenantId: "",
+  sessionUser: {} as User,
 };
 
 const messageBoxStore: StateCreator<
@@ -114,9 +117,12 @@ const messageBoxStore: StateCreator<
       );
     }
   },
-  setDocumentTenantId: (tenant_id: string) => {
-    set({ tenant_id: tenant_id }, false, "setDocumentTenantId");
-  },  
+  setDocumentTenantId: (docTenantId: string) => {
+    set({ documentTenantId: docTenantId }, false, "setDocumentTenantId");
+  },
+  setSessionUser: (user: User) => {
+    set({ sessionUser: user }, false, "setSessionUser");
+  }
 });
 
 export const useDocumentStore = create<IDocumentState>()(

@@ -11,25 +11,6 @@ import { Premise, PremiseForm, RegionForm } from "@/app/lib/definitions";
 
 const ITEMS_PER_PAGE = 8;
 
-// export type PremiseErrState = {
-//   errors?: {
-//     name?: string[];
-//     description?: string[];
-//     cadastral_number?: string[];
-//     square?: string[];
-//     address?: string[];
-//     address_alt?: string[];
-//     type?: string[];
-//     status?: string[];
-//     status_until?: string[];
-//     region_name?: string[];
-//     owner_name?: string[];
-//     operator_name?: string[];
-//     section_name?: string[];
-//   };
-//   message?: string | null;
-// };
-
 //#region Update Delete Premise
 export async function deletePremise(id: string) {
   try {
@@ -52,9 +33,9 @@ export async function createPremise(premise: PremiseForm) {
       INSERT INTO premises (
         name, description, cadastral_number, square, address, address_alt, 
         type, status, status_until, region_id, owner_id, operator_id, section_id, 
-        username, user_tags, access_tags, date_created
+        tenant_id, username, user_tags, access_tags, date_created
       ) VALUES (
-        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18
       )`,
       [
         premise.name,
@@ -70,6 +51,7 @@ export async function createPremise(premise: PremiseForm) {
         premise.owner_id,
         premise.operator_id,
         premise.section_id,
+        premise.tenant_id,
         premise.username,
         JSON.stringify(premise.user_tags),
         JSON.stringify(premise.access_tags),
@@ -89,7 +71,8 @@ export async function createPremise(premise: PremiseForm) {
 export async function updatePremise(premise: Premise) {
   const session = await auth();
   const username = session?.user?.name;
-    console.log("premise userTags: " + JSON.stringify(premise.user_tags),);
+    // console.log("premise userTags: " + JSON.stringify(premise.user_tags),);
+    console.log("premise tenant_id: " + JSON.stringify(premise.tenant_id),);
 
   try {
     await pool.query(
@@ -109,10 +92,11 @@ export async function updatePremise(premise: Premise) {
         owner_id = $11,
         operator_id = $12,
         section_id = $13,
-        username = $14,
-        user_tags = $15,
-        access_tags = $16
-      WHERE id = $17`,
+        tenant_id = $14,
+        username = $15,
+        user_tags = $16,
+        access_tags = $17
+      WHERE id = $18`,
       [
         premise.name,
         premise.description,
@@ -127,6 +111,7 @@ export async function updatePremise(premise: Premise) {
         premise.owner_id,
         premise.operator_id,
         premise.section_id,
+        premise.tenant_id,
         username,
         JSON.stringify(premise.user_tags),
         JSON.stringify(premise.access_tags),
@@ -153,7 +138,7 @@ export async function fetchPremise(id: string, current_sections: string) {
       SELECT
         id, name, description, cadastral_number, square, address, address_alt,
         type, status, status_until, region_id, owner_id, operator_id, section_id,
-        username, timestamptz, date_created, p.user_tags, p.access_tags
+        tenant_id, username, timestamptz, date_created, p.user_tags, p.access_tags
       FROM your_premises
       WHERE id = $2`,
       [current_sections, id]
@@ -177,7 +162,7 @@ export async function fetchPremiseForm(id: string, current_sections: string) {
       SELECT
         p.id, p.name, p.description, p.cadastral_number, p.square, p.address, p.address_alt,
         p.type, p.status, p.status_until, p.region_id, p.owner_id, p.operator_id, p.section_id,
-        p.username, p.timestamptz, p.date_created, p.user_tags, p.access_tags,
+        p.tenant_id, p.username, p.timestamptz, p.date_created, p.user_tags, p.access_tags,
         COALESCE(r.name, '') as region_name,
         COALESCE(le_owner.name, '') as owner_name,
         COALESCE(le_operator.name, '') as operator_name,
@@ -211,7 +196,7 @@ export async function fetchPremises(current_sections: string) {
       SELECT
         id, name, description, cadastral_number, square, address, address_alt,
         type, status, status_until, region_id, owner_id, operator_id, section_id,
-        username, timestamptz, date_created
+        tenant_id, username, timestamptz, date_created
       FROM your_premises
       ORDER BY name ASC`,
       [current_sections]
@@ -235,7 +220,7 @@ export async function fetchPremisesForm(current_sections: string) {
       SELECT
         p.id, p.name, p.description, p.cadastral_number, p.square, p.address, p.address_alt,
         p.type, p.status, p.status_until, p.region_id, p.owner_id, p.operator_id, p.section_id,
-        p.username, p.timestamptz, p.date_created,
+        p.tenant_id, p.username, p.timestamptz, p.date_created,
         COALESCE(r.name, '') as region_name,
         COALESCE(le_owner.name, '') as owner_name,
         COALESCE(le_operator.name, '') as operator_name,
@@ -276,7 +261,7 @@ export async function fetchFilteredPremises(
       SELECT
         p.id, p.name, p.description, p.cadastral_number, p.square, p.address, p.address_alt,
         p.type, p.status, p.status_until, p.region_id, p.owner_id, p.operator_id, p.section_id,
-        p.username, p.timestamptz, p.date_created,
+        p.tenant_id, p.username, p.timestamptz, p.date_created,
         r.name as region_name,
         le_owner.name as owner_name,
         le_operator.name as operator_name,

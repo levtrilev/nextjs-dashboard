@@ -15,18 +15,15 @@ import {
 import { TagInput } from "@/app/lib/tags/tag-input";
 import { lusitana } from "@/app/ui/fonts";
 import { useAccessTagStore, useUserTagStore } from "@/app/lib/tags/tag-store";
-import { fetchAllTags, upsertTags } from "@/app/lib/tags/tags-actions";
+import { upsertTags } from "@/app/lib/tags/tags-actions";
 import { formatDateForInput } from "@/app/lib/common-utils";
 
 interface IEditFormProps {
   premise: PremiseForm,
-  userPermissions: DocUserPermissions,
-  user_id: string,
   readonly: boolean,
   sections: SectionForm[],
   regions: RegionForm[],
   legalEntities: LegalEntity[],
-  tenant_id: string,
 }
 //#region zod schema
 const PremiseFormSchemaFull = z.object({
@@ -90,6 +87,7 @@ const PremiseFormSchemaFull = z.object({
   access_tags: z.array(z.string()).nullable(),
   author_id: z.string(), // z.string().uuid(),
   editor_id: z.string(), // z.string().uuid(),
+  tenant_id: z.string(), // z.string().uuid(),
 });
 const PremiseFormSchema = PremiseFormSchemaFull.omit({ id: true, address_alt: true, timestamptz: true, date_created: true, username: true });
 type FormData = z.infer<typeof PremiseFormSchemaFull>;
@@ -98,19 +96,16 @@ type FormData = z.infer<typeof PremiseFormSchemaFull>;
 export default function PremiseEditForm(props: IEditFormProps) {
   const addUserTag = useUserTagStore().addTag;
   const addAccessTag = useAccessTagStore().addTag;
-  const docTenantId = useDocumentStore.getState().tenant_id;
+  const docTenantId = useDocumentStore.getState().documentTenantId;
+  const sessionUserId = useDocumentStore.getState().sessionUser.id;
   const [showErrors, setShowErrors] = useState(false);
   const [formData, setFormData] = useState<FormData>(props.premise);
-
-  //#region msgBox
   const isDocumentChanged = useIsDocumentChanged();
   const msgBox = useMessageBox();
-
   const docChanged = () => {
     setIsDocumentChanged(true);
     setMessageBoxText('Документ изменен. Закрыть без сохранения?');
   };
-
   const showMsgSaved = () => {
     setIsDocumentChanged(false);
     setMessageBoxText('Документ сохранен.');
@@ -120,50 +115,10 @@ export default function PremiseEditForm(props: IEditFormProps) {
   useEffect(() => {
     setFormData((prev) => ({
       ...prev,
-      author_id: props.user_id,
-      editor_id: props.user_id,
+      author_id: sessionUserId,
+      editor_id: sessionUserId,
     }));
-    return () => {
-      // Сброс при уходе со страницы
-      setIsDocumentChanged(false);
-      setIsMessageBoxOpen(false);
-      setIsOKButtonPressed(false);
-      setIsCancelButtonPressed(false);
-      setIsShowMessageBoxCancel(true);
-      setMessageBoxText('');
-    };
-  }, []);
-
-  useEffect(() => {
-    if (msgBox.isOKButtonPressed && msgBox.messageBoxText === 'Документ изменен. Закрыть без сохранения?') {
-      // router.push('/erp/premises/');
-      window.history.back();
-    }
-    setIsOKButtonPressed(false);
-    setIsCancelButtonPressed(false);
-    setIsDocumentChanged(false);
-    setIsMessageBoxOpen(false);
-    setIsShowMessageBoxCancel(true);
-  }, [msgBox.isOKButtonPressed]);
-  //#endregion
-
-  //#region tenant_id and tags  
-  useEffect(() => {
-    if (props.tenant_id) useDocumentStore.getState().setDocumentTenantId(props.tenant_id);
-  }, [props.tenant_id]);
-
-  useEffect(() => {
-    const fetchAndSetTags = async () => {
-      try {
-        const tags = await fetchAllTags(docTenantId);
-        useDocumentStore.getState().setAllTags(tags);
-      } catch (error) {
-        console.error('Failed to fetch all tags: ', error);
-      }
-    };
-    if (docTenantId) fetchAndSetTags();
-  }, [docTenantId]);
-  //#endregion
+  }, [sessionUserId]);
 
   const validate = () => {
     const res = PremiseFormSchema.safeParse({

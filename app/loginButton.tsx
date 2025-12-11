@@ -1,11 +1,13 @@
 import { ArrowRightIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
-import { auth } from "../auth"
+import { auth, getUser } from "../auth"
 import { Session } from 'next-auth';
+// import { useDocumentStore } from './store/useDocumentStore';
+// import { User } from './lib/definitions';
 
-export default async function LoginButton () {
+export default async function LoginButton() {
     // const { user } = await auth().user?.name;
-    const  session = await auth();
+    const session = await auth();
     if (!session) {
         return <Link
             href="/login"

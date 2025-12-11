@@ -112,6 +112,7 @@ export type Premise = {
   owner_id: string;
   operator_id: string;
   section_id: string;
+  tenant_id: string;
   username?: string;
   author_id: string;
   editor_id: string;
@@ -135,6 +136,7 @@ export type PremiseForm = {
   owner_id: string;
   operator_id: string;
   section_id: string;
+  tenant_id: string;
   username?: string;
   author_id: string;
   editor_id: string;

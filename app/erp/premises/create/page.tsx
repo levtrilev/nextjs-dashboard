@@ -2,7 +2,7 @@
 //premise create Page
 
 import PremiseEditForm from "../[id]/edit/premise-edit-form";
-import { PremiseForm } from "@/app/lib/definitions";
+import { PremiseForm, User } from "@/app/lib/definitions";
 import { lusitana } from "@/app/ui/fonts";
 import { fetchSectionsForm } from "@/app/admin/sections/lib/sections-actions";
 import { fetchRegionsForm } from "@/app/erp/regions/lib/region-actions";
@@ -11,15 +11,19 @@ import { auth, getUser } from "@/auth";
 import { getCurrentSections } from "@/app/lib/common-actions";
 import Breadcrumbs from '@/app/ui/invoices/breadcrumbs';
 import { DateTime } from "next-auth/providers/kakao";
-import { formatDateForInput } from "@/app/lib/common-utils";
+import { checkReadonly, formatDateForInput } from "@/app/lib/common-utils";
 import { fetchDocUserPermissions } from "@/app/admin/permissions/lib/permissios-actions";
+import DocWrapper from "../[id]/edit/doc-wrapper";
 
 export default async function Page() {
   const session = await auth();
   const email = session ? (session.user ? session.user.email : "") : "";
   const user = await getUser(email as string);
   const current_sections = await getCurrentSections(email as string);
-  const userPermissions = await fetchDocUserPermissions(session?.user?.id as string, 'premises');
+  // const userPermissions = await fetchDocUserPermissions(session?.user?.id as string, 'premises');
+  const userPermissions = await fetchDocUserPermissions(user?.id as string, 'premises');
+  const pageUser = user ? user : {} as User
+  const tenant_id = user ? user.tenant_id : "00000000-0000-0000-0000-000000000000";
   // const formatDateForInput = (date: Date | string): string => {
   //   if (!date) return ''; // Если дата пустая, возвращаем пустую строку
   //   const d = new Date(date);
@@ -43,6 +47,7 @@ export default async function Page() {
     owner_id: "",
     operator_id: "",
     section_id: "",
+    tenant_id: "",
     username: user?.name as string,
     author_id: user?.id as string,
     editor_id: "00000000-0000-0000-0000-000000000000",
@@ -55,6 +60,7 @@ export default async function Page() {
     user_tags: [],
     access_tags: []
   } as PremiseForm;
+  const readonly = checkReadonly(userPermissions, premise, pageUser.id);
 
   const sections = await fetchSectionsForm(current_sections);
   const regions = await fetchRegionsForm(current_sections);
@@ -73,17 +79,32 @@ export default async function Page() {
       />
       <div className="flex w-full items-center justify-between">
         {/* <h1 className={`${lusitana.className} text-2xl`}>Новое помещение</h1> */}
+        {readonly && <span className="text-xs font-medium text-gray-400">только чтение для пользователя: {user?.email}</span>}
+        {!readonly && <span className="text-xs font-medium text-gray-400">права на изменение для пользователя: {user?.email}</span>}
       </div>
-      <PremiseEditForm
+      <DocWrapper
+        pageUser={pageUser}
+        userPermissions={userPermissions}
+        docTenantId={tenant_id}
+      >
+        <PremiseEditForm
+          premise={premise}
+          readonly={readonly}
+          sections={sections}
+          regions={regions}
+          legalEntities={legalEntities}
+        />
+      </DocWrapper>
+      {/* <PremiseEditForm
         premise={premise}
         userPermissions={userPermissions}
-        user_id={user?.id as string}
+        userId={user?.id as string}
         readonly={false}
         sections={sections}
         regions={regions}
         legalEntities={legalEntities}
-        tenant_id=""
-      />
+        docTenantId=""
+      /> */}
     </main>
   );
 }
