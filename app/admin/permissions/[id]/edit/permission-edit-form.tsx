@@ -330,7 +330,7 @@ export default function PermissionEditForm(props: IPermissionEditFormProps) {
           className={`${lusitana.className} w-[110px] font-medium flex items-center p-2 text-gray-500`}>
           OR-Тэги:
         </label>
-        <TagInput id="or_tags" value={permission.or_tags} onAdd={addOrTag} handleFormInputChange={handleChangeOrTags} />
+        <TagInput id="or_tags" value={permission.or_tags} onAdd={addOrTag} handleFormInputChange={handleChangeOrTags} readonly={false}/>
       </div>
       {/* and_tags */}
       <div className="flex max-w-[1150px] mt-4">
@@ -339,7 +339,7 @@ export default function PermissionEditForm(props: IPermissionEditFormProps) {
           className={`${lusitana.className} w-[110px] font-medium flex items-center p-2 text-gray-500`}>
           AND-Тэги:
         </label>
-        <TagInput id="and_tags" value={permission.and_tags} onAdd={addAndTag} handleFormInputChange={handleChangeAndTags} />
+        <TagInput id="and_tags" value={permission.and_tags} onAdd={addAndTag} handleFormInputChange={handleChangeAndTags} readonly={false}/>
       </div>
       {/* no_tags */}
       <div className="flex max-w-[1150px] mt-4">
@@ -348,7 +348,7 @@ export default function PermissionEditForm(props: IPermissionEditFormProps) {
           className={`${lusitana.className} w-[110px] font-medium flex items-center p-2 text-gray-500`}>
           NO-Тэги:
         </label>
-        <TagInput id="no_tags" value={permission.no_tags} onAdd={addNoTag} handleFormInputChange={handleChangeNoTags} />
+        <TagInput id="no_tags" value={permission.no_tags} onAdd={addNoTag} handleFormInputChange={handleChangeNoTags} readonly={false}/>
       </div>
       {/* button area */}
       <div className="flex justify-between mt-4 mr-4">

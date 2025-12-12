@@ -598,7 +598,13 @@ export default function PremiseEditForm(props: IEditFormProps) {
           className={`${lusitana.className} w-[130px] font-medium flex items-center p-2 text-gray-500`}>
           Тэги:
         </label>
-        <TagInput id="user_tags" value={formData.user_tags} onAdd={addUserTag} handleFormInputChange={handleChangeUserTags} />
+        <TagInput
+          id="user_tags"
+          value={formData.user_tags}
+          onAdd={addUserTag}
+          handleFormInputChange={handleChangeUserTags}
+          readonly={props.readonly}
+        />
       </div>
       {/* access_tags */}
       <div className="flex max-w-[1150] mt-4">
@@ -607,7 +613,13 @@ export default function PremiseEditForm(props: IEditFormProps) {
           className={`${lusitana.className} w-[130px] font-medium flex items-center p-2 text-gray-500`}>
           Тэги доступа:
         </label>
-        <TagInput id="access_tags" value={formData.access_tags} onAdd={addAccessTag} handleFormInputChange={handleChangeAccessTags} />
+        <TagInput
+          id="access_tags"
+          value={formData.access_tags}
+          onAdd={addAccessTag}
+          handleFormInputChange={handleChangeAccessTags}
+          readonly={props.readonly}
+        />
       </div>
       {/* button area */}
       <div className="flex justify-between mt-4 mr-4">

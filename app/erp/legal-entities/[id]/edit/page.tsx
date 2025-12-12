@@ -39,7 +39,14 @@ async function Page(props: { params: Promise<{ id: string }> }) {
                 <h1 className={`${lusitana.className} text-2xl`}>Юридическое лицо</h1>
             </div>
             <h3 className="text-xs font-medium text-gray-400">id: {id}</h3>
-            <LegalEntitiesEditForm legalEntity={legalEntity} regions={regions} sections={sections} allTags={allTags} tenant_id={tenant_id}></LegalEntitiesEditForm>
+            <LegalEntitiesEditForm 
+            legalEntity={legalEntity} 
+            regions={regions} 
+            sections={sections} 
+            allTags={allTags} 
+            tenant_id={tenant_id}
+            readonly={false}
+            />
         </div>
 
     );

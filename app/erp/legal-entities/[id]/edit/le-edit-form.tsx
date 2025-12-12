@@ -22,11 +22,12 @@ import { TagInput } from "@/app/lib/tags/tag-input";
 import { lusitana } from "@/app/ui/fonts";
 
 interface IEditFormProps {
-  legalEntity: LegalEntityForm,
-  regions: Region[],
-  sections: SectionForm[],
-  allTags: string[],
-  tenant_id: string
+  legalEntity: LegalEntityForm;
+  regions: Region[];
+  sections: SectionForm[];
+  allTags: string[];
+  tenant_id: string;
+  readonly: boolean;
 }
 
 export default function LegalEntitiesEditForm(props: IEditFormProps) {
@@ -333,7 +334,7 @@ export default function LegalEntitiesEditForm(props: IEditFormProps) {
           className={`${lusitana.className} w-[130px] font-medium flex items-center p-2 text-gray-500`}>
           Тэги:
         </label>
-        <TagInput id="user_tags" value={legalEntity.user_tags} onAdd={addUserTag} handleFormInputChange={handleChangeUserTags} />
+        <TagInput id="user_tags" value={legalEntity.user_tags} onAdd={addUserTag} handleFormInputChange={handleChangeUserTags} readonly={props.readonly}/>
       </div>
       {/* access_tags */}
       <div className="flex max-w-[1150] mt-4">
@@ -342,7 +343,7 @@ export default function LegalEntitiesEditForm(props: IEditFormProps) {
           className={`${lusitana.className} w-[130px] font-medium flex items-center p-2 text-gray-500`}>
           Тэги доступа:
         </label>
-        <TagInput id="access_tags" value={legalEntity.access_tags} onAdd={addAccessTag} handleFormInputChange={handleChangeAccessTags} />
+        <TagInput id="access_tags" value={legalEntity.access_tags} onAdd={addAccessTag} handleFormInputChange={handleChangeAccessTags} readonly={props.readonly}/>
       </div>
       {/* buttons area */}
       <div className="flex justify-between mt-4 mr-4">

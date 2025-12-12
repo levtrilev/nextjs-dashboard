@@ -92,17 +92,18 @@ export default function RegionEditForm(props: IEditFormProps) {
     setIsMessageBoxOpen(true);
   }
   useEffect(() => {
-    // const handleBeforeUnload = () => {
-    //   console.log('beforeunload sessionUserId: ' + sessionUser.id);
-    //   props.unlockAction(region.id, sessionUser.id);
-    // };
-    // // Снимаем блокировку при уходе со страницы
-    // window.addEventListener('beforeunload', handleBeforeUnload);
+    const handleBeforeUnload = () => {
+      console.log('beforeunload sessionUserId: ' + sessionUser.id);
+      props.unlockAction(region.id, sessionUser.id);
+    };
+    // Снимаем блокировку при уходе со страницы
+    window.addEventListener('beforeunload', handleBeforeUnload);
 
     return () => {
 
-      // window.removeEventListener('beforeunload', handleBeforeUnload);
-      // props.unlockAction(region.id, sessionUser.id); // на всякий случай
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      props.unlockAction(region.id, sessionUser.id); // на всякий случай
+
       // Сброс MessageBox при уходе со страницы
       setIsDocumentChanged(false);
       setIsMessageBoxOpen(false);
@@ -170,6 +171,7 @@ export default function RegionEditForm(props: IEditFormProps) {
               id="name"
               type="text"
               className="w-7/8 control rounded-md border border-gray-200 p-2"
+              disabled={props.readonly}
               value={region.name}
               onChange={(e) => { setRegion((prev) => ({ ...prev, name: e.target.value, })); docChanged(); }}
             />
@@ -185,6 +187,7 @@ export default function RegionEditForm(props: IEditFormProps) {
               id="capital"
               type="text"
               className="w-13/16 control rounded-md border border-gray-200 p-2"
+              disabled={props.readonly}
               value={region.capital}
               onChange={(e) => { setRegion((prev) => ({ ...prev, capital: e.target.value, })); docChanged(); }}
             />
@@ -201,12 +204,13 @@ export default function RegionEditForm(props: IEditFormProps) {
               type="text"
               name="section_name"
               className="w-13/16 pointer-events-none control rounded-md border border-gray-200 p-2"
+              disabled={props.readonly}
               value={region.section_name}
               readOnly
               onChange={(e) => { setRegion((prev) => ({ ...prev, section_id: e.target.value, })); docChanged(); }}
             // onKeyDown={(e) => handleKeyDown(e)}
             />
-            <BtnSectionsRef sections={props.sections} handleSelectSection={handleSelectSection} />
+            {!props.readonly && <BtnSectionsRef sections={props.sections} handleSelectSection={handleSelectSection} />}
           </div>
         </div>
         {/* second column */}
@@ -222,6 +226,7 @@ export default function RegionEditForm(props: IEditFormProps) {
               id="area"
               type="text"
               className="w-13/16 control rounded-md border border-gray-200 p-2"
+              disabled={props.readonly}
               value={region.area}
               onChange={(e) => { setRegion((prev) => ({ ...prev, area: e.target.value, })); docChanged(); }}
             />
@@ -237,6 +242,7 @@ export default function RegionEditForm(props: IEditFormProps) {
               id="code"
               type="text"
               className="w-13/16 control rounded-md border border-gray-200 p-2"
+              disabled={props.readonly}
               value={region.code}
               onChange={(e) => { setRegion((prev) => ({ ...prev, code: e.target.value, })); docChanged(); }}
             />
@@ -250,7 +256,13 @@ export default function RegionEditForm(props: IEditFormProps) {
           className={`${lusitana.className} w-[130px] font-medium flex items-center p-2 text-gray-500`}>
           Тэги:
         </label>
-        <TagInput id="user_tags" value={region.user_tags} onAdd={addUserTag} handleFormInputChange={handleChangeUserTags} />
+        <TagInput
+          id="user_tags"
+          value={region.user_tags}
+          onAdd={addUserTag}
+          handleFormInputChange={handleChangeUserTags}
+          readonly={props.readonly}
+        />
       </div>
       {/* access_tags */}
       <div className="flex max-w-[1150] mt-4">
@@ -259,16 +271,25 @@ export default function RegionEditForm(props: IEditFormProps) {
           className={`${lusitana.className} w-[130px] font-medium flex items-center p-2 text-gray-500`}>
           Тэги доступа:
         </label>
-        <TagInput id="access_tags" value={region.access_tags} onAdd={addAccessTag} handleFormInputChange={handleChangeAccessTags} />
+        <TagInput
+          id="access_tags"
+          value={region.access_tags}
+          onAdd={addAccessTag}
+          handleFormInputChange={handleChangeAccessTags}
+          readonly={props.readonly}
+        />
       </div>
       {/* button area */}
       <div className="flex justify-between mt-4 mr-4">
         <div className="flex w-full md:w-1/2">
           <div className="w-full md:w-1/2">
             <button
+              disabled={props.readonly}
               onClick={handleSaveClick}
-              className="bg-blue-400 text-white w-full rounded-md border p-2 
-              hover:bg-blue-100 hover:text-gray-500 cursor-pointer"
+              className={`w-full rounded-md border p-2 ${props.readonly
+                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                : 'bg-blue-400 text-white hover:bg-blue-100 hover:text-gray-500 cursor-pointer'
+                }`}
             >
               Сохранить
             </button>
@@ -279,7 +300,7 @@ export default function RegionEditForm(props: IEditFormProps) {
               className="bg-blue-400 text-white w-full rounded-md border p-2
                  hover:bg-blue-100 hover:text-gray-500 cursor-pointer"
             >
-              Закрыть
+              {props.readonly ? 'Закрыть' : 'Закрыть и освободить'}
             </button>
           </div>
         </div>

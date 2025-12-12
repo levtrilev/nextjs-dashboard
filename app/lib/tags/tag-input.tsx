@@ -4,11 +4,12 @@ import { useOrTagStore, useAndTagStore, useNoTagStore } from '@/app/admin/permis
 import { useState, useRef, useEffect } from 'react';
 import { useAccessTagStore, useTagStore, useUserTagStore } from './tag-store';
 
-export function TagInput({ id, value, onAdd, handleFormInputChange }: {
+export function TagInput({ id, value, onAdd, handleFormInputChange, readonly }: {
     id: string;
-    value: string[]|null;
+    value: string[] | null;
     onAdd: (tag: string) => void;
     handleFormInputChange: (tags: string[]) => void;
+    readonly: boolean;
 }) {
     const { input, selectedTags, setInput, setSelectedTags, getSuggestions, removeTag } =
         id === 'user_tags' ? useUserTagStore()
@@ -106,6 +107,7 @@ export function TagInput({ id, value, onAdd, handleFormInputChange }: {
                     <span key={tag} className="bg-blue-100 px-2 py-1 rounded flex items-center">
                         {tag}
                         <button
+                            disabled={readonly}
                             type="button"
                             onClick={() => {
                                 removeTag(tag);
@@ -120,6 +122,7 @@ export function TagInput({ id, value, onAdd, handleFormInputChange }: {
                 <input
                     ref={inputRef}
                     type="text"
+                    disabled={readonly}
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={handleKeyDown}
