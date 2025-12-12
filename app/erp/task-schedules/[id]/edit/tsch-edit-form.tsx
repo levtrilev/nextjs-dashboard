@@ -22,7 +22,7 @@ import {
 import { useRouter } from "next/navigation";
 interface IEditFormProps {
   taskSchedule: TaskScheduleForm,
-  sections: SectionForm[],
+  // sections: SectionForm[],
   premises: PremiseForm[],
   legalEntities: LegalEntity[],
   tasks: TaskForm[],
@@ -300,7 +300,7 @@ export default function TaskScheduleEditForm(props: IEditFormProps) {
               <InputField name="section_name" value={formData.section_name}
                 label="Раздел:" type="text" w={["w-4/16", "w-13/16"]}
                 onChange={(value) => handleInputChange('section_name', value)}
-                refBook={<BtnSectionsRef sections={props.sections} handleSelectSection={handleSelectSection} />}
+                refBook={<BtnSectionsRef handleSelectSection={handleSelectSection} />}
                 errors={errors?.section_name as string[] | undefined}
               />
 

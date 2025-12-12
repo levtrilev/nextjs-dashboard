@@ -59,13 +59,14 @@ async function Page(props: { params: Promise<{ id: string }> }) {
             <h3 className="text-xs font-medium text-gray-400">id: {id}</h3>
             <DocWrapper
                 pageUser={pageUser}
+                userSections={sections}
                 userPermissions={userPermissions}
                 docTenantId={tenant_id}
             >
                 <PremiseEditForm
                     premise={premise}
                     readonly={readonly}
-                    sections={sections}
+                    // sections={sections}
                     regions={regions}
                     legalEntities={legalEntities}
                 />

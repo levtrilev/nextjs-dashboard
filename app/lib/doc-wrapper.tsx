@@ -8,23 +8,17 @@ import { useEffect } from "react";
 interface IDocWrapperProps {
     // document: { author_id?: string };
     pageUser: User;
-    userPermissions: DocUserPermissions,
-    //   readonly: boolean,
+    userSections: SectionForm[];
+    userPermissions: DocUserPermissions;
     docTenantId: string;
     children: React.ReactNode;
 }
-// export const checkReadonly = (userPermissions: DocUserPermissions, document: { author_id?: string }, pageUserId?: string): boolean => {
-//     return userPermissions.full_access ? false
-//         : userPermissions.editor ? false
-//             : (userPermissions.author && document.author_id === pageUserId) ? false
-//                 : userPermissions.reader ? true
-//                     : true
-// }
+
 export default function DocWrapper(props: IDocWrapperProps) {
     const docTenantId = useDocumentStore.getState().documentTenantId;
     // const isDocumentChanged = useIsDocumentChanged();
     const msgBox = useMessageBox();
-    //#region sessionUser
+    //#region sessionUser & userSections
     useEffect(() => {
         const initializeStoreUser = () => {
             if (!useDocumentStore.getState().sessionUser.id) {
@@ -33,6 +27,15 @@ export default function DocWrapper(props: IDocWrapperProps) {
         };
         initializeStoreUser();
     }, [props.pageUser]);
+
+    useEffect(() => {
+        const initializeStoreUserSections = () => {
+            if (props.userSections) {
+                useDocumentStore.getState().setUserSections(props.userSections);
+            }
+        };
+        initializeStoreUserSections();
+    }, [props.userSections]);
     //#endregion
 
     //#region tenant_id and tags  

@@ -24,14 +24,13 @@ import { lusitana } from "@/app/ui/fonts";
 interface IEditFormProps {
   legalEntity: LegalEntityForm;
   regions: Region[];
-  sections: SectionForm[];
-  allTags: string[];
-  tenant_id: string;
+  // allTags: string[];
   readonly: boolean;
 }
 
 export default function LegalEntitiesEditForm(props: IEditFormProps) {
   const [legalEntity, setLegalEntity] = useState(props.legalEntity);
+  const docTenantId = useDocumentStore.getState().documentTenantId;
   const isDocumentChanged = useIsDocumentChanged();
   const msgBox = useMessageBox();
   const router = useRouter();
@@ -73,9 +72,9 @@ export default function LegalEntitiesEditForm(props: IEditFormProps) {
   const handleSaveClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     try {
-      await upsertTags(legalEntity.user_tags, props.tenant_id);
+      await upsertTags(legalEntity.user_tags, docTenantId);
       useDocumentStore.getState().addAllTags(legalEntity.user_tags);
-      await upsertTags(legalEntity.access_tags, props.tenant_id);
+      await upsertTags(legalEntity.access_tags, docTenantId);
       useDocumentStore.getState().addAllTags(legalEntity.access_tags);
 
       await updateLegalEntity(legalEntity);
@@ -111,11 +110,7 @@ export default function LegalEntitiesEditForm(props: IEditFormProps) {
     setIsMessageBoxOpen(false);
     setIsShowMessageBoxCancel(true);
   }, [msgBox.isOKButtonPressed, router]);
-  useEffect(() => {
-    useDocumentStore.getState().setAllTags(props.allTags);
-    // setAllUserTags(props.allTags);
-    // setAllAccessTags(props.allTags);
-  }, [props.allTags]);
+
   const handleChangeIsCustomer = (event: any) => {
     setLegalEntity((prev) => ({
       ...prev,
@@ -323,7 +318,7 @@ export default function LegalEntitiesEditForm(props: IEditFormProps) {
               onChange={(e) => { setLegalEntity((prev) => ({ ...prev, section_id: e.target.value, })); docChanged(); }}
             // onKeyDown={(e) => handleKeyDown(e)}
             />
-            <BtnSectionsRef sections={props.sections} handleSelectSection={handleSelectSection} />
+            <BtnSectionsRef handleSelectSection={handleSelectSection} />
           </div>
         </div>
       </div>

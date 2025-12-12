@@ -3,7 +3,7 @@
 import { create, type StateCreator } from "zustand";
 import { createJSONStorage, devtools, persist } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
-import { MessageBox, User } from "../lib/definitions";
+import { MessageBox, SectionForm, User } from "../lib/definitions";
 
 interface IInitialState {
   messageBox: MessageBox;
@@ -11,6 +11,7 @@ interface IInitialState {
   allTags: string[];
   documentTenantId: string;
   sessionUser: User;
+  userSections: SectionForm[];
 }
 
 interface IActions {
@@ -24,6 +25,7 @@ interface IActions {
   addAllTags: (newTags: string[] | null) => void;
   setDocumentTenantId: (docTenantId: string) => void;
   setSessionUser: (user: User) => void;
+  setUserSections: (sections: SectionForm[]) => void;
 }
 
 interface IDocumentState extends IInitialState, IActions {}
@@ -40,6 +42,7 @@ const initialState = {
   allTags: [],
   documentTenantId: "",
   sessionUser: {} as User,
+  userSections: [] as SectionForm[],
 };
 
 const messageBoxStore: StateCreator<
@@ -122,7 +125,10 @@ const messageBoxStore: StateCreator<
   },
   setSessionUser: (user: User) => {
     set({ sessionUser: user }, false, "setSessionUser");
-  }
+  },
+  setUserSections: (sections: SectionForm[]) => {
+    set({ userSections: sections }, false, "setUserSections");
+  },
 });
 
 export const useDocumentStore = create<IDocumentState>()(
@@ -134,6 +140,10 @@ export const useDocumentStore = create<IDocumentState>()(
         partialize: (state) => ({
           messageBox: state.messageBox,
           isDocumentChanged: state.isDocumentChanged,
+          allTags: state.allTags,
+          documentTenantId: state.documentTenantId,
+          sessionUser: state.sessionUser,
+          userSections: state.userSections
         }),
       }),
       { name: "Document" }

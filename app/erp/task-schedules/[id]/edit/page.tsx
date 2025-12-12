@@ -3,28 +3,34 @@
 
 import EditForm from "./tsch-edit-form";
 // import { fetchPremise, fetchPremiseForm } from "../../lib/premisesActions";
-import { Region, PremiseForm, TaskScheduleForm } from "@/app/lib/definitions";
+import { Region, PremiseForm, TaskScheduleForm, User } from "@/app/lib/definitions";
 import { lusitana } from "@/app/ui/fonts";
-import { fetchSectionsForm } from "@/app/admin/sections/lib/sections-actions";
+import { fetchSectionById, fetchSectionsForm } from "@/app/admin/sections/lib/sections-actions";
 import { fetchRegionsForm } from "@/app/erp/regions/lib/region-actions";
 import PremiseEditForm from "./tsch-edit-form";
 import { fetchLegalEntities } from "@/app/erp/legal-entities/lib/le-actions";
 import { current } from "@reduxjs/toolkit";
-import { auth } from "@/auth";
+import { auth, getUser } from "@/auth";
 import { getCurrentSections } from "@/app/lib/common-actions";
 import { fetchPremiseForm, fetchPremisesForm } from "@/app/erp/premises/lib/premises-actions";
 import TaskScheduleEditForm from "./tsch-edit-form";
 import { fetchTaskScheduleForm } from "../../lib/tsch-actions";
 import { fetchScheduleTasksForm, fetchTasksForm } from "@/app/erp/tasks/lib/task-actions";
+import DocWrapper from "@/app/lib/doc-wrapper";
+import { fetchDocUserPermissions } from "@/app/admin/permissions/lib/permissios-actions";
 
 async function Page(props: { params: Promise<{ id: string }> }) {
 
     const params = await props.params;
     const id = params.id;
-    // console.log("id: " + id);
 
     const session = await auth();
-    const email = session ? (session.user ? session.user.email : "") : "";
+    const session_user = session ? session.user : null;
+    if (!session_user || !session_user.email) return (<h3 className="text-xs font-medium text-gray-400">Вы не авторизованы!</h3>);
+    const email = session_user.email;
+    const user = await getUser(email as string);
+    if (!user) return (<h3 className="text-xs font-medium text-gray-400">Вы не авторизованы!</h3>);
+    const pageUser = user ? user : {} as User;
     const current_sections = await getCurrentSections(email as string);
 
     const taskSchedule: TaskScheduleForm = await fetchTaskScheduleForm(id, current_sections);
@@ -35,19 +41,30 @@ async function Page(props: { params: Promise<{ id: string }> }) {
     const premises = await fetchPremisesForm(current_sections);
     const legalEntities = await fetchLegalEntities(current_sections);
     const tasks = await fetchScheduleTasksForm(id);
+
+    // const tenant_id = (await fetchSectionById(taskSchedule.section_id)).tenant_id;
+    const tenant_id = pageUser.tenant_id;
+    const userPermissions = await fetchDocUserPermissions(user?.id as string, 'task_schedules');
     return (
         <div className="w-full">
             <div className="flex w-full items-center justify-between">
                 <h1 className={`${lusitana.className} text-2xl`}>План обслуживания</h1>
             </div>
             <h3 className="text-xs font-medium text-gray-400">id: {id}</h3>
-            <TaskScheduleEditForm
-                taskSchedule={taskSchedule}
-                sections={sections}
-                premises={premises}
-                legalEntities={legalEntities}
-                tasks={tasks}
-            />
+
+            <DocWrapper
+                pageUser={pageUser}
+                userSections={sections}
+                userPermissions={userPermissions}
+                docTenantId={tenant_id}
+            >
+                <TaskScheduleEditForm
+                    taskSchedule={taskSchedule}
+                    premises={premises}
+                    legalEntities={legalEntities}
+                    tasks={tasks}
+                />
+            </DocWrapper>
         </div>
 
     );

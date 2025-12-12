@@ -84,27 +84,18 @@ export default async function Page() {
       </div>
       <DocWrapper
         pageUser={pageUser}
+        userSections={sections}
         userPermissions={userPermissions}
         docTenantId={tenant_id}
       >
         <PremiseEditForm
           premise={premise}
           readonly={readonly}
-          sections={sections}
+          // sections={sections}
           regions={regions}
           legalEntities={legalEntities}
         />
       </DocWrapper>
-      {/* <PremiseEditForm
-        premise={premise}
-        userPermissions={userPermissions}
-        userId={user?.id as string}
-        readonly={false}
-        sections={sections}
-        regions={regions}
-        legalEntities={legalEntities}
-        docTenantId=""
-      /> */}
     </main>
   );
 }

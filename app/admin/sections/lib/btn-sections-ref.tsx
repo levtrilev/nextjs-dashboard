@@ -6,11 +6,12 @@ import { Section, SectionForm } from "@/app/lib/definitions";
 import SectionsRefTable from "./sections-ref-table";
 
 import dynamic from 'next/dynamic';
+import { useDocumentStore } from "@/app/store/useDocumentStore";
 const Modal = dynamic(() => import('@/app/lib/common-modal'), { ssr: false });
 
 
 interface IBtnSectionsRefProps {
-  sections: SectionForm[],
+  // sections: SectionForm[],
   handleSelectSection: (
     new_section_id: string, 
     new_section_name: string, 
@@ -20,7 +21,7 @@ interface IBtnSectionsRefProps {
 }
 
 export default function BtnSectionsRef(props: IBtnSectionsRefProps) {
-  // const regions = await fetchRegions();
+  const sections = useDocumentStore.getState().userSections;
   const [modal, setModal] = useState(false);
 
   const openModal = (e: React.MouseEvent<HTMLElement>) => {
@@ -42,7 +43,7 @@ export default function BtnSectionsRef(props: IBtnSectionsRefProps) {
       <Modal open={modal} >
 
         <SectionsRefTable 
-        sections={props.sections} 
+        sections={sections} 
         handleSelectSection={props.handleSelectSection}
         closeModal={closeModal}
         setTerm={setTerm}

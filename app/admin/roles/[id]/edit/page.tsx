@@ -35,7 +35,7 @@ async function Page(props: { params: Promise<{ id: string }> }) {
                 <h1 className={`${lusitana.className} text-2xl`}>Роль</h1>
             </div>
             <h3 className="text-xs font-medium text-gray-400">id: {id}</h3>
-            <RoleEditForm role={role} role_sections={role_sections} tenants={tenants} sections={sections} />
+            <RoleEditForm role={role} role_sections={role_sections} tenants={tenants} userSections={sections} />
         </div>
 
     );

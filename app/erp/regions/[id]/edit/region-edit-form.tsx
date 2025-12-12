@@ -21,8 +21,8 @@ import { TagInput } from "@/app/lib/tags/tag-input";
 
 interface IEditFormProps {
   region: RegionForm;
-  sections: SectionForm[];
-  allTags: string[];
+  // sections: SectionForm[];
+  // allTags: string[];
   lockedByUserId: string | null;
   unlockAction: (id: string, userId: string) => Promise<void>;
   readonly: boolean;
@@ -37,8 +37,7 @@ export default function RegionEditForm(props: IEditFormProps) {
   const router = useRouter();
   const sessionUser = useDocumentStore.getState().sessionUser;
   const docTenantId = useDocumentStore.getState().documentTenantId;
-  // const setAllUserTags = useUserTagStore().setAllTags;
-  // const setAllAccessTags = useAccessTagStore().setAllTags;
+
   const addUserTag = useUserTagStore().addTag;
   const addAccessTag = useAccessTagStore().addTag;
   const docChanged = () => {
@@ -92,17 +91,17 @@ export default function RegionEditForm(props: IEditFormProps) {
     setIsMessageBoxOpen(true);
   }
   useEffect(() => {
-    const handleBeforeUnload = () => {
-      console.log('beforeunload sessionUserId: ' + sessionUser.id);
-      props.unlockAction(region.id, sessionUser.id);
-    };
-    // Снимаем блокировку при уходе со страницы
-    window.addEventListener('beforeunload', handleBeforeUnload);
+    // const handleBeforeUnload = () => {
+    //   console.log('beforeunload sessionUserId: ' + sessionUser.id);
+    //   props.unlockAction(region.id, sessionUser.id);
+    // };
+    // // Снимаем блокировку при уходе со страницы
+    // window.addEventListener('beforeunload', handleBeforeUnload);
 
     return () => {
 
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-      props.unlockAction(region.id, sessionUser.id); // на всякий случай
+      // window.removeEventListener('beforeunload', handleBeforeUnload);
+      // props.unlockAction(region.id, sessionUser.id); // на всякий случай
 
       // Сброс MessageBox при уходе со страницы
       setIsDocumentChanged(false);
@@ -126,9 +125,9 @@ export default function RegionEditForm(props: IEditFormProps) {
     setIsShowMessageBoxCancel(true);
   }, [msgBox.isOKButtonPressed, router]);
 
-  useEffect(() => {
-    useDocumentStore.getState().setAllTags(props.allTags);
-  }, [props.allTags]);
+  // useEffect(() => {
+  //   useDocumentStore.getState().setAllTags(props.allTags);
+  // }, [props.allTags]);
 
   const handleSelectSection = (new_section_id: string, new_section_name: string) => {
     setRegion((prev) => ({
@@ -210,7 +209,7 @@ export default function RegionEditForm(props: IEditFormProps) {
               onChange={(e) => { setRegion((prev) => ({ ...prev, section_id: e.target.value, })); docChanged(); }}
             // onKeyDown={(e) => handleKeyDown(e)}
             />
-            {!props.readonly && <BtnSectionsRef sections={props.sections} handleSelectSection={handleSelectSection} />}
+            {!props.readonly && <BtnSectionsRef handleSelectSection={handleSelectSection} />}
           </div>
         </div>
         {/* second column */}

@@ -15,15 +15,14 @@ import DocWrapper from "@/app/lib/doc-wrapper";
 import { fetchDocUserPermissions } from "@/app/admin/permissions/lib/permissios-actions";
 
 async function Page(props: { params: Promise<{ id: string }> }) {
-    // const user = await getCurrentUser();
     const session = await auth();
-    // const email = session ? (session.user ? session.user.email : "") : "";
     const session_user = session ? session.user : null;
     if (!session_user || !session_user.email) return (<h3 className="text-xs font-medium text-gray-400">Вы не авторизованы!</h3>);
 
     const email = session_user.email;
     const user = await getUser(email as string);
     if (!user) return (<h3 className="text-xs font-medium text-gray-400">Вы не авторизованы!</h3>);
+    const pageUser = user ? user : {} as User;
 
     const current_sections = await getCurrentSections(email as string);
 
@@ -36,9 +35,9 @@ async function Page(props: { params: Promise<{ id: string }> }) {
     }
     const sections = await fetchSectionsForm(current_sections);
     const tenant_id = (await fetchSectionById(region.section_id)).tenant_id;
-    const userPermissions = await fetchDocUserPermissions(user?.id as string, 'premises');
-    const pageUser = user ? user : {} as User
-    const allTags = await fetchAllTags(tenant_id);
+    const userPermissions = await fetchDocUserPermissions(user?.id as string, 'regions');
+
+    // const allTags = await fetchAllTags(tenant_id);
     // console.log("region tenant: " + (await fetchSectionById(region.section_id)).tenant_name);
     // console.log("region tenant: " + JSON.stringify(allTags));
 
@@ -80,13 +79,13 @@ async function Page(props: { params: Promise<{ id: string }> }) {
             </div>
             <DocWrapper
                 pageUser={pageUser}
+                userSections={sections}
                 userPermissions={userPermissions}
                 docTenantId={tenant_id}
             >
                 <RegionEditForm
                     region={region}
-                    sections={sections}
-                    allTags={allTags}
+                    // allTags={allTags}
                     lockedByUserId={freshRecord.editing_by_user_id}
                     unlockAction={unlockRecord}
                     readonly={readonly}

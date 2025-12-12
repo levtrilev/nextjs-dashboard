@@ -21,7 +21,7 @@ import { formatDateForInput } from "@/app/lib/common-utils";
 interface IEditFormProps {
   premise: PremiseForm,
   readonly: boolean,
-  sections: SectionForm[],
+  // sections: SectionForm[],
   regions: RegionForm[],
   legalEntities: LegalEntity[],
 }
@@ -578,7 +578,7 @@ export default function PremiseEditForm(props: IEditFormProps) {
                 readOnly
                 onChange={(e) => { setFormData((prev) => ({ ...prev, section_name: e.target.value, })); docChanged(); }}
               />
-              {!props.readonly && <BtnSectionsRef sections={props.sections} handleSelectSection={handleSelectSection} />}
+              {!props.readonly && <BtnSectionsRef handleSelectSection={handleSelectSection} />}
             </div>
             <div id="section_name-error" aria-live="polite" aria-atomic="true">
               {errors?.section_name &&

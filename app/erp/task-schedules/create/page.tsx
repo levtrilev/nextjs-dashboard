@@ -2,22 +2,34 @@
 //TaskSchedule create Page
 
 import TaskScheduleEditForm from "../[id]/edit/tsch-edit-form";
-import { TaskScheduleForm } from "@/app/lib/definitions";
+import { TaskScheduleForm, User } from "@/app/lib/definitions";
 import { lusitana } from "@/app/ui/fonts";
 import { fetchSectionsForm } from "@/app/admin/sections/lib/sections-actions";
 import { fetchLegalEntities } from "@/app/erp/legal-entities/lib/le-actions";
-import { auth } from "@/auth";
+import { auth, getUser } from "@/auth";
 import { getCurrentSections } from "@/app/lib/common-actions";
 import Breadcrumbs from '@/app/ui/invoices/breadcrumbs';
 import { DateTime } from "next-auth/providers/kakao";
 import { formatDateForInput } from "@/app/lib/common-utils";
 import { fetchPremisesForm } from "../../premises/lib/premises-actions";
 import { fetchTasksForm } from "../../tasks/lib/task-actions";
+import DocWrapper from "@/app/lib/doc-wrapper";
+import { fetchDocUserPermissions } from "@/app/admin/permissions/lib/permissios-actions";
 
 export default async function Page() {
-  const session = await auth();
-  const email = session ? (session.user ? session.user.email : "") : "";
-  const current_sections = await getCurrentSections(email as string);
+    const session = await auth();
+    const session_user = session ? session.user : null;
+    if (!session_user || !session_user.email) return (<h3 className="text-xs font-medium text-gray-400">Вы не авторизованы!</h3>);
+    const email = session_user.email;
+    const user = await getUser(email as string);
+    if (!user) return (<h3 className="text-xs font-medium text-gray-400">Вы не авторизованы!</h3>);
+    const pageUser = user ? user : {} as User;
+    const current_sections = await getCurrentSections(email as string);
+
+    const tenant_id = pageUser.tenant_id;
+    const userPermissions = await fetchDocUserPermissions(user?.id as string, 'task_schedules');
+
+
   const tasks = await fetchTasksForm();
   const taskSchedule: TaskScheduleForm = {
     id: "",
@@ -56,13 +68,19 @@ export default async function Page() {
       <div className="flex w-full items-center justify-between">
         {/* <h1 className={`${lusitana.className} text-2xl`}>Новое помещение</h1> */}
       </div>
-      <TaskScheduleEditForm
-        taskSchedule={taskSchedule}
-        sections={sections}
-        premises={premises}
-        legalEntities={legalEntities}
-        tasks={tasks}
-      />
+      <DocWrapper
+        pageUser={pageUser}
+        userSections={sections}
+        userPermissions={userPermissions}
+        docTenantId={tenant_id}
+      >
+        <TaskScheduleEditForm
+          taskSchedule={taskSchedule}
+          premises={premises}
+          legalEntities={legalEntities}
+          tasks={tasks}
+        />
+      </DocWrapper>
     </main>
   );
 }

@@ -12,7 +12,7 @@ import MessageBoxOKCancel from "@/app/lib/message-box-ok-cancel";
 import { useRouter } from 'next/navigation';
 import {
   setIsCancelButtonPressed, setIsDocumentChanged, setIsMessageBoxOpen,
-  setIsOKButtonPressed, setIsShowMessageBoxCancel, setMessageBoxText, useIsDocumentChanged,
+  setIsOKButtonPressed, setIsShowMessageBoxCancel, setMessageBoxText, useDocumentStore, useIsDocumentChanged,
   useMessageBox
 } from "@/app/store/useDocumentStore";
 import { updRole } from "../../lib/store/use-role-store";
@@ -21,7 +21,7 @@ interface IRoleEditFormProps {
   role: RoleForm,
   role_sections: SectionForm[],
   tenants: Tenant[],
-  sections: SectionForm[],
+  userSections: SectionForm[],
 }
 
 export default function RoleEditForm(props: IRoleEditFormProps) {
@@ -141,6 +141,15 @@ export default function RoleEditForm(props: IRoleEditFormProps) {
     setIsDocumentChanged(false);
     setIsMessageBoxOpen(false);
   }, [msgBox.isOKButtonPressed, router]);
+  useEffect(() => {
+
+    const initializeStoreUserSections = () => {
+      if (props.userSections) {
+        useDocumentStore.getState().setUserSections(props.userSections);
+      }
+    };
+    initializeStoreUserSections();
+  }, [props.userSections]);
   return (
 
     <div >
@@ -203,7 +212,7 @@ export default function RoleEditForm(props: IRoleEditFormProps) {
           {/* add section */}
           <div className="flex justify-between mt-1">
             <div className={`${lusitana.className} p-2 text-gray-400`}>Добавить раздел (выберите):</div>
-            <BtnSectionsRef sections={props.sections} handleSelectSection={handleSelectSection} />
+            <BtnSectionsRef handleSelectSection={handleSelectSection} />
           </div>
         </div>
       </div>
