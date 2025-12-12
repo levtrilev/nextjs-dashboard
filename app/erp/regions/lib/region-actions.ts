@@ -9,15 +9,40 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { auth, signIn } from "@/auth";
 import { Region, RegionForm } from "@/app/lib/definitions";
-
-// try {
-//   const result = await pool.query('SELECT * FROM users');
-//   console.log(result.rows);
-// } catch (err) {
-//   console.error('Ошибка выполнения запроса:', err);
-// }
+import { getCurrentUser } from "@/auth";
 
 const ITEMS_PER_PAGE = 8;
+
+export async function tryLockRecord(recordId: string, userId: string | undefined) {
+
+console.log("tryLockRecord user.id: ", userId);
+  const result = await pool.query(
+    `
+      UPDATE regions
+      SET editing_by_user_id = $1, editing_since = NOW()
+      WHERE id = $2
+        AND (editing_by_user_id IS NULL OR editing_since < NOW() - INTERVAL '30 minutes')
+      RETURNING editing_by_user_id;
+    `,
+    [userId, recordId]
+  );
+
+  const isLockedByMe = result.rows.length > 0;
+  return { success: true, isEditable: isLockedByMe };
+}
+
+export async function unlockRecord(recordId: string, userId: string) {
+  console.log("unlockRecord user.id: ", userId);
+  await pool.query(
+    `
+      UPDATE regions
+      SET editing_by_user_id = NULL, editing_since = NULL
+      WHERE id = $1 AND editing_by_user_id = $2;
+    `,
+    [recordId, userId]
+  );
+  // revalidatePath(`/records/${recordId}/edit`);
+}
 
 //#region CreateRegion
 
@@ -179,7 +204,9 @@ export async function fetchRegion(id: string, current_sections: string) {
         timestamptz,
         date,
         user_tags,
-        access_tags
+        access_tags,
+        editing_by_user_id,
+        editing_since
       FROM your_regions regions
       WHERE id = $2
     `,
@@ -212,6 +239,8 @@ export async function fetchRegionForm(id: string, current_sections: string) {
         regions.date,
         regions.user_tags,
         regions.access_tags,
+        editing_by_user_id,
+        editing_since,
         s.name as section_name
       FROM your_regions regions
       LEFT JOIN sections s on regions.section_id = s.id

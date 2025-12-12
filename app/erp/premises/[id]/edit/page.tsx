@@ -11,7 +11,7 @@ import { fetchLegalEntities } from "@/app/erp/legal-entities/lib/le-actions";
 import { auth, getUser } from "@/auth";
 import { getCurrentSections } from "@/app/lib/common-actions";
 import { fetchDocUserPermissions } from "@/app/admin/permissions/lib/permissios-actions";
-import DocWrapper from "./doc-wrapper";
+import DocWrapper from "../../../../lib/doc-wrapper";
 import { checkReadonly } from "@/app/lib/common-utils";
 
 async function Page(props: { params: Promise<{ id: string }> }) {

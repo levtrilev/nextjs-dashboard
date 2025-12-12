@@ -177,6 +177,8 @@ export type Region = {
   date: DateTime;
   access_tags: string[];
   user_tags: string[];
+  editing_by_user_id: string | null;
+  editing_since: string | null;
 };
 export type RegionForm = {
   id: string;
@@ -191,6 +193,8 @@ export type RegionForm = {
   section_name: string;
   access_tags: string[];
   user_tags: string[];
+  editing_by_user_id: string | null;
+  editing_since: string | null;
 };
 export type LegalEntity = {
   id: string;

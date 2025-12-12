@@ -20,20 +20,23 @@ import { TagInput } from "@/app/lib/tags/tag-input";
 
 
 interface IEditFormProps {
-  region: RegionForm,
-  sections: SectionForm[],
-  allTags: string[],
-  tenant_id: string,
+  region: RegionForm;
+  sections: SectionForm[];
+  allTags: string[];
+  lockedByUserId: string | null;
+  unlockAction: (id: string, userId: string) => Promise<void>;
+  readonly: boolean;
 }
 
-export default function EditForm(props: IEditFormProps) {
+export default function RegionEditForm(props: IEditFormProps) {
   const [region, setRegion] = useState(props.region);
   //#region main
   //================================================================
   const isDocumentChanged = useIsDocumentChanged();
   const msgBox = useMessageBox();
   const router = useRouter();
-
+  const sessionUser = useDocumentStore.getState().sessionUser;
+  const docTenantId = useDocumentStore.getState().documentTenantId;
   // const setAllUserTags = useUserTagStore().setAllTags;
   // const setAllAccessTags = useAccessTagStore().setAllTags;
   const addUserTag = useUserTagStore().addTag;
@@ -58,8 +61,9 @@ export default function EditForm(props: IEditFormProps) {
     }));
     docChanged();
   };
-  const handleBackClick = (e: React.MouseEvent) => {
+  const handleBackClick = async (e: React.MouseEvent) => {
     e.preventDefault();
+    await props.unlockAction(region.id, sessionUser.id);
     if (isDocumentChanged && !msgBox.isOKButtonPressed) {
       setIsShowMessageBoxCancel(true);
       setIsMessageBoxOpen(true);
@@ -72,12 +76,13 @@ export default function EditForm(props: IEditFormProps) {
   const handleSaveClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     try {
-      await upsertTags(region.user_tags, props.tenant_id);
+      await upsertTags(region.user_tags, docTenantId);
       useDocumentStore.getState().addAllTags(region.user_tags);
-      await upsertTags(region.access_tags, props.tenant_id);
+      await upsertTags(region.access_tags, docTenantId);
       useDocumentStore.getState().addAllTags(region.access_tags);
 
       await updateRegion(region);
+      // await props.unlockAction(region.id, sessionUser.id); // Разблокировка - убрать после отладки (ведь форма не закрыта)
       setIsDocumentChanged(false);
       setMessageBoxText('Документ сохранен.');
     } catch (error) {
@@ -87,8 +92,18 @@ export default function EditForm(props: IEditFormProps) {
     setIsMessageBoxOpen(true);
   }
   useEffect(() => {
+    // const handleBeforeUnload = () => {
+    //   console.log('beforeunload sessionUserId: ' + sessionUser.id);
+    //   props.unlockAction(region.id, sessionUser.id);
+    // };
+    // // Снимаем блокировку при уходе со страницы
+    // window.addEventListener('beforeunload', handleBeforeUnload);
+
     return () => {
-      // Сброс при уходе со страницы
+
+      // window.removeEventListener('beforeunload', handleBeforeUnload);
+      // props.unlockAction(region.id, sessionUser.id); // на всякий случай
+      // Сброс MessageBox при уходе со страницы
       setIsDocumentChanged(false);
       setIsMessageBoxOpen(false);
       setIsOKButtonPressed(false);
@@ -110,11 +125,6 @@ export default function EditForm(props: IEditFormProps) {
     setIsShowMessageBoxCancel(true);
   }, [msgBox.isOKButtonPressed, router]);
 
-  // useEffect(() => {
-  //   setAllUserTags(allTags);
-  //   setAllAccessTags(allTags);
-  // }, [allTags, setAllUserTags, setAllAccessTags]);
-
   useEffect(() => {
     useDocumentStore.getState().setAllTags(props.allTags);
   }, [props.allTags]);
@@ -129,6 +139,19 @@ export default function EditForm(props: IEditFormProps) {
   };
   //================================================================
   //#endregion
+
+  // useEffect(() => {
+  //   const handleBeforeUnload = () => {
+  //     props.unlockAction(region.id, sessionUser.id);
+  //   };
+  //   // Снимаем блокировку при уходе со страницы
+  //   window.addEventListener('beforeunload', handleBeforeUnload);
+  //   return () => {
+  //     window.removeEventListener('beforeunload', handleBeforeUnload);
+  //     props.unlockAction(region.id, sessionUser.id); // на всякий случай
+  //   };
+  // }, [props.unlockAction, region.id]);
+
   return (
     <div>
       <div className="flex flex-col md:flex-row gap-4 w-full">

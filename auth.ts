@@ -6,17 +6,31 @@ import { z } from "zod";
 import pool from "@/db";
 import bcrypt from "bcrypt";
 import type { User } from "@/app/lib/definitions";
+import { cookies } from "next/headers";
 
 export async function getUser(email: string): Promise<User | undefined> {
   try {
     // const user = await sql<User>`SELECT * FROM users WHERE email=${email}`;
-    const user = await pool.query<User>('SELECT * FROM users WHERE email=$1', [email]);
+    const user = await pool.query<User>("SELECT * FROM users WHERE email=$1", [
+      email,
+    ]);
     // console.error(user.rows[0].password + " " + user.rows[0].email + " " + user.rows[0].id);
     return user.rows[0];
   } catch (error) {
     console.error("Failed to fetch user:", error);
     throw new Error("Failed to fetch user.");
   }
+}
+export async function getCurrentUser() {
+  const cookieStore = await cookies();
+  const sessionToken = cookieStore.get('session')?.value;
+  if (!sessionToken) return null;
+
+  const user = await pool.query<User>(
+    "SELECT * FROM users WHERE session_token = $1",
+    [sessionToken]
+  );
+  return user.rows[0] || null;
 }
 
 export const { auth, signIn, signOut } = NextAuth({
@@ -32,7 +46,10 @@ export const { auth, signIn, signOut } = NextAuth({
           const { email, password } = parsedCredentials.data;
           const user = await getUser(email);
           if (!user) return null;
-          const passwordsMatch = await bcrypt.compare(password, user.password ?? "");
+          const passwordsMatch = await bcrypt.compare(
+            password,
+            user.password ?? ""
+          );
 
           if (passwordsMatch) return user;
         }

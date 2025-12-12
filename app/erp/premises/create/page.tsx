@@ -13,7 +13,7 @@ import Breadcrumbs from '@/app/ui/invoices/breadcrumbs';
 import { DateTime } from "next-auth/providers/kakao";
 import { checkReadonly, formatDateForInput } from "@/app/lib/common-utils";
 import { fetchDocUserPermissions } from "@/app/admin/permissions/lib/permissios-actions";
-import DocWrapper from "../[id]/edit/doc-wrapper";
+import DocWrapper from "../../../lib/doc-wrapper";
 
 export default async function Page() {
   const session = await auth();
