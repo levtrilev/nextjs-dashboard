@@ -24,13 +24,13 @@ async function Page(props: { params: Promise<{ id: string }> }) {
     const email = session_user.email;
     const user = await getUser(email as string);
     if (!user) return (<h3 className="text-xs font-medium text-gray-400">Вы не авторизованы!</h3>);
-    const pageUser = user ? user : {} as User;
+    const pageUser = user;
 
     const current_sections = await getCurrentSections(email as string);
     const sections = await fetchSectionsForm(current_sections);
     // const tenant_id = (await fetchSectionById(task.section_id)).tenant_id;
     const tenant_id = pageUser.tenant_id;
-    const userPermissions = await fetchDocUserPermissions(user?.id as string, 'tasks');
+    const userPermissions = await fetchDocUserPermissions(user.id, 'tasks');
 
     const params = await props.params;
     const id = params.id;

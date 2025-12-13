@@ -60,7 +60,7 @@ export default async function TasksTable({
                       </td>
                       <td className="w-1/12 whitespace-nowrap py-2 pr-3">
                         <div className="flex justify-end gap-3">
-                          <BtnEditTaskLink id={task.id} />
+                          {/* <BtnEditTaskLink id={task.id} /> */}
                           <BtnDeleteTask id={task.id} name={task.name} />
                         </div>
                       </td>

@@ -137,8 +137,8 @@ export default function TaskEditForm(props: IEditFormProps) {
     if (errors) {
       setShowErrors(true);
       console.log("ошибки есть: " + JSON.stringify(errors));
-      console.log(`tenant_id: ${formData.tenant_id}, section_id: ${formData.section_id}`);
-      console.log(`author_id: ${formData.author_id}, editor_id: ${formData.editor_id}`);
+      // console.log(`tenant_id: ${formData.tenant_id}, section_id: ${formData.section_id}`);
+      // console.log(`author_id: ${formData.author_id}, editor_id: ${formData.editor_id}`);
       return;
     }
     if (formData.id === "") {
@@ -217,7 +217,7 @@ export default function TaskEditForm(props: IEditFormProps) {
                 label="Название:" type="text" w={["w-4/16", "w-13/16"]}
                 onChange={(value) => handleInputChange('name', value)}
                 readonly={props.readonly}
-                errors={errors?.name as string[] | undefined}
+                errors={errors?.name?._errors as string[] | undefined}
               />
               {/* taskSchedule_name */}
               <InputField name="taskSchedule_name" value={formData.task_schedule_name as string}
@@ -226,16 +226,16 @@ export default function TaskEditForm(props: IEditFormProps) {
                 onChange={(value) => {}}
                 refBook={<BtnTaskScheduleRef taskSchedules={props.taskSchedules} handleSelectTaskSchedule={handleSelectTaskSchedule} />}
                 readonly={props.readonly}
-                errors={errors?.task_schedule_name as string[] | undefined}
+                errors={errors?.task_schedule_name?._errors as string[] | undefined}
               />
-              {/* section_id */}
+              {/* section_name */}
               <InputField name="section_name" value={formData.section_name as string}
                 label="Раздел:" type="text" w={["w-6/16", "w-11/16"]}
                 // onChange={(value) => handleInputChange('section_id', value)}
                 onChange={(value) => {}}
                 refBook={<BtnSectionsRef handleSelectSection={handleSelectSection} />}
                 readonly={props.readonly}
-                errors={errors?.section_id as string[] | undefined}
+                errors={errors?.section_name?._errors as string[] | undefined}
               />
             </div>
 
@@ -247,14 +247,14 @@ export default function TaskEditForm(props: IEditFormProps) {
                 label="Дата начала действия:" type="date" w={["w-8/16", "w-10/16"]}
                 onChange={(value) => handleInputChange('date_start', value)}
                 readonly={props.readonly}
-                errors={errors?.date_start as string[] | undefined}
+                errors={errors?.date_start?._errors as string[] | undefined}
               />
               {/* date_end */}
               <InputField name="date_end" value={formatDateForInput(formData.date_end)}
                 label="Дата окончания действия:" type="date" w={["w-8/16", "w-10/16"]}
                 onChange={(value) => handleInputChange('date_end', value)}
                 readonly={props.readonly}
-                errors={errors?.date_end as string[] | undefined}
+                errors={errors?.date_end?._errors as string[] | undefined}
               />
             </div>
           </div>

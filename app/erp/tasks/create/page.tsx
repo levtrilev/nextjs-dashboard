@@ -31,7 +31,7 @@ export default async function Page() {
   const sections = await fetchSectionsForm(current_sections);
   // const tenant_id = (await fetchSectionById(task.section_id)).tenant_id;
   const tenant_id = pageUser.tenant_id;
-  const userPermissions = await fetchDocUserPermissions(user?.id as string, 'tasks');
+  const userPermissions = await fetchDocUserPermissions(user.id as string, 'tasks');
   // const readonly_locked = !editingByCurrentUser;
   const readonly_locked = false
   //    #endregion
