@@ -37,10 +37,7 @@ async function Page(props: { params: Promise<{ id: string }> }) {
     const tenant_id = (await fetchSectionById(region.section_id)).tenant_id;
     const userPermissions = await fetchDocUserPermissions(user?.id as string, 'regions');
 
-    // const allTags = await fetchAllTags(tenant_id);
-    // console.log("region tenant: " + (await fetchSectionById(region.section_id)).tenant_name);
-    // console.log("region tenant: " + JSON.stringify(allTags));
-
+    //#region Lock Document
     // Проверяем, кто редактирует
     const isEditable =
         region.editing_by_user_id === null ||
@@ -66,6 +63,7 @@ async function Page(props: { params: Promise<{ id: string }> }) {
 
     const editingByCurrentUser = freshRecord.editing_by_user_id === user.id;
     const readonly = !editingByCurrentUser;
+    //#endregion
     return (
         <div className="w-full">
             <div className="flex w-full items-center justify-between">
@@ -85,7 +83,6 @@ async function Page(props: { params: Promise<{ id: string }> }) {
             >
                 <RegionEditForm
                     region={region}
-                    // allTags={allTags}
                     lockedByUserId={freshRecord.editing_by_user_id}
                     unlockAction={unlockRecord}
                     readonly={readonly}

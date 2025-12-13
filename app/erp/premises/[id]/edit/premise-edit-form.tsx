@@ -1,7 +1,7 @@
 // Premise EditForm
 'use client';
 import { useEffect, useState } from "react";
-import { DocUserPermissions, LegalEntity, PremiseForm, RegionForm, SectionForm } from "@/app/lib/definitions";
+import { LegalEntity, PremiseForm, RegionForm, SectionForm } from "@/app/lib/definitions";
 import { createPremise, updatePremise } from "../../lib/premises-actions";
 import BtnSectionsRef from "@/app/admin/sections/lib/btn-sections-ref";
 import BtnRegionsRef from "@/app/erp/regions/lib/btn-regions-ref";
@@ -94,12 +94,13 @@ type FormData = z.infer<typeof PremiseFormSchemaFull>;
 //#endregion
 
 export default function PremiseEditForm(props: IEditFormProps) {
+  //#region unified form hooks and variables 
   const addUserTag = useUserTagStore().addTag;
   const addAccessTag = useAccessTagStore().addTag;
   const docTenantId = useDocumentStore.getState().documentTenantId;
   const sessionUserId = useDocumentStore.getState().sessionUser.id;
   const [showErrors, setShowErrors] = useState(false);
-  const [formData, setFormData] = useState<FormData>(props.premise);
+  // const [formData, setFormData] = useState<FormData>(props.premise);
   const isDocumentChanged = useIsDocumentChanged();
   const msgBox = useMessageBox();
   const docChanged = () => {
@@ -119,7 +120,9 @@ export default function PremiseEditForm(props: IEditFormProps) {
       editor_id: sessionUserId,
     }));
   }, [sessionUserId]);
-
+  //#endregion
+  
+  const [formData, setFormData] = useState<FormData>(props.premise);
   const validate = () => {
     const res = PremiseFormSchema.safeParse({
       ...formData,
@@ -627,8 +630,6 @@ export default function PremiseEditForm(props: IEditFormProps) {
           <div className="w-full md:w-1/2">
             <button
               disabled={props.readonly}
-              // className="bg-blue-400 text-white w-full rounded-md border p-2 
-              // hover:bg-blue-100 hover:text-gray-500 cursor-pointer"
               className={`w-full rounded-md border p-2 ${props.readonly
                 ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                 : 'bg-blue-400 text-white hover:bg-blue-100 hover:text-gray-500 cursor-pointer'

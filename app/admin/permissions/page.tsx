@@ -32,7 +32,7 @@ async function Page() {
                 <h1 className={`${lusitana.className} text-2xl`}>Роли и полномочия</h1>
             </div>
             {(isSuperadmin || isAdmin) && <NewPermission doctypes={doctypes} tenants={tenants} />}
-            <PermissionsTable permissions={permissions} admin={isSuperadmin || isAdmin} />
+            <PermissionsTable permissions={permissions} admin={isSuperadmin || isAdmin} allRoles={roles}/>
         </div>
     );
 }

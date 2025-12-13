@@ -21,7 +21,7 @@ export default function DocWrapper(props: IDocWrapperProps) {
     //#region sessionUser & userSections
     useEffect(() => {
         const initializeStoreUser = () => {
-            if (!useDocumentStore.getState().sessionUser.id) {
+            if (useDocumentStore.getState().sessionUser.id !== props.pageUser.id) {
                 useDocumentStore.getState().setSessionUser(props.pageUser);
             }
         };

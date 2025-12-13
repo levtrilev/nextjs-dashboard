@@ -1,14 +1,16 @@
 'use client';
-import { Permission } from '@/app/lib/definitions';
+import { Permission, RoleForm } from '@/app/lib/definitions';
 import MessageBoxOKCancel from '@/app/lib/message-box-ok-cancel';
 import { useEffect, useState } from 'react';
 import { setIsCancelButtonPressed, setIsDocumentChanged, setIsMessageBoxOpen, setIsOKButtonPressed, setIsShowMessageBoxCancel, setMessageBoxText, useMessageBox } from '@/app/store/useDocumentStore';
 import { TrashIcon } from '@heroicons/react/24/outline';
 import { deletePermission } from './permissios-actions';
+import { useRoles, fillRoles } from '../../roles/lib/store/use-role-store';
 
 interface IDoctypeTableProps {
-    permissions: Permission[],
-    admin: boolean | undefined,
+    permissions: Permission[];
+    admin: boolean | undefined;
+    allRoles: RoleForm[];
 }
 export const PermissionsTable: React.FC<IDoctypeTableProps> = (props: IDoctypeTableProps) => {
     const datePlaceHolder = "01.01.2025";
@@ -24,6 +26,7 @@ export const PermissionsTable: React.FC<IDoctypeTableProps> = (props: IDoctypeTa
     useEffect(
         () => {
             setIsShowMessageBoxCancel(false);
+            fillRoles(props.allRoles);
         },
         []
     );

@@ -238,6 +238,7 @@ export default function TaskScheduleEditForm(props: IEditFormProps) {
   //   },
   // ];
   const tasks = props.tasks
+  const readonly = false;
   return (
     <div>
       {!pdfUrl && (
@@ -251,6 +252,7 @@ export default function TaskScheduleEditForm(props: IEditFormProps) {
               <InputField name="name" value={formData.name}
                 label="Название:" type="text" w={["w-4/16", "w-13/16"]}
                 onChange={(value) => handleInputChange('name', value)}
+                readonly={readonly}
                 errors={errors?.name as string[] | undefined}
               />
               {/* schedule_owner_name */}
@@ -258,6 +260,7 @@ export default function TaskScheduleEditForm(props: IEditFormProps) {
                 label="Владелец плана:" type="text" w={["w-6/16", "w-11/16"]}
                 onChange={(value) => handleInputChange('schedule_owner_name', value)}
                 refBook={<BtnLegalEntitiesRef legalEntities={props.legalEntities} handleSelectLE={handleSelectOwner} elementIdPrefix="schedule_owner_name_" />}
+                readonly={readonly}
                 errors={errors?.schedule_owner_name as string[] | undefined}
               />
               {/* premise_name */}
@@ -265,12 +268,14 @@ export default function TaskScheduleEditForm(props: IEditFormProps) {
                 label="Помещение:" type="text" w={["w-6/16", "w-11/16"]}
                 onChange={(value) => handleInputChange('premise_name', value)}
                 refBook={<BtnPremisesRef premises={props.premises} handleSelectPremise={handleSelectPremise} />}
+                readonly={readonly}
                 errors={errors?.premise_name as string[] | undefined}
               />
               {/* description */}
               <InputField name="description" value={formData.description}
                 label="Описание:" type="text" w={["w-4/16", "w-13/16"]}
                 onChange={(value) => handleInputChange('description', value)}
+                readonly={readonly}
                 errors={errors?.description as string[] | undefined}
               />
             </div>
@@ -282,18 +287,21 @@ export default function TaskScheduleEditForm(props: IEditFormProps) {
               <InputField name="date" value={formatDateForInput(formData.date)}
                 label="Дата принятия плана:" type="date" w={["w-8/16", "w-10/16"]}
                 onChange={(value) => handleInputChange('date', value)}
+                readonly={readonly}
                 errors={errors?.date as string[] | undefined}
               />
               {/* date_start */}
               <InputField name="date_start" value={formatDateForInput(formData.date_start)}
                 label="Дата начала действия:" type="date" w={["w-8/16", "w-10/16"]}
                 onChange={(value) => handleInputChange('date_start', value)}
+                readonly={readonly}
                 errors={errors?.date_start as string[] | undefined}
               />
               {/* date_end */}
               <InputField name="date_end" value={formatDateForInput(formData.date_end)}
                 label="Дата окончания действия:" type="date" w={["w-8/16", "w-10/16"]}
                 onChange={(value) => handleInputChange('date_end', value)}
+                readonly={readonly}
                 errors={errors?.date_end as string[] | undefined}
               />
               {/* section_name */}
@@ -301,6 +309,7 @@ export default function TaskScheduleEditForm(props: IEditFormProps) {
                 label="Раздел:" type="text" w={["w-4/16", "w-13/16"]}
                 onChange={(value) => handleInputChange('section_name', value)}
                 refBook={<BtnSectionsRef handleSelectSection={handleSelectSection} />}
+                readonly={readonly}
                 errors={errors?.section_name as string[] | undefined}
               />
 

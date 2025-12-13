@@ -46,9 +46,15 @@ export type Task = {
   task_schedule_id: string | null;
   is_periodic: boolean;
   period_days: number | null;
+  section_id: string;
+  tenant_id: string;
   username?: string;
+  author_id: string;
+  editor_id: string;
   timestamptz?: string;
   date_created?: Date;
+  editing_by_user_id: string | null;
+  editing_since: string | null;
 };
 export type TaskForm = {
   id: string;
@@ -56,11 +62,19 @@ export type TaskForm = {
   date_start: Date | string;
   date_end: Date | string;
   task_schedule_id: string | null;
+  task_schedule_name: string | null;
   is_periodic: boolean;
   period_days: number | null;
+  section_id: string;
+  section_name: string;
+  tenant_id: string;
   username?: string;
+  author_id: string;
+  editor_id: string;
   timestamptz?: string;
   date_created?: Date;
+  editing_by_user_id: string | null;
+  editing_since: string | null;
 };
 
 export type TaskSchedule = {

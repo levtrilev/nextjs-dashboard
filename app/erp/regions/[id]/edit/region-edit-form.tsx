@@ -21,8 +21,6 @@ import { TagInput } from "@/app/lib/tags/tag-input";
 
 interface IEditFormProps {
   region: RegionForm;
-  // sections: SectionForm[];
-  // allTags: string[];
   lockedByUserId: string | null;
   unlockAction: (id: string, userId: string) => Promise<void>;
   readonly: boolean;

@@ -73,32 +73,43 @@ const ITEMS_PER_PAGE = 8;
 //     section_id,
 //   } = validatedFields.data;
 
-export async function createTask(
-  task: Task
-) {
+export async function createTask(task: Task) {
   const session = await auth();
   const username = session?.user?.name;
   const date_created = new Date().toISOString();
-
+  const {
+    name,
+    date_start,
+    date_end,
+    task_schedule_id,
+    is_periodic,
+    period_days,
+    section_id,
+  } = task;
   try {
-    await pool.query(`
+    await pool.query(
+      `
       INSERT INTO tasks (
-        name, date_start, date_end, 
+        name, date_start, date_end, task_schedule_id,
         is_periodic, period_days, 
-        username
-      ) VALUES ($1, $2, $3, $4, $5, $6)
-    `, [
-      task.name,
-      task.date_start,
-      task.date_end,
-      task.is_periodic,
-      task.period_days,
-      username,
-    ]);
+        username, section_id
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+    `,
+      [
+        name,
+        date_start,
+        date_end,
+        task_schedule_id,
+        is_periodic,
+        period_days,
+        username,
+        section_id,
+      ]
+    );
   } catch (error) {
     console.error("Не удалось создать задачу:", error);
     return {
-      message: "Ошибка базы данных: Не удалось создать задачу.",
+      message: "Ошибка базы данных: Не удалось создать задачу: " + error,
     };
   }
 
@@ -122,10 +133,12 @@ export async function updateTask(task: Task) {
     task_schedule_id,
     is_periodic,
     period_days,
+    section_id,
   } = task;
 
   try {
-    await pool.query(`
+    await pool.query(
+      `
       UPDATE tasks SET
         name = $1,
         date_start = $2,
@@ -133,21 +146,26 @@ export async function updateTask(task: Task) {
         task_schedule_id = $4,
         is_periodic = $5,
         period_days = $6,
-        username = $7
+        username = $7,
+        section_id = $9,
+        timestamptz = now()
       WHERE id = $8
-    `, [
-      name,
-      date_start,
-      date_end,
-      task_schedule_id,
-      is_periodic,
-      period_days,
-      username,
-      id,
-    ]);
+    `,
+      [
+        name,
+        date_start,
+        date_end,
+        task_schedule_id,
+        is_periodic,
+        period_days,
+        username,
+        id,
+        section_id,
+      ]
+    );
   } catch (error) {
     console.error("Не удалось обновить задачу:", error);
-    throw new Error("Ошибка базы данных: Не удалось обновить задачу.");
+    throw new Error("Ошибка базы данных: Не удалось обновить задачу: " + error);
   }
 
   revalidatePath("/erp/tasks");
@@ -169,7 +187,8 @@ export async function deleteTask(id: string) {
 
 export async function fetchTask(id: string) {
   try {
-    const data = await pool.query<Task>(`
+    const data = await pool.query<Task>(
+      `
       SELECT
         id,
         name,
@@ -179,11 +198,15 @@ export async function fetchTask(id: string) {
         is_periodic,
         period_days,
         username,
+        editing_by_user_id,
+        editing_since,
         timestamptz,
         date_created
       FROM tasks
       WHERE id = $1
-    `, [id]);
+    `,
+      [id]
+    );
 
     return data.rows[0];
   } catch (err) {
@@ -194,7 +217,8 @@ export async function fetchTask(id: string) {
 
 export async function fetchTaskForm(id: string) {
   try {
-    const data = await pool.query<TaskForm>(`
+    const data = await pool.query<TaskForm>(
+      `
       SELECT
         tasks.id,
         tasks.name,
@@ -204,10 +228,18 @@ export async function fetchTaskForm(id: string) {
         tasks.is_periodic,
         tasks.period_days,
         tasks.username,
-        tasks.timestamptz
+        tasks.editing_by_user_id,
+        tasks.editing_since,
+        tasks.timestamptz,
+        sections.name AS section_name,
+        task_schedules.name AS task_schedule_name
       FROM tasks
+      LEFT JOIN sections ON tasks.section_id = sections.id
+      LEFT JOIN task_schedules ON tasks.task_schedule_id = task_schedules.id
       WHERE tasks.id = $1
-    `, [id]);
+    `,
+      [id]
+    );
 
     return data.rows[0];
   } catch (err) {
@@ -218,7 +250,8 @@ export async function fetchTaskForm(id: string) {
 
 export async function fetchTasks() {
   try {
-    const data = await pool.query<Task>(`
+    const data = await pool.query<Task>(
+      `
       SELECT
         id,
         name,
@@ -233,7 +266,9 @@ export async function fetchTasks() {
         date_created
       FROM tasks
       ORDER BY name ASC
-    `, []);
+    `,
+      []
+    );
 
     return data.rows;
   } catch (err) {
@@ -244,7 +279,8 @@ export async function fetchTasks() {
 
 export async function fetchTasksForm() {
   try {
-    const data = await pool.query<TaskForm>(`
+    const data = await pool.query<TaskForm>(
+      `
       SELECT
         tasks.id,
         tasks.name,
@@ -257,7 +293,9 @@ export async function fetchTasksForm() {
         tasks.timestamptz
       FROM tasks
       ORDER BY tasks.name ASC
-    `, []);
+    `,
+      []
+    );
 
     return data.rows;
   } catch (err) {
@@ -268,7 +306,8 @@ export async function fetchTasksForm() {
 
 export async function fetchScheduleTasksForm(schedule_id: string) {
   try {
-    const data = await pool.query<TaskForm>(`
+    const data = await pool.query<TaskForm>(
+      `
       SELECT
         tasks.id,
         tasks.name,
@@ -282,7 +321,9 @@ export async function fetchScheduleTasksForm(schedule_id: string) {
       FROM tasks
       WHERE tasks.task_schedule_id = $1
       ORDER BY tasks.name ASC
-    `, [schedule_id]);
+    `,
+      [schedule_id]
+    );
 
     return data.rows;
   } catch (err) {
@@ -295,14 +336,12 @@ export async function fetchScheduleTasksForm(schedule_id: string) {
 
 //#region Filtered Tasks
 
-export async function fetchFilteredTasks(
-  query: string,
-  currentPage: number,
-) {
+export async function fetchFilteredTasks(query: string, currentPage: number) {
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
   try {
-    const tasks = await pool.query<TaskForm>(`
+    const tasks = await pool.query<TaskForm>(
+      `
       SELECT
         tasks.id,
         tasks.name,
@@ -318,7 +357,9 @@ export async function fetchFilteredTasks(
         tasks.name ILIKE $1
       ORDER BY tasks.name ASC
       LIMIT $2 OFFSET $3
-    `, [`%${query}%`, ITEMS_PER_PAGE, offset]);
+    `,
+      [`%${query}%`, ITEMS_PER_PAGE, offset]
+    );
 
     return tasks.rows;
   } catch (error) {
@@ -329,10 +370,13 @@ export async function fetchFilteredTasks(
 
 export async function fetchTasksPages(query: string) {
   try {
-    const count = await pool.query(`
+    const count = await pool.query(
+      `
       SELECT COUNT(*) FROM tasks
       WHERE tasks.name ILIKE $1
-    `, [`%${query}%`]);
+    `,
+      [`%${query}%`]
+    );
 
     const totalPages = Math.ceil(Number(count.rows[0].count) / ITEMS_PER_PAGE);
     return totalPages;
@@ -343,3 +387,36 @@ export async function fetchTasksPages(query: string) {
 }
 
 //#endregion
+
+export async function unlockRecord(recordId: string, userId: string) {
+  // console.log("unlockRecord user.id: ", userId);
+  await pool.query(
+    `
+      UPDATE tasks
+      SET editing_by_user_id = NULL, editing_since = NULL
+      WHERE id = $1 AND editing_by_user_id = $2;
+    `,
+    [recordId, userId]
+  );
+  // revalidatePath(`/records/${recordId}/edit`);
+}
+
+export async function tryLockRecord(
+  recordId: string,
+  userId: string | undefined
+) {
+  // console.log("tryLockRecord user.id: ", userId);
+  const result = await pool.query(
+    `
+      UPDATE tasks
+      SET editing_by_user_id = $1, editing_since = NOW()
+      WHERE id = $2
+        AND (editing_by_user_id IS NULL OR editing_since < NOW() - INTERVAL '30 minutes')
+      RETURNING editing_by_user_id;
+    `,
+    [userId, recordId]
+  );
+
+  const isLockedByMe = result.rows.length > 0;
+  return { success: true, isEditable: isLockedByMe };
+}

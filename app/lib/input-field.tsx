@@ -1,17 +1,18 @@
 import React, { JSX } from 'react';
 
-interface InputFieldProps {
+interface IInputFieldProps {
     label: string; // Текст метки
     name: string; // Имя поля
     value: string; // Значение поля
     w: string[]; // ширина элементов label/input, например w = ["w-6/16", "w-10/16"]
     type: string; // type для input-элемента
     onChange: (value: string | Date) => void; // Функция для обновления значения
-    refBook?: JSX.Element
+    refBook?: JSX.Element;
+    readonly: boolean;
     errors?: string[]; // Массив ошибок
 }
 
-const InputField: React.FC<InputFieldProps> = ({
+const InputField: React.FC<IInputFieldProps> = ({
     label,
     name,
     value,
@@ -19,6 +20,7 @@ const InputField: React.FC<InputFieldProps> = ({
     type,
     onChange,
     refBook,
+    readonly,
     errors,
 }) => {
     const labelClassName = `${w[0]} text-sm text-blue-900 font-medium flex items-center p-2`;
@@ -39,12 +41,13 @@ const InputField: React.FC<InputFieldProps> = ({
                     type={type}
                     name={name}
                     className={inputClassName}
+                    disabled={readonly}
                     value={value}
                     onChange={type !== "date"
                         ? (e) => onChange(e.target.value)
                         : (e) => onChange(new Date(e.target.value))}
                 />
-                {refBook}
+                {!readonly && refBook}
             </div>
 
             {/* Блок с выводом ошибок */}
