@@ -17,6 +17,7 @@ import {
   setIsShowMessageBoxCancel, setMessageBoxText, useDocumentStore, useIsDocumentChanged, useMessageBox
 } from "@/app/store/useDocumentStore";
 import InputField from "@/app/lib/input-field";
+import { useRouter } from "next/navigation";
 
 interface IEditFormProps {
   task: TaskForm;
@@ -72,16 +73,12 @@ export default function TaskEditForm(props: IEditFormProps) {
   // const [formData, setFormData] = useState<FormData>(props.premise);
   const isDocumentChanged = useIsDocumentChanged();
   const msgBox = useMessageBox();
+  const router = useRouter();
   const docChanged = () => {
     setIsDocumentChanged(true);
     setMessageBoxText('Документ изменен. Закрыть без сохранения?');
   };
-  const showMsgSaved = () => {
-    setIsDocumentChanged(false);
-    setMessageBoxText('Документ сохранен.');
-    setIsShowMessageBoxCancel(false);
-    setIsMessageBoxOpen(true);
-  }
+
   useEffect(() => {
     setFormData((prev) => ({
       ...prev,
@@ -91,19 +88,6 @@ export default function TaskEditForm(props: IEditFormProps) {
   }, [sessionUserId]);
   //#endregion
 
-  const handleBackClick = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    if (props.unlockAction) await props.unlockAction(props.task.id, sessionUserId);
-    if (isDocumentChanged && !msgBox.isOKButtonPressed) {
-      setIsShowMessageBoxCancel(true);
-      setIsMessageBoxOpen(true);
-    } else if (isDocumentChanged && msgBox.isOKButtonPressed) {
-    } else if (!isDocumentChanged) {
-      // router.push('/erp/regions/');
-      window.history.back();
-    }
-  };
-
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [formData, setFormData] = useState<FormData>(props.task as FormData);
 
@@ -112,9 +96,9 @@ export default function TaskEditForm(props: IEditFormProps) {
     setFormData((prev) => ({
       ...prev,
       author_id: sessionUserId,
-      editor_id: sessionUserId,
+      tenant_id: docTenantId,
     }));
-  }, [sessionUserId]);
+  }, []);
 
   const validate = () => {
     const res = TaskFormSchema.safeParse({
@@ -130,9 +114,9 @@ export default function TaskEditForm(props: IEditFormProps) {
   const handleSubmit = async (e: React.MouseEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (formData.is_periodic === null) {
-      formData.is_periodic = false;
-    }
+    // if (formData.is_periodic === null) {
+    //   formData.is_periodic = false;
+    // }
     const errors = validate();
     if (errors) {
       setShowErrors(true);
@@ -141,15 +125,39 @@ export default function TaskEditForm(props: IEditFormProps) {
       // console.log(`author_id: ${formData.author_id}, editor_id: ${formData.editor_id}`);
       return;
     }
-    if (formData.id === "") {
-      await createTask(formData);
-      showMsgSaved();
-    } else {
-      await updateTask(formData);
-      showMsgSaved();
+    try {
+      if (formData.id === "") {
+        await createTask(formData);
+        // setMessageBoxText('Документ сохранен.');
+        setTimeout(() => {
+          router.push('/erp/tasks');
+        }, 2000);
+      } else {
+        await updateTask(formData);
+      }
+      setIsDocumentChanged(false);
+      setMessageBoxText('Документ сохранен.');
+    } catch (error) {
+      if (String(error) === 'NEXT_REDIRECT') {
+        setMessageBoxText('Документ не сохранен! :' + String(error));
+      }
+      // alert('Документ не сохранен! :' + String(error));
     }
-
+    setIsShowMessageBoxCancel(false);
+    setIsMessageBoxOpen(true);
   }
+  const handleBackClick = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (props.unlockAction) await props.unlockAction(props.task.id, sessionUserId);
+    if (isDocumentChanged && !msgBox.isOKButtonPressed) {
+      setIsShowMessageBoxCancel(true);
+      setIsMessageBoxOpen(true);
+    } else if (isDocumentChanged && msgBox.isOKButtonPressed) {
+    } else if (!isDocumentChanged) {
+      // router.push('/erp/regions/');
+      window.history.back();
+    }
+  };
   const handleSelectSection = (new_section_id: string, new_section_name: string, new_section_tenant_id: string) => {
     setFormData((prev) => ({
       ...prev,
@@ -223,7 +231,7 @@ export default function TaskEditForm(props: IEditFormProps) {
               <InputField name="taskSchedule_name" value={formData.task_schedule_name as string}
                 label="принадлежит плану обслуживания:" type="text" w={["w-6/16", "w-11/16"]}
                 // onChange={(value) => handleInputChange('task_schedule_id', value)}
-                onChange={(value) => {}}
+                onChange={(value) => { }}
                 refBook={<BtnTaskScheduleRef taskSchedules={props.taskSchedules} handleSelectTaskSchedule={handleSelectTaskSchedule} />}
                 readonly={props.readonly}
                 errors={errors?.task_schedule_name?._errors as string[] | undefined}
@@ -232,7 +240,7 @@ export default function TaskEditForm(props: IEditFormProps) {
               <InputField name="section_name" value={formData.section_name as string}
                 label="Раздел:" type="text" w={["w-6/16", "w-11/16"]}
                 // onChange={(value) => handleInputChange('section_id', value)}
-                onChange={(value) => {}}
+                onChange={(value) => { }}
                 refBook={<BtnSectionsRef handleSelectSection={handleSelectSection} />}
                 readonly={props.readonly}
                 errors={errors?.section_name?._errors as string[] | undefined}

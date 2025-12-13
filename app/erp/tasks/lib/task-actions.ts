@@ -85,6 +85,8 @@ export async function createTask(task: Task) {
     is_periodic,
     period_days,
     section_id,
+    tenant_id,
+    author_id,
   } = task;
   try {
     await pool.query(
@@ -92,8 +94,9 @@ export async function createTask(task: Task) {
       INSERT INTO tasks (
         name, date_start, date_end, task_schedule_id,
         is_periodic, period_days, 
-        username, section_id
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        username, section_id, timestamptz,
+        tenant_id, author_id
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
     `,
       [
         name,
@@ -104,17 +107,18 @@ export async function createTask(task: Task) {
         period_days,
         username,
         section_id,
+        date_created,
+        tenant_id,
+        author_id,
       ]
     );
   } catch (error) {
     console.error("Не удалось создать задачу:", error);
-    return {
-      message: "Ошибка базы данных: Не удалось создать задачу: " + error,
-    };
+    throw new Error("Не удалось создать задачу:" + String(error));
   }
 
   revalidatePath("/erp/tasks");
-  redirect("/erp/tasks");
+  // redirect("/erp/tasks");
 }
 
 //#endregion
@@ -134,6 +138,8 @@ export async function updateTask(task: Task) {
     is_periodic,
     period_days,
     section_id,
+    tenant_id,
+    author_id,
   } = task;
 
   try {
@@ -148,6 +154,8 @@ export async function updateTask(task: Task) {
         period_days = $6,
         username = $7,
         section_id = $9,
+        tenant_id = $10,
+        author_id = $11,
         timestamptz = now()
       WHERE id = $8
     `,
@@ -161,6 +169,8 @@ export async function updateTask(task: Task) {
         username,
         id,
         section_id,
+        tenant_id,
+        author_id,
       ]
     );
   } catch (error) {
@@ -228,6 +238,7 @@ export async function fetchTaskForm(id: string) {
         tasks.is_periodic,
         tasks.period_days,
         tasks.username,
+        tasks.section_id,
         tasks.editing_by_user_id,
         tasks.editing_since,
         tasks.timestamptz,
