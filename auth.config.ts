@@ -1,19 +1,20 @@
-import type { NextAuthConfig } from 'next-auth';
- 
+import type { NextAuthConfig } from "next-auth";
+
 export const authConfig = {
   // trustHost: true - Удалить в продуктивной конфигурации!
   trustHost: true,
   pages: {
-    signIn: '/login',
+    signIn: "/login",
   },
   callbacks: {
     authorized({ auth, request: { nextUrl } }) {
       // console.log(nextUrl.toString());
       const isLoggedIn = !!auth?.user;
-      const isOnDashboard = nextUrl.pathname.startsWith('/dashboard');
-      const isOnAdmin = nextUrl.pathname.startsWith('/admin');
-      const isOnERP = nextUrl.pathname.startsWith('/erp');
-      const isOnRoot = nextUrl.pathname === '/';
+      const isOnDashboard = nextUrl.pathname.startsWith("/dashboard");
+      const isOnAdmin = nextUrl.pathname.startsWith("/admin");
+      const isOnERP = nextUrl.pathname.startsWith("/erp");
+      const isOnRepair = nextUrl.pathname.startsWith("/repair");
+      const isOnRoot = nextUrl.pathname === "/";
       if (isOnDashboard) {
         if (isLoggedIn) return true;
         return false; // Redirect unauthenticated users to login page
@@ -23,13 +24,16 @@ export const authConfig = {
       } else if (isOnERP) {
         if (isLoggedIn) return true;
         return false;
+      } else if (isOnRepair) {
+        if (isLoggedIn) return true;
+        return false;
       } else if (isOnRoot) {
         return true;
         // if (isLoggedIn) return true;
         // return false;
       } else if (isLoggedIn) {
         // return Response.redirect(new URL('/home', nextUrl));
-        return Response.redirect(new URL('/', nextUrl));
+        return Response.redirect(new URL("/", nextUrl));
       }
       return true;
     },

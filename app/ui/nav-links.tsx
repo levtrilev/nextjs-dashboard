@@ -15,6 +15,7 @@ import { useEffect, useRef, useState } from 'react';
 
 // Map of links to display in the side navigation.
 const links = [
+  { name: 'Ремонт', href: '#', icon: HomeIcon },
   { name: 'Главное', href: '/erp', icon: HomeIcon },
   { name: 'Руководителю', href: '/dashboard', icon: ArrowRightCircleIcon },
   {
@@ -39,6 +40,16 @@ const subMenu = [
   { mainItem: 'Помещения', name: 'Помещения', href: '/erp/premises' },
   { mainItem: 'Помещения', name: 'Планы обслуживания', href: '/erp/task-schedules' },
   { mainItem: 'Помещения', name: 'Задачи обслуживания', href: '/erp/tasks' },
+  { mainItem: 'Ремонт', name: 'Объекты', href: '/repair/objects' },
+  { mainItem: 'Ремонт', name: 'Участки', href: '/repair/units' },
+  { mainItem: 'Ремонт', name: 'Машины', href: '/repair/machines' },
+  { mainItem: 'Ремонт', name: 'Заявки', href: '/repair/claims' },
+  { mainItem: 'Ремонт', name: 'Запчасти', href: '/repair/parts' },
+  { mainItem: 'Ремонт', name: 'Системы', href: '/repair/systems' },
+  { mainItem: 'Ремонт', name: 'Работы', href: '/repair/works' },
+  { mainItem: 'Ремонт', name: 'Локации', href: '/repair/locations' },
+  { mainItem: 'Ремонт', name: 'Сотрудники', href: '/repair/persons' },
+
   // { mainItem: 'Home', name: 'About', href: '/dashboard' },
   // { mainItem: 'Home', name: 'Contacts', href: '/dashboard' },
   // { mainItem: 'Home', name: 'Support', href: '/dashboard' },

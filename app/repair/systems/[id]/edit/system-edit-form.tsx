@@ -1,16 +1,13 @@
-
 // Task EditForm
 
 'use client';
 import { useEffect, useState } from "react";
-import { TaskForm, TaskScheduleForm } from "@/app/lib/definitions";
-import { createTask, updateTask } from "../../lib/task-actions";
+import { SystemForm } from "@/app/lib/definitions";
 import { formatDateForInput } from "@/app/lib/common-utils";
 import BtnSectionsRef from "@/app/admin/sections/lib/btn-sections-ref";
 import { z } from "zod";
 import { pdf, PDFViewer } from '@react-pdf/renderer';
-import PdfDocument from "./task-pdf-document";
-import BtnTaskScheduleRef from "@/app/erp/task-schedules/lib/btn-task-schedule-ref";
+// import BtnTaskScheduleRef from "@/app/erp/task-schedules/lib/btn-task-schedule-ref";
 import MessageBoxOKCancel from "@/app/lib/message-box-ok-cancel";
 import {
   setIsCancelButtonPressed, setIsDocumentChanged, setIsMessageBoxOpen, setIsOKButtonPressed,
@@ -18,33 +15,21 @@ import {
 } from "@/app/store/useDocumentStore";
 import InputField from "@/app/lib/input-field";
 import { useRouter } from "next/navigation";
+import { createSystem, updateSystem } from "../../lib/systems-actions";
+import PdfDocument from "./system-pdf-document";
 
 interface IEditFormProps {
-  task: TaskForm;
-  taskSchedules: TaskScheduleForm[];
+  system: SystemForm;
   lockedByUserId: string | null;
   unlockAction: ((id: string, userId: string) => Promise<void>) | null;
   readonly: boolean;
 }
 //#region zod schema
-const TaskFormSchemaFull = z.object({
+const SystemFormSchemaFull = z.object({
   id: z.string().uuid(),
   name: z.string().min(2, {
     message: "Название должно содержать не менее 2-х символов.",
   }),
-  task_schedule_id: z.string().nullable(),
-  task_schedule_name: z.string().min(1, {
-    message: "Поле task_schedule_name должно быть заполнено.",
-  }),
-  date_start: z.date({
-    required_error: "Поле date_start должно быть заполнено.",
-    invalid_type_error: "Поле date_start должно быть датой.",
-  }),
-  date_end: z.date({
-    invalid_type_error: "Поле date_end должно быть датой.",
-  }),
-  is_periodic: z.boolean(),
-  period_days: z.number().nullable(),
   section_name: z.string().min(1, {
     message: "Поле Раздел должно быть заполнено.",
   }),
@@ -59,11 +44,11 @@ const TaskFormSchemaFull = z.object({
   editing_by_user_id: z.string().nullable(),
   editing_since: z.string().nullable(),
 });
-const TaskFormSchema = TaskFormSchemaFull.omit({ id: true, timestamptz: true, username: true, editing_by_user_id: true, editing_since: true });
-export type FormData = z.infer<typeof TaskFormSchemaFull>;
+const SystemFormSchema = SystemFormSchemaFull.omit({ id: true, timestamptz: true, username: true, editing_by_user_id: true, editing_since: true });
+export type FormData = z.infer<typeof SystemFormSchemaFull>;
 //#endregion
 
-export default function TaskEditForm(props: IEditFormProps) {
+export default function SystemEditForm(props: IEditFormProps) {
 
   //#region unified form hooks and variables 
 
@@ -89,7 +74,7 @@ export default function TaskEditForm(props: IEditFormProps) {
   //#endregion
 
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
-  const [formData, setFormData] = useState<FormData>(props.task as FormData);
+  const [formData, setFormData] = useState<FormData>(props.system as FormData);
 
 
   useEffect(() => {
@@ -101,7 +86,7 @@ export default function TaskEditForm(props: IEditFormProps) {
   }, []);
 
   const validate = () => {
-    const res = TaskFormSchema.safeParse({
+    const res = SystemFormSchema.safeParse({
       ...formData,
       // square: Number(formData.square),
     });
@@ -127,13 +112,13 @@ export default function TaskEditForm(props: IEditFormProps) {
     }
     try {
       if (formData.id === "") {
-        await createTask(formData);
+        await createSystem(formData);
         // setMessageBoxText('Документ сохранен.');
         setTimeout(() => {
-          router.push('/erp/tasks');
+          router.push('/repair/systems');
         }, 2000);
       } else {
-        await updateTask(formData);
+        await updateSystem(formData);
       }
       setIsDocumentChanged(false);
       setMessageBoxText('Документ сохранен.');
@@ -148,13 +133,12 @@ export default function TaskEditForm(props: IEditFormProps) {
   }
   const handleBackClick = async (e: React.MouseEvent) => {
     e.preventDefault();
-    if (props.unlockAction) await props.unlockAction(props.task.id, sessionUserId);
+    if (props.unlockAction) await props.unlockAction(props.system.id, sessionUserId);
     if (isDocumentChanged && !msgBox.isOKButtonPressed) {
       setIsShowMessageBoxCancel(true);
       setIsMessageBoxOpen(true);
     } else if (isDocumentChanged && msgBox.isOKButtonPressed) {
     } else if (!isDocumentChanged) {
-      // router.push('/erp/regions/');
       window.history.back();
     }
   };
@@ -227,15 +211,7 @@ export default function TaskEditForm(props: IEditFormProps) {
                 readonly={props.readonly}
                 errors={errors?.name?._errors as string[] | undefined}
               />
-              {/* taskSchedule_name */}
-              <InputField name="taskSchedule_name" value={formData.task_schedule_name as string}
-                label="принадлежит плану обслуживания:" type="text" w={["w-6/16", "w-11/16"]}
-                // onChange={(value) => handleInputChange('task_schedule_id', value)}
-                onChange={(value) => { }}
-                refBook={<BtnTaskScheduleRef taskSchedules={props.taskSchedules} handleSelectTaskSchedule={handleSelectTaskSchedule} />}
-                readonly={props.readonly}
-                errors={errors?.task_schedule_name?._errors as string[] | undefined}
-              />
+
               {/* section_name */}
               <InputField name="section_name" value={formData.section_name as string}
                 label="Раздел:" type="text" w={["w-6/16", "w-11/16"]}
@@ -250,20 +226,7 @@ export default function TaskEditForm(props: IEditFormProps) {
             {/* second column */}
             <div className="flex flex-col gap-4 w-full md:w-1/2">
 
-              {/* date_start */}
-              <InputField name="date_start" value={formatDateForInput(formData.date_start)}
-                label="Дата начала действия:" type="date" w={["w-8/16", "w-10/16"]}
-                onChange={(value) => handleInputChange('date_start', value)}
-                readonly={props.readonly}
-                errors={errors?.date_start?._errors as string[] | undefined}
-              />
-              {/* date_end */}
-              <InputField name="date_end" value={formatDateForInput(formData.date_end)}
-                label="Дата окончания действия:" type="date" w={["w-8/16", "w-10/16"]}
-                onChange={(value) => handleInputChange('date_end', value)}
-                readonly={props.readonly}
-                errors={errors?.date_end?._errors as string[] | undefined}
-              />
+
             </div>
           </div>
           {/* button area */}
@@ -339,4 +302,3 @@ export default function TaskEditForm(props: IEditFormProps) {
     </div>
   );
 }
-
