@@ -10,6 +10,8 @@ import { checkReadonly } from "@/app/lib/common-utils";
 import { MachineForm } from "@/app/lib/definitions";
 import { fetchMachineForm } from "../../lib/machines-actions";
 import MachineEditForm from "./machine-edit-form";
+import { fetchUnitsForm } from "@/app/repair/units/lib/units-actions";
+import { fetchLocationsForm } from "@/app/repair/locations/lib/locations-actions";
 
 async function Page(props: { params: Promise<{ id: string }> }) {
     //#region unified hooks and variables 
@@ -32,7 +34,7 @@ async function Page(props: { params: Promise<{ id: string }> }) {
     const id = params.id;
     //    #endregion
 
-    const machine: MachineForm = await fetchMachineForm(id);
+    const machine: MachineForm = await fetchMachineForm(id, current_sections);
     if (!machine) {
         return (<h3 className="text-xs font-medium text-gray-400">Not found! id: {id}</h3>);
     }
@@ -64,6 +66,8 @@ async function Page(props: { params: Promise<{ id: string }> }) {
     //#endregion
     const readonly_permission = checkReadonly(userPermissions, machine, pageUser.id);
     const readonly = readonly_locked || readonly_permission;
+    const units = readonly ? [] : await fetchUnitsForm();
+    const locations = readonly ? [] : await fetchLocationsForm();
     return (
         <div className="w-full">
             <div className="flex w-full items-center justify-between">
@@ -83,6 +87,8 @@ async function Page(props: { params: Promise<{ id: string }> }) {
             >
                 <MachineEditForm
                     machine={machine}
+                    units={units}
+                    locations={locations}
                     lockedByUserId={freshRecord.editing_by_user_id}
                     unlockAction={unlockRecord}
                     readonly={readonly}

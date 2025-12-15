@@ -2,7 +2,7 @@
 
 'use client';
 import { useEffect, useState } from "react";
-import { MachineForm } from "@/app/lib/definitions";
+import { LocationForm, MachineForm, MachineStatus, Unit, UnitForm } from "@/app/lib/definitions";
 import { formatDateForInput } from "@/app/lib/common-utils";
 import BtnSectionsRef from "@/app/admin/sections/lib/btn-sections-ref";
 import { z } from "zod";
@@ -17,19 +17,32 @@ import InputField from "@/app/lib/input-field";
 import { useRouter } from "next/navigation";
 import { createMachine, updateMachine } from "../../lib/machines-actions";
 import PdfDocument from "./machine-pdf-document";
+import BtnUnitsRef from "@/app/repair/units/lib/btn-units-ref";
+import BtnLocationsRef from "@/app/repair/locations/lib/btn-locations-ref";
 
 interface IEditFormProps {
   machine: MachineForm;
+  units: UnitForm[];
+  locations: LocationForm[];
   lockedByUserId: string | null;
   unlockAction: ((tableName: string, id: string, userId: string) => Promise<void>) | null;
   readonly: boolean;
 }
 //#region zod schema
+const MachineStatusSchema = z.enum(['норма', 'ремонт', 'ожидание', 'неизвестно']);
+const DocStatusSchema = z.enum(['draft', 'active', 'deleted']);
 const MachineFormSchemaFull = z.object({
   id: z.string().uuid(),
   name: z.string().min(2, {
     message: "Название должно содержать не менее 2-х символов.",
   }),
+  unit_id: z.string(),
+  unit_name: z.string(),
+  location_id: z.string(),
+  location_name: z.string(),
+  number: z.string(),
+  model: z.string(),
+  machine_status: MachineStatusSchema,
   section_name: z.string().min(1, {
     message: "Поле Раздел должно быть заполнено.",
   }),
@@ -43,6 +56,7 @@ const MachineFormSchemaFull = z.object({
   tenant_id: z.string(), // z.string().uuid(),
   editing_by_user_id: z.string().nullable(),
   editing_since: z.string().nullable(),
+  doc_status: DocStatusSchema,
 });
 const MachineFormSchema = MachineFormSchemaFull.omit({ id: true, timestamptz: true, username: true, editing_by_user_id: true, editing_since: true });
 export type FormData = z.infer<typeof MachineFormSchemaFull>;
@@ -153,16 +167,29 @@ export default function MachineEditForm(props: IEditFormProps) {
     docChanged();
   };
 
-  const handleSelectTaskSchedule = (new_ts_id: string, new_ts_name: string) => {
+  const handleSelectUnit = (new_unit_id: string, new_unit_name: string) => {
     setFormData((prev) => ({
       ...prev,
-      task_schedule_id: new_ts_id,
-      task_schedule_name: new_ts_name,
+      unit_id: new_unit_id,
+      unit_name: new_unit_name,
     }));
     docChanged();
   };
-  const handleRedirectBack = () => {
-    window.history.back(); // Возвращает пользователя на предыдущую страницу
+  function handleSelectMachineStatus(event: any) {
+    setFormData((prev) => ({
+      ...prev,
+      machine_status: event.target.value,
+      // machine_status: event.target.selectedOptions[0].text,
+    }));
+    docChanged();
+  }
+  const handleSelectLocation = (new_location_id: string, new_location_name: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      location_id: new_location_id,
+      location_name: new_location_name,
+    }));
+    docChanged();
   };
   const handleShowPDF = async () => {
     try {
@@ -212,6 +239,89 @@ export default function MachineEditForm(props: IEditFormProps) {
                 errors={errors?.name?._errors as string[] | undefined}
               />
 
+              {/* number */}
+              <InputField name="number" value={formData.number}
+                label="Номер:" type="text" w={["w-4/16", "w-13/16"]}
+                onChange={(value) => handleInputChange('number', value)}
+                readonly={props.readonly}
+                errors={errors?.number?._errors as string[] | undefined}
+              />
+
+              {/* model */}
+              <InputField name="model" value={formData.model}
+                label="Модель:" type="text" w={["w-4/16", "w-13/16"]}
+                onChange={(value) => handleInputChange('model', value)}
+                readonly={props.readonly}
+                errors={errors?.model?._errors as string[] | undefined}
+              />
+
+              {/* machine_status */}
+              {/* "норма" | "ремонт" | "ожидание" | "неизвестно"; */}
+              {/* <div>
+                <label htmlFor="machine_status">Состояние</label>
+                <select name="machine_status" id="machine_status" className="input input-bordered w-full">
+                  <option value={formData.machine_status}>норма</option>
+                  <option value={formData.machine_status}>ремонт</option>
+                  <option value={formData.machine_status}>ожидание</option>
+                  <option value={formData.machine_status}>неизвестно</option>
+                </select>
+              </div> */}
+
+              <div className="flex-1 flex items-center">
+                <label htmlFor="machine_status" className="text-sm font-medium flex items-center p-2">Состояние:</label>
+                <select
+                  name="machine_status" id="machine_status"
+                  className="w-full h-10 cursor-pointer rounded-md border border-gray-300 px-3 py-2 hover:bg-gray-50 focus:outline-none focus:ring focus:ring-blue-300"
+                  value={formData.machine_status}
+                  onChange={(e) => handleSelectMachineStatus(e)}
+                >
+                  <option value="" disabled>
+                    Состояние
+                  </option>
+                  <option key={'норма'} value={'норма'}>
+                    норма
+                  </option>
+                  <option key={'ремонт'} value={'ремонт'}>
+                    ремонт
+                  </option>
+                  <option key={'ожидание'} value={'ожидание'}>
+                    ожидание
+                  </option>
+                  <option key={'неизвестно'} value={'неизвестно'}>
+                    неизвестно
+                  </option>
+                </select>
+              </div>
+
+
+            </div>
+
+
+
+
+            {/* second column */}
+            <div className="flex flex-col gap-4 w-full md:w-1/2">
+
+              {/* unit_name */}
+              <InputField name="unit_name" value={formData.unit_name as string}
+                label="Участок:" type="text" w={["w-6/16", "w-11/16"]}
+                // onChange={(value) => handleInputChange('section_id', value)}
+                onChange={(value) => { }}
+                refBook={<BtnUnitsRef handleSelectUnit={handleSelectUnit} units={props.units} />}
+                readonly={props.readonly}
+                errors={errors?.unit_name?._errors as string[] | undefined}
+              />
+
+              {/* location_name */}
+              <InputField name="location_name" value={formData.location_name as string}
+                label="Местоположение:" type="text" w={["w-6/16", "w-11/16"]}
+                // onChange={(value) => handleInputChange('section_id', value)}
+                onChange={(value) => { }}
+                refBook={<BtnLocationsRef handleSelectLocation={handleSelectLocation} locations={props.locations} />}
+                readonly={props.readonly}
+                errors={errors?.location_name?._errors as string[] | undefined}
+              />
+
               {/* section_name */}
               <InputField name="section_name" value={formData.section_name as string}
                 label="Раздел:" type="text" w={["w-6/16", "w-11/16"]}
@@ -221,12 +331,6 @@ export default function MachineEditForm(props: IEditFormProps) {
                 readonly={props.readonly}
                 errors={errors?.section_name?._errors as string[] | undefined}
               />
-            </div>
-
-            {/* second column */}
-            <div className="flex flex-col gap-4 w-full md:w-1/2">
-
-
             </div>
           </div>
           {/* button area */}

@@ -40,6 +40,11 @@ export default function PdfDocument({ formData }: { formData: FormData }) {
       <Page size="A4" style={styles.page}>
         <View style={styles.section}>
           <Text style={styles.text}>Название: {formData.name}</Text>
+          <Text style={styles.text}>Номер: {formData.number}</Text>
+          <Text style={styles.text}>Модель: {formData.model}</Text>
+          <Text style={styles.text}>Участок: {formData.unit_name}</Text>
+          <Text style={styles.text}>Местоположение: {formData.location_name}</Text>
+          <Text style={styles.text}>Состояние: {formData.machine_status}</Text>
         </View>
       </Page>
     </Document>

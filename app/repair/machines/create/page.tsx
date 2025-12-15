@@ -10,6 +10,8 @@ import DocWrapper from "@/app/lib/doc-wrapper";
 import { fetchDocUserPermissions } from "@/app/admin/permissions/lib/permissios-actions";
 import { MachineForm } from "@/app/lib/definitions";
 import MachineEditForm from "../[id]/edit/machine-edit-form";
+import { fetchUnitsForm } from "../../units/lib/units-actions";
+import { fetchLocationsForm } from "../../locations/lib/locations-actions";
 
 export default async function Page() {
   //#region unified hooks and variables 
@@ -34,21 +36,28 @@ export default async function Page() {
   const machine: MachineForm = {
     id: "",
     name: "",
+    unit_id: "00000000-0000-0000-0000-000000000000",
+    unit_name: "",
+    location_id: "00000000-0000-0000-0000-000000000000",
+    location_name: "",
+    number: "",
+    model: "",
+    machine_status: "неизвестно",
     username: "",
     date_created: new Date(), //formatDateForInput(new Date()),
-    schedule_owner_name: "",
-    section_id: "",
+    section_id: "00000000-0000-0000-0000-000000000000",
     section_name: "",
-    premise_id: "",
-    premise_name: "",
-    tenant_id: "",
-    author_id: "",
-    editor_id: "",
+    tenant_id: "00000000-0000-0000-0000-000000000000",
+    author_id: "00000000-0000-0000-0000-000000000000",
+    editor_id: "00000000-0000-0000-0000-000000000000",
     editing_since: "",
     editing_by_user_id: "",
+    doc_status: "draft"
   } as MachineForm;
   const readonly_permission = checkReadonly(userPermissions, machine, pageUser.id);
   const readonly = readonly_locked || readonly_permission;
+  const units = readonly ? [] : await fetchUnitsForm();
+  const locations = readonly ? [] : await fetchLocationsForm();
 
   return (
     <main>
@@ -74,6 +83,8 @@ export default async function Page() {
       >
         <MachineEditForm
           machine={machine}
+          units={units}
+          locations={locations}
           lockedByUserId={null}
           unlockAction={null}
           readonly={readonly}

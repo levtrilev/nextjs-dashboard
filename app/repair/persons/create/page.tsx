@@ -56,7 +56,7 @@ export default async function Page() {
         breadcrumbs={[
           { label: 'Сотрудники', href: '/repair/persons' },
           {
-            label: 'Создать новый',
+            label: 'Создать нового',
             href: '/repair/persons/create',
             active: true,
           },

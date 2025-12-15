@@ -19,7 +19,7 @@ export default async function MachinesTable({
   currentPage: number;
   current_sections: string;
 }) {
-  const machines = await fetchFilteredMachines(query, currentPage);
+  const machines = await fetchFilteredMachines(query, currentPage, current_sections);
 
   return (
     <div className="w-full">
@@ -32,7 +32,12 @@ export default async function MachinesTable({
               <table className="table-fixed hidden w-full rounded-md text-gray-900 md:table">
                 <thead className="rounded-md bg-gray-50 text-left text-sm font-normal">
                   <tr>
-                    <th scope="col" className="w-4/12 px-4 py-5 font-medium sm:pl-6">Название</th>
+                    <th scope="col" className="w-2/12 px-4 py-5 font-medium sm:pl-6">Название</th>
+                    <th scope="col" className="w-2/12 px-4 py-5 font-medium sm:pl-6">Номер</th>
+                    <th scope="col" className="w-2/12 px-4 py-5 font-medium sm:pl-6">Модель</th>
+                    <th scope="col" className="w-2/12 px-4 py-5 font-medium sm:pl-6">Участок</th>
+                    <th scope="col" className="w-2/12 px-4 py-5 font-medium sm:pl-6">Место</th>
+                    <th scope="col" className="w-2/12 px-4 py-5 font-medium sm:pl-6">Состояние</th>
                     <th scope="col" className="w-1/12 px-4 py-5 font-medium"></th>
                   </tr>
                 </thead>
@@ -40,7 +45,7 @@ export default async function MachinesTable({
                 <tbody className="divide-y divide-gray-200 text-gray-900">
                   {machines.map((machine) => (
                     <tr key={machine.id} className="group">
-                      <td className="w-4/12 overflow-hidden whitespace-nowrap bg-white py-2 pl-6 pr-3 text-sm text-black">
+                      <td className="w-2/12 overflow-hidden whitespace-nowrap bg-white py-2 pl-6 pr-3 text-sm text-black">
                         <a
                           href={`/repair/machines/${machine.id}/edit`}
                           className="text-blue-800 underline"
@@ -48,7 +53,21 @@ export default async function MachinesTable({
                           {machine.name}
                         </a>
                       </td>
-
+                      <td className="w-2/16 overflow-hidden whitespace-nowrap bg-white px-4 py-1 text-sm">
+                        {machine.number}
+                      </td>
+                      <td className="w-2/12 overflow-hidden whitespace-nowrap bg-white py-2 pl-6 pr-3 text-sm text-black">
+                        {machine.model}
+                      </td>
+                      <td className="w-2/12 overflow-hidden whitespace-nowrap bg-white py-2 pl-6 pr-3 text-sm text-black">
+                        {machine.unit_name}
+                      </td>
+                      <td className="w-2/12 overflow-hidden whitespace-nowrap bg-white py-2 pl-6 pr-3 text-sm text-black">
+                        {machine.location_name}
+                      </td>                      
+                      <td className="w-2/12 overflow-hidden whitespace-nowrap bg-white py-2 pl-6 pr-3 text-sm text-black">
+                        {machine.machine_status}
+                      </td>
                       <td className="w-1/12 whitespace-nowrap py-2 pr-3">
                         <div className="flex justify-end gap-3">
                           <BtnDeleteMachine id={machine.id} name={machine.name} />

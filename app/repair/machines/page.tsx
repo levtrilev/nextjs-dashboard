@@ -7,7 +7,6 @@ import { auth, getUser } from "@/auth";
 import { getCurrentSections } from "@/app/lib/common-actions";
 import { fetchDocUserPermissions } from "@/app/admin/permissions/lib/permissios-actions";
 import { checkReadonly } from "@/app/lib/common-utils";
-import { Task } from "@/app/lib/definitions";
 import { fetchMachinesPages } from "./lib/machines-actions";
 import { CreateMachine } from "./lib/machines-buttons";
 import MachinesTable from "./lib/machines-table";
@@ -39,7 +38,7 @@ export default async function Page(props: {
   const searchParams = await props.searchParams;
   const query = searchParams?.query || '';
   const currentPage = Number(searchParams?.page) || 1;
-  const totalPages = await fetchMachinesPages(query);
+  const totalPages = await fetchMachinesPages(query, current_sections);
 
   return (
     <>

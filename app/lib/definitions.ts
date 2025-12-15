@@ -3,7 +3,8 @@
 
 import { DateTime } from "next-auth/providers/kakao";
 
-export type Status = "draft" | "active" | "deleted";
+export type DocStatus = "draft" | "active" | "deleted";
+export type MachineStatus = "норма" | "ремонт" | "ожидание" | "неизвестно";
 export type System = {
   id: string;
   name: string;
@@ -277,11 +278,17 @@ export type ClaimForm = {
 export type Machine = {
   id: string;
   name: string;
+  unit_id: string;
+  location_id: string;
+  number: string;
+  model: string;
+  machine_status: MachineStatus;
   section_id: string;
   tenant_id: string;
   username?: string;
   author_id: string;
   editor_id: string;
+  doc_status: DocStatus;
   timestamptz?: string;
   date_created?: Date;
   editing_by_user_id: string | null;
@@ -290,12 +297,20 @@ export type Machine = {
 export type MachineForm = {
   id: string;
   name: string;
+  unit_id: string;
+  unit_name: string;
+  location_id: string;
+  location_name: string;
+  number: string;
+  model: string;
+  machine_status: MachineStatus;
   section_id: string;
   section_name: string;
   tenant_id: string;
   username?: string;
   author_id: string;
   editor_id: string;
+  doc_status: DocStatus;
   timestamptz?: string;
   date_created?: Date;
   editing_by_user_id: string | null;
