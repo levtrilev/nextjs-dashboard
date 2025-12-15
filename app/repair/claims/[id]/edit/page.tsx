@@ -2,14 +2,14 @@
 
 import { lusitana } from "@/app/ui/fonts";
 import { auth, getUser } from "@/auth";
-import { getCurrentSections } from "@/app/lib/common-actions";
+import { getCurrentSections, getFeshRecord, tryLockRecord, unlockRecord } from "@/app/lib/common-actions";
 import DocWrapper from "@/app/lib/doc-wrapper";
 import { fetchDocUserPermissions } from "@/app/admin/permissions/lib/permissios-actions";
 import pool from "@/db";
 import { fetchSectionsForm } from "@/app/admin/sections/lib/sections-actions";
 import { checkReadonly } from "@/app/lib/common-utils";
 import { ClaimForm } from "@/app/lib/definitions";
-import { fetchClaimForm, tryLockRecord, unlockRecord } from "../../lib/claims-actions";
+import { fetchClaimForm } from "../../lib/claims-actions";
 import ClaimEditForm from "./claim-edit-form";
 
 async function Page(props: { params: Promise<{ id: string }> }) {
@@ -49,23 +49,16 @@ async function Page(props: { params: Promise<{ id: string }> }) {
 
   let canEdit = false;
   if (isEditable) {
-    const lockResult = await tryLockRecord(claim.id, user.id);
+    const lockResult = await tryLockRecord('claims', claim.id, user.id);
     canEdit = lockResult.isEditable;
   } else {
     canEdit = false;
   }
 
   // Перечитываем запись после возможного обновления блокировки
-  const freshRecordRes = await pool.query(
-    `SELECT claims.editing_by_user_id, users.email as editing_by_user_email
-     FROM claims 
-     LEFT JOIN users ON claims.editing_by_user_id = users.id 
-     WHERE claims.id = $1`,
-    [claim.id]
-  );
-  const freshRecord = freshRecordRes.rows[0];
 
-  const editingByCurrentUser = freshRecord.editing_by_user_id === user.id;
+  const freshRecord = await getFeshRecord('claims', claim.id);
+  const editingByCurrentUser = freshRecord.editing_by_user_id;
   const readonly_locked = !editingByCurrentUser;
   //#endregion
 

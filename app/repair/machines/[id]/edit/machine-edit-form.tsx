@@ -21,7 +21,7 @@ import PdfDocument from "./machine-pdf-document";
 interface IEditFormProps {
   machine: MachineForm;
   lockedByUserId: string | null;
-  unlockAction: ((id: string, userId: string) => Promise<void>) | null;
+  unlockAction: ((tableName: string, id: string, userId: string) => Promise<void>) | null;
   readonly: boolean;
 }
 //#region zod schema
@@ -133,7 +133,7 @@ export default function MachineEditForm(props: IEditFormProps) {
   }
   const handleBackClick = async (e: React.MouseEvent) => {
     e.preventDefault();
-    if (props.unlockAction) await props.unlockAction(props.machine.id, sessionUserId);
+    if (props.unlockAction) await props.unlockAction("machines", props.machine.id, sessionUserId);
     if (isDocumentChanged && !msgBox.isOKButtonPressed) {
       setIsShowMessageBoxCancel(true);
       setIsMessageBoxOpen(true);

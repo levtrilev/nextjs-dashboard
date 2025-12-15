@@ -257,33 +257,3 @@ export async function fetchClaimsPages(query: string) {
 }
 
 //#endregion
-
-export async function unlockRecord(recordId: string, userId: string) {
-  await pool.query(
-    `
-      UPDATE claims
-      SET editing_by_user_id = NULL, editing_since = NULL
-      WHERE id = $1 AND editing_by_user_id = $2;
-    `,
-    [recordId, userId]
-  );
-}
-
-export async function tryLockRecord(
-  recordId: string,
-  userId: string | undefined
-) {
-  const result = await pool.query(
-    `
-      UPDATE claims
-      SET editing_by_user_id = $1, editing_since = NOW()
-      WHERE id = $2
-        AND (editing_by_user_id IS NULL OR editing_since < NOW() - INTERVAL '30 minutes')
-      RETURNING editing_by_user_id;
-    `,
-    [userId, recordId]
-  );
-
-  const isLockedByMe = result.rows.length > 0;
-  return { success: true, isEditable: isLockedByMe };
-}

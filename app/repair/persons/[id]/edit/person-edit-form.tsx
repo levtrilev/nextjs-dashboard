@@ -21,7 +21,7 @@ import PdfDocument from "./person-pdf-document";
 interface IEditFormProps {
   person: PersonForm;
   lockedByUserId: string | null;
-  unlockAction: ((id: string, userId: string) => Promise<void>) | null;
+  unlockAction: ((tableName: string, id: string, userId: string) => Promise<void>) | null;
   readonly: boolean;
 }
 //#region zod schema
@@ -133,7 +133,7 @@ export default function PersonEditForm(props: IEditFormProps) {
   }
   const handleBackClick = async (e: React.MouseEvent) => {
     e.preventDefault();
-    if (props.unlockAction) await props.unlockAction(props.person.id, sessionUserId);
+    if (props.unlockAction) await props.unlockAction("persons", props.person.id, sessionUserId);
     if (isDocumentChanged && !msgBox.isOKButtonPressed) {
       setIsShowMessageBoxCancel(true);
       setIsMessageBoxOpen(true);

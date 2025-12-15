@@ -20,7 +20,7 @@ import PdfDocument from "./location-pdf-document";
 interface IEditFormProps {
   location: LocationForm;
   lockedByUserId: string | null;
-  unlockAction: ((id: string, userId: string) => Promise<void>) | null;
+  unlockAction: ((tableName: string, id: string, userId: string) => Promise<void>) | null;
   readonly: boolean;
 }
 
@@ -124,7 +124,7 @@ export default function LocationEditForm(props: IEditFormProps) {
 
   const handleBackClick = async (e: React.MouseEvent) => {
     e.preventDefault();
-    if (props.unlockAction) await props.unlockAction(props.location.id, sessionUserId);
+    if (props.unlockAction) await props.unlockAction("locations", props.location.id, sessionUserId);
     if (isDocumentChanged && !msgBox.isOKButtonPressed) {
       setIsShowMessageBoxCancel(true);
       setIsMessageBoxOpen(true);

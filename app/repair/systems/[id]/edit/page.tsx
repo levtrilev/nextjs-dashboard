@@ -2,14 +2,14 @@
 
 import { lusitana } from "@/app/ui/fonts";
 import { auth, getUser } from "@/auth";
-import { getCurrentSections, getFeshRecord } from "@/app/lib/common-actions";
+import { getCurrentSections, getFeshRecord, tryLockRecord, unlockRecord } from "@/app/lib/common-actions";
 import DocWrapper from "@/app/lib/doc-wrapper";
 import { fetchDocUserPermissions } from "@/app/admin/permissions/lib/permissios-actions";
 import pool from "@/db";
 import { fetchSectionsForm } from "@/app/admin/sections/lib/sections-actions";
 import { checkReadonly } from "@/app/lib/common-utils";
 import { SystemForm } from "@/app/lib/definitions";
-import { fetchSystemForm, tryLockRecord, unlockRecord } from "../../lib/systems-actions";
+import { fetchSystemForm } from "../../lib/systems-actions";
 import SystemEditForm from "./system-edit-form";
 
 async function Page(props: { params: Promise<{ id: string }> }) {
@@ -51,7 +51,7 @@ async function Page(props: { params: Promise<{ id: string }> }) {
 
     let canEdit = false;
     if (isEditable) {
-        const lockResult = await tryLockRecord(system.id, user.id);
+        const lockResult = await tryLockRecord('systems', system.id, user.id);
         canEdit = lockResult.isEditable;
     } else {
         canEdit = false;

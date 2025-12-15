@@ -21,7 +21,7 @@ import PdfDocument from "./work-pdf-document";
 interface IEditFormProps {
   work: WorkForm;
   lockedByUserId: string | null;
-  unlockAction: ((id: string, userId: string) => Promise<void>) | null;
+  unlockAction: ((tableName: string, id: string, userId: string) => Promise<void>) | null;
   readonly: boolean;
 }
 //#region zod schema
@@ -133,7 +133,7 @@ export default function WorkEditForm(props: IEditFormProps) {
   }
   const handleBackClick = async (e: React.MouseEvent) => {
     e.preventDefault();
-    if (props.unlockAction) await props.unlockAction(props.work.id, sessionUserId);
+    if (props.unlockAction) await props.unlockAction("works", props.work.id, sessionUserId);
     if (isDocumentChanged && !msgBox.isOKButtonPressed) {
       setIsShowMessageBoxCancel(true);
       setIsMessageBoxOpen(true);

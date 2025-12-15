@@ -233,7 +233,7 @@ export async function getFeshRecord(
   // pool: Pool,
   tableName: string,
   recordId: string
-) {
+): Promise<{ editing_by_user_id: string; editing_by_user_email: string }> {
   if (!isValidTableName(tableName)) {
     throw new Error(`Invalid table name: ${tableName}`);
   }
@@ -246,5 +246,48 @@ export async function getFeshRecord(
   `;
 
   const res = await pool.query(queryText, [recordId]);
-  return res.rows[0] || null;
+  return res.rows[0] || { editing_by_user_id: "", editing_by_user_email: "" };
+}
+
+export async function tryLockRecord(
+  tableName: string,
+  recordId: string,
+  userId: string | undefined
+) {
+  if (!isValidTableName(tableName)) {
+    throw new Error(`Invalid table name: ${tableName}`);
+  }
+
+  const result = await pool.query(
+    `
+      UPDATE ${tableName}
+      SET editing_by_user_id = $1, editing_since = NOW()
+      WHERE id = $2
+        AND (editing_by_user_id IS NULL OR editing_since < NOW() - INTERVAL '30 minutes')
+      RETURNING editing_by_user_id;
+    `,
+    [userId, recordId]
+  );
+
+  const isLockedByMe = result.rows.length > 0;
+  return { success: true, isEditable: isLockedByMe };
+}
+
+export async function unlockRecord(
+  tableName: string,
+  recordId: string,
+  userId: string
+) {
+  if (!isValidTableName(tableName)) {
+    throw new Error(`Invalid table name: ${tableName}`);
+  }
+
+  await pool.query(
+    `
+      UPDATE ${tableName}
+      SET editing_by_user_id = NULL, editing_since = NULL
+      WHERE id = $1 AND editing_by_user_id = $2;
+    `,
+    [recordId, userId]
+  );
 }

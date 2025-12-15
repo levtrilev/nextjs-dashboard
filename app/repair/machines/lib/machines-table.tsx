@@ -33,9 +33,6 @@ export default async function MachinesTable({
                 <thead className="rounded-md bg-gray-50 text-left text-sm font-normal">
                   <tr>
                     <th scope="col" className="w-4/12 px-4 py-5 font-medium sm:pl-6">Название</th>
-                    <th scope="col" className="w-2/12 px-3 py-5 font-medium">Дата начала</th>
-                    <th scope="col" className="w-2/12 px-3 py-5 font-medium">Дата окончания</th>
-                    <th scope="col" className="w-2/12 px-3 py-5 font-medium">Периодичность</th>
                     <th scope="col" className="w-1/12 px-4 py-5 font-medium"></th>
                   </tr>
                 </thead>

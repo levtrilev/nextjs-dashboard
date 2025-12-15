@@ -2,14 +2,14 @@
 
 import { lusitana } from "@/app/ui/fonts";
 import { auth, getUser } from "@/auth";
-import { getCurrentSections, getFeshRecord } from "@/app/lib/common-actions";
+import { getCurrentSections, getFeshRecord, tryLockRecord, unlockRecord } from "@/app/lib/common-actions";
 import DocWrapper from "@/app/lib/doc-wrapper";
 import { fetchDocUserPermissions } from "@/app/admin/permissions/lib/permissios-actions";
 import pool from "@/db";
 import { fetchSectionsForm } from "@/app/admin/sections/lib/sections-actions";
 import { checkReadonly } from "@/app/lib/common-utils";
 import { UnitForm } from "@/app/lib/definitions";
-import { fetchUnitForm, tryLockRecord, unlockRecord } from "../../lib/units-actions";
+import { fetchUnitForm } from "../../lib/units-actions";
 import UnitEditForm from "./unit-edit-form";
 import { fetchObjectsForm } from "@/app/repair/objects/lib/objects-actions";
 
@@ -43,26 +43,20 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 
   let canEdit = false;
   if (isEditable) {
-    const lockResult = await tryLockRecord(unit.id, user.id);
+    // const lockResult = await tryLockRecord(unit.id, user.id);
+    const lockResult = await tryLockRecord('units', unit.id, user.id);
+    // const lockResult = await unlockRecord('units', unit.id, user.id);
     canEdit = lockResult.isEditable;
   }
 
-const freshRecord = await getFeshRecord("units", unit.id);
+  const freshRecord = await getFeshRecord("units", unit.id);
 
-  // const freshRecordRes = await pool.query(
-  //   `SELECT units.editing_by_user_id, users.email as editing_by_user_email
-  //    FROM units 
-  //    LEFT JOIN users ON units.editing_by_user_id = users.id 
-  //    WHERE units.id = $1`,
-  //   [unit.id]
-  // );
-  // const freshRecord = freshRecordRes.rows[0];
   const editingByCurrentUser = freshRecord.editing_by_user_id === user.id;
   const readonly_locked = !editingByCurrentUser;
   const readonly_permission = checkReadonly(userPermissions, unit, user.id);
   const readonly = readonly_locked || readonly_permission;
 
-  const objects = readonly? [] : await fetchObjectsForm();
+  const objects = readonly ? [] : await fetchObjectsForm();
 
   return (
     <div className="w-full">
