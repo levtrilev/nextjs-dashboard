@@ -2,7 +2,7 @@
 
 import { lusitana } from "@/app/ui/fonts";
 import { auth, getUser } from "@/auth";
-import { getCurrentSections } from "@/app/lib/common-actions";
+import { getCurrentSections, getFeshRecord } from "@/app/lib/common-actions";
 import DocWrapper from "@/app/lib/doc-wrapper";
 import { fetchDocUserPermissions } from "@/app/admin/permissions/lib/permissios-actions";
 import pool from "@/db";
@@ -47,14 +47,16 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
     canEdit = lockResult.isEditable;
   }
 
-  const freshRecordRes = await pool.query(
-    `SELECT units.editing_by_user_id, users.email as editing_by_user_email
-     FROM units 
-     LEFT JOIN users ON units.editing_by_user_id = users.id 
-     WHERE units.id = $1`,
-    [unit.id]
-  );
-  const freshRecord = freshRecordRes.rows[0];
+const freshRecord = await getFeshRecord("units", unit.id);
+
+  // const freshRecordRes = await pool.query(
+  //   `SELECT units.editing_by_user_id, users.email as editing_by_user_email
+  //    FROM units 
+  //    LEFT JOIN users ON units.editing_by_user_id = users.id 
+  //    WHERE units.id = $1`,
+  //   [unit.id]
+  // );
+  // const freshRecord = freshRecordRes.rows[0];
   const editingByCurrentUser = freshRecord.editing_by_user_id === user.id;
   const readonly_locked = !editingByCurrentUser;
   const readonly_permission = checkReadonly(userPermissions, unit, user.id);

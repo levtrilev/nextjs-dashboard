@@ -21,7 +21,9 @@ export default function PdfDocument({ formData }: { formData: FormData }) {
     <Document>
       <Page size="A4" style={styles.page}>
         <View style={styles.section}>
-          <Text style={styles.text}>Название единицы: {formData.name}</Text>
+          <Text style={styles.text}>Участок: {formData.name}</Text>
+          <Text style={styles.text}>Объект: {formData.object_name}</Text>
+          <Text style={styles.text}>Раздел: {formData.section_name}</Text>
         </View>
       </Page>
     </Document>

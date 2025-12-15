@@ -3,7 +3,7 @@
 
 import { lusitana } from "@/app/ui/fonts";
 import { auth, getUser } from "@/auth";
-import { getCurrentSections } from "@/app/lib/common-actions";
+import { getCurrentSections, getFeshRecord } from "@/app/lib/common-actions";
 import DocWrapper from "@/app/lib/doc-wrapper";
 import { fetchDocUserPermissions } from "@/app/admin/permissions/lib/permissios-actions";
 import pool from "@/db";
@@ -58,13 +58,7 @@ async function Page(props: { params: Promise<{ id: string }> }) {
         canEdit = false;
     }
     // Перечитаем запись после возможного обновления блокировки
-    const freshRecordRes = await pool.query(
-        `SELECT objects.editing_by_user_id, users.email as editing_by_user_email
-        FROM objects 
-        LEFT JOIN users on objects.editing_by_user_id = users.id 
-        WHERE objects.id = $1`
-        , [object.id]);
-    const freshRecord = freshRecordRes.rows[0];
+    const freshRecord = await getFeshRecord('objects', object.id);
 
     const editingByCurrentUser = freshRecord.editing_by_user_id === user.id;
     const readonly_locked = !editingByCurrentUser;

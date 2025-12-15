@@ -221,3 +221,30 @@ export async function getRoleSections(role_id: string): Promise<{
     throw new Error("Failed to fetch role_sections");
   }
 }
+
+
+// Простая проверка имени таблицы для предотвращения SQL-инъекций
+function isValidTableName(tableName: string): boolean {
+  // Разрешаем только буквы, цифры и подчеркивания
+  return /^[a-zA-Z_][a-zA-Z0-9_]*$/.test(tableName);
+}
+
+export async function getFeshRecord(
+  // pool: Pool,
+  tableName: string,
+  recordId: string
+) {
+  if (!isValidTableName(tableName)) {
+    throw new Error(`Invalid table name: ${tableName}`);
+  }
+
+  const queryText = `
+    SELECT ${tableName}.editing_by_user_id, users.email AS editing_by_user_email
+    FROM ${tableName}
+    LEFT JOIN users ON ${tableName}.editing_by_user_id = users.id
+    WHERE ${tableName}.id = $1
+  `;
+
+  const res = await pool.query(queryText, [recordId]);
+  return res.rows[0] || null;
+}
