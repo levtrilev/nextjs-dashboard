@@ -304,6 +304,7 @@ export type MachineForm = {
 export type Unit = {
   id: string;
   name: string;
+  object_id: string;
   section_id: string;
   tenant_id: string;
   username?: string;
@@ -317,6 +318,8 @@ export type Unit = {
 export type UnitForm = {
   id: string;
   name: string;
+  object_id: string;
+  object_name: string;
   section_id: string;
   section_name: string;
   tenant_id: string;

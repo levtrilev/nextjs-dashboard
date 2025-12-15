@@ -1,6 +1,5 @@
 import { LegalEntity, Region } from "@/app/lib/definitions";
 import RefSearch from "@/app/ui/ref-search";
-import { useState } from "react";
 
 interface ILegalEntitiesRefTableProps {
     legalEntities: LegalEntity[],

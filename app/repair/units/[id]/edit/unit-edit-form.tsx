@@ -2,9 +2,9 @@
 
 'use client';
 import { useEffect, useState } from "react";
-import { UnitForm } from "@/app/lib/definitions";
+import { ObjectForm, UnitForm } from "@/app/lib/definitions";
 import BtnSectionsRef from "@/app/admin/sections/lib/btn-sections-ref";
-import { z } from "zod";
+import { object, z } from "zod";
 import { pdf } from '@react-pdf/renderer';
 import MessageBoxOKCancel from "@/app/lib/message-box-ok-cancel";
 import {
@@ -20,17 +20,21 @@ import InputField from "@/app/lib/input-field";
 import { useRouter } from "next/navigation";
 import { createUnit, updateUnit } from "../../lib/units-actions";
 import PdfDocument from "./unit-pdf-document";
+import BtnObjectsRef from "@/app/repair/objects/lib/btn-objects-ref";
 
 interface IEditFormProps {
   unit: UnitForm;
   lockedByUserId: string | null;
   unlockAction: ((id: string, userId: string) => Promise<void>) | null;
   readonly: boolean;
+  objects: ObjectForm[];
 }
 
 const UnitFormSchemaFull = z.object({
   id: z.string().uuid(),
   name: z.string().min(2, { message: "Название должно содержать не менее 2-х символов." }),
+  object_id: z.string().min(1, { message: "Поле Объект должно быть заполнено." }),
+  object_name: z.string().min(2, { message: "Название должно содержать не менее 2-х символов." }),
   section_name: z.string().min(1, { message: "Поле Раздел должно быть заполнено." }),
   section_id: z.string().min(1, { message: "Поле section_id должно быть заполнено." }),
   username: z.string().optional(),
@@ -126,7 +130,14 @@ export default function UnitEditForm(props: IEditFormProps) {
     useDocumentStore.getState().setDocumentTenantId(new_section_tenant_id);
     docChanged();
   };
-
+const handleSelectObject = (new_object_id: string, new_object_name: string) => {
+  setFormData((prev) => ({
+    ...prev,
+    object_id: new_object_id,
+    object_name: new_object_name,
+  }));
+  docChanged();
+}
   const handleInputChange = (field: string, value: string | Date) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     docChanged();
@@ -167,13 +178,26 @@ export default function UnitEditForm(props: IEditFormProps) {
                 readonly={props.readonly}
                 errors={errors?.name?._errors as string[] | undefined}
               />
+              {/* object_name */}
+              <InputField
+                name="object_name"
+                value={formData.object_name}
+                label="Объект:"
+                type="text"
+                w={["w-6/16", "w-11/16"]}
+                onChange={() => { }}
+                refBook={<BtnObjectsRef handleSelectObject={handleSelectObject} objects={props.objects}/>}
+                readonly={props.readonly}
+                errors={errors?.object_name?._errors}
+              />
+              {/* section_name */}
               <InputField
                 name="section_name"
                 value={formData.section_name}
                 label="Раздел:"
                 type="text"
                 w={["w-6/16", "w-11/16"]}
-                onChange={() => {}}
+                onChange={() => { }}
                 refBook={<BtnSectionsRef handleSelectSection={handleSelectSection} />}
                 readonly={props.readonly}
                 errors={errors?.section_name?._errors}
@@ -186,9 +210,8 @@ export default function UnitEditForm(props: IEditFormProps) {
               <div className="w-full md:w-1/2">
                 <button
                   disabled={props.readonly}
-                  className={`w-full rounded-md border p-2 ${
-                    props.readonly ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-blue-400 text-white hover:bg-blue-100 hover:text-gray-500'
-                  }`}
+                  className={`w-full rounded-md border p-2 ${props.readonly ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-blue-400 text-white hover:bg-blue-100 hover:text-gray-500'
+                    }`}
                   type="submit"
                 >
                   Сохранить

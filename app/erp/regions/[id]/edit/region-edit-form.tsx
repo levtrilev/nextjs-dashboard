@@ -138,18 +138,6 @@ export default function RegionEditForm(props: IEditFormProps) {
   //================================================================
   //#endregion
 
-  // useEffect(() => {
-  //   const handleBeforeUnload = () => {
-  //     props.unlockAction(region.id, sessionUser.id);
-  //   };
-  //   // Снимаем блокировку при уходе со страницы
-  //   window.addEventListener('beforeunload', handleBeforeUnload);
-  //   return () => {
-  //     window.removeEventListener('beforeunload', handleBeforeUnload);
-  //     props.unlockAction(region.id, sessionUser.id); // на всякий случай
-  //   };
-  // }, [props.unlockAction, region.id]);
-
   return (
     <div>
       <div className="flex flex-col md:flex-row gap-4 w-full">

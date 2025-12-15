@@ -11,6 +11,7 @@ import { checkReadonly } from "@/app/lib/common-utils";
 import { UnitForm } from "@/app/lib/definitions";
 import { fetchUnitForm, tryLockRecord, unlockRecord } from "../../lib/units-actions";
 import UnitEditForm from "./unit-edit-form";
+import { fetchObjectsForm } from "@/app/repair/objects/lib/objects-actions";
 
 export default async function Page(props: { params: Promise<{ id: string }> }) {
   const session = await auth();
@@ -59,10 +60,12 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
   const readonly_permission = checkReadonly(userPermissions, unit, user.id);
   const readonly = readonly_locked || readonly_permission;
 
+  const objects = readonly? [] : await fetchObjectsForm();
+
   return (
     <div className="w-full">
       <div className="flex w-full items-center justify-between">
-        <h1 className={`${lusitana.className} text-2xl`}>Единица</h1>
+        <h1 className={`${lusitana.className} text-2xl`}>Участок</h1>
         {readonly && <span className="text-xs font-medium text-gray-400">только чтение для пользователя: {user.email}</span>}
         {!readonly && <span className="text-xs font-medium text-gray-400">права на изменение для пользователя: {user.email}</span>}
         {!editingByCurrentUser && (
@@ -81,6 +84,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
       >
         <UnitEditForm
           unit={unit}
+          objects={objects}
           lockedByUserId={freshRecord.editing_by_user_id}
           unlockAction={unlockRecord}
           readonly={readonly}

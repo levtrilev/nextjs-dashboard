@@ -1,15 +1,15 @@
-import { Region } from "@/app/lib/definitions";
+import { Object } from "@/app/lib/definitions";
 import RefSearch from "@/app/ui/ref-search";
 
-interface IRegionsRefTableProps {
-    regions: Region[],
-    handleSelectRegion: (new_region_id: string, new_region_name: string) => void,
+interface IObjectsRefTableProps {
+    objects: Object[],
+    handleSelectObject: (new_object_id: string, new_object_name: string) => void,
     closeModal: () => void,
     setTerm: (value: string) => void,
     term: string,
 }
 
-export default function RegionsRefTable(props: IRegionsRefTableProps) {
+export default function ObjectsRefTable(props: IObjectsRefTableProps) {
 
     // const [term, setTerm] = useState<string>("");
     const handleSearch = (input: string) => {
@@ -17,7 +17,7 @@ export default function RegionsRefTable(props: IRegionsRefTableProps) {
     }
     return (
         <div className="w-full">
-            <p>Выберите регион:</p>
+            <p>Выберите объект:</p>
             <RefSearch callback={handleSearch} term={props.term} elementIdPrefix="" />
             <div className="mt-0 flow-root">
                 {/* Таблица для больших экранов */}
@@ -44,10 +44,10 @@ export default function RegionsRefTable(props: IRegionsRefTableProps) {
                         <div className="max-h-[300px] overflow-y-auto rounded-md bg-gray-50 p-2 md:pt-0">
                             <table className="table-fixed hidden w-full rounded-md text-gray-900 md:table">
                                 <tbody className="divide-y divide-gray-200 text-gray-900">
-                                    {props.regions.map((region) => ((
-                                        region.name.toLowerCase().includes(props.term.toLowerCase())
+                                    {props.objects.map((object) => (((
+                                        object.name.toLowerCase().includes(props.term.toLowerCase())
                                         || props.term.length === 0) &&
-                                        <tr key={region.id} className="group">
+                                        <tr key={object.id} className="group">
                                             <td className="w-1/2 overflow-hidden whitespace-nowrap text-ellipsis bg-white py-1 pl-0 text-left  
                           pr-3 text-sm text-black group-first-of-type:rounded-md group-last-of-type:rounded-md sm:pl-6">
                                                 <div className="flex items-left gap-3">
@@ -55,23 +55,23 @@ export default function RegionsRefTable(props: IRegionsRefTableProps) {
                                                         onClick={(e) => {
                                                             e.preventDefault();
                                                             e.stopPropagation();
-                                                            props.handleSelectRegion(region.id, region.name);
+                                                            props.handleSelectObject(object.id, object.name);
                                                             props.setTerm("");
                                                             props.closeModal();
                                                         }}
                                                         // href={"#"}
                                                         className="text-blue-800 underline cursor-pointer hover:text-blue-600"
-                                                    >{region.name.substring(0, 36)}</a>
+                                                    >{object.name.substring(0, 36)}</a>
                                                 </div>
                                             </td>
                                             <td className="w-6/16 overflow-hidden whitespace-nowrap bg-white px-4 py-1 text-sm">
-                                                {region.area}
+                                                {object.name.substring(0, 36)}
                                             </td>
                                             <td className="w-1/8 overflow-hidden whitespace-nowrap bg-white px-4 py-1 text-sm">
-                                                {region.code}
+                                                {object.name.substring(0, 36)}
                                             </td>
                                         </tr>
-                                    ))}
+                                    )))}
                                 </tbody>
                             </table>
                         </div>
@@ -80,30 +80,30 @@ export default function RegionsRefTable(props: IRegionsRefTableProps) {
                 {/* Список для маленьких экранов */}
                 <div className="block md:hidden">
                     <div className="max-h-[300px] overflow-y-auto rounded-md bg-gray-50 p-2">
-                        {props.regions
-                            .filter((region) =>
-                                region.name.toLowerCase().includes(props.term.toLowerCase()) ||
+                        {props.objects
+                            .filter((object) =>
+                                object.name.toLowerCase().includes(props.term.toLowerCase()) ||
                                 props.term.length === 0
                             )
-                            .map((region) => (
+                            .map((object) => (
                                 <div
-                                    key={region.id}
+                                    key={object.id}
                                     className="border-b border-gray-200 bg-white p-4 text-sm text-gray-900 last:border-b-0"
                                 >
                                     <div className="font-medium text-black">
                                         <a
                                             onClick={(e) => {
-                                                props.handleSelectRegion(region.id, region.name);
+                                                props.handleSelectObject(object.id, object.name);
                                                 props.setTerm("");
                                                 props.closeModal();
                                             }}
                                             className="text-blue-800 underline cursor-pointer hover:text-blue-600"
                                         >
-                                            {region.name.substring(0, 36)}
+                                            {object.name.substring(0, 36)}
                                         </a>
                                     </div>
-                                    <div className="text-gray-500">{region.area}</div>
-                                    <div className="text-gray-500">{region.code}</div>
+                                    <div className="text-gray-500">{object.name}</div>
+                                    <div className="text-gray-500">{object.name}</div>
                                 </div>
                             ))}
                     </div>

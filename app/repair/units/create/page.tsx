@@ -9,6 +9,7 @@ import DocWrapper from "@/app/lib/doc-wrapper";
 import { fetchDocUserPermissions } from "@/app/admin/permissions/lib/permissios-actions";
 import { UnitForm } from "@/app/lib/definitions";
 import UnitEditForm from "../[id]/edit/unit-edit-form";
+import { fetchObjectsForm } from "../../objects/lib/objects-actions";
 
 export default async function Page() {
   const session = await auth();
@@ -28,6 +29,8 @@ export default async function Page() {
   const unit: UnitForm = {
     id: "",
     name: "",
+    object_id: "",
+    object_name: "",
     username: "",
     date_created: new Date(),
     section_id: "",
@@ -41,6 +44,7 @@ export default async function Page() {
 
   const readonly_permission = checkReadonly(userPermissions, unit, user.id);
   const readonly = readonly_locked || readonly_permission;
+  const objects = readonly? [] : await fetchObjectsForm();
 
   return (
     <main>
@@ -62,6 +66,7 @@ export default async function Page() {
       >
         <UnitEditForm
           unit={unit}
+          objects={objects}
           lockedByUserId={null}
           unlockAction={null}
           readonly={readonly}

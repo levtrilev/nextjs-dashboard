@@ -17,6 +17,7 @@ export async function createUnit(unit: Unit) {
   const date_created = new Date().toISOString();
   const {
     name,
+    object_id,
     section_id,
     tenant_id,
     author_id,
@@ -25,13 +26,14 @@ export async function createUnit(unit: Unit) {
     await pool.query(
       `
       INSERT INTO units (
-        name, 
+        name, object_id,
         username, section_id, timestamptz,
         tenant_id, author_id
-      ) VALUES ($1, $2, $3, $4, $5, $6)
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7)
     `,
       [
         name,
+        object_id,
         username,
         section_id,
         date_created,
@@ -57,6 +59,7 @@ export async function updateUnit(unit: Unit) {
 
   const {
     id,
+    object_id,
     name,
     section_id,
     tenant_id,
@@ -68,6 +71,7 @@ export async function updateUnit(unit: Unit) {
       `
       UPDATE units SET
         name = $1,
+        object_id = $7,
         username = $2,
         section_id = $4,
         tenant_id = $5,
@@ -82,6 +86,7 @@ export async function updateUnit(unit: Unit) {
         section_id,
         tenant_id,
         author_id,
+        object_id,
       ]
     );
   } catch (error) {
@@ -113,6 +118,7 @@ export async function fetchUnit(id: string) {
       SELECT
         id,
         name,
+        object_id,
         username,
         editing_by_user_id,
         editing_since,
@@ -138,14 +144,17 @@ export async function fetchUnitForm(id: string) {
       SELECT
         units.id,
         units.name,
+        units.object_id,
         units.username,
         units.section_id,
         units.editing_by_user_id,
         units.editing_since,
         units.timestamptz,
+        objects.name AS object_name,
         sections.name AS section_name
       FROM units
       LEFT JOIN sections ON units.section_id = sections.id
+      LEFT JOIN objects ON units.object_id = objects.id
       WHERE units.id = $1
     `,
       [id]
@@ -165,6 +174,7 @@ export async function fetchUnits() {
       SELECT
         id,
         name,
+        object_id,
         section_id,
         username,
         timestamptz,
@@ -189,9 +199,11 @@ export async function fetchUnitsForm() {
       SELECT
         units.id,
         units.name,
+        objects.name AS object_name,
         units.username,
         units.timestamptz
       FROM units
+      LEFT JOIN objects ON units.object_id = objects.id
       ORDER BY units.name ASC
     `,
       []
@@ -217,9 +229,11 @@ export async function fetchFilteredUnits(query: string, currentPage: number) {
       SELECT
         units.id,
         units.name,
+        objects.name AS object_name,
         units.username,
         units.timestamptz
       FROM units
+      LEFT JOIN objects ON units.object_id = objects.id
       WHERE
         units.name ILIKE $1
       ORDER BY units.name ASC
