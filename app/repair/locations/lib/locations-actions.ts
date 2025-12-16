@@ -109,11 +109,15 @@ export async function deleteLocation(id: string) {
 
 //#region Fetch Locations
 
-export async function fetchLocation(id: string) {
+export async function fetchLocation(id: string, 
+  current_sections: string) {
   try {
     const data = await pool.query<Location>(
       `
-      SELECT
+      WITH your_locations AS ( SELECT * FROM locations where section_id = 
+        ANY ($1::uuid[]))
+
+        SELECT
         id,
         name,
         username,
@@ -121,10 +125,10 @@ export async function fetchLocation(id: string) {
         editing_since,
         timestamptz,
         date_created
-      FROM locations
-      WHERE id = $1
+      FROM your_locations
+      WHERE id = $2
     `,
-      [id]
+      [current_sections, id]
     );
 
     return data.rows[0];
@@ -134,11 +138,15 @@ export async function fetchLocation(id: string) {
   }
 }
 
-export async function fetchLocationForm(id: string) {
+export async function fetchLocationForm(id: string, 
+  current_sections: string) {
   try {
     const data = await pool.query<LocationForm>(
       `
-      SELECT
+      WITH your_locations AS ( SELECT * FROM locations where section_id = 
+        ANY ($1::uuid[]))
+
+        SELECT
         locations.id,
         locations.name,
         locations.username,
@@ -147,11 +155,11 @@ export async function fetchLocationForm(id: string) {
         locations.editing_since,
         locations.timestamptz,
         sections.name AS section_name
-      FROM locations
+      FROM your_locations locations
       LEFT JOIN sections ON locations.section_id = sections.id
-      WHERE locations.id = $1
+      WHERE locations.id = $2
     `,
-      [id]
+      [current_sections, id]
     );
 
     return data.rows[0];
@@ -161,21 +169,24 @@ export async function fetchLocationForm(id: string) {
   }
 }
 
-export async function fetchLocations() {
+export async function fetchLocations(current_sections: string) {
   try {
     const data = await pool.query<Location>(
       `
-      SELECT
+      WITH your_locations AS ( SELECT * FROM locations where section_id = 
+        ANY ($1::uuid[]))
+
+        SELECT
         id,
         name,
         section_id,
         username,
         timestamptz,
         date_created
-      FROM locations
+      FROM your_locations
       ORDER BY name ASC
     `,
-      []
+      [current_sections]
     );
 
     return data.rows;
@@ -185,19 +196,22 @@ export async function fetchLocations() {
   }
 }
 
-export async function fetchLocationsForm() {
+export async function fetchLocationsForm(current_sections: string) {
   try {
     const data = await pool.query<LocationForm>(
       `
+      WITH your_locations AS ( SELECT * FROM locations where section_id = 
+        ANY ($1::uuid[]))
+
       SELECT
         locations.id,
         locations.name,
         locations.username,
         locations.timestamptz
-      FROM locations
+      FROM your_locations locations
       ORDER BY locations.name ASC
     `,
-      []
+      [current_sections]
     );
 
     return data.rows;
@@ -211,24 +225,28 @@ export async function fetchLocationsForm() {
 
 //#region Filtered Locations
 
-export async function fetchFilteredLocations(query: string, currentPage: number) {
+export async function fetchFilteredLocations(query: string, currentPage: number, 
+  current_sections: string) {
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
   try {
     const locations = await pool.query<LocationForm>(
       `
-      SELECT
+      WITH your_locations AS ( SELECT * FROM locations where section_id = 
+        ANY ($1::uuid[]))
+
+        SELECT
         locations.id,
         locations.name,
         locations.username,
         locations.timestamptz
-      FROM locations
+      FROM your_locations locations
       WHERE
-        locations.name ILIKE $1
+        locations.name ILIKE $2
       ORDER BY locations.name ASC
-      LIMIT $2 OFFSET $3
+      LIMIT $3 OFFSET $4
     `,
-      [`%${query}%`, ITEMS_PER_PAGE, offset]
+      [current_sections, `%${query}%`, ITEMS_PER_PAGE, offset]
     );
 
     return locations.rows;
@@ -238,14 +256,18 @@ export async function fetchFilteredLocations(query: string, currentPage: number)
   }
 }
 
-export async function fetchLocationsPages(query: string) {
+export async function fetchLocationsPages(query: string, 
+  current_sections: string) {
   try {
     const count = await pool.query(
       `
-      SELECT COUNT(*) FROM locations
-      WHERE locations.name ILIKE $1
+      WITH your_locations AS ( SELECT * FROM locations where section_id = 
+        ANY ($1::uuid[]))
+
+        SELECT COUNT(*) FROM your_locations locations
+      WHERE locations.name ILIKE $2
     `,
-      [`%${query}%`]
+      [current_sections, `%${query}%`]
     );
 
     const totalPages = Math.ceil(Number(count.rows[0].count) / ITEMS_PER_PAGE);

@@ -17,7 +17,7 @@ export default async function ClaimsTable({
   currentPage: number;
   current_sections: string;
 }) {
-  const claims = await fetchFilteredClaims(query, currentPage);
+  const claims = await fetchFilteredClaims(query, currentPage, current_sections);
 
   return (
     <div className="w-full">

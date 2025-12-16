@@ -17,7 +17,7 @@ export default async function LocationsTable({
   currentPage: number;
   current_sections: string;
 }) {
-  const locations = await fetchFilteredLocations(query, currentPage);
+  const locations = await fetchFilteredLocations(query, currentPage, current_sections);
 
   return (
     <div className="w-full">

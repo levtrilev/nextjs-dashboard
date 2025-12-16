@@ -14,7 +14,7 @@ export default async function UnitsTable({
   currentPage: number;
   current_sections: string;
 }) {
-  const units = await fetchFilteredUnits(query, currentPage);
+  const units = await fetchFilteredUnits(query, currentPage, current_sections);
 
   return (
     <div className="w-full">

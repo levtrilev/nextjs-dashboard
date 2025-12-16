@@ -9,6 +9,9 @@ import DocWrapper from "@/app/lib/doc-wrapper";
 import { fetchDocUserPermissions } from "@/app/admin/permissions/lib/permissios-actions";
 import { ClaimForm } from "@/app/lib/definitions";
 import ClaimEditForm from "../[id]/edit/claim-edit-form";
+import { read } from "fs";
+import { fetchMachinesForm } from "../../machines/lib/machines-actions";
+import { fetchLocationsForm } from "../../locations/lib/locations-actions";
 
 export default async function Page() {
   //#region unified hooks and variables 
@@ -35,6 +38,16 @@ export default async function Page() {
   const claim: ClaimForm = {
     id: "",
     name: "",
+      claim_date: new Date(),
+      priority: "низкий",
+      machine_id: "",
+      machine_name: "",
+      location_id: "",
+      location_name: "",
+      repair_todo: "",
+      repair_reason: "",
+      breakdown_reasons: "",
+      emergency_act: "",
     username: "",
     date_created: new Date(),
     section_id: "",
@@ -48,7 +61,8 @@ export default async function Page() {
 
   const readonly_permission = checkReadonly(userPermissions, claim, pageUser.id);
   const readonly = readonly_locked || readonly_permission;
-
+  const machines = readonly ? [] : await fetchMachinesForm(current_sections);
+  const locations = readonly ? [] : await fetchLocationsForm(current_sections);
   return (
     <main>
       <Breadcrumbs
@@ -81,6 +95,8 @@ export default async function Page() {
       >
         <ClaimEditForm
           claim={claim}
+          machines={machines}
+          locations={locations}
           lockedByUserId={null}
           unlockAction={null}
           readonly={readonly}

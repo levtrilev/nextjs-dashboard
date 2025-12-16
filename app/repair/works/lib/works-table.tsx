@@ -19,7 +19,7 @@ export default async function WorksTable({
   currentPage: number;
   current_sections: string;
 }) {
-  const works = await fetchFilteredWorks(query, currentPage);
+  const works = await fetchFilteredWorks(query, currentPage, current_sections);
 
   return (
     <div className="w-full">

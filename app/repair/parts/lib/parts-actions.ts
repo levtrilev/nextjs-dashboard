@@ -109,11 +109,14 @@ export async function deletePart(id: string) {
 
 //#region Fetch Parts
 
-export async function fetchPart(id: string) {
+export async function fetchPart(id: string, current_sections: string) {
   try {
     const data = await pool.query<Part>(
       `
-      SELECT
+      WITH your_parts AS ( SELECT * FROM parts where section_id = 
+        ANY ($1::uuid[]))
+
+        SELECT
         id,
         name,
         username,
@@ -121,10 +124,10 @@ export async function fetchPart(id: string) {
         editing_since,
         timestamptz,
         date_created
-      FROM parts
-      WHERE id = $1
+      FROM your_parts parts
+      WHERE id = $2
     `,
-      [id]
+      [current_sections, id]
     );
 
     return data.rows[0];
@@ -134,11 +137,14 @@ export async function fetchPart(id: string) {
   }
 }
 
-export async function fetchPartForm(id: string) {
+export async function fetchPartForm(id: string, current_sections: string) {
   try {
     const data = await pool.query<PartForm>(
       `
-      SELECT
+      WITH your_parts AS ( SELECT * FROM parts where section_id = 
+        ANY ($1::uuid[]))
+
+        SELECT
         parts.id,
         parts.name,
         parts.username,
@@ -147,35 +153,38 @@ export async function fetchPartForm(id: string) {
         parts.editing_since,
         parts.timestamptz,
         sections.name AS section_name
-      FROM parts
+      FROM your_parts parts
       LEFT JOIN sections ON parts.section_id = sections.id
-      WHERE parts.id = $1
+      WHERE parts.id = $2
     `,
-      [id]
+      [current_sections, id]
     );
 
     return data.rows[0];
   } catch (err) {
     console.error("Ошибка получения формы Part:", err);
-    throw new Error("Не удалось получить данные формы Part.");
+    throw new Error("Не удалось получить данные формы Part:" + String(err));
   }
 }
 
-export async function fetchParts() {
+export async function fetchParts(current_sections: string) {
   try {
     const data = await pool.query<Part>(
       `
-      SELECT
+      WITH your_parts AS ( SELECT * FROM parts where section_id = 
+        ANY ($1::uuid[]))
+        
+        SELECT
         id,
         name,
         section_id,
         username,
         timestamptz,
         date_created
-      FROM parts
+      FROM your_parts parts
       ORDER BY name ASC
     `,
-      []
+      [current_sections]
     );
 
     return data.rows;
@@ -185,19 +194,22 @@ export async function fetchParts() {
   }
 }
 
-export async function fetchPartsForm() {
+export async function fetchPartsForm(current_sections: string) {
   try {
     const data = await pool.query<PartForm>(
       `
-      SELECT
+      WITH your_parts AS ( SELECT * FROM parts where section_id = 
+        ANY ($1::uuid[]))
+        
+        SELECT
         parts.id,
         parts.name,
         parts.username,
         parts.timestamptz
-      FROM parts
+      FROM your_parts parts
       ORDER BY parts.name ASC
     `,
-      []
+      [current_sections]
     );
 
     return data.rows;
@@ -211,24 +223,27 @@ export async function fetchPartsForm() {
 
 //#region Filtered Parts
 
-export async function fetchFilteredParts(query: string, currentPage: number) {
+export async function fetchFilteredParts(query: string, currentPage: number, current_sections: string) {
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
   try {
     const parts = await pool.query<PartForm>(
       `
-      SELECT
+      WITH your_parts AS ( SELECT * FROM parts where section_id = 
+        ANY ($1::uuid[]))
+        
+        SELECT
         parts.id,
         parts.name,
         parts.username,
         parts.timestamptz
-      FROM parts
+      FROM your_parts parts
       WHERE
-        parts.name ILIKE $1
+        parts.name ILIKE $2
       ORDER BY parts.name ASC
-      LIMIT $2 OFFSET $3
+      LIMIT $3 OFFSET $4
     `,
-      [`%${query}%`, ITEMS_PER_PAGE, offset]
+      [current_sections, `%${query}%`, ITEMS_PER_PAGE, offset]
     );
 
     return parts.rows;
@@ -238,14 +253,17 @@ export async function fetchFilteredParts(query: string, currentPage: number) {
   }
 }
 
-export async function fetchPartsPages(query: string) {
+export async function fetchPartsPages(query: string, current_sections: string) {
   try {
     const count = await pool.query(
       `
-      SELECT COUNT(*) FROM parts
-      WHERE parts.name ILIKE $1
+      WITH your_parts AS ( SELECT * FROM parts where section_id = 
+      ANY ($1::uuid[]))
+              
+      SELECT COUNT(*) FROM your_parts parts
+      WHERE parts.name ILIKE $2
     `,
-      [`%${query}%`]
+      [current_sections, `%${query}%`]
     );
 
     const totalPages = Math.ceil(Number(count.rows[0].count) / ITEMS_PER_PAGE);

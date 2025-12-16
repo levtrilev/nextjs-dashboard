@@ -17,7 +17,7 @@ export default async function SystemsTable({
   currentPage: number;
   current_sections: string;
 }) {
-  const systems = await fetchFilteredSystems(query, currentPage);
+  const systems = await fetchFilteredSystems(query, currentPage, current_sections);
 
   return (
     <div className="w-full">

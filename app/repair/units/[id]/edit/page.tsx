@@ -30,7 +30,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
   const tenant_id = user.tenant_id;
   const userPermissions = await fetchDocUserPermissions(user.id, 'units');
 
-  const unit: UnitForm = await fetchUnitForm(id);
+  const unit: UnitForm = await fetchUnitForm(id, current_sections);
   if (!unit) {
     return <h3 className="text-xs font-medium text-gray-400">Not found! id: {id}</h3>;
   }
@@ -56,7 +56,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
   const readonly_permission = checkReadonly(userPermissions, unit, user.id);
   const readonly = readonly_locked || readonly_permission;
 
-  const objects = readonly ? [] : await fetchObjectsForm();
+  const objects = readonly ? [] : await fetchObjectsForm(current_sections);
 
   return (
     <div className="w-full">

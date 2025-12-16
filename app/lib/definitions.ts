@@ -4,6 +4,7 @@
 import { DateTime } from "next-auth/providers/kakao";
 
 export type DocStatus = "draft" | "active" | "deleted";
+export type Priority = "высокий" | "низкий";
 export type MachineStatus = "норма" | "ремонт" | "ожидание" | "неизвестно";
 export type System = {
   id: string;
@@ -251,6 +252,14 @@ export type PartForm = {
 export type Claim = {
   id: string;
   name: string;
+  claim_date: Date | string;
+  priority: Priority;
+  machine_id: string;
+  location_id: string;
+  repair_todo: string;
+  repair_reason: string;
+  breakdown_reasons: string;
+  emergency_act: string;
   section_id: string;
   tenant_id: string;
   username?: string;
@@ -264,6 +273,16 @@ export type Claim = {
 export type ClaimForm = {
   id: string;
   name: string;
+  claim_date: Date | string;
+  priority: Priority;
+  machine_id: string;
+  machine_name: string;
+  location_id: string;
+  location_name: string;
+  repair_todo: string;
+  repair_reason: string;
+  breakdown_reasons: string;
+  emergency_act: string;
   section_id: string;
   section_name: string;
   tenant_id: string;

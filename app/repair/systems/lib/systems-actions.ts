@@ -109,10 +109,13 @@ export async function deleteSystem(id: string) {
 
 //#region Fetch Systems
 
-export async function fetchSystem(id: string) {
+export async function fetchSystem(id: string, current_sections: string) {
   try {
     const data = await pool.query<System>(
       `
+      WITH your_systems AS ( SELECT * FROM systems where section_id = 
+      ANY ($1::uuid[]))
+
       SELECT
         id,
         name,
@@ -121,10 +124,10 @@ export async function fetchSystem(id: string) {
         editing_since,
         timestamptz,
         date_created
-      FROM systems
-      WHERE id = $1
+      FROM your_systems systems
+      WHERE id = $2
     `,
-      [id]
+      [current_sections, id]
     );
 
     return data.rows[0];
@@ -134,10 +137,13 @@ export async function fetchSystem(id: string) {
   }
 }
 
-export async function fetchSystemForm(id: string) {
+export async function fetchSystemForm(id: string, current_sections: string) {
   try {
     const data = await pool.query<SystemForm>(
       `
+      WITH your_systems AS ( SELECT * FROM systems where section_id = 
+      ANY ($1::uuid[]))
+
       SELECT
         systems.id,
         systems.name,
@@ -147,11 +153,11 @@ export async function fetchSystemForm(id: string) {
         systems.editing_since,
         systems.timestamptz,
         sections.name AS section_name
-      FROM systems
+      FROM your_systems systems
       LEFT JOIN sections ON systems.section_id = sections.id
-      WHERE systems.id = $1
+      WHERE systems.id = $2
     `,
-      [id]
+      [current_sections, id]
     );
 
     return data.rows[0];
@@ -161,10 +167,13 @@ export async function fetchSystemForm(id: string) {
   }
 }
 
-export async function fetchSystems() {
+export async function fetchSystems(current_sections: string) {
   try {
     const data = await pool.query<System>(
       `
+      WITH your_systems AS ( SELECT * FROM systems where section_id = 
+      ANY ($1::uuid[]))
+
       SELECT
         id,
         name,
@@ -172,32 +181,38 @@ export async function fetchSystems() {
         username,
         timestamptz,
         date_created
-      FROM systems
+      FROM your_systems systems
       ORDER BY name ASC
     `,
-      []
+      [current_sections]
     );
 
     return data.rows;
   } catch (err) {
     console.error("Ошибка получения списка задач:", err);
-    throw new Error("Не удалось загрузить список задач.");
+    throw new Error("Не удалось загрузить список задач:" + String(err));
   }
 }
 
-export async function fetchSystemsForm() {
+export async function fetchSystemsForm(current_sections: string) {
   try {
     const data = await pool.query<SystemForm>(
       `
+      WITH your_systems AS ( SELECT * FROM systems where section_id = 
+      ANY ($1::uuid[]))
+
       SELECT
         systems.id,
         systems.name,
+        systems.section_id,
         systems.username,
-        systems.timestamptz
-      FROM systems
+        systems.timestamptz,
+        sections.name AS section_name
+      FROM your_systems systems
+      LEFT JOIN sections ON systems.section_id = sections.id
       ORDER BY systems.name ASC
     `,
-      []
+      [current_sections]
     );
 
     return data.rows;
@@ -211,24 +226,27 @@ export async function fetchSystemsForm() {
 
 //#region Filtered Systems
 
-export async function fetchFilteredSystems(query: string, currentPage: number) {
+export async function fetchFilteredSystems(query: string, currentPage: number, current_sections: string) {
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
   try {
     const systems = await pool.query<SystemForm>(
       `
+      WITH your_systems AS ( SELECT * FROM systems where section_id = 
+      ANY ($1::uuid[]))
+        
       SELECT
         systems.id,
         systems.name,
         systems.username,
         systems.timestamptz
-      FROM systems
+      FROM your_systems systems
       WHERE
-        systems.name ILIKE $1
+        systems.name ILIKE $2
       ORDER BY systems.name ASC
-      LIMIT $2 OFFSET $3
+      LIMIT $3 OFFSET $4
     `,
-      [`%${query}%`, ITEMS_PER_PAGE, offset]
+      [current_sections, `%${query}%`, ITEMS_PER_PAGE, offset]
     );
 
     return systems.rows;
@@ -238,21 +256,24 @@ export async function fetchFilteredSystems(query: string, currentPage: number) {
   }
 }
 
-export async function fetchSystemsPages(query: string) {
+export async function fetchSystemsPages(query: string, current_sections: string) {
   try {
     const count = await pool.query(
       `
-      SELECT COUNT(*) FROM systems
-      WHERE systems.name ILIKE $1
+      WITH your_systems AS ( SELECT * FROM systems where section_id = 
+      ANY ($1::uuid[]))
+
+      SELECT COUNT(*) FROM your_systems systems
+      WHERE systems.name ILIKE $2
     `,
-      [`%${query}%`]
+      [current_sections, `%${query}%`]
     );
 
     const totalPages = Math.ceil(Number(count.rows[0].count) / ITEMS_PER_PAGE);
     return totalPages;
   } catch (error) {
     console.error("Ошибка подсчёта страниц Systems:", error);
-    throw new Error("Не удалось определить количество страниц.");
+    throw new Error("Не удалось определить количество страниц: " + String(error));
   }
 }
 

@@ -11,6 +11,8 @@ import { checkReadonly } from "@/app/lib/common-utils";
 import { ClaimForm } from "@/app/lib/definitions";
 import { fetchClaimForm } from "../../lib/claims-actions";
 import ClaimEditForm from "./claim-edit-form";
+import { fetchMachinesForm } from "@/app/repair/machines/lib/machines-actions";
+import { fetchLocationsForm } from "@/app/repair/locations/lib/locations-actions";
 
 async function Page(props: { params: Promise<{ id: string }> }) {
   //#region unified hooks and variables 
@@ -36,7 +38,7 @@ async function Page(props: { params: Promise<{ id: string }> }) {
   const id = params.id;
   //#endregion
 
-  const claim: ClaimForm = await fetchClaimForm(id);
+  const claim: ClaimForm = await fetchClaimForm(id, current_sections);
   if (!claim) {
     return <h3 className="text-xs font-medium text-gray-400">Not found! id: {id}</h3>;
   }
@@ -46,6 +48,7 @@ async function Page(props: { params: Promise<{ id: string }> }) {
     claim.editing_by_user_id === null ||
     claim.editing_by_user_id === user.id ||
     (claim.editing_since && new Date(claim.editing_since) < new Date(Date.now() - 30 * 60 * 1000));
+    
 
   let canEdit = false;
   if (isEditable) {
@@ -58,13 +61,16 @@ async function Page(props: { params: Promise<{ id: string }> }) {
   // Перечитываем запись после возможного обновления блокировки
 
   const freshRecord = await getFeshRecord('claims', claim.id);
-  const editingByCurrentUser = freshRecord.editing_by_user_id;
+
+  const editingByCurrentUser = freshRecord.editing_by_user_id === user.id;
   const readonly_locked = !editingByCurrentUser;
   //#endregion
 
   const readonly_permission = checkReadonly(userPermissions, claim, pageUser.id);
   const readonly = readonly_locked || readonly_permission;
-
+  
+  const machines = readonly ? [] : await fetchMachinesForm(current_sections);
+  const locations = readonly ? [] : await fetchLocationsForm(current_sections);
   return (
     <div className="w-full">
       <div className="flex w-full items-center justify-between">
@@ -95,7 +101,9 @@ async function Page(props: { params: Promise<{ id: string }> }) {
       >
         <ClaimEditForm
           claim={claim}
-          lockedByUserId={freshRecord.editing_by_user_id}
+          machines={machines}
+          locations={locations}
+          lockedByUserId={null}
           unlockAction={unlockRecord}
           readonly={readonly}
         />

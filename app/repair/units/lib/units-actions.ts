@@ -111,10 +111,13 @@ export async function deleteUnit(id: string) {
 
 //#region Fetch Units
 
-export async function fetchUnit(id: string) {
+export async function fetchUnit(id: string, current_sections: string) {
   try {
     const data = await pool.query<Unit>(
       `
+      WITH your_units AS ( SELECT * FROM units where section_id = 
+      ANY ($1::uuid[]))
+
       SELECT
         id,
         name,
@@ -124,10 +127,10 @@ export async function fetchUnit(id: string) {
         editing_since,
         timestamptz,
         date_created
-      FROM units
-      WHERE id = $1
+      FROM your_units units
+      WHERE id = $2
     `,
-      [id]
+      [current_sections, id]
     );
 
     return data.rows[0];
@@ -137,10 +140,13 @@ export async function fetchUnit(id: string) {
   }
 }
 
-export async function fetchUnitForm(id: string) {
+export async function fetchUnitForm(id: string, current_sections: string) {
   try {
     const data = await pool.query<UnitForm>(
       `
+      WITH your_units AS ( SELECT * FROM units where section_id = 
+      ANY ($1::uuid[]))
+
       SELECT
         units.id,
         units.name,
@@ -152,25 +158,28 @@ export async function fetchUnitForm(id: string) {
         units.timestamptz,
         objects.name AS object_name,
         sections.name AS section_name
-      FROM units
+      FROM your_units units
       LEFT JOIN sections ON units.section_id = sections.id
       LEFT JOIN objects ON units.object_id = objects.id
       WHERE units.id = $1
     `,
-      [id]
+      [current_sections, id]
     );
 
     return data.rows[0];
   } catch (err) {
     console.error("Ошибка получения формы Unit:", err);
-    throw new Error("Не удалось получить данные формы Unit.");
+    throw new Error("Не удалось получить данные формы Unit:" + String(err));
   }
 }
 
-export async function fetchUnits() {
+export async function fetchUnits(current_sections: string) {
   try {
     const data = await pool.query<Unit>(
       `
+      WITH your_units AS ( SELECT * FROM units where section_id = 
+      ANY ($1::uuid[]))
+
       SELECT
         id,
         name,
@@ -179,34 +188,37 @@ export async function fetchUnits() {
         username,
         timestamptz,
         date_created
-      FROM units
+      FROM your_units units
       ORDER BY name ASC
     `,
-      []
+      [current_sections]
     );
 
     return data.rows;
   } catch (err) {
     console.error("Ошибка получения списка Units:", err);
-    throw new Error("Не удалось загрузить список Units.");
+    throw new Error("Не удалось загрузить список Units:" + String(err));
   }
 }
 
-export async function fetchUnitsForm() {
+export async function fetchUnitsForm(current_sections: string) {
   try {
     const data = await pool.query<UnitForm>(
       `
+      WITH your_units AS ( SELECT * FROM units where section_id = 
+      ANY ($1::uuid[]))
+
       SELECT
         units.id,
         units.name,
         objects.name AS object_name,
         units.username,
         units.timestamptz
-      FROM units
+      FROM your_units units
       LEFT JOIN objects ON units.object_id = objects.id
       ORDER BY units.name ASC
     `,
-      []
+      [current_sections]
     );
 
     return data.rows;
@@ -220,26 +232,29 @@ export async function fetchUnitsForm() {
 
 //#region Filtered Units
 
-export async function fetchFilteredUnits(query: string, currentPage: number) {
+export async function fetchFilteredUnits(query: string, currentPage: number, current_sections: string) {
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
   try {
     const units = await pool.query<UnitForm>(
       `
+      WITH your_units AS ( SELECT * FROM units where section_id = 
+      ANY ($1::uuid[]))
+
       SELECT
         units.id,
         units.name,
         objects.name AS object_name,
         units.username,
         units.timestamptz
-      FROM units
+      FROM your_units units
       LEFT JOIN objects ON units.object_id = objects.id
       WHERE
-        units.name ILIKE $1
+        units.name ILIKE $2
       ORDER BY units.name ASC
-      LIMIT $2 OFFSET $3
+      LIMIT $3 OFFSET $4
     `,
-      [`%${query}%`, ITEMS_PER_PAGE, offset]
+      [current_sections,`%${query}%`, ITEMS_PER_PAGE, offset]
     );
 
     return units.rows;
@@ -249,52 +264,25 @@ export async function fetchFilteredUnits(query: string, currentPage: number) {
   }
 }
 
-export async function fetchUnitsPages(query: string) {
+export async function fetchUnitsPages(query: string, current_sections: string) {
   try {
     const count = await pool.query(
       `
-      SELECT COUNT(*) FROM units
-      WHERE units.name ILIKE $1
+      WITH your_units AS ( SELECT * FROM units where section_id = 
+      ANY ($1::uuid[]))
+
+      SELECT COUNT(*) FROM your_units units
+      WHERE units.name ILIKE $2
     `,
-      [`%${query}%`]
+      [current_sections,`%${query}%`]
     );
 
     const totalPages = Math.ceil(Number(count.rows[0].count) / ITEMS_PER_PAGE);
     return totalPages;
   } catch (error) {
     console.error("Ошибка подсчёта страниц Units:", error);
-    throw new Error("Не удалось определить количество страниц.");
+    throw new Error("Не удалось определить количество страниц: " + String(error));
   }
 }
 
 //#endregion
-
-// export async function unlockRecord(recordId: string, userId: string) {
-//   await pool.query(
-//     `
-//       UPDATE units
-//       SET editing_by_user_id = NULL, editing_since = NULL
-//       WHERE id = $1 AND editing_by_user_id = $2;
-//     `,
-//     [recordId, userId]
-//   );
-// }
-
-// export async function tryLockRecord(
-//   recordId: string,
-//   userId: string | undefined
-// ) {
-//   const result = await pool.query(
-//     `
-//       UPDATE units
-//       SET editing_by_user_id = $1, editing_since = NOW()
-//       WHERE id = $2
-//         AND (editing_by_user_id IS NULL OR editing_since < NOW() - INTERVAL '30 minutes')
-//       RETURNING editing_by_user_id;
-//     `,
-//     [userId, recordId]
-//   );
-
-//   const isLockedByMe = result.rows.length > 0;
-//   return { success: true, isEditable: isLockedByMe };
-// }

@@ -44,7 +44,7 @@ export default async function Page() {
 
   const readonly_permission = checkReadonly(userPermissions, unit, user.id);
   const readonly = readonly_locked || readonly_permission;
-  const objects = readonly? [] : await fetchObjectsForm();
+  const objects = readonly? [] : await fetchObjectsForm(current_sections);
 
   return (
     <main>

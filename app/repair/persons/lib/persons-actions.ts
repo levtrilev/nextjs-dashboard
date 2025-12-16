@@ -89,7 +89,7 @@ export async function updatePerson(person: Person) {
     );
   } catch (error) {
     console.error("Не удалось обновить Person:", error);
-    throw new Error("Ошибка базы данных: Не удалось обновить Person: " + error);
+    throw new Error("Ошибка базы данных: Не удалось обновить Person: " + String(error));
   }
 
   revalidatePath("/repair/persons");
@@ -100,7 +100,7 @@ export async function deletePerson(id: string) {
     await pool.query(`DELETE FROM persons WHERE id = $1`, [id]);
   } catch (error) {
     console.error("Ошибка удаления Person:", error);
-    throw new Error("Ошибка базы данных: Не удалось удалить Person.");
+    throw new Error("Ошибка базы данных: Не удалось удалить Person: " + String(error));
   }
   revalidatePath("/repair/persons");
 }
@@ -109,10 +109,13 @@ export async function deletePerson(id: string) {
 
 //#region Fetch Persons
 
-export async function fetchPerson(id: string) {
+export async function fetchPerson(id: string, current_sections: string) {
   try {
     const data = await pool.query<Person>(
       `
+      WITH your_persons AS ( SELECT * FROM persons where section_id = 
+      ANY ($1::uuid[]))
+
       SELECT
         id,
         name,
@@ -121,10 +124,10 @@ export async function fetchPerson(id: string) {
         editing_since,
         timestamptz,
         date_created
-      FROM persons
-      WHERE id = $1
+      FROM your_persons persons
+      WHERE id = $2
     `,
-      [id]
+      [current_sections, id]
     );
 
     return data.rows[0];
@@ -134,10 +137,13 @@ export async function fetchPerson(id: string) {
   }
 }
 
-export async function fetchPersonForm(id: string) {
+export async function fetchPersonForm(id: string, current_sections: string) {
   try {
     const data = await pool.query<PersonForm>(
       `
+      WITH your_persons AS ( SELECT * FROM persons where section_id = 
+      ANY ($1::uuid[]))
+
       SELECT
         persons.id,
         persons.name,
@@ -147,24 +153,27 @@ export async function fetchPersonForm(id: string) {
         persons.editing_since,
         persons.timestamptz,
         sections.name AS section_name
-      FROM persons
+      FROM your_persons persons
       LEFT JOIN sections ON persons.section_id = sections.id
       WHERE persons.id = $1
     `,
-      [id]
+      [current_sections, id]
     );
 
     return data.rows[0];
   } catch (err) {
     console.error("Ошибка получения формы Person:", err);
-    throw new Error("Не удалось получить данные формы Person.");
+    throw new Error("Не удалось получить данные формы Person:" + String(err));
   }
 }
 
-export async function fetchPersons() {
+export async function fetchPersons(current_sections: string) {
   try {
     const data = await pool.query<Person>(
       `
+      WITH your_persons AS ( SELECT * FROM persons where section_id = 
+      ANY ($1::uuid[]))
+
       SELECT
         id,
         name,
@@ -172,32 +181,37 @@ export async function fetchPersons() {
         username,
         timestamptz,
         date_created
-      FROM persons
+      FROM your_persons persons
       ORDER BY name ASC
     `,
-      []
+      [current_sections]
     );
 
     return data.rows;
   } catch (err) {
     console.error("Ошибка получения списка задач:", err);
-    throw new Error("Не удалось загрузить список задач.");
+    throw new Error("Не удалось загрузить список задач:" + String(err));
   }
 }
 
-export async function fetchPersonsForm() {
+export async function fetchPersonsForm(current_sections: string) {
   try {
     const data = await pool.query<PersonForm>(
       `
+      WITH your_persons AS ( SELECT * FROM persons where section_id = 
+      ANY ($1::uuid[]))
+
       SELECT
         persons.id,
         persons.name,
         persons.username,
-        persons.timestamptz
-      FROM persons
+        persons.timestamptz,
+        sections.name AS section_name
+      FROM your_persons persons
+      LEFT JOIN sections ON persons.section_id = sections.id
       ORDER BY persons.name ASC
     `,
-      []
+      [current_sections]
     );
 
     return data.rows;
@@ -211,24 +225,27 @@ export async function fetchPersonsForm() {
 
 //#region Filtered Persons
 
-export async function fetchFilteredPersons(query: string, currentPage: number) {
+export async function fetchFilteredPersons(query: string, currentPage: number, current_sections: string) {
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
   try {
     const persons = await pool.query<PersonForm>(
       `
+      WITH your_persons AS ( SELECT * FROM persons where section_id = 
+      ANY ($1::uuid[]))
+
       SELECT
         persons.id,
         persons.name,
         persons.username,
         persons.timestamptz
-      FROM persons
+      FROM your_persons persons
       WHERE
-        persons.name ILIKE $1
+        persons.name ILIKE $2
       ORDER BY persons.name ASC
-      LIMIT $2 OFFSET $3
+      LIMIT $3 OFFSET $4
     `,
-      [`%${query}%`, ITEMS_PER_PAGE, offset]
+      [current_sections, `%${query}%`, ITEMS_PER_PAGE, offset]
     );
 
     return persons.rows;
@@ -238,14 +255,17 @@ export async function fetchFilteredPersons(query: string, currentPage: number) {
   }
 }
 
-export async function fetchPersonsPages(query: string) {
+export async function fetchPersonsPages(query: string, current_sections: string) {
   try {
     const count = await pool.query(
       `
-      SELECT COUNT(*) FROM persons
-      WHERE persons.name ILIKE $1
+      WITH your_persons AS ( SELECT * FROM persons where section_id = 
+      ANY ($1::uuid[]))
+
+      SELECT COUNT(*) FROM your_persons persons
+      WHERE persons.name ILIKE $2
     `,
-      [`%${query}%`]
+      [current_sections, `%${query}%`]
     );
 
     const totalPages = Math.ceil(Number(count.rows[0].count) / ITEMS_PER_PAGE);

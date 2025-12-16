@@ -34,7 +34,7 @@ async function Page(props: { params: Promise<{ id: string }> }) {
     const id = params.id;
     //    #endregion
 
-    const object: ObjectForm = await fetchObjectForm(id);
+    const object: ObjectForm = await fetchObjectForm(id, current_sections);
     if (!object) {
         return (<h3 className="text-xs font-medium text-gray-400">Not found! id: {id}</h3>);
     }

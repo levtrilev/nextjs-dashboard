@@ -35,7 +35,7 @@ async function Page(props: { params: Promise<{ id: string }> }) {
   const id = params.id;
   //#endregion
 
-  const location: LocationForm = await fetchLocationForm(id);
+  const location: LocationForm = await fetchLocationForm(id, current_sections);
   if (!location) {
     return <h3 className="text-xs font-medium text-gray-400">Not found! id: {id}</h3>;
   }

@@ -256,17 +256,6 @@ export default function MachineEditForm(props: IEditFormProps) {
               />
 
               {/* machine_status */}
-              {/* "норма" | "ремонт" | "ожидание" | "неизвестно"; */}
-              {/* <div>
-                <label htmlFor="machine_status">Состояние</label>
-                <select name="machine_status" id="machine_status" className="input input-bordered w-full">
-                  <option value={formData.machine_status}>норма</option>
-                  <option value={formData.machine_status}>ремонт</option>
-                  <option value={formData.machine_status}>ожидание</option>
-                  <option value={formData.machine_status}>неизвестно</option>
-                </select>
-              </div> */}
-
               <div className="flex-1 flex items-center">
                 <label htmlFor="machine_status" className="text-sm font-medium flex items-center p-2">Состояние:</label>
                 <select
@@ -293,11 +282,7 @@ export default function MachineEditForm(props: IEditFormProps) {
                 </select>
               </div>
 
-
             </div>
-
-
-
 
             {/* second column */}
             <div className="flex flex-col gap-4 w-full md:w-1/2">

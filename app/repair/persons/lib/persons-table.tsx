@@ -19,7 +19,7 @@ export default async function PersonsTable({
   currentPage: number;
   current_sections: string;
 }) {
-  const persons = await fetchFilteredPersons(query, currentPage);
+  const persons = await fetchFilteredPersons(query, currentPage, current_sections);
 
   return (
     <div className="w-full">

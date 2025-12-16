@@ -66,8 +66,8 @@ async function Page(props: { params: Promise<{ id: string }> }) {
     //#endregion
     const readonly_permission = checkReadonly(userPermissions, machine, pageUser.id);
     const readonly = readonly_locked || readonly_permission;
-    const units = readonly ? [] : await fetchUnitsForm();
-    const locations = readonly ? [] : await fetchLocationsForm();
+    const units = readonly ? [] : await fetchUnitsForm(current_sections);
+    const locations = readonly ? [] : await fetchLocationsForm(current_sections);
     return (
         <div className="w-full">
             <div className="flex w-full items-center justify-between">

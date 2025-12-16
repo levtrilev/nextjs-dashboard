@@ -33,7 +33,7 @@ async function Page(props: { params: Promise<{ id: string }> }) {
     const id = params.id;
     //    #endregion
 
-    const system: SystemForm = await fetchSystemForm(id);
+    const system: SystemForm = await fetchSystemForm(id, current_sections);
     if (!system) {
         return (<h3 className="text-xs font-medium text-gray-400">Not found! id: {id}</h3>);
     }

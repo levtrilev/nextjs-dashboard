@@ -260,8 +260,14 @@ export async function fetchMachinesForm(current_sections: string) {
         machines.doc_status,
         machines.date_created,
         machines.username,
-        machines.timestamptz
-      FROM your_machines
+        machines.timestamptz,
+        sections.name AS section_name,
+        COALESCE(units.name, '') as unit_name,
+        COALESCE(locations.name, '') as location_name
+      FROM your_machines machines
+      LEFT JOIN sections ON machines.section_id = sections.id
+      LEFT JOIN units ON machines.unit_id = units.id
+      LEFT JOIN locations ON machines.location_id = locations.id
       ORDER BY machines.name ASC
     `,
       [current_sections]

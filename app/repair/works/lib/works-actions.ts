@@ -109,10 +109,13 @@ export async function deleteWork(id: string) {
 
 //#region Fetch Works
 
-export async function fetchWork(id: string) {
+export async function fetchWork(id: string, current_sections: string) {
   try {
     const data = await pool.query<Work>(
       `
+      WITH your_works AS ( SELECT * FROM works where section_id = 
+      ANY ($1::uuid[]))
+
       SELECT
         id,
         name,
@@ -121,10 +124,10 @@ export async function fetchWork(id: string) {
         editing_since,
         timestamptz,
         date_created
-      FROM works
-      WHERE id = $1
+      FROM your_works works
+      WHERE id = $2
     `,
-      [id]
+      [current_sections, id]
     );
 
     return data.rows[0];
@@ -134,10 +137,13 @@ export async function fetchWork(id: string) {
   }
 }
 
-export async function fetchWorkForm(id: string) {
+export async function fetchWorkForm(id: string, current_sections: string) {
   try {
     const data = await pool.query<WorkForm>(
       `
+      WITH your_works AS ( SELECT * FROM works where section_id = 
+      ANY ($1::uuid[]))
+
       SELECT
         works.id,
         works.name,
@@ -147,24 +153,27 @@ export async function fetchWorkForm(id: string) {
         works.editing_since,
         works.timestamptz,
         sections.name AS section_name
-      FROM works
+      FROM your_works works
       LEFT JOIN sections ON works.section_id = sections.id
-      WHERE works.id = $1
+      WHERE works.id = $2
     `,
-      [id]
+      [current_sections, id]
     );
 
     return data.rows[0];
   } catch (err) {
     console.error("Ошибка получения формы Work:", err);
-    throw new Error("Не удалось получить данные формы Work.");
+    throw new Error("Не удалось получить данные формы Work:" + String(err));
   }
 }
 
-export async function fetchWorks() {
+export async function fetchWorks(current_sections: string) {
   try {
     const data = await pool.query<Work>(
       `
+      WITH your_works AS ( SELECT * FROM works where section_id = 
+      ANY ($1::uuid[]))
+
       SELECT
         id,
         name,
@@ -172,32 +181,35 @@ export async function fetchWorks() {
         username,
         timestamptz,
         date_created
-      FROM works
+      FROM your_works works
       ORDER BY name ASC
     `,
-      []
+      [current_sections]
     );
 
     return data.rows;
   } catch (err) {
     console.error("Ошибка получения списка задач:", err);
-    throw new Error("Не удалось загрузить список задач.");
+    throw new Error("Не удалось загрузить список задач:" + String(err));
   }
 }
 
-export async function fetchWorksForm() {
+export async function fetchWorksForm(current_sections: string) {
   try {
     const data = await pool.query<WorkForm>(
       `
+      WITH your_works AS ( SELECT * FROM works where section_id = 
+      ANY ($1::uuid[]))
+
       SELECT
         works.id,
         works.name,
         works.username,
         works.timestamptz
-      FROM works
+      FROM your_works works
       ORDER BY works.name ASC
     `,
-      []
+      [current_sections]
     );
 
     return data.rows;
@@ -211,48 +223,54 @@ export async function fetchWorksForm() {
 
 //#region Filtered Works
 
-export async function fetchFilteredWorks(query: string, currentPage: number) {
+export async function fetchFilteredWorks(query: string, currentPage: number, current_sections: string) {
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
   try {
     const works = await pool.query<WorkForm>(
       `
+      WITH your_works AS ( SELECT * FROM works where section_id = 
+      ANY ($1::uuid[]))
+
       SELECT
         works.id,
         works.name,
         works.username,
         works.timestamptz
-      FROM works
+      FROM your_works works
       WHERE
-        works.name ILIKE $1
+        works.name ILIKE $2
       ORDER BY works.name ASC
-      LIMIT $2 OFFSET $3
+      LIMIT $3 OFFSET $4
     `,
-      [`%${query}%`, ITEMS_PER_PAGE, offset]
+      [current_sections, `%${query}%`, ITEMS_PER_PAGE, offset]
     );
 
     return works.rows;
   } catch (error) {
     console.error("Ошибка фильтрации Объектов(таблица works):", error);
-    throw new Error("Не удалось загрузить отфильтрованные Объекты:" + error);
+    throw new Error("Не удалось загрузить отфильтрованные Объекты:" + String(error));
   }
 }
 
-export async function fetchWorksPages(query: string) {
+export async function fetchWorksPages(query: string, current_sections: string) {
   try {
     const count = await pool.query(
       `
-      SELECT COUNT(*) FROM works
-      WHERE works.name ILIKE $1
+      WITH your_works AS ( SELECT * FROM works where section_id = 
+      ANY ($1::uuid[]))
+
+      SELECT COUNT(*) FROM your_works works
+      WHERE works.name ILIKE $2
     `,
-      [`%${query}%`]
+      [current_sections, `%${query}%`]
     );
 
     const totalPages = Math.ceil(Number(count.rows[0].count) / ITEMS_PER_PAGE);
     return totalPages;
   } catch (error) {
     console.error("Ошибка подсчёта страниц Works:", error);
-    throw new Error("Не удалось определить количество страниц.");
+    throw new Error("Не удалось определить количество страниц: " + String(error));
   }
 }
 

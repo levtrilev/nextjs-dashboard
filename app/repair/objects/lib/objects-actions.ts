@@ -89,7 +89,7 @@ export async function updateObject(object: Object) {
     );
   } catch (error) {
     console.error("Не удалось обновить Object:", error);
-    throw new Error("Ошибка базы данных: Не удалось обновить Object: " + error);
+    throw new Error("Ошибка базы данных: Не удалось обновить Object: " + String(error));
   }
 
   revalidatePath("/repair/objects");
@@ -109,10 +109,13 @@ export async function deleteObject(id: string) {
 
 //#region Fetch Objects
 
-export async function fetchObject(id: string) {
+export async function fetchObject(id: string, current_sections: string) {
   try {
     const data = await pool.query<Object>(
       `
+      WITH your_objects AS ( SELECT * FROM objects where section_id = 
+      ANY ($1::uuid[]))
+
       SELECT
         id,
         name,
@@ -121,10 +124,10 @@ export async function fetchObject(id: string) {
         editing_since,
         timestamptz,
         date_created
-      FROM objects
-      WHERE id = $1
+      FROM your_objects objects
+      WHERE id = $2
     `,
-      [id]
+      [current_sections, id]
     );
 
     return data.rows[0];
@@ -134,10 +137,13 @@ export async function fetchObject(id: string) {
   }
 }
 
-export async function fetchObjectForm(id: string) {
+export async function fetchObjectForm(id: string, current_sections: string) {
   try {
     const data = await pool.query<ObjectForm>(
       `
+      WITH your_objects AS ( SELECT * FROM objects where section_id = 
+      ANY ($1::uuid[]))
+
       SELECT
         objects.id,
         objects.name,
@@ -147,11 +153,11 @@ export async function fetchObjectForm(id: string) {
         objects.editing_since,
         objects.timestamptz,
         sections.name AS section_name
-      FROM objects
+      FROM your_objects objects
       LEFT JOIN sections ON objects.section_id = sections.id
-      WHERE objects.id = $1
+      WHERE objects.id = $2
     `,
-      [id]
+      [current_sections, id]
     );
 
     return data.rows[0];
@@ -161,10 +167,13 @@ export async function fetchObjectForm(id: string) {
   }
 }
 
-export async function fetchObjects() {
+export async function fetchObjects(current_sections: string) {
   try {
     const data = await pool.query<Object>(
       `
+      WITH your_objects AS ( SELECT * FROM objects where section_id = 
+      ANY ($1::uuid[]))
+
       SELECT
         id,
         name,
@@ -172,32 +181,35 @@ export async function fetchObjects() {
         username,
         timestamptz,
         date_created
-      FROM objects
+      FROM your_objects objects
       ORDER BY name ASC
     `,
-      []
+      [current_sections]
     );
 
     return data.rows;
   } catch (err) {
     console.error("Ошибка получения списка задач:", err);
-    throw new Error("Не удалось загрузить список задач.");
+    throw new Error("Не удалось загрузить список задач:" + String(err));
   }
 }
 
-export async function fetchObjectsForm() {
+export async function fetchObjectsForm(current_sections: string) {
   try {
     const data = await pool.query<ObjectForm>(
       `
+      WITH your_objects AS ( SELECT * FROM objects where section_id = 
+      ANY ($1::uuid[]))
+
       SELECT
         objects.id,
         objects.name,
         objects.username,
         objects.timestamptz
-      FROM objects
+      FROM your_objects objects
       ORDER BY objects.name ASC
     `,
-      []
+      [current_sections]
     );
 
     return data.rows;
@@ -211,48 +223,54 @@ export async function fetchObjectsForm() {
 
 //#region Filtered Objects
 
-export async function fetchFilteredObjects(query: string, currentPage: number) {
+export async function fetchFilteredObjects(query: string, currentPage: number, current_sections: string) {
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
   try {
     const objects = await pool.query<ObjectForm>(
       `
+      WITH your_objects AS ( SELECT * FROM objects where section_id = 
+      ANY ($1::uuid[]))
+
       SELECT
         objects.id,
         objects.name,
         objects.username,
         objects.timestamptz
-      FROM objects
+      FROM your_objects objects
       WHERE
-        objects.name ILIKE $1
+        objects.name ILIKE $2
       ORDER BY objects.name ASC
-      LIMIT $2 OFFSET $3
+      LIMIT $3 OFFSET $4
     `,
-      [`%${query}%`, ITEMS_PER_PAGE, offset]
+      [current_sections, `%${query}%`, ITEMS_PER_PAGE, offset]
     );
 
     return objects.rows;
   } catch (error) {
     console.error("Ошибка фильтрации Объектов(таблица objects):", error);
-    throw new Error("Не удалось загрузить отфильтрованные Объекты:" + error);
+    throw new Error("Не удалось загрузить отфильтрованные Объекты:" + String(error));
   }
 }
 
-export async function fetchObjectsPages(query: string) {
+export async function fetchObjectsPages(query: string, current_sections: string) {
   try {
     const count = await pool.query(
       `
-      SELECT COUNT(*) FROM objects
-      WHERE objects.name ILIKE $1
+      WITH your_objects AS ( SELECT * FROM objects where section_id = 
+      ANY ($1::uuid[]))
+
+      SELECT COUNT(*) FROM your_objects objects
+      WHERE objects.name ILIKE $2
     `,
-      [`%${query}%`]
+      [current_sections, `%${query}%`]
     );
 
     const totalPages = Math.ceil(Number(count.rows[0].count) / ITEMS_PER_PAGE);
     return totalPages;
   } catch (error) {
     console.error("Ошибка подсчёта страниц Objects:", error);
-    throw new Error("Не удалось определить количество страниц.");
+    throw new Error("Не удалось определить количество страниц: " + String(error));
   }
 }
 

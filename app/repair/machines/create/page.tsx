@@ -56,8 +56,8 @@ export default async function Page() {
   } as MachineForm;
   const readonly_permission = checkReadonly(userPermissions, machine, pageUser.id);
   const readonly = readonly_locked || readonly_permission;
-  const units = readonly ? [] : await fetchUnitsForm();
-  const locations = readonly ? [] : await fetchLocationsForm();
+  const units = readonly ? [] : await fetchUnitsForm(current_sections);
+  const locations = readonly ? [] : await fetchLocationsForm(current_sections);
 
   return (
     <main>

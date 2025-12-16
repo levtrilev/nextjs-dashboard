@@ -17,7 +17,7 @@ export default async function PartsTable({
   currentPage: number;
   current_sections: string;
 }) {
-  const parts = await fetchFilteredParts(query, currentPage);
+  const parts = await fetchFilteredParts(query, currentPage, current_sections);
 
   return (
     <div className="w-full">

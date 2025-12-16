@@ -19,7 +19,7 @@ export default async function ObjectsTable({
   currentPage: number;
   current_sections: string;
 }) {
-  const objects = await fetchFilteredObjects(query, currentPage);
+  const objects = await fetchFilteredObjects(query, currentPage, current_sections);
 
   return (
     <div className="w-full">
