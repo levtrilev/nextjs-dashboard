@@ -298,18 +298,6 @@ export async function fetchClaimsForm(current_sections: string) {
       LEFT JOIN locations ON claims.location_id = locations.id
       LEFT JOIN units ON machines.unit_id = units.id
       ORDER BY claims.name ASC
-
-    machines.name AS machine_name,
-    locations.name AS location_name,
-    units.name as machine_unit_name,
-    machines.machine_status as machine_machine_status
-      FROM your_claims claims
-      LEFT JOIN sections ON claims.section_id = sections.id
-      LEFT JOIN machines ON claims.machine_id = machines.id
-      LEFT JOIN locations ON claims.location_id = locations.id
-      LEFT JOIN units ON machines.unit_id = units.id
-
-
     `,
       [current_sections]
     );

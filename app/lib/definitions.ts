@@ -6,6 +6,39 @@ import { DateTime } from "next-auth/providers/kakao";
 export type DocStatus = "draft" | "active" | "deleted";
 export type Priority = "высокий" | "низкий";
 export type MachineStatus = "норма" | "ремонт" | "ожидание" | "неизвестно";
+export type Workorder = {
+  id: string;
+  name: string;
+  claim_id: string;
+  section_id: string;
+  tenant_id: string;
+  username?: string;
+  author_id: string;
+  editor_id: string;
+  timestamptz?: string;
+  date_created?: Date;
+  editing_by_user_id: string | null;
+  editing_since: string | null;
+};
+export type WorkorderForm = {
+  id: string;
+  name: string;
+  claim_id: string;
+  claim_name: string;
+  claim_machine_id: string;
+  claim_machine_name: string;
+  section_id: string;
+  section_name: string;
+  tenant_id: string;
+  username?: string;
+  author_id: string;
+  editor_id: string;
+  timestamptz?: string;
+  date_created?: Date;
+  editing_by_user_id: string | null;
+  editing_since: string | null;
+};
+
 export type System = {
   id: string;
   name: string;

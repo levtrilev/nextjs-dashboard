@@ -161,7 +161,7 @@ export async function fetchUnitForm(id: string, current_sections: string) {
       FROM your_units units
       LEFT JOIN sections ON units.section_id = sections.id
       LEFT JOIN objects ON units.object_id = objects.id
-      WHERE units.id = $1
+      WHERE units.id = $2
     `,
       [current_sections, id]
     );

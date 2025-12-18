@@ -1,7 +1,7 @@
 "use server";
 
 import { z } from "zod";
-import pool from "@/db";  // Replaced with pool import
+import pool from "@/db"; // Replaced with pool import
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { auth, signIn } from "@/auth";
@@ -110,10 +110,7 @@ export async function updateInvoice(
 
 export async function deleteInvoice(id: string) {
   try {
-    await pool.query(
-      "DELETE FROM invoices WHERE id = $1",
-      [id]
-    );
+    await pool.query("DELETE FROM invoices WHERE id = $1", [id]);
     revalidatePath("/dashboard/invoices");
   } catch (error) {
     console.error("Database Error, Failed to Delete Invoice:", error);
@@ -144,10 +141,12 @@ export async function authenticate(
 //#endregion
 
 export async function getCurrentSections(email: string): Promise<string> {
-  if (email === "") { return ""; }
-  
+  if (email === "") {
+    return "" //[]; //""
+  }
+
   try {
-    const result = await pool.query<Section>(
+    const result = (await pool.query<Section>(
       `SELECT sections.id
        FROM sections
        WHERE sections.id = ANY (
@@ -160,20 +159,24 @@ export async function getCurrentSections(email: string): Promise<string> {
          )
        )`,
       [email]
-    ) as { rows: Section[] };
-    
+    )) as { rows: Section[] };
+
     const sections_id_array = result.rows.map((section) => section.id);
     const sections_id_string = sections_id_array.join(",");
     return "{" + sections_id_string + "}";
+    // const sections_id_array = result.rows.map((section) => section.id);
+    // return sections_id_array;
   } catch (error) {
     console.error("Failed to fetch current_sections:", error);
-    throw new Error("Failed to fetch current_sections.");
+    throw new Error("Failed to fetch current_sections: " + String(error));
   }
 }
 
 export async function getUserRoles(user_id: string): Promise<RoleForm[]> {
-  if (user_id === "") { return []; }
-  
+  if (user_id === "") {
+    return [];
+  }
+
   try {
     const result = await pool.query(
       `SELECT r.id, r.name, r.description, r.tenant_id, t.name as tenant_name
@@ -186,7 +189,7 @@ export async function getUserRoles(user_id: string): Promise<RoleForm[]> {
        )`,
       [user_id]
     );
-    
+
     return result.rows;
   } catch (err) {
     console.error("Database Error:", err);
@@ -194,14 +197,18 @@ export async function getUserRoles(user_id: string): Promise<RoleForm[]> {
   }
 }
 
-export async function getRoleSections(role_id: string): Promise<{
-  id: string;
-  name: string;
-  tenant_id: string;
-  tenant_name: string;
-}[]> {
-  if (role_id === "") { return []; }
-  
+export async function getRoleSections(role_id: string): Promise<
+  {
+    id: string;
+    name: string;
+    tenant_id: string;
+    tenant_name: string;
+  }[]
+> {
+  if (role_id === "") {
+    return [];
+  }
+
   try {
     const result = await pool.query(
       `SELECT s.id, s.name, s.tenant_id, t.name as tenant_name
@@ -214,14 +221,13 @@ export async function getRoleSections(role_id: string): Promise<{
        )`,
       [role_id]
     );
-    
+
     return result.rows;
   } catch (err) {
     console.error("Database Error:", err);
     throw new Error("Failed to fetch role_sections");
   }
 }
-
 
 // Простая проверка имени таблицы для предотвращения SQL-инъекций
 function isValidTableName(tableName: string): boolean {

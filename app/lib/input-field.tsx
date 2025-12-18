@@ -28,7 +28,7 @@ const InputField: React.FC<IInputFieldProps> = ({
     const labelClassName = `${w[0]} text-sm text-blue-900 font-medium flex items-center p-2`;
     // const inputClassName = `${w[1]} ${moreInputClassName} control rounded-md border border-gray-200 p-2`;
     // `${inputClassName} break-words`
-    const inputClassName = `${w[1]} break-words control rounded-md border border-gray-200 p-2`;
+    const inputClassName = `${w[1]} disabled:text-gray-400 disabled:bg-gray-100 break-words control rounded-md border border-gray-200 p-2`;
 
     return (
 
