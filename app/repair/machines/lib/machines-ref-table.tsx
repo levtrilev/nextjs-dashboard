@@ -18,7 +18,7 @@ export default function MachinesRefTable(props: IMachinesRefTableProps) {
     return (
         <div className="w-full">
             <p>Выберите технику:</p>
-            <RefSearch callback={handleSearch} term={props.term} elementIdPrefix="" />
+            <RefSearch callback={handleSearch} term={props.term} elementIdPrefix="machine" />
             <div className="mt-0 flow-root">
                 {/* Таблица для больших экранов */}
                 <div className="overflow-x-auto md:block hidden">

@@ -18,7 +18,7 @@ export default function LocationsRefTable(props: ILocationsRefTableProps) {
     return (
         <div className="w-full">
             <p>Выберите место:</p>
-            <RefSearch callback={handleSearch} term={props.term} elementIdPrefix="" />
+            <RefSearch callback={handleSearch} term={props.term} elementIdPrefix="location" />
             <div className="mt-0 flow-root">
                 {/* Таблица для больших экранов */}
                 <div className="overflow-x-auto md:block hidden">

@@ -10,6 +10,7 @@ interface IInputFieldProps {
     refBook?: JSX.Element;
     readonly: boolean;
     errors?: string[]; // Массив ошибок
+    textArea?: boolean
 }
 
 const InputField: React.FC<IInputFieldProps> = ({
@@ -22,9 +23,13 @@ const InputField: React.FC<IInputFieldProps> = ({
     refBook,
     readonly,
     errors,
+    textArea,
 }) => {
     const labelClassName = `${w[0]} text-sm text-blue-900 font-medium flex items-center p-2`;
-    const inputClassName = `${w[1]} control rounded-md border border-gray-200 p-2`;
+    // const inputClassName = `${w[1]} ${moreInputClassName} control rounded-md border border-gray-200 p-2`;
+    // `${inputClassName} break-words`
+    const inputClassName = `${w[1]} break-words control rounded-md border border-gray-200 p-2`;
+
     return (
 
         <div className="flex-col">
@@ -36,7 +41,7 @@ const InputField: React.FC<IInputFieldProps> = ({
                 >
                     {label}
                 </label>
-                <input
+                {!textArea && <input
                     id={name}
                     type={type}
                     name={name}
@@ -46,7 +51,18 @@ const InputField: React.FC<IInputFieldProps> = ({
                     onChange={type !== "date"
                         ? (e) => onChange(e.target.value)
                         : (e) => onChange(new Date(e.target.value))}
-                />
+                />}
+                {textArea && <textarea
+                    id={name}
+                    // type={type}
+                    name={name}
+                    // className={inputClassName}
+                    disabled={readonly}
+                    value={value}
+                    onChange={type !== "date"
+                        ? (e) => onChange(e.target.value)
+                        : (e) => onChange(new Date(e.target.value))}
+                    className="w-full break-words rounded-md border border-gray-200 p-2" />}
                 {!readonly && refBook}
             </div>
 

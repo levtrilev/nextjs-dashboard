@@ -203,14 +203,16 @@ export async function fetchClaimForm(id: string,
         claims.editing_by_user_id,
         claims.editing_since,
         claims.timestamptz,
-        sections.name AS section_name,
         COALESCE(machines.name, '') as machine_name,
         COALESCE(locations.name, '') as location_name,
-        COALESCE(sections.name, '') as section_name
+        COALESCE(sections.name, '') as section_name,
+        COALESCE(units.name, '') as machine_unit_name,
+        COALESCE(machines.machine_status, '') as machine_machine_status
       FROM your_claims claims
       LEFT JOIN sections ON claims.section_id = sections.id
       LEFT JOIN machines ON claims.machine_id = machines.id
       LEFT JOIN locations ON claims.location_id = locations.id
+      LEFT JOIN units ON machines.unit_id = units.id
       WHERE claims.id = $2
     `,
       [current_sections, id]
@@ -287,14 +289,27 @@ export async function fetchClaimsForm(current_sections: string) {
         claims.timestamptz,
         COALESCE(machines.name, '') as machine_name,
         COALESCE(locations.name, '') as location_name,
-        COALESCE(sections.name, '') as section_name
-    machines.name AS machine_name,
-    locations.name AS location_name
+        COALESCE(sections.name, '') as section_name,
+        COALESCE(units.name, '') as machine_unit_name,
+        COALESCE(machines.machine_status, '') as machine_machine_status
       FROM your_claims claims
       LEFT JOIN sections ON claims.section_id = sections.id
       LEFT JOIN machines ON claims.machine_id = machines.id
       LEFT JOIN locations ON claims.location_id = locations.id
+      LEFT JOIN units ON machines.unit_id = units.id
       ORDER BY claims.name ASC
+
+    machines.name AS machine_name,
+    locations.name AS location_name,
+    units.name as machine_unit_name,
+    machines.machine_status as machine_machine_status
+      FROM your_claims claims
+      LEFT JOIN sections ON claims.section_id = sections.id
+      LEFT JOIN machines ON claims.machine_id = machines.id
+      LEFT JOIN locations ON claims.location_id = locations.id
+      LEFT JOIN units ON machines.unit_id = units.id
+
+
     `,
       [current_sections]
     );
@@ -340,11 +355,14 @@ export async function fetchFilteredClaims(query: string, currentPage: number,
         claims.timestamptz,
         sections.name AS section_name,
     machines.name AS machine_name,
-    locations.name AS location_name
+    locations.name AS location_name,
+    units.name as machine_unit_name,
+    machines.machine_status as machine_machine_status
       FROM your_claims claims
       LEFT JOIN sections ON claims.section_id = sections.id
       LEFT JOIN machines ON claims.machine_id = machines.id
       LEFT JOIN locations ON claims.location_id = locations.id
+      LEFT JOIN units ON machines.unit_id = units.id
       WHERE
         claims.name ILIKE $2
       ORDER BY claims.name ASC

@@ -23,6 +23,7 @@ import { createClaim, updateClaim } from "../../lib/claims-actions";
 import PdfDocument from "./claim-pdf-document";
 import BtnMachinesRef from "@/app/repair/machines/lib/btn-machines-ref";
 import BtnLocationsRef from "@/app/repair/locations/lib/btn-locations-ref";
+import { machine } from "os";
 
 interface IEditFormProps {
   claim: ClaimForm;
@@ -54,7 +55,8 @@ const ClaimFormSchemaFull = z.object({
   repair_reason: z.string(),
   breakdown_reasons: z.string(),
   emergency_act: z.string(),
-
+  machine_unit_name: z.string(),
+  machine_machine_status: z.string(),
   section_name: z.string().min(1, {
     message: "Поле Раздел должно быть заполнено.",
   }),
@@ -337,6 +339,7 @@ export default function ClaimEditForm(props: IEditFormProps) {
                 label="Аварийный акт:"
                 type="text"
                 w={["w-4/16", "w-13/16"]}
+                // moreInputClassName="break-words"
                 onChange={(value) => handleInputChange('emergency_act', value)}
                 readonly={props.readonly}
                 errors={errors?.emergency_act?._errors as string[] | undefined}
@@ -351,18 +354,20 @@ export default function ClaimEditForm(props: IEditFormProps) {
                 w={["w-4/16", "w-13/16"]}
                 onChange={(value) => handleInputChange('repair_reason', value)}
                 readonly={props.readonly}
+                textArea={true}
                 errors={errors?.repair_reason?._errors as string[] | undefined}
               />
               
               {/* breakdown_reasons */}
               <InputField
                 name="breakdown_reasons"
-                value={formData.emergency_act}
+                value={formData.breakdown_reasons}
                 label="Причины, вызвавшие поломку:"
                 type="text"
                 w={["w-4/16", "w-13/16"]}
                 onChange={(value) => handleInputChange('breakdown_reasons', value)}
                 readonly={props.readonly}
+                textArea={true}
                 errors={errors?.breakdown_reasons?._errors as string[] | undefined}
               />
 

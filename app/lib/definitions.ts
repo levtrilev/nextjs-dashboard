@@ -117,6 +117,7 @@ export type EquipForm = {
 export type Operation = {
   id: string;
   name: string;
+  work_id: string;
   section_id: string;
   tenant_id: string;
   username?: string;
@@ -130,6 +131,8 @@ export type Operation = {
 export type OperationForm = {
   id: string;
   name: string;
+  work_id: string;
+  work_name: string;
   section_id: string;
   section_name: string;
   tenant_id: string;
@@ -285,6 +288,8 @@ export type ClaimForm = {
   emergency_act: string;
   section_id: string;
   section_name: string;
+  machine_unit_name: string;
+  machine_machine_status: string;
   tenant_id: string;
   username?: string;
   author_id: string;

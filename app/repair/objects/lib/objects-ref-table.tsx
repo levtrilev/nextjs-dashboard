@@ -18,7 +18,7 @@ export default function ObjectsRefTable(props: IObjectsRefTableProps) {
     return (
         <div className="w-full">
             <p>Выберите объект:</p>
-            <RefSearch callback={handleSearch} term={props.term} elementIdPrefix="" />
+            <RefSearch callback={handleSearch} term={props.term} elementIdPrefix="object" />
             <div className="mt-0 flow-root">
                 {/* Таблица для больших экранов */}
                 <div className="overflow-x-auto md:block hidden">

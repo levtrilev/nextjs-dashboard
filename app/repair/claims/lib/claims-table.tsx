@@ -31,6 +31,11 @@ export default async function ClaimsTable({
                 <thead className="rounded-md bg-gray-50 text-left text-sm font-normal">
                   <tr>
                     <th scope="col" className="w-4/12 px-4 py-5 font-medium sm:pl-6">Название</th>
+                    <th scope="col" className="w-2/12 px-4 py-5 font-medium">Дата</th>
+                    <th scope="col" className="w-2/12 px-4 py-5 font-medium">Участок</th>
+                    <th scope="col" className="w-2/12 px-4 py-5 font-medium">Состояние</th>
+                    <th scope="col" className="w-2/12 px-4 py-5 font-medium">Характер ремонта</th>
+                    <th scope="col" className="w-2/12 px-4 py-5 font-medium">Приоритет</th>
                     <th scope="col" className="w-1/12 px-4 py-5 font-medium"></th>
                   </tr>
                 </thead>
@@ -45,7 +50,21 @@ export default async function ClaimsTable({
                           {claim.name}
                         </a>
                       </td>
-
+                      <td className="w-2/12 overflow-hidden whitespace-nowrap bg-white py-2 pl-6 pr-3 text-sm text-black">
+                        {new Date(claim.claim_date).toLocaleDateString()}
+                      </td>
+                      <td className="w-2/12 overflow-hidden whitespace-nowrap bg-white py-2 pl-6 pr-3 text-sm text-black">
+                        {claim.machine_unit_name}
+                      </td>
+                      <td className="w-1/12 overflow-hidden whitespace-nowrap bg-white py-2 pl-6 pr-3 text-sm text-black">
+                        {claim.machine_machine_status}
+                      </td>
+                      <td className="w-4/12 overflow-hidden whitespace-nowrap bg-white py-2 pl-6 pr-3 text-sm text-black">
+                        {claim.repair_todo}
+                      </td>
+                      <td className="w-2/12 overflow-hidden whitespace-nowrap bg-white py-2 pl-6 pr-3 text-sm text-black">
+                        {claim.priority}
+                      </td>
                       <td className="w-1/12 whitespace-nowrap py-2 pr-3">
                         <div className="flex justify-end gap-3">
                           <BtnDeleteClaim id={claim.id} name={claim.name} />

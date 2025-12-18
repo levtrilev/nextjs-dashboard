@@ -47,6 +47,7 @@ const subMenu = [
   { mainItem: 'Ремонт', name: 'Запчасти', href: '/repair/parts' },
   { mainItem: 'Ремонт', name: 'Системы', href: '/repair/systems' },
   { mainItem: 'Ремонт', name: 'Работы', href: '/repair/works' },
+  { mainItem: 'Ремонт', name: 'Операции', href: '/repair/operations' },
   { mainItem: 'Ремонт', name: 'Локации', href: '/repair/locations' },
   { mainItem: 'Ремонт', name: 'Сотрудники', href: '/repair/persons' },
 

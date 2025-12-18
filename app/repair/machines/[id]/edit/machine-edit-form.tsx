@@ -37,9 +37,14 @@ const MachineFormSchemaFull = z.object({
     message: "Название должно содержать не менее 2-х символов.",
   }),
   unit_id: z.string(),
-  unit_name: z.string(),
+  unit_name: z.string().min(1, {
+    message: "Поле Участок должно быть заполнено.",
+  }),
   location_id: z.string(),
-  location_name: z.string(),
+  location_name: z.string().min(1, {
+    message: "Поле Местоположение должно быть заполнено.",
+  }),
+  // location_name: z.string(),
   number: z.string(),
   model: z.string(),
   machine_status: MachineStatusSchema,
@@ -137,9 +142,9 @@ export default function MachineEditForm(props: IEditFormProps) {
       setIsDocumentChanged(false);
       setMessageBoxText('Документ сохранен.');
     } catch (error) {
-      if (String(error) === 'NEXT_REDIRECT') {
+      // if (String(error) === 'NEXT_REDIRECT') {
         setMessageBoxText('Документ не сохранен! :' + String(error));
-      }
+      // }
       // alert('Документ не сохранен! :' + String(error));
     }
     setIsShowMessageBoxCancel(false);
