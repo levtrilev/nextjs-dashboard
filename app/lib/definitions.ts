@@ -2,13 +2,62 @@
 // These types may be generated automatically if you're using an ORM such as Prisma.
 
 import { DateTime } from "next-auth/providers/kakao";
+import { number } from "zod";
 
 export type DocStatus = "draft" | "active" | "deleted";
 export type Priority = "высокий" | "низкий";
 export type MachineStatus = "норма" | "ремонт" | "ожидание" | "неизвестно";
+export type WoPart = {
+  id: string;
+  name: string;
+  workorder_id: string;
+  work_id: string;
+  part_id: string;
+  quantity: number;
+  section_id: string;
+};
+export type WoPartForm = {
+  id: string;
+  name: string;
+  workorder_id: string;
+  work_id: string;
+  part_id: string;
+  quantity: number;
+  section_id: string;
+  work_name: string;
+  part_name: string;
+  section_name: string;
+  workorder_name: string;
+};
+export type WoOperation = {
+  id: string;
+  name: string;
+  workorder_id: string;
+  work_id: string;
+  operation_id: string;
+  hours_norm: number;
+  section_id: string;
+};
+export type WoOperationForm = {
+  id: string;
+  name: string;
+  workorder_id: string;
+  work_id: string;
+  operation_id: string;
+  hours_norm: number;
+  section_id: string;
+  work_name: string;
+  operation_name: string;
+  section_name: string;
+  workorder_name: string;
+};
 export type Workorder = {
   id: string;
   name: string;
+  doc_number: string;
+  doc_date: Date;
+  doc_status: DocStatus;
+  performer_id: string;
   claim_id: string;
   section_id: string;
   tenant_id: string;
@@ -23,6 +72,11 @@ export type Workorder = {
 export type WorkorderForm = {
   id: string;
   name: string;
+  doc_number: string;
+  doc_date: Date;
+  doc_status: DocStatus;
+  performer_id: string;
+  performer_name: string;
   claim_id: string;
   claim_name: string;
   claim_machine_id: string;

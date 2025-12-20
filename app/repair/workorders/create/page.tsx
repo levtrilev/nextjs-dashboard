@@ -10,6 +10,7 @@ import { fetchDocUserPermissions } from "@/app/admin/permissions/lib/permissios-
 import { WorkorderForm } from "@/app/lib/definitions";
 import WorkorderEditForm from "../[id]/edit/workorder-edit-form";
 import { fetchClaimsForm } from "../../claims/lib/claims-actions";
+import { fetchPersonsForm } from "../../persons/lib/persons-actions";
 
 export default async function Page() {
   //#region unified hooks and variables 
@@ -36,6 +37,11 @@ export default async function Page() {
   const workorder: WorkorderForm = {
     id: "",
     name: "",
+    doc_number: "",
+    doc_date: new Date(),
+    doc_status: "draft",
+    performer_id: "",
+    performer_name: "",  
     claim_id: "",
     claim_name: "",
     claim_machine_id: "",
@@ -57,6 +63,7 @@ export default async function Page() {
   const readonly_permission = checkReadonly(userPermissions, workorder, pageUser.id);
   const readonly = readonly_locked || readonly_permission;
   const claims = readonly ? [] : await fetchClaimsForm(current_sections);
+  const persons = readonly ? [] : await fetchPersonsForm(current_sections);
 
   return (
     <main>
@@ -86,6 +93,7 @@ export default async function Page() {
           unlockAction={null}
           readonly={readonly}
           claims={claims}
+          persons={persons}
         />
       </DocWrapper>
     </main>

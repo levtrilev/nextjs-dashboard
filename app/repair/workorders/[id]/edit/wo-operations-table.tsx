@@ -1,0 +1,179 @@
+// app/repair/workorders/WoOperationsTable.tsx
+'use client';
+
+import { TrashIcon } from "@heroicons/react/24/outline";
+import { useWoOperationsStore } from "../../lib/store/useWoOperationsStore";
+import { deleteWoOperation } from "../../lib/wo-operations-actions";
+// import { useWoOperationsStore } from "@/app/store/useWoOperationsStore";
+
+interface WoOperationsTableProps {
+    readonly: boolean;
+    onDocumentChanged: () => void;
+    workorderId: string;
+    sectionId: string;
+}
+
+const PlusButton = ({ onClick }: { onClick: () => void; }) => {
+    return (
+        <button
+            type="button"
+            className="absolute top-12 left-102 z-10 w-6 h-6 rounded-full bg-blue-400 flex items-center justify-center shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            onClick={onClick}
+            aria-label="Добавить новую операцию"
+        >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+        </button>
+    );
+}
+
+export default function WoOperationsTable({ readonly, onDocumentChanged, workorderId, sectionId }: WoOperationsTableProps) {
+    const {
+        wo_operations,
+        addNewOperation,
+        updateOperationField,
+        saveOperation,
+        deleteWoOperationFromState,
+    } = useWoOperationsStore();
+    const handleDeleteWoOperation = async (operation_id: string) => {
+        try {
+            await deleteWoOperation(operation_id);
+            deleteWoOperationFromState(operation_id);
+            // onDocumentChanged();
+        } catch (error) {
+            console.error("Ошибка удаления wo_operation:", error);
+            throw new Error(
+                "Ошибка базы данных: Не удалось удалить wo_operation: " + String(error)
+            );
+        }
+    };
+    let current_work = { id: "", name: "" };
+    return (
+        <div id="table_part_wo_operations" className="mt-2 relative">
+            <div className="flex flex-row gap-4 w-full md:w-1/2">
+                <h2 className="px-2 pt-1 font-medium">Работы:</h2>
+            </div>
+            {/* заголовки таблицы не прокручиваются */}
+            <div className="max-h-[50vh] overflow-y-auto rounded-md border border-gray-200 bg-white">
+                <table className="table-fixed hidden w-full rounded-md text-gray-900 md:table">
+                    <thead className="rounded-md bg-gray-50 text-left text-sm font-normal">
+                        <tr>
+                            <th scope="col" className="w-7/16 overflow-hidden px-0 py-5 font-medium sm:pl-6 text-gray-400">
+                                Работа
+                            </th>
+                            <th scope="col" className="w-4/8 px-3 py-5 font-medium text-gray-400">
+                                Операция
+                            </th>
+                            <th scope="col" className="w-2/8 px-3 py-5 font-medium text-gray-400">
+                                Норма,часов
+                            </th>
+                            <th scope="col" className="w-1/16 px-3 py-5 font-medium"></th>
+                        </tr>
+                    </thead>
+                </table>
+                {!readonly && <PlusButton onClick={() => addNewOperation(current_work)} />}
+            </div>
+            {/* таблица прокручивается */}
+            <div className="max-h-[50vh] overflow-y-auto rounded-md border border-gray-200 bg-white relative">
+                <table className="table-fixed hidden w-full rounded-md text-gray-900 md:table">
+                    <tbody className="divide-y divide-gray-200 text-gray-900">
+                        {wo_operations.map((wo_operation) => {
+                            current_work.id = wo_operation.work_id;
+                            current_work.name = wo_operation.work_name;
+                            return (
+
+                                <tr key={wo_operation.id} className="group" >
+                                    <td className="w-7/16 overflow-hidden whitespace-nowrap text-ellipsis bg-white py-1 pl-0 text-left pr-3 text-sm text-black group-first-of-type:rounded-md group-last-of-type:rounded-md sm:pl-6">
+                                        <div className="flex items-left gap-3">
+                                            <a
+                                                href={"/repair/works/" + wo_operation.work_id + "/edit"}
+                                                className="text-blue-800 underline"
+                                            >
+                                                {wo_operation.work_name.substring(0, 36)}
+                                            </a>
+                                        </div>
+                                    </td>
+                                    <td className="w-4/8 overflow-hidden whitespace-nowrap bg-white px-4 py-1 text-sm">
+                                        {wo_operation.isEditing ? (
+                                            <input
+                                                type="text"
+                                                value={wo_operation.operation_name}
+                                                onChange={(e) => updateOperationField(wo_operation.id, 'operation_name', e.target.value)}
+                                                className="w-full p-1 border rounded"
+                                                disabled={readonly}
+                                                autoFocus
+                                            />
+                                        ) : (
+                                            wo_operation.operation_name === "" ? wo_operation.name : wo_operation.operation_name
+                                        )}
+                                    </td>
+                                    <td className="w-2/8 overflow-hidden whitespace-nowrap bg-white px-4 py-1 text-sm">
+                                        {wo_operation.isEditing ? (
+                                            <input
+                                                type="text"
+                                                inputMode="decimal"
+                                                value={wo_operation.hours_norm}
+                                                onChange={(e) => updateOperationField(wo_operation.id, 'hours_norm', e.target.value)}
+                                                className="w-full p-1 border rounded"
+                                                disabled={readonly}
+                                            />
+                                        ) : (
+                                            wo_operation.hours_norm
+                                        )}
+                                    </td>
+                                    <td className="w-1/16 whitespace-nowrap pl-4 py-1 pr-3">
+                                        <div className="flex justify-end gap-3">
+                                            {wo_operation.isEditing ? (
+                                                <>
+                                                    <button
+                                                        type="button"
+                                                        onClick={async () => {
+                                                            const success = await saveOperation(
+                                                                wo_operation.id,
+                                                                wo_operation.operation_name,
+                                                                workorderId,
+                                                                sectionId,
+                                                                current_work.id
+                                                            );
+                                                            if (success) {
+                                                                onDocumentChanged();
+                                                            }
+                                                        }}
+                                                        disabled={readonly}
+                                                        className="p-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
+                                                    >
+                                                        ✓
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => deleteWoOperationFromState(wo_operation.id)}
+                                                        disabled={readonly}
+                                                        className="p-2 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50"
+                                                    >
+                                                        ✕
+                                                    </button>
+                                                </>
+                                            ) : (
+                                                <button
+                                                    className="rounded-md border border-gray-200 p-2 h-10 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                    onClick={() => handleDeleteWoOperation(wo_operation.id)}
+                                                    disabled={readonly}
+                                                >
+                                                    <span className="sr-only">Delete</span>
+                                                    <TrashIcon className="w-5 h-5 text-gray-800" />
+                                                </button>
+                                            )}
+                                        </div>
+                                    </td>
+                                </tr>
+
+                            );
+                        })}
+                    </tbody>
+                </table>
+            </div>
+        </div >
+    );
+}
+

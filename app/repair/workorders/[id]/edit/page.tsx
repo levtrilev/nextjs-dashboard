@@ -11,6 +11,9 @@ import { WorkorderForm } from "@/app/lib/definitions";
 import WorkorderEditForm from "./workorder-edit-form";
 import { fetchWorkorderForm } from "../../lib/workorders-actions";
 import { fetchClaimsForm } from "@/app/repair/claims/lib/claims-actions";
+import { fetchPersonsForm } from "@/app/repair/persons/lib/persons-actions";
+import { fetchWoOperationsForm } from "../../lib/wo-operations-actions";
+import { fetchWoPartsForm } from "../../lib/wo-parts-actions";
 
 async function Page(props: { params: Promise<{ id: string }> }) {
   //#region unified hooks and variables 
@@ -40,7 +43,8 @@ async function Page(props: { params: Promise<{ id: string }> }) {
   if (!workorder) {
     return <h3 className="text-xs font-medium text-gray-400">Not found! id: {id}</h3>;
   }
-
+  const wo_operations = await fetchWoOperationsForm(workorder.id, current_sections);
+  const wo_parts = await fetchWoPartsForm(workorder.id, current_sections);
   //#region Lock Document
   const isEditable =
     workorder.editing_by_user_id === null ||
@@ -64,6 +68,7 @@ async function Page(props: { params: Promise<{ id: string }> }) {
   const readonly_permission = checkReadonly(userPermissions, workorder, pageUser.id);
   const readonly = readonly_locked || readonly_permission;
   const claims = readonly ? [] : await fetchClaimsForm(current_sections);
+  const persons = readonly ? [] : await fetchPersonsForm(current_sections);
   return (
     <div className="w-full">
       <div className="flex w-full items-center justify-between">
@@ -98,6 +103,9 @@ async function Page(props: { params: Promise<{ id: string }> }) {
           unlockAction={unlockRecord}
           readonly={readonly}
           claims={claims}
+          persons={persons}
+          wo_operations={wo_operations}
+          wo_parts={wo_parts}
         />
       </DocWrapper>
     </div>

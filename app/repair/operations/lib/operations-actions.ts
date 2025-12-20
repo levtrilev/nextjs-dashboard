@@ -11,38 +11,27 @@ import { OperationForm, Operation } from "@/app/lib/definitions";
 
 const ITEMS_PER_PAGE = 8;
 
-//#region Create Task
+//#region Create Operation
 
 export async function createOperation(operation: Operation) {
   const session = await auth();
   const username = session?.user?.name;
   const date_created = new Date().toISOString();
-  const {
-    name,
-    work_id,
-    section_id,
-    tenant_id,
-    author_id,
-  } = operation;
+  const { name, work_id, section_id, tenant_id, author_id } = operation;
   try {
-    await pool.query(
+    const result = await pool.query(
       `
       INSERT INTO operations (
         name, work_id,
         username, section_id, timestamptz,
         tenant_id, author_id
       ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+       returning id
     `,
-      [
-        name,
-        work_id,
-        username,
-        section_id,
-        date_created,
-        tenant_id,
-        author_id,
-      ]
+      [name, work_id, username, section_id, date_created, tenant_id, author_id]
     );
+    const id = result.rows[0].id;
+    return id;
   } catch (error) {
     console.error("Не удалось создать Operation:", error);
     throw new Error("Не удалось создать Operation:" + String(error));
@@ -60,14 +49,7 @@ export async function updateOperation(operation: Operation) {
   const session = await auth();
   const username = session?.user?.name;
 
-  const {
-    id,
-    name,
-    work_id,
-    section_id,
-    tenant_id,
-    author_id,
-  } = operation;
+  const { id, name, work_id, section_id, tenant_id, author_id } = operation;
 
   try {
     await pool.query(
@@ -82,19 +64,13 @@ export async function updateOperation(operation: Operation) {
         timestamptz = now()
       WHERE id = $1
     `,
-      [
-        id,
-        name,
-        work_id,
-        username,
-        section_id,
-        tenant_id,
-        author_id,
-      ]
+      [id, name, work_id, username, section_id, tenant_id, author_id]
     );
   } catch (error) {
     console.error("Не удалось обновить Operation:", error);
-    throw new Error("Ошибка базы данных: Не удалось обновить Operation: " + error);
+    throw new Error(
+      "Ошибка базы данных: Не удалось обновить Operation: " + error
+    );
   }
 
   revalidatePath("/repair/operations");
@@ -114,8 +90,7 @@ export async function deleteOperation(id: string) {
 
 //#region Fetch Operations
 
-export async function fetchOperation(id: string, 
-  current_sections: string) {
+export async function fetchOperation(id: string, current_sections: string) {
   try {
     const data = await pool.query<Operation>(
       `
@@ -144,8 +119,7 @@ export async function fetchOperation(id: string,
   }
 }
 
-export async function fetchOperationForm(id: string, 
-  current_sections: string) {
+export async function fetchOperationForm(id: string, current_sections: string) {
   try {
     const data = await pool.query<OperationForm>(
       `
@@ -241,8 +215,11 @@ export async function fetchOperationsForm(current_sections: string) {
 
 //#region Filtered Operations
 
-export async function fetchFilteredOperations(query: string, currentPage: number, 
-  current_sections: string) {
+export async function fetchFilteredOperations(
+  query: string,
+  currentPage: number,
+  current_sections: string
+) {
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
   try {
@@ -277,8 +254,10 @@ export async function fetchFilteredOperations(query: string, currentPage: number
   }
 }
 
-export async function fetchOperationsPages(query: string, 
-  current_sections: string) {
+export async function fetchOperationsPages(
+  query: string,
+  current_sections: string
+) {
   try {
     const count = await pool.query(
       `
@@ -295,7 +274,9 @@ export async function fetchOperationsPages(query: string,
     return totalPages;
   } catch (error) {
     console.error("Ошибка подсчёта страниц Operations:", error);
-    throw new Error("Не удалось определить количество страниц: " + String(error));
+    throw new Error(
+      "Не удалось определить количество страниц: " + String(error)
+    );
   }
 }
 

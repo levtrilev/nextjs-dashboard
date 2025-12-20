@@ -20,10 +20,6 @@ import { createWorkorder, updateWorkorder } from "../../lib/workorders-actions";
 import BtnClaimsRef from "@/app/repair/claims/lib/btn-claims-ref";
 import BtnPersonsRef from "@/app/repair/persons/lib/btn-persons-ref";
 import { TrashIcon } from "@heroicons/react/24/outline";
-import { useWoOperationsStore } from "../../lib/store/useWoOperationsStore";
-import { useWoPartsStore } from "../../lib/store/useWoPartsStore";
-import WoOperationsTable from "./wo-operations-table";
-import WoPartsTable from "./wo-parts-table";
 
 interface IEditFormProps {
   workorder: WorkorderForm;
@@ -107,22 +103,6 @@ export default function WorkorderEditForm(props: IEditFormProps) {
     setMessageBoxText('Документ изменен. Закрыть без сохранения?');
   };
 
-  const {
-    wo_operations,
-    addNewOperation,
-    updateOperationField,
-    saveOperation,
-    deleteWoOperationFromState
-  } = useWoOperationsStore();
-
-  const {
-    wo_parts,
-    addNewPart,
-    updatePartField,
-    savePart,
-    deletePart: deletePartStore
-  } = useWoPartsStore();
-
   useEffect(() => {
     setFormData((prev) => ({
       ...prev,
@@ -130,32 +110,6 @@ export default function WorkorderEditForm(props: IEditFormProps) {
       editor_id: sessionUserId,
     }));
   }, [sessionUserId]);
-
-  // >>>> Инициализация таблиц при монтировании
-  useEffect(() => {
-    useWoOperationsStore.getState().setInitialOperations(
-      props.wo_operations.map(op => ({
-        id: op.id,
-        name: op.name,
-        work_name: op.work_name,
-        work_id: op.work_id,
-        operation_name: op.operation_name,
-        operation_id: op.operation_id,
-        hours_norm: String(op.hours_norm),
-        isEditing: false,
-      }))
-    );
-    useWoPartsStore.getState().setInitialParts(
-      props.wo_parts.map(p => ({
-        id: p.id,
-        work_name: p.work_name,
-        part_name: p.part_name,
-        quantity: String(p.quantity),
-        isEditing: false,
-      }))
-    );
-  }, [props.wo_operations, props.wo_parts]);
-  // <<<<
 
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [formData, setFormData] = useState<FormData>(props.workorder);
@@ -186,11 +140,28 @@ export default function WorkorderEditForm(props: IEditFormProps) {
         new_work_name: string;
       }[]
   ) => {
-
+    // setRoleSections(role_sections.concat({
+    //   id: new_section_id,
+    //   name: new_section_name,
+    //   tenant_id: new_section_tenant_id,
+    //   tenant_name: new_section_tenant_name
+    // }));
+    // prepareRoleSectionIds(role_sections.concat({
+    //   id: new_section_id,
+    //   name: new_section_name,
+    //   tenant_id: new_section_tenant_id,
+    //   tenant_name: new_section_tenant_name
+    // }));
 
     docChanged();
   };
+  const handleDeleteOperation = (operation_id: string) => {
 
+  }
+
+  const handleDeletePart = (part_id: string) => {
+    
+  }
   const handleSubmit = async (e: React.MouseEvent<HTMLFormElement>) => {
     e.preventDefault();
     // console.log("formData: " + JSON.stringify(formData));
@@ -387,12 +358,133 @@ export default function WorkorderEditForm(props: IEditFormProps) {
             </div>
           </div>
 
-          <WoOperationsTable
-            readonly={props.readonly}
-            onDocumentChanged={docChanged}
-            workorderId={formData.id}
-            sectionId={formData.section_id} />
-          <WoPartsTable readonly={props.readonly} onDocumentChanged={docChanged} />
+          {/* table part wo_operations */}
+          <div id="table_part_wo_operations" className="mt-2">
+            <div className="flex flex-row gap-4 w-full md:w-1/2">
+              <h2 className="px-2 pt-1 font-medium">Работы:</h2>
+            </div>
+            {/* заголовки таблицы не прокручиваются */}
+            <div className="max-h-[50vh] overflow-y-auto rounded-md border border-gray-200 bg-white">
+              <table className="table-fixed hidden w-full rounded-md text-gray-900 md:table">
+                <thead className="rounded-md bg-gray-50 text-left text-sm font-normal">
+                  <tr>
+                    <th scope="col" className="w-7/16 overflow-hidden px-0 py-5 font-medium sm:pl-6 text-gray-400">
+                      Работа
+                    </th>
+                    <th scope="col" className="w-4/8 px-3 py-5 font-medium text-gray-400">
+                      Операция
+                    </th>
+                    <th scope="col" className="w-2/8 px-3 py-5 font-medium text-gray-400">
+                      Норма,часов
+                    </th>
+                    <th scope="col" className="w-1/16 px-3 py-5 font-medium">
+                    </th>
+                  </tr>
+                </thead>
+              </table>
+            </div>
+            {/* таблица прокручивается */}
+            <div className="max-h-[50vh] overflow-y-auto rounded-md border border-gray-200 bg-white">
+              <table className="table-fixed hidden w-full rounded-md text-gray-900 md:table">
+                <tbody className="divide-y divide-gray-200 text-gray-900">
+                  {props.wo_operations.map((operation) => (
+                    <tr key={operation.id} className="group">
+                      <td className="w-7/16 overflow-hidden whitespace-nowrap text-ellipsis bg-white py-1 pl-0 text-left  
+                      pr-3 text-sm text-black group-first-of-type:rounded-md group-last-of-type:rounded-md sm:pl-6">
+                        <div className="flex items-left gap-3">
+                          <a
+                            href={"/admin/sections/" + operation.id + "/edit"}
+                            className="text-blue-800 underline"
+                          >{operation.work_name.substring(0, 36)}</a>
+                        </div>
+                      </td>
+                      <td className="w-4/8 overflow-hidden whitespace-nowrap bg-white px-4 py-1 text-sm">
+                        {operation.operation_name}
+                      </td>
+                      <td className="w-2/8 overflow-hidden whitespace-nowrap bg-white px-4 py-1 text-sm">
+                        {operation.hours_norm}
+                      </td>
+                      <td className="w-1/16 whitespace-nowrap pl-4 py-1 pr-3">
+                        <div className="flex justify-end gap-3">
+                          <button className="rounded-md border border-gray-200 p-2 h-10 hover:bg-gray-100 
+                  focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            onClick={() => handleDeleteOperation(operation.id)}>
+                            <span className="sr-only">Delete</span>
+                            <TrashIcon className="w-5 h-5 text-gray-800" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* table part wo_parts */}
+          <div id="table_part_wo_parts" className="mt-2">
+            <div className="flex flex-row gap-4 w-full md:w-1/2">
+              <h2 className="px-2 pt-1 font-medium">Запчасти:</h2>
+            </div>
+            {/* заголовки таблицы не прокручиваются */}
+            <div className="max-h-[50vh] overflow-y-auto rounded-md border border-gray-200 bg-white">
+              <table className="table-fixed hidden w-full rounded-md text-gray-900 md:table">
+                <thead className="rounded-md bg-gray-50 text-left text-sm font-normal">
+                  <tr>
+                    <th scope="col" className="w-7/16 overflow-hidden px-0 py-5 font-medium sm:pl-6 text-gray-400">
+                      Работа
+                    </th>
+                    <th scope="col" className="w-4/8 px-3 py-5 font-medium text-gray-400">
+                      Запчасть
+                    </th>
+                    <th scope="col" className="w-2/8 px-3 py-5 font-medium text-gray-400">
+                      Количество
+                    </th>
+                    <th scope="col" className="w-1/16 px-3 py-5 font-medium">
+                    </th>
+                  </tr>
+                </thead>
+              </table>
+            </div>
+            {/* таблица прокручивается */}
+            <div className="max-h-[50vh] overflow-y-auto rounded-md border border-gray-200 bg-white">
+              <table className="table-fixed hidden w-full rounded-md text-gray-900 md:table">
+                <tbody className="divide-y divide-gray-200 text-gray-900">
+                  {props.wo_parts.map((part) => (
+                    <tr key={part.id} className="group">
+                      <td className="w-7/16 overflow-hidden whitespace-nowrap text-ellipsis bg-white py-1 pl-0 text-left  
+                      pr-3 text-sm text-black group-first-of-type:rounded-md group-last-of-type:rounded-md sm:pl-6">
+                        <div className="flex items-left gap-3">
+                          <a
+                            href={"/admin/sections/" + part.id + "/edit"}
+                            className="text-blue-800 underline"
+                          >{part.work_name.substring(0, 36)}</a>
+                        </div>
+                      </td>
+                      <td className="w-4/8 overflow-hidden whitespace-nowrap bg-white px-4 py-1 text-sm">
+                        {part.part_name}
+                      </td>
+                      <td className="w-2/8 overflow-hidden whitespace-nowrap bg-white px-4 py-1 text-sm">
+                        {part.quantity}
+                      </td>
+                      <td className="w-1/16 whitespace-nowrap pl-4 py-1 pr-3">
+                        <div className="flex justify-end gap-3">
+                          <button className="rounded-md border border-gray-200 p-2 h-10 hover:bg-gray-100 
+                  focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            onClick={() => handleDeletePart(part.id)}>
+                            <span className="sr-only">Delete</span>
+                            <TrashIcon className="w-5 h-5 text-gray-800" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+
 
           <div className="flex justify-between mt-4 mr-4">
             <div className="flex w-full md:w-3/4">
