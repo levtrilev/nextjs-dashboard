@@ -41,7 +41,7 @@ export default async function Page() {
     doc_date: new Date(),
     doc_status: "draft",
     performer_id: "",
-    performer_name: "",  
+    performer_name: "",
     claim_id: "",
     claim_name: "",
     claim_machine_id: "",
@@ -94,6 +94,9 @@ export default async function Page() {
           readonly={readonly}
           claims={claims}
           persons={persons}
+          wo_operations={null}
+          wo_parts={null}
+          works={null}
         />
       </DocWrapper>
     </main>

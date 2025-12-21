@@ -14,6 +14,7 @@ import { fetchClaimsForm } from "@/app/repair/claims/lib/claims-actions";
 import { fetchPersonsForm } from "@/app/repair/persons/lib/persons-actions";
 import { fetchWoOperationsForm } from "../../lib/wo-operations-actions";
 import { fetchWoPartsForm } from "../../lib/wo-parts-actions";
+import { fetchWorks } from "@/app/repair/works/lib/works-actions";
 
 async function Page(props: { params: Promise<{ id: string }> }) {
   //#region unified hooks and variables 
@@ -69,6 +70,7 @@ async function Page(props: { params: Promise<{ id: string }> }) {
   const readonly = readonly_locked || readonly_permission;
   const claims = readonly ? [] : await fetchClaimsForm(current_sections);
   const persons = readonly ? [] : await fetchPersonsForm(current_sections);
+  const works = readonly ? [] : await fetchWorks(current_sections);
   return (
     <div className="w-full">
       <div className="flex w-full items-center justify-between">
@@ -106,6 +108,7 @@ async function Page(props: { params: Promise<{ id: string }> }) {
           persons={persons}
           wo_operations={wo_operations}
           wo_parts={wo_parts}
+          works={works}
         />
       </DocWrapper>
     </div>

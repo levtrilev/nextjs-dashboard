@@ -2,15 +2,18 @@
 'use client';
 
 import { TrashIcon } from "@heroicons/react/24/outline";
-import { useWoOperationsStore } from "../../lib/store/useWoOperationsStore";
+import { createWoOperationsStore } from "../../lib/store/useWoOperationsStore";
 import { deleteWoOperation } from "../../lib/wo-operations-actions";
-// import { useWoOperationsStore } from "@/app/store/useWoOperationsStore";
-
+import InputField from "@/app/lib/input-field";
+import BtnWorksRef from "@/app/repair/works/lib/btn-works-ref";
+import { Work } from "@/app/lib/definitions";
+import { getWoOperationsStore } from "../../lib/store/woOperationsStoreRegistry";
 interface WoOperationsTableProps {
     readonly: boolean;
     onDocumentChanged: () => void;
     workorderId: string;
     sectionId: string;
+    works: Work[] | null;
 }
 
 const PlusButton = ({ onClick }: { onClick: () => void; }) => {
@@ -28,14 +31,23 @@ const PlusButton = ({ onClick }: { onClick: () => void; }) => {
     );
 }
 
-export default function WoOperationsTable({ readonly, onDocumentChanged, workorderId, sectionId }: WoOperationsTableProps) {
-    const {
-        wo_operations,
-        addNewOperation,
-        updateOperationField,
-        saveOperation,
-        deleteWoOperationFromState,
-    } = useWoOperationsStore();
+export default function WoOperationsTable({
+    readonly,
+    onDocumentChanged,
+    workorderId,
+    sectionId,
+    works
+}: WoOperationsTableProps) {
+    const useStore = getWoOperationsStore(workorderId);
+
+    const wo_operations = useStore((state) => state.wo_operations);
+    const addNewOperation = useStore((state) => state.addNewOperation);
+    const updateOperationField = useStore((state) => state.updateOperationField);
+    const saveOperation = useStore((state) => state.saveOperation);
+    const deleteWoOperationFromState = useStore((state) => state.deleteWoOperationFromState);
+    const wo_current_work = useStore((state) => state.wo_current_work);
+    const setCurrentWork = useStore((state) => state.setCurrentWork);
+
     const handleDeleteWoOperation = async (operation_id: string) => {
         try {
             await deleteWoOperation(operation_id);
@@ -48,11 +60,25 @@ export default function WoOperationsTable({ readonly, onDocumentChanged, workord
             );
         }
     };
-    let current_work = { id: "", name: "" };
+
     return (
         <div id="table_part_wo_operations" className="mt-2 relative">
             <div className="flex flex-row gap-4 w-full md:w-1/2">
                 <h2 className="px-2 pt-1 font-medium">Работы:</h2>
+                {/* work_name */}
+                <InputField
+                    name="work_name"
+                    value={wo_current_work.name as string}
+                    label="Работа:"
+                    type="text"
+                    w={["w-6/16", "w-11/16"]}
+                    onChange={(value) => { }}
+                    refBook={works ? <BtnWorksRef
+                        handleSelectWork={
+                            (new_work_id, new_work_name) => setCurrentWork({ id: new_work_id, name: new_work_name })}
+                        works={works} /> : undefined}
+                    readonly={readonly}
+                />
             </div>
             {/* заголовки таблицы не прокручиваются */}
             <div className="max-h-[50vh] overflow-y-auto rounded-md border border-gray-200 bg-white">
@@ -72,15 +98,14 @@ export default function WoOperationsTable({ readonly, onDocumentChanged, workord
                         </tr>
                     </thead>
                 </table>
-                {!readonly && <PlusButton onClick={() => addNewOperation(current_work)} />}
+                {!readonly && <PlusButton onClick={() => addNewOperation(wo_current_work)} />}
             </div>
             {/* таблица прокручивается */}
             <div className="max-h-[50vh] overflow-y-auto rounded-md border border-gray-200 bg-white relative">
                 <table className="table-fixed hidden w-full rounded-md text-gray-900 md:table">
                     <tbody className="divide-y divide-gray-200 text-gray-900">
                         {wo_operations.map((wo_operation) => {
-                            current_work.id = wo_operation.work_id;
-                            current_work.name = wo_operation.work_name;
+
                             return (
 
                                 <tr key={wo_operation.id} className="group" >
@@ -128,17 +153,15 @@ export default function WoOperationsTable({ readonly, onDocumentChanged, workord
                                                 <>
                                                     <button
                                                         type="button"
-                                                        onClick={async () => {
-                                                            const success = await saveOperation(
+                                                        onClick={() => {
+                                                            const success = saveOperation(
                                                                 wo_operation.id,
                                                                 wo_operation.operation_name,
                                                                 workorderId,
                                                                 sectionId,
-                                                                current_work.id
+                                                                wo_current_work.id
                                                             );
-                                                            if (success) {
-                                                                onDocumentChanged();
-                                                            }
+                                                            onDocumentChanged();
                                                         }}
                                                         disabled={readonly}
                                                         className="p-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
@@ -156,6 +179,7 @@ export default function WoOperationsTable({ readonly, onDocumentChanged, workord
                                                 </>
                                             ) : (
                                                 <button
+                                                    type="button"
                                                     className="rounded-md border border-gray-200 p-2 h-10 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                                     onClick={() => handleDeleteWoOperation(wo_operation.id)}
                                                     disabled={readonly}

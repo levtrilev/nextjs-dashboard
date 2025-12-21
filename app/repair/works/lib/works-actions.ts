@@ -179,8 +179,7 @@ export async function fetchWorks(current_sections: string) {
         name,
         section_id,
         username,
-        timestamptz,
-        date_created
+        timestamptz
       FROM your_works works
       ORDER BY name ASC
     `,

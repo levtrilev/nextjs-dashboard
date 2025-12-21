@@ -87,7 +87,7 @@ export async function updateWorkorder(workorder: Workorder) {
     );
   }
 
-  revalidatePath("/repair/workorders");
+  // revalidatePath("/repair/workorders");
 }
 
 export async function deleteWorkorder(id: string) {

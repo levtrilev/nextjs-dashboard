@@ -1,89 +1,162 @@
-// store/useWoPartsStore.ts
+// app/lib/store/woPartsStoreFactory.ts
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
+import { createWoPart } from "../wo-parts-actions";
 
-export interface WOPart {
+export interface WoPart {
   id: string;
+  name: string;
   work_name: string;
   part_name: string;
-  quantity: string;
+  quantity: string; // строка для удобства ввода в input
   isEditing?: boolean;
+  work_id?: string; // опционально, если понадобится
+}
+export interface WoCurrentWork {
+  id: string;
+  name: string;
+}
+export interface WoPartsState {
+  wo_parts: WoPart[];
+  wo_current_work: WoCurrentWork;
+  setInitialParts: (parts: WoPart[]) => void;
+  setCurrentWork: (work: WoCurrentWork) => void;
+  addNewPart: (work: { id: string; name: string }) => void;
+  updatePartField: (id: string, field: keyof WoPart, value: string) => void;
+  savePart: (
+    id: string,
+    part_name: string,
+    workorder_id: string,
+    section_id: string,
+    work_id: string
+  ) => Promise<boolean>;
+  deletePartFromState: (id: string) => void;
+  validatePart: (part: WoPart) => boolean;
+  saveNewPartsToDB: (
+    workorder_id: string,
+    section_id: string
+  ) => Promise<boolean>;
 }
 
-interface WoPartsState {
-  wo_parts: WOPart[];
-  setInitialParts: (parts: WOPart[]) => void;
-  addNewPart: () => void;
-  updatePartField: (id: string, field: keyof WOPart, value: string) => void;
-  savePart: (id: string) => boolean;
-  deletePart: (id: string) => void;
-  validatePart: (part: WOPart) => boolean;
-}
+export const createWoPartsStore = (id: string) =>
+  create<WoPartsState>()(
+    devtools(
+      immer((set, get) => ({
+        wo_parts: [],
+        wo_current_work: { id: "", name: "" },
+        setInitialParts: (parts) => set({ wo_parts: parts }),
+        setCurrentWork: (work) => set({ wo_current_work: work }),
+        addNewPart: (work) =>
+          set((state) => {
+            const newPart: WoPart = {
+              id: `temp-${Date.now()}`,
+              name: "",
+              work_name: work.name,
+              work_id: work.id,
+              part_name: "",
+              quantity: "",
+              isEditing: true,
+            };
+            state.wo_parts.unshift(newPart);
+          }),
+        updatePartField: (id, field, value) =>
+          set((state) => {
+            const part = state.wo_parts.find((p) => p.id === id);
+            if (part && (field === "part_name" || field === "quantity")) {
+              part[field] = value;
+            }
+          }),
+        validatePart: (part) => {
+          const qty = parseFloat(part.quantity);
+          return part.part_name.trim().length > 0 && !isNaN(qty) && qty > 0;
+        },
+        savePart: async (id, part_name, workorder_id, section_id, work_id) => {
+          const { wo_parts, validatePart } = get();
+          const part = wo_parts.find((p) => p.id === id);
+          if (!part || !validatePart(part)) return false;
 
-export const useWoPartsStore = create<WoPartsState>()(
-  devtools(
-    immer((set, get) => ({
-      wo_parts: [],
-
-      setInitialParts: (parts) => set({ wo_parts: parts }),
-
-      addNewPart: () =>
-        set((state) => {
-          const newPart: WOPart = {
-            id: `temp-${Date.now()}`,
-            work_name: "",
-            part_name: "",
-            quantity: "",
-            isEditing: true,
-          };
-          state.wo_parts.unshift(newPart);
-        }),
-
-      // updatePartField: (id, field, value) =>
-      //   set((state) => {
-      //     const part = state.wo_parts.find((p) => p.id === id);
-      //     if (part) part[field] = value;
-      //   }),
-      updatePartField: (id, field, value) =>
-        set((state) => {
-          const part = state.wo_parts.find((p) => p.id === id);
-          if (
-            part &&
-            (field === "work_name" ||
-              field === "part_name" ||
-              field === "quantity")
-          ) {
-            part[field] = value;
+          if (!id.startsWith("temp-")) {
+            set((state) => {
+              const found = state.wo_parts.find((p) => p.id === id);
+              if (found) found.isEditing = false;
+            });
+            return true;
           }
-        }),
 
-      validatePart: (part) => {
-        const qty = parseFloat(part.quantity);
-        return (
-          part.work_name.trim().length > 0 &&
-          part.part_name.trim().length > 0 &&
-          !isNaN(qty) &&
-          qty > 0
-        );
-      },
+          set((state) => {
+            const index = state.wo_parts.findIndex((p) => p.id === id);
+            if (index !== -1) {
+              state.wo_parts[index] = {
+                ...part,
+                isEditing: false,
+                part_name,
+              };
+            }
+          });
+          return true;
+        },
+        saveNewPartsToDB: async (
+          workorder_id: string,
+          section_id: string
+        ): Promise<boolean> => {
+          const { wo_parts, validatePart } = get();
+          const tempParts = wo_parts.filter(
+            (p) => p.id.startsWith("temp-") && validatePart(p)
+          );
 
-      savePart: (id) => {
-        const { wo_parts, validatePart } = get();
-        const part = wo_parts.find((p) => p.id === id);
-        if (!part || !validatePart(part)) return false;
-        set((state) => {
-          const found = state.wo_parts.find((p) => p.id === id);
-          if (found) found.isEditing = false;
-        });
-        return true;
-      },
+          if (tempParts.length === 0) return true;
 
-      deletePart: (id) =>
-        set((state) => {
-          state.wo_parts = state.wo_parts.filter((p) => p.id !== id);
-        }),
-    })),
-    { name: "WO Parts Store" }
-  )
-);
+          try {
+            const savedResults = await Promise.all(
+              tempParts.map(async (part) => {
+                const newPartData = {
+                  id: "",
+                  name: part.part_name,
+                  workorder_id,
+                  work_id:
+                    part.work_id || "00000000-0000-0000-0000-000000000000",
+                  part_id: "00000000-0000-0000-0000-000000000000", // placeholder
+                  quantity: parseFloat(part.quantity),
+                  section_id,
+                };
+                const savedId = await createWoPart(newPartData);
+                return { originalId: part.id, savedId };
+              })
+            );
+
+            const idMap = new Map(
+              savedResults.map((r) => [r.originalId, r.savedId])
+            );
+
+            set((state) => {
+              const updatedParts = state.wo_parts.map((part) => {
+                if (part.id.startsWith("temp-") && idMap.has(part.id)) {
+                  return {
+                    ...part,
+                    id: idMap.get(part.id)!,
+                    part_id: "00000000-0000-0000-0000-000000000000",
+                    isEditing: false,
+                    part_name: "",
+                    name: part.part_name,
+                  };
+                }
+                return part;
+              });
+              return { ...state, wo_parts: updatedParts };
+            });
+
+            return true;
+          } catch (error) {
+            console.error("Failed to save parts:", error);
+            return false;
+          }
+        },
+        deletePartFromState: (id) =>
+          set((state) => {
+            state.wo_parts = state.wo_parts.filter((p) => p.id !== id);
+          }),
+      })),
+      { name: `WO Parts Store [${id}]` }
+    )
+  );

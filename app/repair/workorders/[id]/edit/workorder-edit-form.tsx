@@ -1,8 +1,8 @@
 // Workorder EditForm
 
 'use client';
-import { useEffect, useState } from "react";
-import { ClaimForm, OperationForm, PersonForm, WoOperationForm, WoPartForm, WorkForm, WorkorderForm } from "@/app/lib/definitions";
+import { useEffect, useMemo, useState } from "react";
+import { ClaimForm, OperationForm, PersonForm, WoOperationForm, WoPartForm, Work, WorkForm, WorkorderForm } from "@/app/lib/definitions";
 import { formatDateForInput } from "@/app/lib/common-utils";
 import BtnSectionsRef from "@/app/admin/sections/lib/btn-sections-ref";
 import { z } from "zod";
@@ -19,12 +19,10 @@ import PdfDocument from "./workorder-pdf-document";
 import { createWorkorder, updateWorkorder } from "../../lib/workorders-actions";
 import BtnClaimsRef from "@/app/repair/claims/lib/btn-claims-ref";
 import BtnPersonsRef from "@/app/repair/persons/lib/btn-persons-ref";
-import { TrashIcon } from "@heroicons/react/24/outline";
-import { useWoOperationsStore } from "../../lib/store/useWoOperationsStore";
-import { useWoPartsStore } from "../../lib/store/useWoPartsStore";
 import WoOperationsTable from "./wo-operations-table";
 import WoPartsTable from "./wo-parts-table";
-
+import { getWoOperationsStore, destroyWoOperationsStore } from "../../lib/store/woOperationsStoreRegistry";
+import { getWoPartsStore, destroyWoPartsStore } from "../../lib/store/woPartsStoreRegistry";
 interface IEditFormProps {
   workorder: WorkorderForm;
   lockedByUserId: string | null;
@@ -33,8 +31,9 @@ interface IEditFormProps {
   claims: ClaimForm[];
   persons: PersonForm[];
   // operations: OperationForm[];
-  wo_operations: WoOperationForm[];
-  wo_parts: WoPartForm[];
+  wo_operations: WoOperationForm[] | null;
+  wo_parts: WoPartForm[] | null;
+  works: Work[] | null;
 }
 const DocStatusSchema = z.enum(['draft', 'active', 'deleted']);
 
@@ -106,64 +105,72 @@ export default function WorkorderEditForm(props: IEditFormProps) {
     setIsDocumentChanged(true);
     setMessageBoxText('Документ изменен. Закрыть без сохранения?');
   };
-
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [formData, setFormData] = useState<FormData>(props.workorder);
+  const useCurrentWoOperationsStore = getWoOperationsStore(formData.id);
+  const useCurrentWoPartsStore = getWoPartsStore(formData.id);
   const {
     wo_operations,
+    saveNewOperationsToDB,
     addNewOperation,
     updateOperationField,
     saveOperation,
     deleteWoOperationFromState
-  } = useWoOperationsStore();
+  } = useCurrentWoOperationsStore();
 
   const {
     wo_parts,
+    saveNewPartsToDB,
     addNewPart,
     updatePartField,
     savePart,
-    deletePart: deletePartStore
-  } = useWoPartsStore();
+    // deletePart: deletePartStore
+  } = useCurrentWoPartsStore();
+
+  useEffect(() => {
+    return () => {
+      // Очищаем сторы, когда документ закрывается
+      destroyWoOperationsStore(formData.id);
+      destroyWoPartsStore(formData.id);
+    };
+  }, [formData.id]);
+
+  useEffect(() => {
+    if (props.wo_operations) {
+      useCurrentWoOperationsStore.getState().setInitialOperations(
+        props.wo_operations.map(op => ({
+          id: op.id,
+          name: op.name,
+          work_name: op.work_name,
+          work_id: op.work_id,
+          operation_name: op.operation_name,
+          operation_id: op.operation_id,
+          hours_norm: String(op.hours_norm),
+          isEditing: false,
+        }))
+      );
+    }
+    if (props.wo_parts) {
+      useCurrentWoPartsStore.getState().setInitialParts(
+        props.wo_parts.map(p => ({
+          id: p.id,
+          name: p.name,
+          work_name: p.work_name,
+          part_name: p.part_name,
+          quantity: String(p.quantity),
+          isEditing: false,
+        }))
+      );
+    }
+  }, [props.wo_operations, props.wo_parts, useCurrentWoOperationsStore, useCurrentWoPartsStore]);
+
+
 
   useEffect(() => {
     setFormData((prev) => ({
       ...prev,
       author_id: sessionUserId,
-      editor_id: sessionUserId,
-    }));
-  }, [sessionUserId]);
-
-  // >>>> Инициализация таблиц при монтировании
-  useEffect(() => {
-    useWoOperationsStore.getState().setInitialOperations(
-      props.wo_operations.map(op => ({
-        id: op.id,
-        name: op.name,
-        work_name: op.work_name,
-        work_id: op.work_id,
-        operation_name: op.operation_name,
-        operation_id: op.operation_id,
-        hours_norm: String(op.hours_norm),
-        isEditing: false,
-      }))
-    );
-    useWoPartsStore.getState().setInitialParts(
-      props.wo_parts.map(p => ({
-        id: p.id,
-        work_name: p.work_name,
-        part_name: p.part_name,
-        quantity: String(p.quantity),
-        isEditing: false,
-      }))
-    );
-  }, [props.wo_operations, props.wo_parts]);
-  // <<<<
-
-  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
-  const [formData, setFormData] = useState<FormData>(props.workorder);
-
-  useEffect(() => {
-    setFormData((prev) => ({
-      ...prev,
-      author_id: sessionUserId,
+      editor_id: '00000000-0000-0000-0000-000000000000',
       tenant_id: docTenantId,
     }));
   }, []);
@@ -177,23 +184,10 @@ export default function WorkorderEditForm(props: IEditFormProps) {
     }
     return res.error.format();
   };
-  const handleAddWorkOpertions = (
-    new_operations:
-      {
-        new_operation_id: string;
-        new_operation_name: string;
-        new_work_id: string;
-        new_work_name: string;
-      }[]
-  ) => {
-
-
-    docChanged();
-  };
 
   const handleSubmit = async (e: React.MouseEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // console.log("formData: " + JSON.stringify(formData));
+    // console.log("handleSubmit!!! formData: " + JSON.stringify(formData));
     const errors = validate();
     if (errors) {
       console.log("Ошибки есть! :" + JSON.stringify(errors));
@@ -209,6 +203,9 @@ export default function WorkorderEditForm(props: IEditFormProps) {
         }, 2000);
       } else {
         await updateWorkorder(formData);
+        await saveNewOperationsToDB(formData.id, formData.section_id);
+        await saveNewPartsToDB(formData.id, formData.section_id);
+
       }
       setIsDocumentChanged(false);
       setMessageBoxText('Документ сохранен.');
@@ -387,13 +384,23 @@ export default function WorkorderEditForm(props: IEditFormProps) {
             </div>
           </div>
 
-          <WoOperationsTable
-            readonly={props.readonly}
-            onDocumentChanged={docChanged}
-            workorderId={formData.id}
-            sectionId={formData.section_id} />
-          <WoPartsTable readonly={props.readonly} onDocumentChanged={docChanged} />
-
+          {props.wo_operations &&
+            <WoOperationsTable
+              readonly={props.readonly}
+              onDocumentChanged={docChanged}
+              workorderId={formData.id}
+              sectionId={formData.section_id}
+              works={props.works}
+            />}
+          {props.wo_parts &&
+            <WoPartsTable
+              readonly={props.readonly}
+              onDocumentChanged={docChanged}
+              workorderId={formData.id}
+              sectionId={formData.section_id}
+              works={props.works}
+            />
+          }
           <div className="flex justify-between mt-4 mr-4">
             <div className="flex w-full md:w-3/4">
               <div className="w-full md:w-1/2">
