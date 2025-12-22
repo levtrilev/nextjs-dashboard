@@ -19,7 +19,7 @@ const PlusButton = ({ onClick }: { onClick: () => void; }) => {
   return (
     <button
       type="button"
-      className="absolute top-12 left-102 z-10 w-6 h-6 rounded-full bg-blue-400 flex items-center justify-center shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+      className="ml-2 z-10 w-6 h-6 rounded-full bg-blue-400 flex items-center justify-center shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
       onClick={onClick}
       aria-label="Добавить новую операцию"
     >
@@ -59,9 +59,9 @@ export default function WoPartsTable({
     <div id="table_part_wo_parts" className="mt-2 relative">
       <div className="flex flex-row gap-4 w-full md:w-1/2">
         <h2 className="px-2 pt-1 font-medium">Запчасти:</h2>
-        {/* work_name */}
+        {/* work_name_parts */}
         <InputField
-          name="work_name"
+          name="work_name_parts"
           value={wo_current_work.name as string}
           label="Работа:"
           type="text"
@@ -70,7 +70,7 @@ export default function WoPartsTable({
           refBook={works ? <BtnWorksRef
             handleSelectWork={
               (new_work_id, new_work_name) => setCurrentWork({ id: new_work_id, name: new_work_name })}
-            works={works} /> : undefined}
+            works={works} instanceId="_parts" /> : undefined}
           readonly={readonly}
         />
       </div>
@@ -83,7 +83,9 @@ export default function WoPartsTable({
                 Работа
               </th>
               <th scope="col" className="w-4/8 px-3 py-5 font-medium text-gray-400">
-                Запчасть
+                <div className="flex flwx-row">
+                  Запчасть {!readonly && <PlusButton onClick={() => addNewPart(wo_current_work)} />}
+                </div>
               </th>
               <th scope="col" className="w-2/8 px-3 py-5 font-medium text-gray-400">
                 Количество
@@ -92,7 +94,8 @@ export default function WoPartsTable({
             </tr>
           </thead>
         </table>
-        {!readonly && <PlusButton onClick={() => addNewPart(wo_current_work)} />}      </div>
+        {/* {!readonly && <PlusButton onClick={() => addNewPart(wo_current_work)} />} */}
+      </div>
       {/* таблица прокручивается */}
       <div className="max-h-[50vh] overflow-y-auto rounded-md border border-gray-200 bg-white relative">
         <table className="table-fixed hidden w-full rounded-md text-gray-900 md:table">

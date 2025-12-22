@@ -14,11 +14,10 @@ import pool from "@/db";
 //#region Create wo_operation
 
 export async function createWoPart(wo_part: WoPart) {
-
   const { name, workorder_id, work_id, part_id, quantity, section_id } =
     wo_part;
   try {
-    await pool.query(
+    const result = await pool.query(
       `
       INSERT INTO wo_parts (
     name,
@@ -32,6 +31,8 @@ export async function createWoPart(wo_part: WoPart) {
     `,
       [name, workorder_id, work_id, part_id, quantity, section_id]
     );
+    const id = result.rows[0].id;
+    return id;
   } catch (error) {
     console.error("Не удалось создать wo_part:", error);
     throw new Error("Не удалось создать wo_part:" + String(error));
@@ -45,16 +46,8 @@ export async function createWoPart(wo_part: WoPart) {
 //#region Update/Delete wo_operation
 
 export async function updateWoPart(wo_operation: WoPart) {
-
-  const {
-    id,
-    name,
-    workorder_id,
-    work_id,
-    part_id,
-    quantity,
-    section_id,
-  } = wo_operation;
+  const { id, name, workorder_id, work_id, part_id, quantity, section_id } =
+    wo_operation;
 
   try {
     await pool.query<WoPart>(
@@ -78,7 +71,7 @@ export async function updateWoPart(wo_operation: WoPart) {
     );
   }
 
-//   revalidatePath("/repair/workorders");
+  //   revalidatePath("/repair/workorders");
 }
 
 export async function deleteWoPart(id: string) {
@@ -86,14 +79,19 @@ export async function deleteWoPart(id: string) {
     await pool.query(`DELETE FROM wo_parts WHERE id = $1`, [id]);
   } catch (error) {
     console.error("Ошибка удаления wo_part:", error);
-    throw new Error("Ошибка базы данных: Не удалось удалить wo_part: " + String(error));
+    throw new Error(
+      "Ошибка базы данных: Не удалось удалить wo_part: " + String(error)
+    );
   }
-//   revalidatePath("/repair/workorders");
+  //   revalidatePath("/repair/workorders");
 }
 
 //#endregion
 
-export async function fetchWoPartsForm(workorder_id: string, current_sections: string) {
+export async function fetchWoPartsForm(
+  workorder_id: string,
+  current_sections: string
+) {
   try {
     const data = await pool.query<WoPartForm>(
       `

@@ -20,7 +20,8 @@ const PlusButton = ({ onClick }: { onClick: () => void; }) => {
     return (
         <button
             type="button"
-            className="absolute top-12 left-102 z-10 w-6 h-6 rounded-full bg-blue-400 flex items-center justify-center shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            // className="absolute top-12 left-102 z-10 w-6 h-6 rounded-full bg-blue-400 flex items-center justify-center shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="ml-2 z-10 w-6 h-6 rounded-full bg-blue-400 flex items-center justify-center shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
             onClick={onClick}
             aria-label="Добавить новую операцию"
         >
@@ -65,9 +66,9 @@ export default function WoOperationsTable({
         <div id="table_part_wo_operations" className="mt-2 relative">
             <div className="flex flex-row gap-4 w-full md:w-1/2">
                 <h2 className="px-2 pt-1 font-medium">Работы:</h2>
-                {/* work_name */}
+                {/* work_name_operations */}
                 <InputField
-                    name="work_name"
+                    name="work_name_operations"
                     value={wo_current_work.name as string}
                     label="Работа:"
                     type="text"
@@ -89,7 +90,9 @@ export default function WoOperationsTable({
                                 Работа
                             </th>
                             <th scope="col" className="w-4/8 px-3 py-5 font-medium text-gray-400">
-                                Операция
+                            <div className="flex flex-row">
+                                Операция {!readonly && <PlusButton onClick={() => addNewOperation(wo_current_work)} />}
+                            </div>
                             </th>
                             <th scope="col" className="w-2/8 px-3 py-5 font-medium text-gray-400">
                                 Норма,часов
@@ -98,7 +101,7 @@ export default function WoOperationsTable({
                         </tr>
                     </thead>
                 </table>
-                {!readonly && <PlusButton onClick={() => addNewOperation(wo_current_work)} />}
+                {/* {!readonly && <PlusButton onClick={() => addNewOperation(wo_current_work)} />} */}
             </div>
             {/* таблица прокручивается */}
             <div className="max-h-[50vh] overflow-y-auto rounded-md border border-gray-200 bg-white relative">

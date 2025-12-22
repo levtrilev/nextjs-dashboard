@@ -7,6 +7,7 @@ interface IWorksRefTableProps {
     closeModal: () => void,
     setTerm: (value: string) => void,
     term: string,
+    instanceId?: string,
 }
 
 export default function WorksRefTable(props: IWorksRefTableProps) {
@@ -18,7 +19,7 @@ export default function WorksRefTable(props: IWorksRefTableProps) {
     return (
         <div className="w-full">
             <p>Выберите работу:</p>
-            <RefSearch callback={handleSearch} term={props.term} elementIdPrefix="work" />
+            <RefSearch callback={handleSearch} term={props.term} elementIdPrefix={"work"+ String(props.instanceId)} />
             <div className="mt-0 flow-root">
                 {/* Таблица для больших экранов */}
                 <div className="overflow-x-auto md:block hidden">

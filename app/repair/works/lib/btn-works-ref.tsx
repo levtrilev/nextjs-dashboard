@@ -9,6 +9,7 @@ const Modal = dynamic(() => import('@/app/lib/common-modal'), { ssr: false });
 interface IBtnWorksRefProps {
   works: Work[],
   handleSelectWork: (new_work_id: string, new_work_name: string) => void,
+  instanceId?: string,
 }
 
 export default function BtnWorksRef(props: IBtnWorksRefProps) {
@@ -44,6 +45,7 @@ export default function BtnWorksRef(props: IBtnWorksRefProps) {
           closeModal={closeModal}
           setTerm={setTerm}
           term={term}
+          instanceId={props.instanceId}
         />
 
         {/* buttons */}
