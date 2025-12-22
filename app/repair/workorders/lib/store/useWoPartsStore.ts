@@ -2,16 +2,17 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
-import { createWoPart } from "../wo-parts-actions";
+import { createWoPart, deleteWoPart } from "../wo-parts-actions";
 
 export interface WoPart {
   id: string;
   name: string;
   work_name: string;
   part_name: string;
-  quantity: string; // строка для удобства ввода в input
+  quantity: string;
   isEditing?: boolean;
-  work_id?: string; // опционально, если понадобится
+  work_id?: string;
+  isToBeDeleted: boolean;
 }
 export interface WoCurrentWork {
   id: string;
@@ -32,11 +33,13 @@ export interface WoPartsState {
     work_id: string
   ) => Promise<boolean>;
   deletePartFromState: (id: string) => void;
+  markWoPartToBeDeleted: (id: string) => void;
   validatePart: (part: WoPart) => boolean;
   saveNewPartsToDB: (
     workorder_id: string,
     section_id: string
   ) => Promise<boolean>;
+  deleteMarkedPartsFromDB: () => Promise<boolean>;
 }
 
 export const createWoPartsStore = (id: string) =>
@@ -57,6 +60,7 @@ export const createWoPartsStore = (id: string) =>
               part_name: "",
               quantity: "",
               isEditing: true,
+              isToBeDeleted: false,
             };
             state.wo_parts.unshift(newPart);
           }),
@@ -156,6 +160,40 @@ export const createWoPartsStore = (id: string) =>
           set((state) => {
             state.wo_parts = state.wo_parts.filter((p) => p.id !== id);
           }),
+        markWoPartToBeDeleted: (id) =>
+          set((state) => {
+            const p = state.wo_parts.find((p) => p.id === id);
+            if (p) {
+              p.isToBeDeleted = !p.isToBeDeleted;
+            }
+          }),
+        deleteMarkedPartsFromDB: async (): Promise<boolean> => {
+          const { wo_parts } = get();
+          const notMarkedParts = wo_parts.filter(
+            (p) => !p.isToBeDeleted
+          );
+          const markedParts = wo_parts.filter(
+            (p) => p.isToBeDeleted
+          );
+          if (markedParts.length !== 0) {
+            try {
+              await Promise.all(
+                markedParts.map(async (p) => {
+                  if (!p.id.startsWith("temp-")) await deleteWoPart(p.id);
+                })
+              );
+            } catch (error) {
+              console.error("Failed to delete part: ", error);
+              throw new Error("Failed to delete part: " + String(error));
+            }
+          }
+          if (notMarkedParts.length === 0) return true;
+
+          set((state) => {
+            return { ...state, wo_parts: notMarkedParts };
+          });
+          return true;
+        },
       })),
       { name: `WO Parts Store [${id}]` }
     )

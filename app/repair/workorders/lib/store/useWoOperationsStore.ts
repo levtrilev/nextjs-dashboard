@@ -2,7 +2,7 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
-import { createWoOperation } from "../wo-operations-actions";
+import { createWoOperation, deleteWoOperation } from "../wo-operations-actions";
 
 export interface WoOperation {
   id: string;
@@ -13,6 +13,7 @@ export interface WoOperation {
   operation_id: string;
   hours_norm: string;
   isEditing?: boolean;
+  isToBeDeleted: boolean;
 }
 
 export interface WoCurrentWork {
@@ -39,11 +40,13 @@ export interface WoOperationsState {
     work_id: string
   ) => Promise<boolean>;
   deleteWoOperationFromState: (id: string) => void;
+  markWoOperationToBeDeleted: (id: string) => void;
   validateOperation: (op: WoOperation) => boolean;
   saveNewOperationsToDB: (
     workorder_id: string,
     section_id: string
   ) => Promise<boolean>;
+  deleteMarkedOperationsFromDB: () => Promise<boolean>;
 }
 
 // Фабрика: создаёт НОВЫЙ экземпляр стора
@@ -66,6 +69,7 @@ export const createWoOperationsStore = (id: string) =>
               operation_id: "",
               hours_norm: "",
               isEditing: true,
+              isToBeDeleted: false,
             };
             state.wo_operations.unshift(newOp);
           }),
@@ -90,7 +94,13 @@ export const createWoOperationsStore = (id: string) =>
             norm > 0
           );
         },
-        saveOperation: async (id, operation_name, workorder_id, section_id, work_id) => {
+        saveOperation: async (
+          id,
+          operation_name,
+          workorder_id,
+          section_id,
+          work_id
+        ) => {
           const { wo_operations, validateOperation } = get();
           const op = wo_operations.find((op) => op.id === id);
           if (!op || !validateOperation(op)) return false;
@@ -115,10 +125,14 @@ export const createWoOperationsStore = (id: string) =>
           });
           return true;
         },
-        saveNewOperationsToDB: async (workorder_id: string, section_id: string): Promise<boolean> => {
+        saveNewOperationsToDB: async (
+          workorder_id: string,
+          section_id: string
+        ): Promise<boolean> => {
           const { wo_operations, validateOperation } = get();
-          const tempOps = wo_operations
-            .filter((op) => op.id.startsWith("temp-") && validateOperation(op));
+          const tempOps = wo_operations.filter(
+            (op) => op.id.startsWith("temp-") && validateOperation(op)
+          );
 
           if (tempOps.length === 0) return true;
 
@@ -139,7 +153,9 @@ export const createWoOperationsStore = (id: string) =>
               })
             );
 
-            const idMap = new Map(savedResults.map(r => [r.originalId, r.savedId]));
+            const idMap = new Map(
+              savedResults.map((r) => [r.originalId, r.savedId])
+            );
 
             set((state) => {
               const updatedOps = state.wo_operations.map((op) => {
@@ -166,8 +182,44 @@ export const createWoOperationsStore = (id: string) =>
         },
         deleteWoOperationFromState: (id) =>
           set((state) => {
-            state.wo_operations = state.wo_operations.filter((op) => op.id !== id);
+            state.wo_operations = state.wo_operations.filter(
+              (op) => op.id !== id
+            );
           }),
+        markWoOperationToBeDeleted: (id) =>
+          set((state) => {
+            const op = state.wo_operations.find((op) => op.id === id);
+            if (op) {
+              op.isToBeDeleted = !op.isToBeDeleted;
+            }
+          }),
+        deleteMarkedOperationsFromDB: async (): Promise<boolean> => {
+          const { wo_operations } = get();
+          const notMarkedOps = wo_operations.filter(
+            (op) => !op.isToBeDeleted
+          );
+          const markedOps = wo_operations.filter(
+            (op) => op.isToBeDeleted
+          );
+          if (markedOps.length !== 0) {
+            try {
+              await Promise.all(
+                markedOps.map(async (op) => {
+                  if (!op.id.startsWith("temp-")) await deleteWoOperation(op.id);
+                })
+              );
+            } catch (error) {
+              console.error("Failed to delete operation: ", error);
+              throw new Error("Failed to delete operations: " + String(error));
+            }
+          }
+          if (notMarkedOps.length === 0) return true;
+
+          set((state) => {
+            return { ...state, wo_operations: notMarkedOps };
+          });
+          return true;
+        },
       })),
       { name: `WO Operations Store [${id}]` }
     )

@@ -39,6 +39,7 @@ export default function WoPartsTable({
   const addNewPart = useStore((state) => state.addNewPart);
   const updatePartField = useStore((state) => state.updatePartField);
   const deletePartFromState = useStore((state) => state.deletePartFromState);
+  const markWoPartToBeDeleted = useStore((state) => state.markWoPartToBeDeleted);
   const setCurrentWork = useStore((state) => state.setCurrentWork);
   const wo_current_work = useStore((state) => state.wo_current_work);
 
@@ -57,15 +58,15 @@ export default function WoPartsTable({
 
   return (
     <div id="table_part_wo_parts" className="mt-2 relative">
-      <div className="flex flex-row gap-4 w-full md:w-1/2">
+      <div className="mb-2 flex flex-row gap-4 w-full md:w-1/2">
         <h2 className="px-2 pt-1 font-medium">Запчасти:</h2>
         {/* work_name_parts */}
         <InputField
           name="work_name_parts"
           value={wo_current_work.name as string}
-          label="Работа:"
+          label="Добавлять запчасти в работу:"
           type="text"
-          w={["w-6/16", "w-11/16"]}
+          w={["w-9/16", "w-8/16"]}
           onChange={(value) => { }}
           refBook={works ? <BtnWorksRef
             handleSelectWork={
@@ -103,7 +104,10 @@ export default function WoPartsTable({
             {wo_parts.map((wo_part) => {
 
               return (
-                <tr key={wo_part.id} className="group">
+                <tr key={wo_part.id}
+                  className={`group ${wo_part.isToBeDeleted ? 'line-through text-red-600' : ''} 
+                                    ${!wo_part.isEditing && wo_part.id.startsWith("temp-") ? 'text-green-600' : ''}`}
+                >
                   <td className="w-7/16 overflow-hidden whitespace-nowrap text-ellipsis bg-white py-1 pl-0 text-left pr-3 text-sm text-black group-first-of-type:rounded-md group-last-of-type:rounded-md sm:pl-6">
                     <div className="flex items-left gap-3">
                       <a
@@ -114,7 +118,7 @@ export default function WoPartsTable({
                       </a>
                     </div>
                   </td>
-                  <td className="w-7/16 overflow-hidden whitespace-nowrap text-ellipsis bg-white py-1 pl-0 text-left pr-3 text-sm text-black group-first-of-type:rounded-md group-last-of-type:rounded-md sm:pl-6">
+                  <td className="w-7/16 overflow-hidden whitespace-nowrap text-ellipsis bg-white py-1 pl-0 text-left pr-3 text-smx group-first-of-type:rounded-md group-last-of-type:rounded-md sm:pl-6">
                     <div className="flex items-left gap-3">
                       {wo_part.isEditing ? (
                         <input
@@ -177,7 +181,9 @@ export default function WoPartsTable({
                         <button
                           type="button"
                           className="rounded-md border border-gray-200 p-2 h-10 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          onClick={() => handleDeleteWoPart(wo_part.id)}
+                          // onClick={() => handleDeleteWoPart(wo_part.id)}
+                          onClick={() => markWoPartToBeDeleted(wo_part.id)}
+
                           disabled={readonly}
                         >
                           <span className="sr-only">Delete</span>
@@ -191,18 +197,6 @@ export default function WoPartsTable({
             })}
           </tbody>
         </table>
-        {/* {!readonly && (
-          <button
-            type="button"
-            className="absolute bottom-2 left-2 z-10 w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            onClick={addNewPart}
-            aria-label="Добавить новую запчасть"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-            </svg>
-          </button>
-        )} */}
       </div>
     </div>
   );

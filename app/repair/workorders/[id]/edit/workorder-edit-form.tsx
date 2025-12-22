@@ -112,6 +112,7 @@ export default function WorkorderEditForm(props: IEditFormProps) {
   const {
     wo_operations,
     saveNewOperationsToDB,
+    deleteMarkedOperationsFromDB,
     addNewOperation,
     updateOperationField,
     saveOperation,
@@ -121,6 +122,7 @@ export default function WorkorderEditForm(props: IEditFormProps) {
   const {
     wo_parts,
     saveNewPartsToDB,
+    deleteMarkedPartsFromDB,
     addNewPart,
     updatePartField,
     savePart,
@@ -147,6 +149,7 @@ export default function WorkorderEditForm(props: IEditFormProps) {
           operation_id: op.operation_id,
           hours_norm: String(op.hours_norm),
           isEditing: false,
+          isToBeDeleted: false,
         }))
       );
     }
@@ -159,6 +162,7 @@ export default function WorkorderEditForm(props: IEditFormProps) {
           part_name: p.part_name,
           quantity: String(p.quantity),
           isEditing: false,
+          isToBeDeleted: false,
         }))
       );
     }
@@ -202,10 +206,18 @@ export default function WorkorderEditForm(props: IEditFormProps) {
           router.push('/repair/workorders');
         }, 2000);
       } else {
-        await updateWorkorder(formData);
-        await saveNewOperationsToDB(formData.id, formData.section_id);
-        await saveNewPartsToDB(formData.id, formData.section_id);
-
+        // await updateWorkorder(formData);
+        // await deleteMarkedOperationsFromDB();
+        // await deleteMarkedPartsFromDB();
+        // await saveNewOperationsToDB(formData.id, formData.section_id);
+        // await saveNewPartsToDB(formData.id, formData.section_id);
+        await Promise.all([
+          updateWorkorder(formData),
+          deleteMarkedOperationsFromDB(),
+          deleteMarkedPartsFromDB(),
+          saveNewOperationsToDB(formData.id, formData.section_id),
+          saveNewPartsToDB(formData.id, formData.section_id),
+        ]);
       }
       setIsDocumentChanged(false);
       setMessageBoxText('Документ сохранен.');
@@ -285,7 +297,7 @@ export default function WorkorderEditForm(props: IEditFormProps) {
   return (
     <div>
       {!pdfUrl && (
-        <form id="workorder-form" onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <form id="workorder-form" onSubmit={handleSubmit} className="flex flex-col gap-4 pb-24">
           <div className="flex flex-col md:flex-row gap-4 w-full">
 
             {/* первая колонка */}
@@ -401,36 +413,38 @@ export default function WorkorderEditForm(props: IEditFormProps) {
               works={props.works}
             />
           }
-          <div className="flex justify-between mt-4 mr-4">
-            <div className="flex w-full md:w-3/4">
-              <div className="w-full md:w-1/2">
-                <button
-                  disabled={props.readonly}
-                  className={`w-full rounded-md border p-2 ${props.readonly
-                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                    : 'bg-blue-400 text-white hover:bg-blue-100 hover:text-gray-500 cursor-pointer'
-                    }`}
-                  type="submit"
-                >
-                  Сохранить
-                </button>
-              </div>
-              <div className="w-full md:w-1/2">
-                <button
-                  onClick={handleBackClick}
-                  className="bg-blue-400 text-white w-full rounded-md border p-2 hover:bg-blue-100 hover:text-gray-500 cursor-pointer"
-                >
-                  {props.readonly ? 'Закрыть' : 'Закрыть и освободить'}
-                </button>
-              </div>
-              <div className="w-full md:w-1/2">
-                <button
-                  type="button"
-                  onClick={handleShowPDF}
-                  className="bg-green-400 text-white w-full rounded-md border p-2 hover:bg-green-100 hover:text-gray-500 cursor-pointer"
-                >
-                  Открыть PDF
-                </button>
+          <div className="sticky bottom-0 bg-white py-4 z-10"> {/* // border-t  */}
+            <div className="flex justify-between mt-4 mr-4">
+              <div className="flex w-full md:w-3/4">
+                <div className="w-full md:w-1/2">
+                  <button
+                    disabled={props.readonly}
+                    className={`w-full rounded-md border p-2 ${props.readonly
+                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                      : 'bg-blue-400 text-white hover:bg-blue-100 hover:text-gray-500 cursor-pointer'
+                      }`}
+                    type="submit"
+                  >
+                    Сохранить
+                  </button>
+                </div>
+                <div className="w-full md:w-1/2">
+                  <button
+                    onClick={handleBackClick}
+                    className="bg-blue-400 text-white w-full rounded-md border p-2 hover:bg-blue-100 hover:text-gray-500 cursor-pointer"
+                  >
+                    {props.readonly ? 'Закрыть' : 'Закрыть и освободить'}
+                  </button>
+                </div>
+                <div className="w-full md:w-1/2">
+                  <button
+                    type="button"
+                    onClick={handleShowPDF}
+                    className="bg-green-400 text-white w-full rounded-md border p-2 hover:bg-green-100 hover:text-gray-500 cursor-pointer"
+                  >
+                    Открыть PDF
+                  </button>
+                </div>
               </div>
             </div>
           </div>

@@ -46,6 +46,7 @@ export default function WoOperationsTable({
     const updateOperationField = useStore((state) => state.updateOperationField);
     const saveOperation = useStore((state) => state.saveOperation);
     const deleteWoOperationFromState = useStore((state) => state.deleteWoOperationFromState);
+    const markWoOperationToBeDeleted = useStore((state) => state.markWoOperationToBeDeleted);
     const wo_current_work = useStore((state) => state.wo_current_work);
     const setCurrentWork = useStore((state) => state.setCurrentWork);
 
@@ -64,15 +65,15 @@ export default function WoOperationsTable({
 
     return (
         <div id="table_part_wo_operations" className="mt-2 relative">
-            <div className="flex flex-row gap-4 w-full md:w-1/2">
+            <div className="mb-2 flex flex-row gap-4 w-full md:w-1/2">
                 <h2 className="px-2 pt-1 font-medium">Работы:</h2>
                 {/* work_name_operations */}
                 <InputField
                     name="work_name_operations"
                     value={wo_current_work.name as string}
-                    label="Работа:"
+                    label="Добавлять операции в работу:"
                     type="text"
-                    w={["w-6/16", "w-11/16"]}
+                    w={["w-9/16", "w-8/16"]}
                     onChange={(value) => { }}
                     refBook={works ? <BtnWorksRef
                         handleSelectWork={
@@ -90,9 +91,9 @@ export default function WoOperationsTable({
                                 Работа
                             </th>
                             <th scope="col" className="w-4/8 px-3 py-5 font-medium text-gray-400">
-                            <div className="flex flex-row">
-                                Операция {!readonly && <PlusButton onClick={() => addNewOperation(wo_current_work)} />}
-                            </div>
+                                <div className="flex flex-row">
+                                    Операция {!readonly && <PlusButton onClick={() => addNewOperation(wo_current_work)} />}
+                                </div>
                             </th>
                             <th scope="col" className="w-2/8 px-3 py-5 font-medium text-gray-400">
                                 Норма,часов
@@ -111,7 +112,10 @@ export default function WoOperationsTable({
 
                             return (
 
-                                <tr key={wo_operation.id} className="group" >
+                                <tr key={wo_operation.id}
+                                    className={`group ${wo_operation.isToBeDeleted ? 'line-through text-red-600' : ''} 
+                                    ${!wo_operation.isEditing && wo_operation.id.startsWith("temp-") ? 'text-green-600' : ''}`}
+                                >
                                     <td className="w-7/16 overflow-hidden whitespace-nowrap text-ellipsis bg-white py-1 pl-0 text-left pr-3 text-sm text-black group-first-of-type:rounded-md group-last-of-type:rounded-md sm:pl-6">
                                         <div className="flex items-left gap-3">
                                             <a
@@ -122,19 +126,21 @@ export default function WoOperationsTable({
                                             </a>
                                         </div>
                                     </td>
-                                    <td className="w-4/8 overflow-hidden whitespace-nowrap bg-white px-4 py-1 text-sm">
-                                        {wo_operation.isEditing ? (
-                                            <input
-                                                type="text"
-                                                value={wo_operation.operation_name}
-                                                onChange={(e) => updateOperationField(wo_operation.id, 'operation_name', e.target.value)}
-                                                className="w-full p-1 border rounded"
-                                                disabled={readonly}
-                                                autoFocus
-                                            />
-                                        ) : (
-                                            wo_operation.operation_name === "" ? wo_operation.name : wo_operation.operation_name
-                                        )}
+                                    <td className="w-7/16 overflow-hidden whitespace-nowrap text-ellipsis bg-white py-1 pl-0 text-left pr-3 text-smx group-first-of-type:rounded-md group-last-of-type:rounded-md sm:pl-6">
+                                        <div className="flex items-left gap-3">
+                                            {wo_operation.isEditing ? (
+                                                <input
+                                                    type="text"
+                                                    value={wo_operation.operation_name}
+                                                    onChange={(e) => updateOperationField(wo_operation.id, 'operation_name', e.target.value)}
+                                                    className="w-full p-1 border rounded"
+                                                    disabled={readonly}
+                                                    autoFocus
+                                                />
+                                            ) : (
+                                                wo_operation.operation_name === "" ? wo_operation.name : wo_operation.operation_name
+                                            )}
+                                        </div>
                                     </td>
                                     <td className="w-2/8 overflow-hidden whitespace-nowrap bg-white px-4 py-1 text-sm">
                                         {wo_operation.isEditing ? (
@@ -184,7 +190,8 @@ export default function WoOperationsTable({
                                                 <button
                                                     type="button"
                                                     className="rounded-md border border-gray-200 p-2 h-10 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                                    onClick={() => handleDeleteWoOperation(wo_operation.id)}
+                                                    // onClick={() => handleDeleteWoOperation(wo_operation.id)}
+                                                    onClick={() => markWoOperationToBeDeleted(wo_operation.id)}
                                                     disabled={readonly}
                                                 >
                                                     <span className="sr-only">Delete</span>
