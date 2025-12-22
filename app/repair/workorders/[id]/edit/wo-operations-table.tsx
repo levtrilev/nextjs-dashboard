@@ -96,7 +96,14 @@ export default function WoOperationsTable({
                                 </div>
                             </th>
                             <th scope="col" className="w-2/8 px-3 py-5 font-medium text-gray-400">
-                                Норма,часов
+                                Норма, часов
+                            </th>
+                            {/* Новые колонки — только для реальных записей */}
+                            <th scope="col" className="w-2/8 px-3 py-5 font-medium text-gray-400 text-center">
+                                Факт, часов
+                            </th>
+                            <th scope="col" className="w-1/8 px-3 py-5 font-medium text-gray-400 text-center">
+                                Завершено
                             </th>
                             <th scope="col" className="w-1/16 px-3 py-5 font-medium"></th>
                         </tr>
@@ -109,99 +116,123 @@ export default function WoOperationsTable({
                 <table className="table-fixed hidden w-full rounded-md text-gray-900 md:table">
                     <tbody className="divide-y divide-gray-200 text-gray-900">
                         {wo_operations.map((wo_operation) => {
-
-                            return (
-
-                                <tr key={wo_operation.id}
-                                    className={`group ${wo_operation.isToBeDeleted ? 'line-through text-red-600' : ''} 
-                                    ${!wo_operation.isEditing && wo_operation.id.startsWith("temp-") ? 'text-green-600' : ''}`}
-                                >
-                                    <td className="w-7/16 overflow-hidden whitespace-nowrap text-ellipsis bg-white py-1 pl-0 text-left pr-3 text-sm text-black group-first-of-type:rounded-md group-last-of-type:rounded-md sm:pl-6">
-                                        <div className="flex items-left gap-3">
-                                            <a
-                                                href={"/repair/works/" + wo_operation.work_id + "/edit"}
-                                                className="text-blue-800 underline"
-                                            >
-                                                {wo_operation.work_name.substring(0, 36)}
-                                            </a>
-                                        </div>
-                                    </td>
-                                    <td className="w-7/16 overflow-hidden whitespace-nowrap text-ellipsis bg-white py-1 pl-0 text-left pr-3 text-smx group-first-of-type:rounded-md group-last-of-type:rounded-md sm:pl-6">
-                                        <div className="flex items-left gap-3">
-                                            {wo_operation.isEditing ? (
-                                                <input
-                                                    type="text"
-                                                    value={wo_operation.operation_name}
-                                                    onChange={(e) => updateOperationField(wo_operation.id, 'operation_name', e.target.value)}
-                                                    className="w-full p-1 border rounded"
-                                                    disabled={readonly}
-                                                    autoFocus
-                                                />
-                                            ) : (
-                                                wo_operation.operation_name === "" ? wo_operation.name : wo_operation.operation_name
-                                            )}
-                                        </div>
-                                    </td>
-                                    <td className="w-2/8 overflow-hidden whitespace-nowrap bg-white px-4 py-1 text-sm">
+                            return (<tr key={wo_operation.id}
+                                className={`group ${wo_operation.isToBeDeleted ? 'line-through text-red-600' : ''} ${!wo_operation.isEditing && wo_operation.id.startsWith("temp-") ? 'text-green-600' : ''}`}
+                            >
+                                <td className="w-7/16 overflow-hidden whitespace-nowrap text-ellipsis bg-white py-1 pl-0 text-left pr-3 text-sm text-black group-first-of-type:rounded-md group-last-of-type:rounded-md sm:pl-6">
+                                    <div className="flex items-left gap-3">
+                                        <a
+                                            href={"/repair/works/" + wo_operation.work_id + "/edit"}
+                                            className="text-blue-800 underline"
+                                        >
+                                            {wo_operation.work_name.substring(0, 36)}
+                                        </a>
+                                    </div>
+                                </td>
+                                <td className="w-7/16 overflow-hidden whitespace-nowrap text-ellipsis bg-white py-1 pl-0 text-left pr-3 text-smx group-first-of-type:rounded-md group-last-of-type:rounded-md sm:pl-6">
+                                    <div className="flex items-left gap-3">
                                         {wo_operation.isEditing ? (
                                             <input
                                                 type="text"
-                                                inputMode="decimal"
-                                                value={wo_operation.hours_norm}
-                                                onChange={(e) => updateOperationField(wo_operation.id, 'hours_norm', e.target.value)}
+                                                value={wo_operation.operation_name}
+                                                onChange={(e) => updateOperationField(wo_operation.id, 'operation_name', e.target.value)}
                                                 className="w-full p-1 border rounded"
                                                 disabled={readonly}
+                                                autoFocus
                                             />
                                         ) : (
-                                            wo_operation.hours_norm
+                                            wo_operation.operation_name === "" ? wo_operation.name : wo_operation.operation_name
                                         )}
-                                    </td>
-                                    <td className="w-1/16 whitespace-nowrap pl-4 py-1 pr-3">
-                                        <div className="flex justify-end gap-3">
-                                            {wo_operation.isEditing ? (
-                                                <>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => {
-                                                            const success = saveOperation(
-                                                                wo_operation.id,
-                                                                wo_operation.operation_name,
-                                                                workorderId,
-                                                                sectionId,
-                                                                wo_current_work.id
-                                                            );
-                                                            onDocumentChanged();
-                                                        }}
-                                                        disabled={readonly}
-                                                        className="p-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
-                                                    >
-                                                        ✓
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => deleteWoOperationFromState(wo_operation.id)}
-                                                        disabled={readonly}
-                                                        className="p-2 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50"
-                                                    >
-                                                        ✕
-                                                    </button>
-                                                </>
-                                            ) : (
+                                    </div>
+                                </td>
+                                <td className="w-2/8 overflow-hidden whitespace-nowrap bg-white px-4 py-1 text-sm">
+                                    {wo_operation.isEditing ? (
+                                        <input
+                                            type="text"
+                                            inputMode="decimal"
+                                            value={wo_operation.hours_norm}
+                                            onChange={(e) => updateOperationField(wo_operation.id, 'hours_norm', e.target.value)}
+                                            className="w-full p-1 border rounded"
+                                            disabled={readonly}
+                                        />
+                                    ) : (
+                                        wo_operation.hours_norm
+                                    )}
+                                </td>
+                                <td className="w-2/8 overflow-hidden whitespace-nowrap bg-white px-3 py-1 text-sm text-center">
+                                    {wo_operation.id.startsWith("temp-") ? (
+                                        <span className="text-gray-400">—</span>
+                                    ) : !wo_operation.isEditing ? (
+                                        <input
+                                            type="text"
+                                            inputMode="decimal"
+                                            value={wo_operation.hours_fact ?? "0"}
+                                            onChange={(e) => updateOperationField(wo_operation.id, 'hours_fact', e.target.value)}
+                                            className={`w-full p-1 ${readonly || wo_operation.completed ? 'text-gray-600' : 'border rounded '} text-center`}
+                                            disabled={readonly || wo_operation.completed}
+                                        />
+                                    ) : (
+                                        wo_operation.hours_fact ?? "—"
+                                    )}
+                                </td>
+                                <td className="w-1/8 overflow-hidden whitespace-nowrap bg-white px-3 py-1 text-sm text-center">
+                                    {wo_operation.id.startsWith("temp-") ? (
+                                        <span className="text-gray-400">—</span>
+                                    ) : (
+                                        <input
+                                            type="checkbox"
+                                            checked={!!wo_operation.completed}
+                                            onChange={(e) => updateOperationField(wo_operation.id, 'completed', e.target.checked)}
+                                            disabled={readonly || wo_operation.isEditing}
+                                            className="h-4 w-4 text-blue-600 rounded focus:ring-blue-500"
+                                        />
+                                    )}
+                                </td>
+                                <td className="w-1/16 whitespace-nowrap pl-4 py-1 pr-3">
+                                    <div className="flex justify-end gap-3">
+                                        {wo_operation.isEditing ? (
+                                            <>
                                                 <button
                                                     type="button"
-                                                    className="rounded-md border border-gray-200 p-2 h-10 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                                    // onClick={() => handleDeleteWoOperation(wo_operation.id)}
-                                                    onClick={() => markWoOperationToBeDeleted(wo_operation.id)}
+                                                    onClick={() => {
+                                                        const success = saveOperation(
+                                                            wo_operation.id,
+                                                            wo_operation.operation_name,
+                                                            workorderId,
+                                                            sectionId,
+                                                            wo_current_work.id
+                                                        );
+                                                        onDocumentChanged();
+                                                    }}
                                                     disabled={readonly}
+                                                    className="p-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
                                                 >
-                                                    <span className="sr-only">Delete</span>
-                                                    <TrashIcon className="w-5 h-5 text-gray-800" />
+                                                    ✓
                                                 </button>
-                                            )}
-                                        </div>
-                                    </td>
-                                </tr>
-
+                                                <button
+                                                    type="button"
+                                                    onClick={() => deleteWoOperationFromState(wo_operation.id)}
+                                                    disabled={readonly}
+                                                    className="p-2 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50"
+                                                >
+                                                    ✕
+                                                </button>
+                                            </>
+                                        ) : (
+                                            <button
+                                                type="button"
+                                                className="rounded-md border border-gray-200 p-2 h-10 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                // onClick={() => handleDeleteWoOperation(wo_operation.id)}
+                                                onClick={() => markWoOperationToBeDeleted(wo_operation.id)}
+                                                disabled={readonly}
+                                            >
+                                                <span className="sr-only">Delete</span>
+                                                <TrashIcon className="w-5 h-5 text-gray-800" />
+                                            </button>
+                                        )}
+                                    </div>
+                                </td>
+                            </tr>
                             );
                         })}
                     </tbody>

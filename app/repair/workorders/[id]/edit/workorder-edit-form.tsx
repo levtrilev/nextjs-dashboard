@@ -113,20 +113,14 @@ export default function WorkorderEditForm(props: IEditFormProps) {
     wo_operations,
     saveNewOperationsToDB,
     deleteMarkedOperationsFromDB,
-    addNewOperation,
-    updateOperationField,
-    saveOperation,
-    deleteWoOperationFromState
+    setInitialOperations,
   } = useCurrentWoOperationsStore();
 
   const {
     wo_parts,
     saveNewPartsToDB,
     deleteMarkedPartsFromDB,
-    addNewPart,
-    updatePartField,
-    savePart,
-    // deletePart: deletePartStore
+    setInitialParts,
   } = useCurrentWoPartsStore();
 
   useEffect(() => {
@@ -139,7 +133,7 @@ export default function WorkorderEditForm(props: IEditFormProps) {
 
   useEffect(() => {
     if (props.wo_operations) {
-      useCurrentWoOperationsStore.getState().setInitialOperations(
+      setInitialOperations(
         props.wo_operations.map(op => ({
           id: op.id,
           name: op.name,
@@ -148,13 +142,15 @@ export default function WorkorderEditForm(props: IEditFormProps) {
           operation_name: op.operation_name,
           operation_id: op.operation_id,
           hours_norm: String(op.hours_norm),
+          hours_fact: String(op.hours_fact) ? String(op.hours_fact) : "0",
+          completed: op.completed,
           isEditing: false,
           isToBeDeleted: false,
         }))
       );
     }
     if (props.wo_parts) {
-      useCurrentWoPartsStore.getState().setInitialParts(
+      setInitialParts(
         props.wo_parts.map(p => ({
           id: p.id,
           name: p.name,

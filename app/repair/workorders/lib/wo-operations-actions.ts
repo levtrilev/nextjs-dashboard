@@ -20,11 +20,13 @@ export async function createWoOperation(wo_operation: {
   work_id: string;
   operation_id: string;
   hours_norm: number;
+  hours_fact: number;
+  completed: boolean;
   section_id: string;
 }): Promise<string> {
-  const { name, workorder_id, work_id, operation_id, hours_norm, section_id } =
+  const { name, workorder_id, work_id, operation_id, hours_norm, hours_fact, completed, section_id } =
     wo_operation;
-    console.log("createWoOperation section_id: " + section_id);
+  console.log("createWoOperation section_id: " + section_id);
   try {
     const result = await pool.query(
       `
@@ -34,11 +36,13 @@ export async function createWoOperation(wo_operation: {
     work_id,
     operation_id,
     hours_norm,
+    hours_fact,
+    completed,
     section_id
-      ) VALUES ($1, $2, $3, $4, $5, $6::uuid)
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8::uuid)
        returning id
     `,
-      [name, workorder_id, work_id, operation_id, hours_norm, section_id]
+      [name, workorder_id, work_id, operation_id, hours_norm, hours_fact, completed, section_id]
     );
     const id = result.rows[0].id;
     return id;
@@ -62,6 +66,8 @@ export async function updateWoOperation(wo_operation: WoOperation) {
     work_id,
     operation_id,
     hours_norm,
+    hours_fact,
+    completed,
     section_id,
   } = wo_operation;
 
@@ -75,10 +81,13 @@ export async function updateWoOperation(wo_operation: WoOperation) {
     work_id = $4,
     operation_id = $5,
     hours_norm = $6,
-    section_id = $7
+    hours_fact = $7,
+    completed = $8,
+    section_id = $9
       WHERE id = $1
     `,
-      [id, name, workorder_id, work_id, operation_id, hours_norm, section_id]
+    [name, workorder_id, work_id, operation_id, hours_norm, hours_fact, completed, section_id]
+
     );
   } catch (error) {
     console.error("Не удалось обновить wo_operation:", error);
@@ -121,6 +130,8 @@ export async function fetchWoOperationsForm(
     wo_operations.work_id,
     wo_operations.operation_id,
     wo_operations.hours_norm,
+    wo_operations.hours_fact,
+    wo_operations.completed,
     wo_operations.section_id,        
         COALESCE(sections.name, '') AS section_name,
         COALESCE(workorders.name, '') AS workorder_name,

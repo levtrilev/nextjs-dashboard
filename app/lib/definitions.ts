@@ -36,6 +36,8 @@ export type WoOperation = {
   work_id: string;
   operation_id: string;
   hours_norm: number;
+  hours_fact: number;
+  completed: boolean;
   section_id: string;
 };
 export type WoOperationForm = {
@@ -45,6 +47,8 @@ export type WoOperationForm = {
   work_id: string;
   operation_id: string;
   hours_norm: number;
+  hours_fact: number;
+  completed: boolean;
   section_id: string;
   work_name: string;
   operation_name: string;

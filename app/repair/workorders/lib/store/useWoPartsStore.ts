@@ -48,8 +48,13 @@ export const createWoPartsStore = (id: string) =>
       immer((set, get) => ({
         wo_parts: [],
         wo_current_work: { id: "", name: "" },
-        setInitialParts: (parts) => set({ wo_parts: parts }),
-        setCurrentWork: (work) => set({ wo_current_work: work }),
+        // setInitialParts: (parts) => set({ wo_parts: parts }),
+        setInitialParts: (parts) => {
+            set({
+            wo_parts: parts,
+            wo_current_work: { id: parts[0]?.work_id || "", name: parts[0]?.work_name || "", }
+          });
+        },        setCurrentWork: (work) => set({ wo_current_work: work }),
         addNewPart: (work) =>
           set((state) => {
             const newPart: WoPart = {

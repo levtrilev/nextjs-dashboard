@@ -12,6 +12,8 @@ export interface WoOperation {
   operation_name: string;
   operation_id: string;
   hours_norm: string;
+  hours_fact: string;
+  completed: boolean;
   isEditing?: boolean;
   isToBeDeleted: boolean;
 }
@@ -20,7 +22,12 @@ export interface WoCurrentWork {
   id: string;
   name: string;
 }
-
+type UpdatableWoOperationFields =
+  | "work_name"
+  | "operation_name"
+  | "hours_norm"
+  | "hours_fact"
+  | "completed";
 export interface WoOperationsState {
   wo_operations: WoOperation[];
   wo_current_work: WoCurrentWork;
@@ -29,8 +36,8 @@ export interface WoOperationsState {
   addNewOperation: (current_work: { id: string; name: string }) => void;
   updateOperationField: (
     id: string,
-    field: keyof WoOperation,
-    value: string
+    field: UpdatableWoOperationFields,
+    value: string | boolean
   ) => void;
   saveOperation: (
     id: string,
@@ -56,7 +63,15 @@ export const createWoOperationsStore = (id: string) =>
       immer((set, get) => ({
         wo_operations: [],
         wo_current_work: { id: "", name: "" },
-        setInitialOperations: (ops) => set({ wo_operations: ops }),
+        setInitialOperations: (ops) => {
+          set({
+            wo_operations: ops,
+            wo_current_work: {
+              id: ops[0]?.work_id || "",
+              name: ops[0]?.work_name || "",
+            },
+          });
+        },
         setCurrentWork: (work) => set({ wo_current_work: work }),
         addNewOperation: (current_work) =>
           set((state) => {
@@ -68,22 +83,57 @@ export const createWoOperationsStore = (id: string) =>
               operation_name: "",
               operation_id: "",
               hours_norm: "",
+              hours_fact: "0",
+              completed: false,
               isEditing: true,
               isToBeDeleted: false,
             };
             state.wo_operations.unshift(newOp);
           }),
-        updateOperationField: (id, field, value) =>
+        // updateOperationField: (id, field, value) =>
+        //   set((state) => {
+        //     const op = state.wo_operations.find((op) => op.id === id);
+        //     if (
+        //       op &&
+        //       (field === "work_name" ||
+        //         field === "operation_name" ||
+        //         field === "hours_norm" ||
+        //         field === "hours_fact" ||
+        //         field === "completed")
+        //     ) {
+        //       op[field] = value;
+        //     }
+        //   }),
+        updateOperationField: (
+          id: string,
+          field: UpdatableWoOperationFields,
+          value: string | boolean
+        ) =>
           set((state) => {
-            const op = state.wo_operations.find((op) => op.id === id);
-            if (
-              op &&
-              (field === "work_name" ||
-                field === "operation_name" ||
-                field === "hours_norm")
-            ) {
-              op[field] = value;
+            const opIndex = state.wo_operations.findIndex((op) => op.id === id);
+            if (opIndex === -1) return;
+
+            const op = state.wo_operations[opIndex];
+
+            let updatedOp;
+            switch (field) {
+              case "work_name":
+              case "operation_name":
+              case "hours_norm":
+              case "hours_fact":
+                updatedOp = { ...op, [field]: value as string };
+                break;
+              case "completed":
+                updatedOp = { ...op, [field]: value as boolean };
+                break;
+              default:
+                return; // невозможный случай благодаря типу
             }
+
+            const newOperations = [...state.wo_operations];
+            newOperations[opIndex] = updatedOp;
+
+            return { wo_operations: newOperations };
           }),
         validateOperation: (op) => {
           const norm = parseFloat(op.hours_norm);
@@ -146,6 +196,8 @@ export const createWoOperationsStore = (id: string) =>
                   work_id: op.work_id,
                   operation_id: "00000000-0000-0000-0000-000000000000",
                   hours_norm: parseFloat(op.hours_norm),
+                  hours_fact: parseFloat(op.hours_fact),
+                  completed: op.completed,
                   section_id,
                 };
                 const savedId = await createWoOperation(newOpData);
@@ -195,17 +247,14 @@ export const createWoOperationsStore = (id: string) =>
           }),
         deleteMarkedOperationsFromDB: async (): Promise<boolean> => {
           const { wo_operations } = get();
-          const notMarkedOps = wo_operations.filter(
-            (op) => !op.isToBeDeleted
-          );
-          const markedOps = wo_operations.filter(
-            (op) => op.isToBeDeleted
-          );
+          const notMarkedOps = wo_operations.filter((op) => !op.isToBeDeleted);
+          const markedOps = wo_operations.filter((op) => op.isToBeDeleted);
           if (markedOps.length !== 0) {
             try {
               await Promise.all(
                 markedOps.map(async (op) => {
-                  if (!op.id.startsWith("temp-")) await deleteWoOperation(op.id);
+                  if (!op.id.startsWith("temp-"))
+                    await deleteWoOperation(op.id);
                 })
               );
             } catch (error) {
