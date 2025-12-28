@@ -100,7 +100,7 @@ const userStore: StateCreator<
       await deleteUser(user.email);
       set(
         (state: IUserState) => {
-          const index = state.users.findIndex((user) => user.email === user.email);
+          const index = state.users.findIndex((u) => u.email === user.email);
           if (index !== -1) {
             state.users.splice(index, 1);
           }

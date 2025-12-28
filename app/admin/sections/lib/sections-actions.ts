@@ -51,7 +51,7 @@ export async function deleteSection(name: string, tenantId: string) {
     console.error("Database Error, Failed to Delete Section:", error);
     throw new Error("Database Error: Failed to Delete Section:" + error);
   }
-  revalidatePath("/admin");
+  revalidatePath("/admin/sections");
 }
 
 export async function deleteSectionById(id: string) {
@@ -64,7 +64,7 @@ export async function deleteSectionById(id: string) {
     console.error("Database Error, Failed to Delete Section by id:", error);
     throw new Error("Database Error: Failed to Delete Section by id");
   }
-  revalidatePath("/admin");
+  revalidatePath("/admin/sections");
 }
 //#endregion
 

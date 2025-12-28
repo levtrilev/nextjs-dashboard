@@ -40,6 +40,7 @@ const subMenu = [
   { mainItem: 'Помещения', name: 'Помещения', href: '/erp/premises' },
   { mainItem: 'Помещения', name: 'Планы обслуживания', href: '/erp/task-schedules' },
   { mainItem: 'Помещения', name: 'Задачи обслуживания', href: '/erp/tasks' },
+  { mainItem: 'Ремонт', name: 'АРМ', href: '/repair/arm' },
   { mainItem: 'Ремонт', name: 'Объекты', href: '/repair/objects' },
   { mainItem: 'Ремонт', name: 'Участки', href: '/repair/units' },
   { mainItem: 'Ремонт', name: 'Машины', href: '/repair/machines' },

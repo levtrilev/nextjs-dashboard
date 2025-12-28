@@ -63,7 +63,7 @@ const tenantStore: StateCreator<
       set(
         (state: ITenantState) => {
           const index = state.tenants.findIndex(
-            (tenant: Tenant) => tenant.id === tenant.id
+            (t: Tenant) => t.id === tenant.id
           );
           if (index !== -1) {
             state.tenants.splice(index, 1);

@@ -43,21 +43,22 @@ export default async function Page(props: {
   const totalPages = await fetchClaimsPages(query, current_sections);
 
   return (
-    <>
-      <div className="w-full">
-        <div className="flex w-full items-center justify-between">
-          <h1 className={`${lusitana.className} text-2xl`}>Заявки</h1>
-        </div>
-        <div className="mt-4 flex items-center justify-between gap-2 md:mt-8">
-          <Search placeholder="Найти заявку..." />
-          <CreateClaim readonly={readonly_permission} />
-        </div>
 
-        <ClaimsTable query={query} currentPage={currentPage} current_sections={current_sections} />
-        <div className="mt-5 flex w-full justify-center">
-          <Pagination totalPages={totalPages} />
-        </div>
+    <div className="w-full">
+      {/* <TabsPage /> */}
+      <div className="flex w-full items-center justify-between">
+        <h1 className={`${lusitana.className} text-2xl`}>Заявки</h1>
       </div>
-    </>
+      <div className="mt-4 flex items-center justify-between gap-2 md:mt-8">
+        <Search placeholder="Найти заявку..." />
+        <CreateClaim readonly={readonly_permission} />
+      </div>
+
+      <ClaimsTable query={query} currentPage={currentPage} current_sections={current_sections} />
+      <div className="mt-5 flex w-full justify-center">
+        <Pagination totalPages={totalPages} />
+      </div>
+    </div>
+
   );
 }

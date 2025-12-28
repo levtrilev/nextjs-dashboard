@@ -110,7 +110,7 @@ const roleStore: StateCreator<
       await deleteRole(role.id);
       set(
         (state: IRoleState) => {
-          const index = state.roles.findIndex((role) => role.id === role.id);
+          const index = state.roles.findIndex((r) => r.id === role.id);
           if (index !== -1) {
             state.roles.splice(index, 1);
             // console.log("splice roles index: " + index);

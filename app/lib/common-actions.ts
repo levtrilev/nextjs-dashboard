@@ -171,6 +171,38 @@ export async function getCurrentSections(email: string): Promise<string> {
     throw new Error("Failed to fetch current_sections: " + String(error));
   }
 }
+export async function getCurrentSectionsArray(email: string): Promise<Section[]> {
+  if (email === "") {
+    return []; //""
+  }
+
+  try {
+    const result = (await pool.query<Section>(
+      `SELECT sections.id, sections.name
+       FROM sections
+       WHERE sections.id = ANY (
+         SELECT unnest(section_ids)
+         FROM roles
+         WHERE roles.id = ANY (
+           SELECT unnest(role_ids)
+           FROM users
+           WHERE users.email = $1
+         )
+       )`,
+      [email]
+    )) as { rows: Section[] };
+
+    const sections_id_array = result.rows.map((section) => section.id);
+    // const sections_id_string = sections_id_array.join(",");
+    // return "{" + sections_id_string + "}";
+    // const sections_id_array = result.rows.map((section) => section.id);
+    // return sections_id_array;
+    return result.rows;
+  } catch (error) {
+    console.error("Failed to fetch current_sections:", error);
+    throw new Error("Failed to fetch current_sections: " + String(error));
+  }
+}
 
 export async function getUserRoles(user_id: string): Promise<RoleForm[]> {
   if (user_id === "") {

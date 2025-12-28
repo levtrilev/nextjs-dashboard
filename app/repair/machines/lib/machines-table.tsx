@@ -1,11 +1,5 @@
 // machines-table.tsx
 
-import { lusitana } from '@/app/ui/fonts';
-import Search from '@/app/ui/search';
-
-import { Machine } from '@/app/lib/definitions';
-// import { BtnEditTaskLink } from './task-buttons';
-// import BtnDeleteTask from './btn-delete-task';
 import { fetchFilteredMachines } from './machines-actions';
 import BtnDeleteMachine from './btn-delete-machine';
 import { BtnEditMachineLink } from './machines-buttons';

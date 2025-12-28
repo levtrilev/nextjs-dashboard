@@ -95,7 +95,7 @@ const sectionStore: StateCreator<
       set(
         (state: ISectionState) => {
           const index = state.sections.findIndex(
-            (section) => section.name === section.name
+            (s) => s.name === section.name
           );
           if (index !== -1) {
             state.sections.splice(index, 1);
