@@ -1,6 +1,7 @@
 'use client';
 
 import { ArrowRightIcon, ArrowUpIcon } from "@heroicons/react/16/solid";
+import { usePathname, useRouter } from 'next/navigation';
 
 interface ChildButtonProps {
     onClick: (value: string) => void;
@@ -9,6 +10,8 @@ interface ChildButtonProps {
 }
 
 const TabsStatus: React.FC<ChildButtonProps> = (props: ChildButtonProps) => {
+    const router = useRouter();
+    const pathname = usePathname(); // текущий путь без query-параметров
 
     return (
         <div className="flex items-center w-full p-1">
@@ -23,35 +26,65 @@ const TabsStatus: React.FC<ChildButtonProps> = (props: ChildButtonProps) => {
                 <div className="w-30">
                     <button
                         className={(props.activeStatusTab === 'Парк' ? 'bg-blue-600' : 'bg-blue-200') + ' text-white w-full rounded-md border p-2 hover:bg-blue-500'}
-                        onClick={() => props.onClick("Парк")}>
+                        onClick={() => {
+                            props.onClick("Парк");
+                            const target = '/repair/machines';
+                            if (pathname !== target) {
+                                router.push(target);
+                            }
+                        }}>
                         Парк
                     </button>
                 </div>
                 <div className="w-30">
                     <button
                         className={(props.activeStatusTab === 'Все норма' ? 'bg-blue-600' : 'bg-blue-200') + ' text-white w-full rounded-md border p-2 hover:bg-blue-500'}
-                        onClick={() => props.onClick("Все норма")}>
+                        onClick={() => {
+                            props.onClick("Все норма");
+                            const target = '/repair/machines';
+                            if (pathname !== target) {
+                                router.push(target);
+                            }
+                        }}>
                         Все норма
                     </button>
                 </div>
                 <div className="w-30">
                     <button
                         className={(props.activeStatusTab === 'Резерв' ? 'bg-blue-600' : 'bg-blue-200') + ' text-white w-full rounded-md border p-2 hover:bg-blue-500'}
-                        onClick={() => props.onClick("Резерв")}>
+                        onClick={() => {
+                            props.onClick("Резерв");
+                            const target = '/repair/machines';
+                            if (pathname !== target) {
+                                router.push(target);
+                            }
+                        }}>
                         Резерв
                     </button>
                 </div>
                 <div className="max-w-48">
                     <button
                         className={(props.activeStatusTab === 'заявки в ремонт' ? 'bg-blue-600' : 'bg-blue-200') + ' text-white w-full rounded-md border p-2 hover:bg-blue-500'}
-                        onClick={() => props.onClick("заявки в ремонт")}>
+                        onClick={() => {
+                            props.onClick("заявки в ремонт");
+                            const target = '/repair/claims';
+                            if (pathname !== target) {
+                                router.push(target);
+                            }
+                        }}>
                         заявки в ремонт
                     </button>
                 </div>
                 <div className="max-w-62">
                     <button
                         className={(props.activeStatusTab === 'невыполняемые ремонты' ? 'bg-blue-600' : 'bg-blue-200') + ' text-white w-full rounded-md border p-2 hover:bg-blue-500'}
-                        onClick={() => props.onClick("невыполняемые ремонты")}>
+                        onClick={() => {
+                            props.onClick("невыполняемые ремонты");
+                            const target = '/repair/workorders';
+                            if (pathname !== target) {
+                                router.push(target);
+                            }
+                        }}>
                         невыполняемые ремонты
                     </button>
                 </div>

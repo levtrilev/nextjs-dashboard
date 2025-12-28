@@ -12,7 +12,7 @@ import { useEffect } from "react";
 interface ITabsPageProps {
     current_sections_array: Section[]
 }
-export const TabsPage: React.FC<ITabsPageProps> = (props: ITabsPageProps) => {
+export const ArmTabsPage: React.FC<ITabsPageProps> = (props: ITabsPageProps) => {
     // export const TabsPage: React.FC = () => {
     const userSections = props.current_sections_array;
     const { isSelected, tabs, statusTab, _hasHydrated, setIsSelected, addTab,
@@ -59,7 +59,7 @@ export const TabsPage: React.FC<ITabsPageProps> = (props: ITabsPageProps) => {
     );
 }
 
-export default TabsPage;
+export default ArmTabsPage;
 
 function unitsGroupByObject(section: Section[]): { object: string; units: { id: string, name: string }[]; }[] {
     const grouped: Record<string, { id: string, name: string }[]> = {};

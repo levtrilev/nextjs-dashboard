@@ -12,7 +12,7 @@ import { CreateMachine } from "./lib/machines-buttons";
 import MachinesTable from "./lib/machines-table";
 import { getUserCurrentSections } from "../arm/arm-actions";
 import { EffectiveSectionsSync } from "../arm/effective-sections-sync";
-import TabsPage from "../arm/tabs-page";
+import { ArmTabsPage } from "../arm/tabs-page";
 
 export default async function Page(props: {
 
@@ -54,7 +54,7 @@ export default async function Page(props: {
   return (
 
     <div className="w-full">
-      <TabsPage current_sections_array={current_sections_array}/>
+      <ArmTabsPage current_sections_array={current_sections_array}/>
       {/* Синхронизация Zustand-tabs после выбора пользователем с сервером */}
       <EffectiveSectionsSync
         userId={user.id}
