@@ -25,9 +25,9 @@ const TabsStatus: React.FC<ChildButtonProps> = (props: ChildButtonProps) => {
             <div className="flex items-center flex-1 p-1">
                 <div className="w-30">
                     <button
-                        className={(props.activeStatusTab === 'Парк' ? 'bg-blue-600' : 'bg-blue-200') + ' text-white w-full rounded-md border p-2 hover:bg-blue-500'}
+                        className={(props.activeStatusTab === 'парк' ? 'bg-blue-600' : 'bg-blue-200') + ' text-white w-full rounded-md border p-2 hover:bg-blue-500'}
                         onClick={() => {
-                            props.onClick("Парк");
+                            props.onClick("парк");
                             const target = '/repair/machines';
                             if (pathname !== target) {
                                 router.push(target);
@@ -38,9 +38,9 @@ const TabsStatus: React.FC<ChildButtonProps> = (props: ChildButtonProps) => {
                 </div>
                 <div className="w-30">
                     <button
-                        className={(props.activeStatusTab === 'Все норма' ? 'bg-blue-600' : 'bg-blue-200') + ' text-white w-full rounded-md border p-2 hover:bg-blue-500'}
+                        className={(props.activeStatusTab === 'норма' ? 'bg-blue-600' : 'bg-blue-200') + ' text-white w-full rounded-md border p-2 hover:bg-blue-500'}
                         onClick={() => {
-                            props.onClick("Все норма");
+                            props.onClick("норма");
                             const target = '/repair/machines';
                             if (pathname !== target) {
                                 router.push(target);
@@ -64,9 +64,9 @@ const TabsStatus: React.FC<ChildButtonProps> = (props: ChildButtonProps) => {
                 </div>
                 <div className="max-w-48">
                     <button
-                        className={(props.activeStatusTab === 'заявки в ремонт' ? 'bg-blue-600' : 'bg-blue-200') + ' text-white w-full rounded-md border p-2 hover:bg-blue-500'}
+                        className={(props.activeStatusTab === 'ремонт' ? 'bg-blue-600' : 'bg-blue-200') + ' text-white w-full rounded-md border p-2 hover:bg-blue-500'}
                         onClick={() => {
-                            props.onClick("заявки в ремонт");
+                            props.onClick("ремонт");
                             const target = '/repair/claims';
                             if (pathname !== target) {
                                 router.push(target);
@@ -77,9 +77,9 @@ const TabsStatus: React.FC<ChildButtonProps> = (props: ChildButtonProps) => {
                 </div>
                 <div className="max-w-62">
                     <button
-                        className={(props.activeStatusTab === 'невыполняемые ремонты' ? 'bg-blue-600' : 'bg-blue-200') + ' text-white w-full rounded-md border p-2 hover:bg-blue-500'}
+                        className={(props.activeStatusTab === 'ожидание' ? 'bg-blue-600' : 'bg-blue-200') + ' text-white w-full rounded-md border p-2 hover:bg-blue-500'}
                         onClick={() => {
-                            props.onClick("невыполняемые ремонты");
+                            props.onClick("ожидание");
                             const target = '/repair/workorders';
                             if (pathname !== target) {
                                 router.push(target);

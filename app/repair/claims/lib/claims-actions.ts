@@ -314,7 +314,7 @@ export async function fetchClaimsForm(current_sections: string) {
 //#region Filtered Claims
 
 export async function fetchFilteredClaims(query: string, currentPage: number, 
-  current_sections: string) {
+  current_sections: string, machine_id: string = '00000000-0000-0000-0000-000000000000') {
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
   try {
@@ -353,10 +353,11 @@ export async function fetchFilteredClaims(query: string, currentPage: number,
       LEFT JOIN units ON machines.unit_id = units.id
       WHERE
         claims.name ILIKE $2
+        AND ($3 = '00000000-0000-0000-0000-000000000000'::uuid OR claims.machine_id = $3)
       ORDER BY claims.name ASC
-      LIMIT $3 OFFSET $4
+      LIMIT $4 OFFSET $5
     `,
-      [current_sections, `%${query}%`, ITEMS_PER_PAGE, offset]
+      [current_sections, `%${query}%`, machine_id, ITEMS_PER_PAGE, offset]
     );
 
     return claims.rows;

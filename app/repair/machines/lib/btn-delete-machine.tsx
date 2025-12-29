@@ -6,7 +6,8 @@ import { useState, useRef } from 'react';
 import MessageBoxSrv from '@/app/lib/message-box-srv';
 import { deleteMachine } from './machines-actions';
 
-export default function BtnDeleteMachine({ id, name }: { id: string, name: string }) {
+export default function BtnDeleteMachine({ id, name, onDelete }
+  : { id: string, name: string, onDelete: () => void }) {
   const [isMessageBoxOpen, setIsMessageBoxOpen] = useState(false);
   const [messageBoxText, setMessageBoxText] = useState('');
   const idToDelete = useRef('');
@@ -21,6 +22,7 @@ export default function BtnDeleteMachine({ id, name }: { id: string, name: strin
 
   const handleOK = () => {
     deleteMachine(idToDelete.current);
+    onDelete();
     setIsMessageBoxOpen(false);
   };
 

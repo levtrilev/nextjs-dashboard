@@ -147,6 +147,7 @@ export default function ClaimEditForm(props: IEditFormProps) {
         }, 2000);
       } else {
         await updateClaim(formData);
+        router.refresh();
       }
       setIsDocumentChanged(false);
       setMessageBoxText('Документ сохранен.');

@@ -2,8 +2,8 @@
 
 'use client';
 import { useEffect, useState } from "react";
-import { LocationForm, MachineForm, MachineStatus, Unit, UnitForm } from "@/app/lib/definitions";
-import { formatDateForInput } from "@/app/lib/common-utils";
+import { ClaimForm, LocationForm, MachineForm, MachineStatus, Unit, UnitForm } from "@/app/lib/definitions";
+// import { formatDateForInput } from "@/app/lib/common-utils";
 import BtnSectionsRef from "@/app/admin/sections/lib/btn-sections-ref";
 import { z } from "zod";
 import { pdf, PDFViewer } from '@react-pdf/renderer';
@@ -19,6 +19,10 @@ import { createMachine, updateMachine } from "../../lib/machines-actions";
 import PdfDocument from "./machine-pdf-document";
 import BtnUnitsRef from "@/app/repair/units/lib/btn-units-ref";
 import BtnLocationsRef from "@/app/repair/locations/lib/btn-locations-ref";
+import { createClaim } from "@/app/repair/claims/lib/claims-actions";
+import ClaimsTable from "@/app/repair/claims/lib/claims-table";
+import Pagination from "@/app/ui/pagination";
+import { useTabsStore } from "@/app/repair/arm/tabsStore";
 
 interface IEditFormProps {
   machine: MachineForm;
@@ -94,7 +98,9 @@ export default function MachineEditForm(props: IEditFormProps) {
 
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [formData, setFormData] = useState<FormData>(props.machine as FormData);
-
+  const [repairReason, setRepairReason] = useState<string>('');
+  const effective_sections_array = useTabsStore((state) => state.effectiveSections);
+  const effectiveSectionIdsString = '{' + effective_sections_array.join(",") + '}';
 
   useEffect(() => {
     setFormData((prev) => ({
@@ -138,12 +144,13 @@ export default function MachineEditForm(props: IEditFormProps) {
         }, 2000);
       } else {
         await updateMachine(formData);
+        router.refresh();
       }
       setIsDocumentChanged(false);
       setMessageBoxText('Документ сохранен.');
     } catch (error) {
       // if (String(error) === 'NEXT_REDIRECT') {
-        setMessageBoxText('Документ не сохранен! :' + String(error));
+      setMessageBoxText('Документ не сохранен! :' + String(error));
       // }
       // alert('Документ не сохранен! :' + String(error));
     }
@@ -224,9 +231,50 @@ export default function MachineEditForm(props: IEditFormProps) {
     docChanged();
   };
   //#endregion
-
+const [claimsTableKey, setClaimsTableKey] = useState(0);
   const errors = showErrors ? validate() : undefined;
+  const handleCreateClaim = async (FormData: FormData) => {
+      setFormData((prev) => ({
+      ...prev,
+      machine_status: 'ремонт',
+    }));
+    const claim = {
+      name: repairReason,
+      claim_date: new Date(),
+      priority: "низкий",
+      machine_id: formData.id,
+      machine_name: formData.name,
+      machine_machine_status: formData.machine_status,
+      location_id: formData.location_id,
+      location_name: formData.location_name,
+      repair_todo: "",
+      repair_reason: repairReason,
+      breakdown_reasons: "",
+      emergency_act: "",
+      section_id: formData.section_id,
+      section_name: formData.section_name,
+      tenant_id: formData.tenant_id,
+      author_id: formData.author_id,
+      username: "",
+      date_created: new Date(),
+      editing_since: null,
+      editing_by_user_id: null,
+    } as ClaimForm;
+    try {
+      await createClaim(claim);
+      // setTimeout(() => {
+      //   router.push('/repair/claims');
+      // }, 2000);
+      setClaimsTableKey(prev => prev + 1);
 
+    } catch (error) {
+
+      setMessageBoxText('Документ не сохранен! :' + String(error) + ' ' + JSON.stringify(claim));
+
+    }
+    // setIsShowMessageBoxCancel(false);
+    // setIsMessageBoxOpen(true);
+  }
   return (
     <div>
       {!pdfUrl && (
@@ -321,6 +369,33 @@ export default function MachineEditForm(props: IEditFormProps) {
                 readonly={props.readonly}
                 errors={errors?.section_name?._errors as string[] | undefined}
               />
+
+              {/* repairReason & createClaim */}
+              <div className="flex justify-center h-1/4 md:w-full">
+                <textarea
+                  id="repairReason"
+                  name="repairReason"
+                  className="w-full break-words rounded-md border border-gray-200 p-2"
+                  disabled={props.readonly}
+                  placeholder="Причина постановки в ремонт"
+                  value={repairReason}
+                  onChange={(e) => setRepairReason(e.target.value)}
+                />
+                {/* onChange={(value) => { setRepairReason(value.toString()) }} */}
+
+                {!props.readonly && <button
+                  type="button"
+                  onClick={() => handleCreateClaim(formData)}
+                  disabled={props.readonly}
+                  className={`w-4/16 rounded-md border p-2 ${props.readonly
+                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    : 'bg-blue-400 text-white hover:bg-blue-100 hover:text-gray-500 cursor-pointer'
+                    }`}
+                >
+                  Создать заявку
+                  {/* {props.readonly ? 'Закрыть' : 'Закрыть и освободить'} */}
+                </button>}
+              </div>
             </div>
           </div>
           {/* button area */}
@@ -339,6 +414,7 @@ export default function MachineEditForm(props: IEditFormProps) {
               </div>
               <div className="w-full md:w-1/2">
                 <button
+                  type="button"
                   onClick={handleBackClick}
                   className="bg-blue-400 text-white w-full rounded-md border p-2
                  hover:bg-blue-100 hover:text-gray-500 cursor-pointer"
@@ -392,6 +468,15 @@ export default function MachineEditForm(props: IEditFormProps) {
           title="PDF Preview"
         />
       )}
+      <ClaimsTable
+        query={''}
+        currentPage={1}
+        current_sections={effectiveSectionIdsString}
+        machine_id={formData.id} 
+        key={claimsTableKey} />
+      <div className="mt-5 flex w-full justify-center">
+        <Pagination totalPages={1} />
+      </div>
       <MessageBoxOKCancel />
     </div>
   );

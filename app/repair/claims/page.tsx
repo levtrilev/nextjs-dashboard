@@ -70,7 +70,13 @@ export default async function Page(props: {
       </div>
 
       {/* <ClaimsTable query={query} currentPage={currentPage} current_sections={current_sections} /> */}
-      <ClaimsTable query={query} currentPage={currentPage} current_sections={effectiveSectionIdsString} />
+      <ClaimsTable
+        query={query}
+        currentPage={currentPage}
+        current_sections={effectiveSectionIdsString}
+        key={1}
+        machine_id={'00000000-0000-0000-0000-000000000000'}
+      />
       <div className="mt-5 flex w-full justify-center">
         <Pagination totalPages={totalPages} />
       </div>

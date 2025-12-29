@@ -287,7 +287,8 @@ export async function fetchMachinesForm(current_sections: string) {
 export async function fetchFilteredMachines(
   query: string,
   currentPage: number, 
-  current_sections: string
+  current_sections: string,
+  status: string = 'парк'
 ) {
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
@@ -320,11 +321,12 @@ export async function fetchFilteredMachines(
       LEFT JOIN units ON machines.unit_id = units.id
       LEFT JOIN locations ON machines.location_id = locations.id
       WHERE
-        machines.name ILIKE $2
+        machines.name ILIKE $2 
+        AND ($5 = 'парк' OR machines.machine_status = $5)
       ORDER BY machines.name ASC
       LIMIT $3 OFFSET $4
     `,
-      [current_sections, `%${query}%`, ITEMS_PER_PAGE, offset]
+      [current_sections, `%${query}%`, ITEMS_PER_PAGE, offset, status]
     );
 
     return machines.rows;

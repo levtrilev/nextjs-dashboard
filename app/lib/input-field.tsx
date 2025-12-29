@@ -1,7 +1,7 @@
 import React, { JSX } from 'react';
 
 interface IInputFieldProps {
-    label: string; // Текст метки
+    label?: string; // Текст метки
     name: string; // Имя поля
     value: string; // Значение поля
     w: string[]; // ширина элементов label/input, например w = ["w-6/16", "w-10/16"]
@@ -10,7 +10,8 @@ interface IInputFieldProps {
     refBook?: JSX.Element;
     readonly: boolean;
     errors?: string[]; // Массив ошибок
-    textArea?: boolean
+    textArea?: boolean;
+    placeholder?: string;
 }
 
 const InputField: React.FC<IInputFieldProps> = ({
@@ -24,6 +25,7 @@ const InputField: React.FC<IInputFieldProps> = ({
     readonly,
     errors,
     textArea,
+    placeholder
 }) => {
     const labelClassName = `${w[0]} text-sm text-blue-900 font-medium flex items-center p-2`;
     // const inputClassName = `${w[1]} ${moreInputClassName} control rounded-md border border-gray-200 p-2`;
@@ -35,12 +37,12 @@ const InputField: React.FC<IInputFieldProps> = ({
         <div className="flex-col">
             {/* Блок с меткой и полем ввода */}
             <div className="flex justify-between mt-1">
-                <label
+                {label && <label
                     htmlFor={name}
                     className={labelClassName}
                 >
                     {label}
-                </label>
+                </label>}
                 {!textArea && <input
                     id={name}
                     type={type}
@@ -48,6 +50,7 @@ const InputField: React.FC<IInputFieldProps> = ({
                     className={inputClassName}
                     disabled={readonly}
                     value={value}
+                    placeholder={placeholder}
                     onChange={type !== "date"
                         ? (e) => onChange(e.target.value)
                         : (e) => onChange(new Date(e.target.value))}

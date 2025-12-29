@@ -6,7 +6,7 @@ import { useState, useRef } from 'react';
 import MessageBoxSrv from '@/app/lib/message-box-srv';
 import { deleteClaim } from './claims-actions';
 
-export default function BtnDeleteClaim({ id, name }: { id: string; name: string }) {
+export default function BtnDeleteClaim({ id, name, onDelete }: { id: string; name: string; onDelete: () => void }) {
   const [isMessageBoxOpen, setIsMessageBoxOpen] = useState(false);
   const [messageBoxText, setMessageBoxText] = useState('');
   const idToDelete = useRef('');
@@ -21,6 +21,7 @@ export default function BtnDeleteClaim({ id, name }: { id: string; name: string 
 
   const handleOK = () => {
     deleteClaim(idToDelete.current);
+    onDelete();
     setIsMessageBoxOpen(false);
   };
 

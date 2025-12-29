@@ -1,26 +1,48 @@
 // claims-table.tsx
+'use client';
 
-import { lusitana } from '@/app/ui/fonts';
-import Search from '@/app/ui/search';
-
-import { Claim } from '@/app/lib/definitions';
+import { useEffect, useState } from 'react';
+import { ClaimForm } from '@/app/lib/definitions';
 import { fetchFilteredClaims } from './claims-actions';
 import BtnDeleteClaim from './btn-delete-claim';
 import { BtnEditClaimLink } from './claims-buttons';
 
-export default async function ClaimsTable({
+export default function ClaimsTable({
   query,
   currentPage,
   current_sections,
+  machine_id = '00000000-0000-0000-0000-000000000000',
 }: {
   query: string;
   currentPage: number;
   current_sections: string;
+  machine_id: string;
 }) {
-  const claims = await fetchFilteredClaims(query, currentPage, current_sections);
+  const [claims, setClaims] = useState<ClaimForm[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+    const loadClaims = async () => {
+      try {
+        setLoading(true);
+        const data = await fetchFilteredClaims(query, currentPage, current_sections, machine_id);
+        setClaims(data);
+      } catch (err) {
+        setError('Не удалось загрузить заявки');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+  useEffect(() => {
+    loadClaims();
+  }, [query, currentPage, current_sections, machine_id]);
+
+  if (loading) return <div>Загрузка...</div>;
+  if (error) return <div className="text-red-500">{error}</div>;
+  if (claims.length === 0) return <div className='mt-4'>Нет заявок</div>;
 
   return (
-    <div className="w-full">
+    <div id="claims-table" className="w-full">
       <div className="mt-6 flow-root">
         <div className="overflow-x-auto">
           <div className="inline-block min-w-full align-middle">
@@ -30,10 +52,12 @@ export default async function ClaimsTable({
               <table className="table-fixed hidden w-full rounded-md text-gray-900 md:table">
                 <thead className="rounded-md bg-gray-50 text-left text-sm font-normal">
                   <tr>
-                    <th scope="col" className="w-4/12 px-4 py-5 font-medium sm:pl-6">Название</th>
+                    <th scope="col" className="w-2/12 px-4 py-5 font-medium sm:pl-6">ЗАЯВКИ</th>
                     <th scope="col" className="w-2/12 px-4 py-5 font-medium">Дата</th>
+                    <th scope="col" className="w-2/12 px-4 py-5 font-medium">Машина</th>
+                    <th scope="col" className="w-4/12 px-4 py-5 font-medium">Причина постановки в ремонт</th>
                     <th scope="col" className="w-2/12 px-4 py-5 font-medium">Участок</th>
-                    <th scope="col" className="w-2/12 px-4 py-5 font-medium">Состояние</th>
+                    {/* <th scope="col" className="w-2/12 px-4 py-5 font-medium">Состояние</th> */}
                     <th scope="col" className="w-2/12 px-4 py-5 font-medium">Характер ремонта</th>
                     <th scope="col" className="w-2/12 px-4 py-5 font-medium">Приоритет</th>
                     <th scope="col" className="w-1/12 px-4 py-5 font-medium"></th>
@@ -42,7 +66,7 @@ export default async function ClaimsTable({
                 <tbody className="divide-y divide-gray-200 text-gray-900">
                   {claims.map((claim) => (
                     <tr key={claim.id} className="group">
-                      <td className="w-4/12 overflow-hidden whitespace-nowrap bg-white py-2 pl-6 pr-3 text-sm text-black">
+                      <td className="w-2/12 overflow-hidden whitespace-nowrap bg-white py-2 pl-6 pr-3 text-sm text-black">
                         <a
                           href={`/repair/claims/${claim.id}/edit`}
                           className="text-blue-800 underline"
@@ -54,11 +78,17 @@ export default async function ClaimsTable({
                         {new Date(claim.claim_date).toLocaleDateString()}
                       </td>
                       <td className="w-2/12 overflow-hidden whitespace-nowrap bg-white py-2 pl-6 pr-3 text-sm text-black">
+                        {claim.machine_name}
+                      </td>
+                      <td className="w-4/12 overflow-hidden whitespace-nowrap bg-white py-2 pl-6 pr-3 text-sm text-black">
+                        {claim.repair_reason}
+                      </td>                      
+                      <td className="w-2/12 overflow-hidden whitespace-nowrap bg-white py-2 pl-6 pr-3 text-sm text-black">
                         {claim.machine_unit_name}
                       </td>
-                      <td className="w-1/12 overflow-hidden whitespace-nowrap bg-white py-2 pl-6 pr-3 text-sm text-black">
+                      {/* <td className="w-1/12 overflow-hidden whitespace-nowrap bg-white py-2 pl-6 pr-3 text-sm text-black">
                         {claim.machine_machine_status}
-                      </td>
+                      </td> */}
                       <td className="w-4/12 overflow-hidden whitespace-nowrap bg-white py-2 pl-6 pr-3 text-sm text-black">
                         {claim.repair_todo}
                       </td>
@@ -67,7 +97,7 @@ export default async function ClaimsTable({
                       </td>
                       <td className="w-1/12 whitespace-nowrap py-2 pr-3">
                         <div className="flex justify-end gap-3">
-                          <BtnDeleteClaim id={claim.id} name={claim.name} />
+                          <BtnDeleteClaim id={claim.id} name={claim.name} onDelete={loadClaims} />
                         </div>
                       </td>
                     </tr>
@@ -90,12 +120,10 @@ export default async function ClaimsTable({
                       </h3>
                       <div className="flex gap-2">
                         <BtnEditClaimLink id={claim.id} />
-                        <BtnDeleteClaim id={claim.id} name={claim.name} />
+                        <BtnDeleteClaim id={claim.id} name={claim.name} onDelete={loadClaims} />
                       </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      {/* Здесь можно добавить дополнительные поля заявки, если понадобится */}
-                    </div>
+                    {/* Дополнительные поля можно добавить по желанию */}
                   </div>
                 ))}
               </div>
