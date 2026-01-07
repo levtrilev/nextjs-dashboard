@@ -60,6 +60,7 @@ export const useTabsStore = create<TabsState>()(
             set({
               currentUserId: userId,
               tabs: [],
+              // tabs: get().effectiveSections,
               //   effectiveSections: [],
               //   allowedSections: [],
             });

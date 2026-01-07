@@ -75,11 +75,20 @@ export const generatePagination = (currentPage: number, totalPages: number) => {
     totalPages,
   ];
 };
-export const formatDateForInput = (date: Date | string) => {
+export const formatDateForInput = (date: Date | string | undefined) => {
   if (!date) return ''; // Если дата пустая, возвращаем пустую строку
   const d = new Date(date);
   const year = d.getFullYear();
   const month = String(d.getMonth() + 1).padStart(2, '0'); // Месяцы начинаются с 0
   const day = String(d.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
+};
+
+export const utcISOToLocalDateTimeInput = (isoString: string | null | undefined): string => {
+  if (!isoString) return '';
+  const date = new Date(isoString); // корректно парсит UTC
+  // Форматируем как местное время, но в виде YYYY-MM-DDTHH:mm
+  return new Date(date.getTime() - date.getTimezoneOffset() * 60000)
+    .toISOString()
+    .slice(0, 16);
 };

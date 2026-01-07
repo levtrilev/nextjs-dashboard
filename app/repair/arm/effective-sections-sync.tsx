@@ -21,12 +21,13 @@ export function EffectiveSectionsSync({
         setAllowedSections(allowedSections);
         if (effectiveSections.length === 0) {
             setEffectiveSections(initialEffectiveSections);
+            console.log("EffectiveSectionsSync setEffectiveSections", initialEffectiveSections);
         }
     }, [allowedSections, initialEffectiveSections, setEffectiveSections, setAllowedSections, effectiveSections]);
 
     // effective-sections-sync.tsx
     useEffect(() => {
-        setUserId(userId); // вызовет сброс, если userId изменился
+        setUserId(userId); // вызовет сброс tabs: [], если userId изменился
 
         // После сброса — установка allowedSections и initialEffectiveSections
         // setAllowedSections(allowedSections);

@@ -12,6 +12,8 @@ import ClaimEditForm from "../[id]/edit/claim-edit-form";
 import { read } from "fs";
 import { fetchMachinesForm } from "../../machines/lib/machines-actions";
 import { fetchLocationsForm } from "../../locations/lib/locations-actions";
+import { fetchSystemsForm } from "../../systems/lib/systems-actions";
+import { fetchPersonsForm } from "../../persons/lib/persons-actions";
 
 export default async function Page() {
   //#region unified hooks and variables 
@@ -38,16 +40,26 @@ export default async function Page() {
   const claim: ClaimForm = {
     id: "",
     name: "",
-      claim_date: new Date(),
-      priority: "низкий",
-      machine_id: "",
-      machine_name: "",
-      location_id: "",
-      location_name: "",
-      repair_todo: "",
-      repair_reason: "",
-      breakdown_reasons: "",
-      emergency_act: "",
+    claim_date: new Date(),
+    created_by_person_id: "",
+    created_by_person_name: "",
+    priority: "низкий",
+    machine_id: "",
+    machine_name: "",
+    location_id: "",
+    location_name: "",
+    system_id: "00000000-0000-0000-0000-000000000000",
+    system_name: "",
+    repair_todo: "",
+    repair_reason: "",
+    breakdown_reasons: "",
+    emergency_act: "",
+    approved_by_person_id: "00000000-0000-0000-0000-000000000000",
+    approved_by_person_name: "",
+    // approved_date: "",
+    accepted_by_person_id: "00000000-0000-0000-0000-000000000000",
+    accepted_by_person_name: "",
+    // accepted_date: "",
     username: "",
     date_created: new Date(),
     section_id: "",
@@ -63,6 +75,8 @@ export default async function Page() {
   const readonly = readonly_locked || readonly_permission;
   const machines = readonly ? [] : await fetchMachinesForm(current_sections);
   const locations = readonly ? [] : await fetchLocationsForm(current_sections);
+  const systems = readonly ? [] : await fetchSystemsForm(current_sections);
+  const persons = readonly ? [] : await fetchPersonsForm(current_sections);
   return (
     <main>
       <Breadcrumbs
@@ -97,6 +111,8 @@ export default async function Page() {
           claim={claim}
           machines={machines}
           locations={locations}
+          systems={systems}
+          persons={persons}
           lockedByUserId={null}
           unlockAction={null}
           readonly={readonly}

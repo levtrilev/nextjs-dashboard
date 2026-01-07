@@ -13,6 +13,8 @@ import { fetchClaimForm } from "../../lib/claims-actions";
 import ClaimEditForm from "./claim-edit-form";
 import { fetchMachinesForm } from "@/app/repair/machines/lib/machines-actions";
 import { fetchLocationsForm } from "@/app/repair/locations/lib/locations-actions";
+import { fetchSystemsForm } from "@/app/repair/systems/lib/systems-actions";
+import { fetchPersonsForm } from "@/app/repair/persons/lib/persons-actions";
 
 async function Page(props: { params: Promise<{ id: string }> }) {
   //#region unified hooks and variables 
@@ -48,7 +50,7 @@ async function Page(props: { params: Promise<{ id: string }> }) {
     claim.editing_by_user_id === null ||
     claim.editing_by_user_id === user.id ||
     (claim.editing_since && new Date(claim.editing_since) < new Date(Date.now() - 30 * 60 * 1000));
-    
+
 
   let canEdit = false;
   if (isEditable) {
@@ -68,9 +70,11 @@ async function Page(props: { params: Promise<{ id: string }> }) {
 
   const readonly_permission = checkReadonly(userPermissions, claim, pageUser.id);
   const readonly = readonly_locked || readonly_permission;
-  
+
   const machines = readonly ? [] : await fetchMachinesForm(current_sections);
   const locations = readonly ? [] : await fetchLocationsForm(current_sections);
+  const systems = readonly ? [] : await fetchSystemsForm(current_sections);
+  const persons = readonly ? [] : await fetchPersonsForm(current_sections);
   return (
     <div className="w-full">
       <div className="flex w-full items-center justify-between">
@@ -103,6 +107,8 @@ async function Page(props: { params: Promise<{ id: string }> }) {
           claim={claim}
           machines={machines}
           locations={locations}
+          systems={systems}
+          persons={persons}
           lockedByUserId={null}
           unlockAction={unlockRecord}
           readonly={readonly}
