@@ -40,7 +40,7 @@ export default async function Page() {
   const claim: ClaimForm = {
     id: "",
     name: "",
-    claim_date: new Date(),
+    claim_date: null,
     created_by_person_id: "",
     created_by_person_name: "",
     priority: "низкий",

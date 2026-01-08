@@ -40,16 +40,31 @@ interface IEditFormProps {
 
 //#Claim zod schema
 const PrioritySchema = z.enum(['высокий', 'низкий']);
-
+const ClaimDateSchema = z.object({
+  claim_date: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, 'Неверный формат даты')
+    .refine(
+      (dateStr) => {
+        const d = new Date(dateStr);
+        return !isNaN(d.getTime()) && d.toISOString().slice(0, 10) === dateStr;
+      },
+      { message: 'Некорректная дата' }
+    ),
+  // Опционально: запрет будущих дат
+  // .refine((dateStr) => new Date(dateStr) <= new Date(), {
+  //   message: 'Дата не может быть в будущем',
+  // }),
+});
 const ClaimFormSchemaFull = z.object({
   id: z.string().uuid(),
   name: z.string().min(2, {
     message: "Название должно содержать не менее 2-х символов.",
   }),
-  claim_date: z.date({
-    required_error: "Поле claim_date должно быть заполнено.",
-    invalid_type_error: "Поле claim_date должно быть датой.",
-  }),
+  claim_date: z.string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, 'Неверный формат даты')
+    .refine((s) => !isNaN(Date.parse(s)), 'Некорректная дата'),
+  // claim_date: ClaimDateSchema,
   created_by_person_id: z.string().uuid(),
   created_by_person_name: z.string().min(1, {
     message: "Поле Создал(исполнитель) должно быть заполнено.",
@@ -61,17 +76,17 @@ const ClaimFormSchemaFull = z.object({
   }),
   location_id: z.string(),
   location_name: z.string(),
-  system_id: z.string(),
+  system_id: z.string().nullable(),
   system_name: z.string(),
   repair_todo: z.string(),
   repair_reason: z.string(),
   breakdown_reasons: z.string(),
   emergency_act: z.string(),
-  approved_date: z.string().nullable(),
-  approved_by_person_id: z.string(),
+  approved_date: z.string().optional().nullable(),
+  approved_by_person_id: z.string().nullable(),
   approved_by_person_name: z.string(),
-  accepted_date: z.string(),
-  accepted_by_person_id: z.string(),
+  accepted_date: z.string().optional().nullable(),
+  accepted_by_person_id: z.string().nullable(),
   accepted_by_person_name: z.string(),
   machine_unit_name: z.string(),
   machine_machine_status: z.string(),
@@ -156,6 +171,7 @@ export default function ClaimEditForm(props: IEditFormProps) {
     if (errors) {
       setShowErrors(true);
       console.log("ошибки есть: " + JSON.stringify(errors));
+      console.log("claim_date: " + formData.claim_date);
       return;
     }
 
@@ -263,6 +279,9 @@ export default function ClaimEditForm(props: IEditFormProps) {
     setFormData((prev) => ({ ...prev, [field]: value }));
     docChanged();
   };
+  const handleClaimDateChange = (value: string) => {
+    setFormData((prev) => ({ ...prev, claim_date: value }));
+  };
   const handleSetAccepted = () => {
     setFormData((prev) => ({
       ...prev,
@@ -349,19 +368,26 @@ export default function ClaimEditForm(props: IEditFormProps) {
 
               <div className="flex flex-row justify-between">
                 {/* claim_date */}
-                <InputField name="claim_date" value={formatDateForInput(formData.claim_date)}
-                  label="Дата заявки:" type="date" w={["w-8/16", "w-10/16"]}
-                  onChange={(value) => handleInputChange('claim_date', value)}
-                  readonly={props.readonly}
-                  errors={errors?.claim_date?._errors as string[] | undefined}
-                />
+                <div className="flex-2 flex items-center">
+                  <label
+                    htmlFor="claim_date"
+                    className="w-5/16 text-sm text-blue-900 font-medium flex items-center p-1 pl-2"
+                  >Дата заявки:</label>
+                  <input
+                    name="claim_date"
+                    value={formData.claim_date ?? ''}
+                    type="date"
+                    className="w-5/16 disabled:text-gray-400 disabled:bg-gray-100 break-words control rounded-md border border-gray-200 p-1"
+                    onChange={(e) => handleClaimDateChange(String(e.target.value))}
+                    disabled={props.readonly}
+                  />
+                  {/* // errors={errors?.claim_date?._errors as string[] | undefined} */}
 
                 {/* priority */}
-                <div className="flex-1 flex items-center">
                   <label htmlFor="priority" className="text-sm font-medium flex items-center p-2">Приоритет:</label>
                   <select
                     name="priority" id="priority"
-                    className="w-full h-10 cursor-pointer rounded-md border border-gray-300 px-3 py-2 hover:bg-gray-50 focus:outline-none focus:ring focus:ring-blue-300"
+                    className="w-5/16 h-10 cursor-pointer rounded-md border border-gray-300 px-1 py-2 hover:bg-gray-50 focus:outline-none focus:ring focus:ring-blue-300"
                     disabled={props.readonly}
                     value={formData.priority}
                     onChange={(e) => handleSelectPriority(e)}

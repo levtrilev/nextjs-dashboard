@@ -75,7 +75,7 @@ export default function ClaimsTable({
                         </a>
                       </td>
                       <td className="w-2/12 overflow-hidden whitespace-nowrap bg-white py-2 pl-6 pr-3 text-sm text-black">
-                        {new Date(claim.claim_date).toLocaleDateString()}
+                        {claim.claim_date && new Date(claim.claim_date).toLocaleDateString()}
                       </td>
                       <td className="w-2/12 overflow-hidden whitespace-nowrap bg-white py-2 pl-6 pr-3 text-sm text-black">
                         {claim.machine_name}

@@ -231,16 +231,24 @@ export default function MachineEditForm(props: IEditFormProps) {
     docChanged();
   };
   //#endregion
-const [claimsTableKey, setClaimsTableKey] = useState(0);
+  const [claimsTableKey, setClaimsTableKey] = useState(0);
   const errors = showErrors ? validate() : undefined;
   const handleCreateClaim = async (FormData: FormData) => {
-      setFormData((prev) => ({
+    setFormData((prev) => ({
       ...prev,
       machine_status: 'ремонт',
     }));
     const claim = {
       name: repairReason,
-      claim_date: new Date(),
+      // claim_date: new Date().toISOString(),
+      claim_date: (function () {
+        const d = new Date();
+        return d.getFullYear() + '-' +
+          String(d.getMonth() + 1).padStart(2, '0') + '-' +
+          String(d.getDate()).padStart(2, '0');// + 'T' +
+        // String(d.getHours()).padStart(2, '0') + ':' +
+        // String(d.getMinutes()).padStart(2, '0');
+      })(),
       priority: "низкий",
       machine_id: formData.id,
       machine_name: formData.name,
@@ -251,6 +259,7 @@ const [claimsTableKey, setClaimsTableKey] = useState(0);
       repair_reason: repairReason,
       breakdown_reasons: "",
       emergency_act: "",
+      system_id: null,
       section_id: formData.section_id,
       section_name: formData.section_name,
       tenant_id: formData.tenant_id,
@@ -259,6 +268,22 @@ const [claimsTableKey, setClaimsTableKey] = useState(0);
       date_created: new Date(),
       editing_since: null,
       editing_by_user_id: null,
+      // approved_date: (function () {
+      //   const d = new Date();
+      //   return d.getFullYear() + '-' +
+      //     String(d.getMonth() + 1).padStart(2, '0') + '-' +
+      //     String(d.getDate()).padStart(2, '0') + 'T' +
+      //     String(d.getHours()).padStart(2, '0') + ':' +
+      //     String(d.getMinutes()).padStart(2, '0');
+      // })(),
+      // accepted_date: (function () {
+      //   const d = new Date();
+      //   return d.getFullYear() + '-' +
+      //     String(d.getMonth() + 1).padStart(2, '0') + '-' +
+      //     String(d.getDate()).padStart(2, '0') + 'T' +
+      //     String(d.getHours()).padStart(2, '0') + ':' +
+      //     String(d.getMinutes()).padStart(2, '0');
+      // })(),
     } as ClaimForm;
     try {
       await createClaim(claim);
@@ -385,7 +410,7 @@ const [claimsTableKey, setClaimsTableKey] = useState(0);
 
                 {!props.readonly && <button
                   type="button"
-                  onClick={() => handleCreateClaim(formData)}
+                  onClick={() => {handleCreateClaim(formData); docChanged();}}
                   disabled={props.readonly}
                   className={`w-4/16 rounded-md border p-2 ${props.readonly
                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
@@ -472,7 +497,7 @@ const [claimsTableKey, setClaimsTableKey] = useState(0);
         query={''}
         currentPage={1}
         current_sections={effectiveSectionIdsString}
-        machine_id={formData.id} 
+        machine_id={formData.id}
         key={claimsTableKey} />
       <div className="mt-5 flex w-full justify-center">
         <Pagination totalPages={1} />

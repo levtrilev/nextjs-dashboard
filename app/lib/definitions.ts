@@ -346,20 +346,20 @@ export type PartForm = {
 export type Claim = {
   id: string;
   name: string;
-  claim_date: Date | string;
+  claim_date: string | null;
   created_by_person_id: string;
   priority: Priority;
   machine_id: string;
   location_id: string;
-  system_id: string;
+  system_id: string | null;
   repair_todo: string;
   repair_reason: string;
   breakdown_reasons: string;
   emergency_act: string;
-  approved_date: string | null;
-  approved_by_person_id: string;
-  accepted_date: string | null;
-  accepted_by_person_id: string;
+  approved_date?: string | null;
+  approved_by_person_id: string | null;
+  accepted_date?: string | null;
+  accepted_by_person_id: string | null;
   section_id: string;
   tenant_id: string;
   username?: string;
@@ -373,7 +373,7 @@ export type Claim = {
 export type ClaimForm = {
   id: string;
   name: string;
-  claim_date: Date | string;
+  claim_date: string | null;
   created_by_person_id: string;
   created_by_person_name: string;
   priority: Priority;
@@ -381,17 +381,17 @@ export type ClaimForm = {
   machine_name: string;
   location_id: string;
   location_name: string;
-  system_id: string;
+  system_id: string | null;
   system_name: string;
   repair_todo: string;
   repair_reason: string;
   breakdown_reasons: string;
   emergency_act: string;
   approved_date: string | null; // формат "YYYY-MM-DDTHH:mm" — местное время, без зоны
-  approved_by_person_id: string;
+  approved_by_person_id: string | null;
   approved_by_person_name: string;
   accepted_date: string | null;
-  accepted_by_person_id: string;
+  accepted_by_person_id: string | null;
   accepted_by_person_name: string;
   section_id: string;
   section_name: string;
