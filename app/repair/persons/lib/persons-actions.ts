@@ -17,29 +17,17 @@ export async function createPerson(person: Person) {
   const session = await auth();
   const username = session?.user?.name;
   const date_created = new Date().toISOString();
-  const {
-    name,
-    section_id,
-    tenant_id,
-    author_id,
-  } = person;
+  const { name, section_id, tenant_id, author_id } = person;
   try {
     await pool.query(
       `
       INSERT INTO persons (
-        name, 
+        name, person_user_id, person_user_name,
         username, section_id, timestamptz,
         tenant_id, author_id
       ) VALUES ($1, $2, $3, $4, $5, $6)
     `,
-      [
-        name,
-        username,
-        section_id,
-        date_created,
-        tenant_id,
-        author_id,
-      ]
+      [name, username, section_id, date_created, tenant_id, author_id]
     );
   } catch (error) {
     console.error("Не удалось создать Person:", error);
@@ -58,38 +46,29 @@ export async function updatePerson(person: Person) {
   const session = await auth();
   const username = session?.user?.name;
 
-  const {
-    id,
-    name,
-    section_id,
-    tenant_id,
-    author_id,
-  } = person;
+  const { id, name, person_user_id, person_user_name, section_id, tenant_id, author_id } = person;
 
   try {
     await pool.query(
       `
       UPDATE persons SET
         name = $1,
-        username = $2,
-        section_id = $4,
-        tenant_id = $5,
-        author_id = $6,
+        person_user_id = $2,
+        person_user_name = $3,
+        username = $4,
+        section_id = $5,
+        tenant_id = $6,
+        author_id = $7,
         timestamptz = now()
-      WHERE id = $3
+      WHERE id = $8
     `,
-      [
-        name,
-        username,
-        id,
-        section_id,
-        tenant_id,
-        author_id,
-      ]
+      [name, person_user_id, person_user_name, username, section_id, tenant_id, author_id, id]
     );
   } catch (error) {
     console.error("Не удалось обновить Person:", error);
-    throw new Error("Ошибка базы данных: Не удалось обновить Person: " + String(error));
+    throw new Error(
+      "Ошибка базы данных: Не удалось обновить Person: " + String(error)
+    );
   }
 
   revalidatePath("/repair/persons");
@@ -100,7 +79,9 @@ export async function deletePerson(id: string) {
     await pool.query(`DELETE FROM persons WHERE id = $1`, [id]);
   } catch (error) {
     console.error("Ошибка удаления Person:", error);
-    throw new Error("Ошибка базы данных: Не удалось удалить Person: " + String(error));
+    throw new Error(
+      "Ошибка базы данных: Не удалось удалить Person: " + String(error)
+    );
   }
   revalidatePath("/repair/persons");
 }
@@ -119,6 +100,8 @@ export async function fetchPerson(id: string, current_sections: string) {
       SELECT
         id,
         name,
+        person_user_id,
+        COALESCE(person_user_name, '') as person_user_name,
         username,
         editing_by_user_id,
         editing_since,
@@ -147,6 +130,8 @@ export async function fetchPersonForm(id: string, current_sections: string) {
       SELECT
         persons.id,
         persons.name,
+        persons.person_user_id,
+        COALESCE(persons.person_user_name, '') as person_user_name,
         persons.username,
         persons.section_id,
         persons.editing_by_user_id,
@@ -155,7 +140,7 @@ export async function fetchPersonForm(id: string, current_sections: string) {
         sections.name AS section_name
       FROM your_persons persons
       LEFT JOIN sections ON persons.section_id = sections.id
-      WHERE persons.id = $1
+      WHERE persons.id = $2
     `,
       [current_sections, id]
     );
@@ -177,6 +162,8 @@ export async function fetchPersons(current_sections: string) {
       SELECT
         id,
         name,
+        person_user_id,
+        COALESCE(person_user_name, '') as person_user_name,
         section_id,
         username,
         timestamptz,
@@ -204,6 +191,8 @@ export async function fetchPersonsForm(current_sections: string) {
       SELECT
         persons.id,
         persons.name,
+        persons.person_user_id,
+        COALESCE(persons.person_user_name, '') as person_user_name,
         persons.username,
         persons.timestamptz,
         sections.name AS section_name
@@ -225,7 +214,11 @@ export async function fetchPersonsForm(current_sections: string) {
 
 //#region Filtered Persons
 
-export async function fetchFilteredPersons(query: string, currentPage: number, current_sections: string) {
+export async function fetchFilteredPersons(
+  query: string,
+  currentPage: number,
+  current_sections: string
+) {
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
   try {
@@ -237,6 +230,8 @@ export async function fetchFilteredPersons(query: string, currentPage: number, c
       SELECT
         persons.id,
         persons.name,
+        persons.person_user_id,
+        COALESCE(persons.person_user_name, '') as person_user_name,        
         persons.username,
         persons.timestamptz
       FROM your_persons persons
@@ -255,7 +250,10 @@ export async function fetchFilteredPersons(query: string, currentPage: number, c
   }
 }
 
-export async function fetchPersonsPages(query: string, current_sections: string) {
+export async function fetchPersonsPages(
+  query: string,
+  current_sections: string
+) {
   try {
     const count = await pool.query(
       `

@@ -123,7 +123,6 @@ export default function ClaimsTable({
                         <BtnDeleteClaim id={claim.id} name={claim.name} onDelete={loadClaims} />
                       </div>
                     </div>
-                    {/* Дополнительные поля можно добавить по желанию */}
                   </div>
                 ))}
               </div>

@@ -2,7 +2,7 @@
 
 'use client';
 import { useEffect, useState } from "react";
-import { PersonForm } from "@/app/lib/definitions";
+import { PersonForm, UserForm } from "@/app/lib/definitions";
 import { formatDateForInput } from "@/app/lib/common-utils";
 import BtnSectionsRef from "@/app/admin/sections/lib/btn-sections-ref";
 import { z } from "zod";
@@ -17,9 +17,11 @@ import InputField from "@/app/lib/input-field";
 import { useRouter } from "next/navigation";
 import { createPerson, updatePerson } from "../../lib/persons-actions";
 import PdfDocument from "./person-pdf-document";
+import BtnUsersRef from "@/app/admin/users/lib/btn-users-ref";
 
 interface IEditFormProps {
   person: PersonForm;
+  users: UserForm[];
   lockedByUserId: string | null;
   unlockAction: ((tableName: string, id: string, userId: string) => Promise<void>) | null;
   readonly: boolean;
@@ -30,6 +32,8 @@ const PersonFormSchemaFull = z.object({
   name: z.string().min(2, {
     message: "Название должно содержать не менее 2-х символов.",
   }),
+  person_user_id: z.string().nullable().optional(),
+  person_user_name: z.string().nullable().optional(),
   section_name: z.string().min(1, {
     message: "Поле Раздел должно быть заполнено.",
   }),
@@ -192,7 +196,14 @@ export default function PersonEditForm(props: IEditFormProps) {
     docChanged();
   };
   //#endregion
-
+const handleSelectUser = (new_user_id: string, new_user_name: string) => {
+  setFormData((prev) => ({
+    ...prev,
+    person_user_id: new_user_id,
+    person_user_name: new_user_name,
+  }));
+  docChanged();
+}
   const errors = showErrors ? validate() : undefined;
 
   return (
@@ -211,7 +222,18 @@ export default function PersonEditForm(props: IEditFormProps) {
                 readonly={props.readonly}
                 errors={errors?.name?._errors as string[] | undefined}
               />
-
+              {/* person_user_name */}
+              <InputField
+                name="person_user_name"
+                value={formData.person_user_name as string}
+                label="Имя пользователя:"
+                type="text"
+                w={["w-4/16", "w-13/16"]}
+                onChange={(value) => { }}
+                refBook={<BtnUsersRef handleSelectUser={handleSelectUser} users={props.users} />}
+                readonly={props.readonly}
+                errors={errors?.person_user_name?._errors as string[] | undefined}
+              />
               {/* section_name */}
               <InputField name="section_name" value={formData.section_name as string}
                 label="Раздел:" type="text" w={["w-6/16", "w-11/16"]}

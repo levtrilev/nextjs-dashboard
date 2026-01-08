@@ -11,6 +11,7 @@ import { checkReadonly } from "@/app/lib/common-utils";
 import { PersonForm } from "@/app/lib/definitions";
 import { fetchPersonForm } from "../../lib/persons-actions";
 import PersonEditForm from "./person-edit-form";
+import { fetchUsersAdmin } from "@/app/admin/users/lib/users-actions";
 
 async function Page(props: { params: Promise<{ id: string }> }) {
     //#region unified hooks and variables 
@@ -65,6 +66,7 @@ async function Page(props: { params: Promise<{ id: string }> }) {
     //#endregion
     const readonly_permission = checkReadonly(userPermissions, person, pageUser.id);
     const readonly = readonly_locked || readonly_permission;
+    const users = readonly ? [] : await fetchUsersAdmin(tenant_id);
     return (
         <div className="w-full">
             <div className="flex w-full items-center justify-between">
@@ -84,6 +86,7 @@ async function Page(props: { params: Promise<{ id: string }> }) {
             >
                 <PersonEditForm
                     person={person}
+                    users={users}
                     lockedByUserId={freshRecord.editing_by_user_id}
                     unlockAction={unlockRecord}
                     readonly={readonly}

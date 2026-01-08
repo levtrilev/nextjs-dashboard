@@ -10,6 +10,7 @@ import DocWrapper from "@/app/lib/doc-wrapper";
 import { fetchDocUserPermissions } from "@/app/admin/permissions/lib/permissios-actions";
 import { PersonForm } from "@/app/lib/definitions";
 import PersonEditForm from "../[id]/edit/person-edit-form";
+import { fetchUsersAdmin } from "@/app/admin/users/lib/users-actions";
 
 export default async function Page() {
   //#region unified hooks and variables 
@@ -34,6 +35,8 @@ export default async function Page() {
   const person: PersonForm = {
     id: "",
     name: "",
+    person_user_id: "",
+    person_user_name: "",
     username: "",
     date_created: new Date(), //formatDateForInput(new Date()),
     schedule_owner_name: "",
@@ -49,6 +52,7 @@ export default async function Page() {
   } as PersonForm;
   const readonly_permission = checkReadonly(userPermissions, person, pageUser.id);
   const readonly = readonly_locked || readonly_permission;
+  const users = readonly ? [] : await fetchUsersAdmin(tenant_id);
 
   return (
     <main>
@@ -74,6 +78,7 @@ export default async function Page() {
       >
         <PersonEditForm
           person={person}
+          users={users}
           lockedByUserId={null}
           unlockAction={null}
           readonly={readonly}

@@ -265,6 +265,8 @@ export type WorkForm = {
 export type Person = {
   id: string;
   name: string;
+  person_user_name?: string | null;
+  person_user_id?: string | null;
   section_id: string;
   tenant_id: string;
   username?: string;
@@ -278,6 +280,8 @@ export type Person = {
 export type PersonForm = {
   id: string;
   name: string;
+  person_user_name: string;
+  person_user_id: string;
   section_id: string;
   section_name: string;
   tenant_id: string;
