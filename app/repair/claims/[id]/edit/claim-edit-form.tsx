@@ -19,7 +19,7 @@ import {
 } from "@/app/store/useDocumentStore";
 import InputField from "@/app/lib/input-field";
 import { useRouter } from "next/navigation";
-import { createClaim, updateClaim } from "../../lib/claims-actions";
+import { createClaim, fetchPersonByUser, updateClaim } from "../../lib/claims-actions";
 import PdfDocument from "./claim-pdf-document";
 import BtnMachinesRef from "@/app/repair/machines/lib/btn-machines-ref";
 import BtnLocationsRef from "@/app/repair/locations/lib/btn-locations-ref";
@@ -38,7 +38,7 @@ interface IEditFormProps {
   readonly: boolean;
 }
 
-//#Claim zod schema
+//#region Claim zod schema
 const PrioritySchema = z.enum(['высокий', 'низкий']);
 const ClaimDateSchema = z.object({
   claim_date: z
@@ -119,10 +119,11 @@ export type FormData = z.infer<typeof ClaimFormSchemaFull>;
 //#endregion
 
 export default function ClaimEditForm(props: IEditFormProps) {
-
+  const userSections = useDocumentStore.getState().userSections;
+  const sessionUser = useDocumentStore.getState().sessionUser;
   //#region unified form hooks and variables 
   const docTenantId = useDocumentStore.getState().documentTenantId;
-  const sessionUserId = useDocumentStore.getState().sessionUser.id;
+  // const sessionUserId = useDocumentStore.getState().sessionUser.id;
   const [showErrors, setShowErrors] = useState(false);
   const isDocumentChanged = useIsDocumentChanged();
   const msgBox = useMessageBox();
@@ -136,10 +137,10 @@ export default function ClaimEditForm(props: IEditFormProps) {
   useEffect(() => {
     setFormData((prev) => ({
       ...prev,
-      author_id: sessionUserId,
-      editor_id: sessionUserId,
+      author_id: sessionUser.id,
+      editor_id: sessionUser.id,
     }));
-  }, [sessionUserId]);
+  }, [sessionUser.id]);
   //#endregion
 
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
@@ -148,7 +149,7 @@ export default function ClaimEditForm(props: IEditFormProps) {
   useEffect(() => {
     setFormData((prev) => ({
       ...prev,
-      author_id: sessionUserId,
+      author_id: sessionUser.id,
       tenant_id: docTenantId,
     }));
   }, []);
@@ -198,7 +199,7 @@ export default function ClaimEditForm(props: IEditFormProps) {
 
   const handleBackClick = async (e: React.MouseEvent) => {
     e.preventDefault();
-    if (props.unlockAction) await props.unlockAction("claims", props.claim.id, sessionUserId);
+    if (props.unlockAction) await props.unlockAction("claims", props.claim.id, sessionUser.id);
     if (isDocumentChanged && !msgBox.isOKButtonPressed) {
       setIsShowMessageBoxCancel(true);
       setIsMessageBoxOpen(true);
@@ -282,7 +283,9 @@ export default function ClaimEditForm(props: IEditFormProps) {
   const handleClaimDateChange = (value: string) => {
     setFormData((prev) => ({ ...prev, claim_date: value }));
   };
-  const handleSetAccepted = () => {
+  const handleSetAccepted = async () => {
+    const accepted_by_person = await fetchPersonByUser(sessionUser.id, userSections.map((s) => s.id));
+
     setFormData((prev) => ({
       ...prev,
       accepted_date: (function () {
@@ -293,12 +296,16 @@ export default function ClaimEditForm(props: IEditFormProps) {
           String(d.getHours()).padStart(2, '0') + ':' +
           String(d.getMinutes()).padStart(2, '0');
       })(),
-      accepted_by_person_id: '06fbf58c-35e6-4a1e-9194-faa1fa2cc65c',
-      accepted_by_person_name: 'Миненко',
+      // accepted_by_person_id: '06fbf58c-35e6-4a1e-9194-faa1fa2cc65c',
+      // accepted_by_person_name: 'Миненко',
+      accepted_by_person_id: accepted_by_person ? accepted_by_person.id : '00000000-0000-0000-0000-000000000000',
+      accepted_by_person_name: accepted_by_person ? accepted_by_person.name : sessionUser.name,
     }));
     docChanged();
   }
-  const handleSetApproved = () => {
+  const handleSetApproved = async () => {
+    const approved_by_person = await fetchPersonByUser(sessionUser.id, userSections.map((s) => s.id));
+
     setFormData((prev) => ({
       ...prev,
       approved_date: (function () {
@@ -309,8 +316,10 @@ export default function ClaimEditForm(props: IEditFormProps) {
           String(d.getHours()).padStart(2, '0') + ':' +
           String(d.getMinutes()).padStart(2, '0');
       })(),
-      approved_by_person_id: 'c0adf0d0-3801-438c-8407-7f7c9bf23767',
-      approved_by_person_name: 'Попруженко',
+      // approved_by_person_id: 'c0adf0d0-3801-438c-8407-7f7c9bf23767',
+      // approved_by_person_name: 'Попруженко',
+      approved_by_person_id: approved_by_person ? approved_by_person.id : '00000000-0000-0000-0000-000000000000',
+      approved_by_person_name: approved_by_person ? approved_by_person.name : sessionUser.name,
     }));
     docChanged();
   }
@@ -383,7 +392,7 @@ export default function ClaimEditForm(props: IEditFormProps) {
                   />
                   {/* // errors={errors?.claim_date?._errors as string[] | undefined} */}
 
-                {/* priority */}
+                  {/* priority */}
                   <label htmlFor="priority" className="text-sm font-medium flex items-center p-2">Приоритет:</label>
                   <select
                     name="priority" id="priority"

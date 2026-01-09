@@ -7,7 +7,7 @@ import pool from "@/db";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { ClaimForm, Claim, Priority } from "@/app/lib/definitions";
+import { ClaimForm, Claim, Priority, Person } from "@/app/lib/definitions";
 
 const ITEMS_PER_PAGE = 8;
 
@@ -502,4 +502,33 @@ export async function fetchClaimsPages(
   }
 }
 
+//#endregion
+
+//#region FetchPersonByUser Claim
+
+// client side: userId = useDocumentStore.getState().sessionUser.id;
+export async function fetchPersonByUser(userId: string, current_sections: string[]) {
+  try {
+    const data = await pool.query<Person>(
+      `
+      WITH your_persons AS ( SELECT * FROM persons where section_id = 
+        ANY ($1::uuid[]))
+
+        SELECT
+        id,
+        name,
+        person_user_id,
+        person_user_name
+        from your_persons
+        WHERE person_user_id = $2
+      `,
+      [current_sections, userId]
+    );
+
+    return data.rows[0];
+  } catch (err) {
+    console.error("Ошибка получения Person по ID:", err);
+    throw new Error("Не удалось получить Person:" + String(err));
+  }
+}
 //#endregion
