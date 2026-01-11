@@ -9,6 +9,7 @@ import { getCurrentSections, getRoleSections } from "@/app/lib/common-actions";
 import { fetchTenantsAdmin, fetchTenantsSuperadmin } from "@/app/admin/tenants/lib/tenants-actions";
 import { fetchSectionsForm, fetchSectionsFormAdmin, fetchSectionsFormSuperadmin } from "@/app/admin/sections/lib/sections-actions";
 import { auth, getUser } from "@/auth";
+import { fetchPermissionsAdmin, fetchPermissionsSuperadmin } from "@/app/admin/permissions/lib/permissios-actions";
 
 async function Page(props: { params: Promise<{ id: string }> }) {
     const session = await auth();
@@ -29,13 +30,19 @@ async function Page(props: { params: Promise<{ id: string }> }) {
             : await fetchSectionsForm(current_sections);
 
     const tenants = isSuperadmin ? await fetchTenantsSuperadmin() : await fetchTenantsAdmin(role.tenant_id);
+    const role_permissions = isAdmin ? await fetchPermissionsAdmin(user.tenant_id, role.id) : [];
     return (
         <div className="w-full">
             <div className="flex w-full items-center justify-between">
                 <h1 className={`${lusitana.className} text-2xl`}>Роль</h1>
             </div>
             <h3 className="text-xs font-medium text-gray-400">id: {id}</h3>
-            <RoleEditForm role={role} role_sections={role_sections} tenants={tenants} userSections={sections} />
+            <RoleEditForm
+                role={role}
+                role_sections={role_sections}
+                tenants={tenants}
+                userSections={sections}
+                role_permissions={role_permissions} />
         </div>
 
     );

@@ -745,6 +745,15 @@ export type LegalEntity = {
   section_id: string;
   access_tags: string[];
   user_tags: string[];
+
+  tenant_id: string;
+  username?: string;
+  author_id: string;
+  editor_id: string;
+  timestamptz?: string;
+  date_created?: Date;
+  editing_by_user_id: string | null;
+  editing_since: string | null;
 };
 
 export type LegalEntityForm = {
@@ -765,6 +774,15 @@ export type LegalEntityForm = {
   section_name: string;
   access_tags: string[];
   user_tags: string[];
+
+  tenant_id: string;
+  username?: string;
+  author_id: string;
+  editor_id: string;
+  timestamptz?: string;
+  date_created?: Date;
+  editing_by_user_id: string | null;
+  editing_since: string | null;
 };
 
 export type User = {

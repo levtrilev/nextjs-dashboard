@@ -22,7 +22,7 @@ import { TagInput } from "@/app/lib/tags/tag-input";
 interface IEditFormProps {
   region: RegionForm;
   lockedByUserId: string | null;
-  unlockAction: (id: string, userId: string) => Promise<void>;
+  unlockAction: ((tableName: string, id: string, userId: string) => Promise<void>) | null;
   readonly: boolean;
 }
 
@@ -60,7 +60,7 @@ export default function RegionEditForm(props: IEditFormProps) {
   };
   const handleBackClick = async (e: React.MouseEvent) => {
     e.preventDefault();
-    await props.unlockAction(region.id, sessionUser.id);
+    if (props.unlockAction) await props.unlockAction("regions", region.id, sessionUser.id);
     if (isDocumentChanged && !msgBox.isOKButtonPressed) {
       setIsShowMessageBoxCancel(true);
       setIsMessageBoxOpen(true);
@@ -155,7 +155,7 @@ export default function RegionEditForm(props: IEditFormProps) {
             <input
               id="name"
               type="text"
-              className="w-7/8 control rounded-md border border-gray-200 p-2"
+              className="w-7/8 disabled:text-gray-400 disabled:bg-gray-100 break-words control rounded-md border border-gray-200 p-2"
               disabled={props.readonly}
               value={region.name}
               onChange={(e) => { setRegion((prev) => ({ ...prev, name: e.target.value, })); docChanged(); }}
@@ -171,7 +171,7 @@ export default function RegionEditForm(props: IEditFormProps) {
             <input
               id="capital"
               type="text"
-              className="w-13/16 control rounded-md border border-gray-200 p-2"
+              className="w-13/16 disabled:text-gray-400 disabled:bg-gray-100 break-words control rounded-md border border-gray-200 p-2"
               disabled={props.readonly}
               value={region.capital}
               onChange={(e) => { setRegion((prev) => ({ ...prev, capital: e.target.value, })); docChanged(); }}
@@ -188,7 +188,7 @@ export default function RegionEditForm(props: IEditFormProps) {
               id="section_name"
               type="text"
               name="section_name"
-              className="w-13/16 pointer-events-none control rounded-md border border-gray-200 p-2"
+              className="w-13/16 disabled:text-gray-400 disabled:bg-gray-100 break-words control rounded-md border border-gray-200 p-2"
               disabled={props.readonly}
               value={region.section_name}
               readOnly
@@ -210,7 +210,7 @@ export default function RegionEditForm(props: IEditFormProps) {
             <input
               id="area"
               type="text"
-              className="w-13/16 control rounded-md border border-gray-200 p-2"
+              className="w-13/16 disabled:text-gray-400 disabled:bg-gray-100 break-words control rounded-md border border-gray-200 p-2"
               disabled={props.readonly}
               value={region.area}
               onChange={(e) => { setRegion((prev) => ({ ...prev, area: e.target.value, })); docChanged(); }}
@@ -226,7 +226,7 @@ export default function RegionEditForm(props: IEditFormProps) {
             <input
               id="code"
               type="text"
-              className="w-13/16 control rounded-md border border-gray-200 p-2"
+              className="w-13/16 disabled:text-gray-400 disabled:bg-gray-100 break-words control rounded-md border border-gray-200 p-2"
               disabled={props.readonly}
               value={region.code}
               onChange={(e) => { setRegion((prev) => ({ ...prev, code: e.target.value, })); docChanged(); }}

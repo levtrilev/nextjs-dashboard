@@ -46,15 +46,35 @@ async function Page(props: { params: Promise<{ id: string }> }) {
     }
 
     //#region Lock Document
-    // Проверяем, кто редактирует
+    // const isEditable =
+    //     person.editing_by_user_id === null ||
+    //     person.editing_by_user_id === user.id ||
+    //     (person.editing_since && new Date(person.editing_since) < new Date(Date.now() - 30 * 60 * 1000));
+
+    // let canEdit = false;
+    // if (isEditable) {
+    //     const lockResult = await tryLockRecord('persons', person.id, user.id);
+    //     canEdit = lockResult.isEditable;
+    // } else {
+    //     canEdit = false;
+    // }
+    // // Перечитаем запись после возможного обновления блокировки
+    // const freshRecord = await getFeshRecord('persons', person.id);
+
+    // const editingByCurrentUser = freshRecord.editing_by_user_id === user.id;
+    // const readonly_locked = !editingByCurrentUser;
+    //#endregion
+    // const readonly_permission = checkReadonly(userPermissions, person, pageUser.id);
+    // const readonly = readonly_locked || readonly_permission;
+
+    //#region Lock Document
+    const readonly_permission = checkReadonly(userPermissions, person, pageUser.id);
+    // Пытаемся захватить документ, если имеем права на изменение
     const isEditable =
-        person.editing_by_user_id === null ||
-        person.editing_by_user_id === user.id ||
-        (person.editing_since && new Date(person.editing_since) < new Date(Date.now() - 30 * 60 * 1000));
-    // Если текущий пользователь — не владелец блокировки, не пытаемся её захватить
-    // Но если он может редактировать — захватываем блокировку
-    // console.log("person: ", JSON.stringify(person));
-    // console.log("isEditable: ", isEditable);
+        !readonly_permission &&
+        (person.editing_by_user_id === null ||
+            person.editing_by_user_id === user.id ||
+            (person.editing_since && new Date(person.editing_since) < new Date(Date.now() - 30 * 60 * 1000)));
 
     let canEdit = false;
     if (isEditable) {
@@ -63,15 +83,15 @@ async function Page(props: { params: Promise<{ id: string }> }) {
     } else {
         canEdit = false;
     }
-    // Перечитаем запись после возможного обновления блокировки
-    const freshRecord = await getFeshRecord('persons', person.id);
+    // Перечитываем запись после возможного обновления блокировки
+    const freshRecord = !readonly_permission
+        ? await getFeshRecord('persons', person.id)
+        : { editing_by_user_id: '', editing_by_user_email: '', };
 
     const editingByCurrentUser = freshRecord.editing_by_user_id === user.id;
-    const readonly_locked = !editingByCurrentUser;
-    // const readonly_locked = false
+    const readonly = readonly_permission ? readonly_permission : !editingByCurrentUser;
     //#endregion
-    const readonly_permission = checkReadonly(userPermissions, person, pageUser.id);
-    const readonly = readonly_locked || readonly_permission;
+
     const users = readonly ? [] : await fetchUsersAdmin(tenant_id);
     return (
         <div className="w-full">
@@ -79,7 +99,7 @@ async function Page(props: { params: Promise<{ id: string }> }) {
                 <h1 className={`${lusitana.className} text-2xl`}>Сотрудник</h1>
                 {readonly && <span className="text-xs font-medium text-gray-400">только чтение для пользователя: {user?.email}</span>}
                 {!readonly && <span className="text-xs font-medium text-gray-400">права на изменение для пользователя: {user?.email}</span>}
-                {!editingByCurrentUser && <span className="text-xs font-medium text-gray-400">    Редактируется пользователем: {freshRecord.editing_by_user_email}</span>}
+                {!readonly && !editingByCurrentUser && <span className="text-xs font-medium text-gray-400">    Редактируется пользователем: {freshRecord.editing_by_user_email}</span>}
 
             </div>
             <h3 className="text-xs font-medium text-gray-400">id: {id}</h3>

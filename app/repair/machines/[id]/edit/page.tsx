@@ -46,15 +46,41 @@ async function Page(props: { params: Promise<{ id: string }> }) {
     }
 
     //#region Lock Document
-    // Проверяем, кто редактирует
+    // // Проверяем, кто редактирует
+    // const isEditable =
+    //     machine.editing_by_user_id === null ||
+    //     machine.editing_by_user_id === user.id ||
+    //     (machine.editing_since && new Date(machine.editing_since) < new Date(Date.now() - 30 * 60 * 1000));
+    // // Если текущий пользователь — не владелец блокировки, не пытаемся её захватить
+    // // Но если он может редактировать — захватываем блокировку
+    // // console.log("machine: ", JSON.stringify(machine));
+    // // console.log("isEditable: ", isEditable);
+
+    // let canEdit = false;
+    // if (isEditable) {
+    //     const lockResult = await tryLockRecord('machines', machine.id, user.id);
+    //     canEdit = lockResult.isEditable;
+    // } else {
+    //     canEdit = false;
+    // }
+    // // Перечитаем запись после возможного обновления блокировки
+    // const freshRecord = await getFeshRecord('machines', machine.id);
+
+    // const editingByCurrentUser = freshRecord.editing_by_user_id === user.id;
+    // const readonly_locked = !editingByCurrentUser;
+    // // const readonly_locked = false
+    //#endregion
+    // const readonly_permission = checkReadonly(userPermissions, machine, pageUser.id);
+    // const readonly = readonly_locked || readonly_permission;
+
+    //#region Lock Document
+    const readonly_permission = checkReadonly(userPermissions, machine, pageUser.id);
+    // Пытаемся захватить документ, если имеем права на изменение
     const isEditable =
-        machine.editing_by_user_id === null ||
-        machine.editing_by_user_id === user.id ||
-        (machine.editing_since && new Date(machine.editing_since) < new Date(Date.now() - 30 * 60 * 1000));
-    // Если текущий пользователь — не владелец блокировки, не пытаемся её захватить
-    // Но если он может редактировать — захватываем блокировку
-    // console.log("machine: ", JSON.stringify(machine));
-    // console.log("isEditable: ", isEditable);
+        !readonly_permission &&
+        (machine.editing_by_user_id === null ||
+            machine.editing_by_user_id === user.id ||
+            (machine.editing_since && new Date(machine.editing_since) < new Date(Date.now() - 30 * 60 * 1000)));
 
     let canEdit = false;
     if (isEditable) {
@@ -63,15 +89,15 @@ async function Page(props: { params: Promise<{ id: string }> }) {
     } else {
         canEdit = false;
     }
-    // Перечитаем запись после возможного обновления блокировки
-    const freshRecord = await getFeshRecord('machines', machine.id);
+    // Перечитываем запись после возможного обновления блокировки
+    const freshRecord = !readonly_permission
+        ? await getFeshRecord('machines', machine.id)
+        : { editing_by_user_id: '', editing_by_user_email: '', };
 
     const editingByCurrentUser = freshRecord.editing_by_user_id === user.id;
-    const readonly_locked = !editingByCurrentUser;
-    // const readonly_locked = false
+    const readonly = readonly_permission ? readonly_permission : !editingByCurrentUser;
     //#endregion
-    const readonly_permission = checkReadonly(userPermissions, machine, pageUser.id);
-    const readonly = readonly_locked || readonly_permission;
+
     const units = readonly ? [] : await fetchUnitsForm(current_sections);
     const locations = readonly ? [] : await fetchLocationsForm(current_sections);
     return (
@@ -80,7 +106,7 @@ async function Page(props: { params: Promise<{ id: string }> }) {
                 <h1 className={`${lusitana.className} text-2xl`}>Машина</h1>
                 {readonly && <span className="text-xs font-medium text-gray-400">только чтение для пользователя: {user?.email}</span>}
                 {!readonly && <span className="text-xs font-medium text-gray-400">права на изменение для пользователя: {user?.email}</span>}
-                {!editingByCurrentUser && <span className="text-xs font-medium text-gray-400">    Редактируется пользователем: {freshRecord.editing_by_user_email}</span>}
+                {(!readonly_permission && !editingByCurrentUser) && <span className="text-xs font-medium text-gray-400">    Редактируется пользователем: {freshRecord.editing_by_user_email}</span>}
 
             </div>
             <h3 className="text-xs font-medium text-gray-400">id: {id}</h3>

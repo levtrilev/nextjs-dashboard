@@ -53,27 +53,52 @@ async function Page(props: { params: Promise<{ id: string }> }) {
   const wo_operations = await fetchWoOperationsForm(workorder.id, current_sections);
   const wo_parts = await fetchWoPartsForm(workorder.id, current_sections);
   //#region Lock Document
+  // const isEditable =
+  //   workorder.editing_by_user_id === null ||
+  //   workorder.editing_by_user_id === user.id ||
+  //   (workorder.editing_since && new Date(workorder.editing_since) < new Date(Date.now() - 30 * 60 * 1000));
+
+  // let canEdit = false;
+  // if (isEditable) {
+  //   const lockResult = await tryLockRecord("workorders", workorder.id, user.id);
+  //   canEdit = lockResult.isEditable;
+  // } else {
+  //   canEdit = false;
+  // }
+
+  // const freshRecord = await getFeshRecord("workorders", workorder.id);
+
+  // const editingByCurrentUser = freshRecord.editing_by_user_id === user.id;
+  // const readonly_locked = !editingByCurrentUser;
+  //#endregion
+  // const readonly_permission = checkReadonly(userPermissions, workorder, pageUser.id);
+  // const readonly = readonly_locked || readonly_permission;
+
+  //#region Lock Document
+  const readonly_permission = checkReadonly(userPermissions, workorder, pageUser.id);
+  // Пытаемся захватить документ, если имеем права на изменение
   const isEditable =
-    workorder.editing_by_user_id === null ||
-    workorder.editing_by_user_id === user.id ||
-    (workorder.editing_since && new Date(workorder.editing_since) < new Date(Date.now() - 30 * 60 * 1000));
+    !readonly_permission &&
+    (workorder.editing_by_user_id === null ||
+      workorder.editing_by_user_id === user.id ||
+      (workorder.editing_since && new Date(workorder.editing_since) < new Date(Date.now() - 30 * 60 * 1000)));
 
   let canEdit = false;
   if (isEditable) {
-    const lockResult = await tryLockRecord("workorders", workorder.id, user.id);
+    const lockResult = await tryLockRecord('workorders', workorder.id, user.id);
     canEdit = lockResult.isEditable;
   } else {
     canEdit = false;
   }
-
-  const freshRecord = await getFeshRecord("workorders", workorder.id);
+  // Перечитываем запись после возможного обновления блокировки
+  const freshRecord = !readonly_permission
+    ? await getFeshRecord('workorders', workorder.id)
+    : { editing_by_user_id: '', editing_by_user_email: '', };
 
   const editingByCurrentUser = freshRecord.editing_by_user_id === user.id;
-  const readonly_locked = !editingByCurrentUser;
+  const readonly = readonly_permission ? readonly_permission : !editingByCurrentUser;
   //#endregion
 
-  const readonly_permission = checkReadonly(userPermissions, workorder, pageUser.id);
-  const readonly = readonly_locked || readonly_permission;
   const claims = readonly ? [] : await fetchClaimsForm(current_sections);
   const persons = readonly ? [] : await fetchPersonsForm(current_sections);
   const works = readonly ? [] : await fetchWorks(current_sections);
@@ -91,7 +116,7 @@ async function Page(props: { params: Promise<{ id: string }> }) {
             права на изменение для пользователя: {user?.email}
           </span>
         )}
-        {!editingByCurrentUser && freshRecord.editing_by_user_email && (
+        {!readonly && !editingByCurrentUser && freshRecord.editing_by_user_email && (
           <span className="text-xs font-medium text-gray-400">
             &nbsp;&nbsp;&nbsp;Редактируется пользователем: {freshRecord.editing_by_user_email}
           </span>

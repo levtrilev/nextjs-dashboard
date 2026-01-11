@@ -22,7 +22,7 @@ export const NewPermission = (props: INewDocRolePermissionProps) => {
     const [roleId, setRoleId] = useState<string>("");
     const [roleName, setRoleName] = useState<string>("");
     const allRoles = useRoles();
-    console.log("allRoles: ", JSON.stringify(allRoles));
+    // console.log("allRoles: ", JSON.stringify(allRoles));
     const [roles, setRoles] = useState<RoleForm[]>(allRoles);
     const msgBox = useMessageBox();
     function handleSelectDoctype(event: any) {

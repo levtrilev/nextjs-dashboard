@@ -19,7 +19,6 @@ async function Page(props: { params: Promise<{ id: string }> }) {
 
     const params = await props.params;
     const id = params.id;
-    // console.log("id: " + id);
 
     const session = await auth();
     const session_user = session ? session.user : null;
@@ -43,19 +42,9 @@ async function Page(props: { params: Promise<{ id: string }> }) {
         return <NotAuthorized />
     }
     const pageUser = user ? user : {} as User
-    // const checkReadonly = (userPermissions: DocUserPermissions): boolean => {
-    //     return userPermissions.full_access ? false
-    //         : userPermissions.editor ? false
-    //             : (userPermissions.author && premise.author_id === user?.id) ? false
-    //                 : userPermissions.reader ? true
-    //                     : true
-    // }
+
     const readonly = checkReadonly(userPermissions, premise, pageUser.id);
 
-    // console.log(`user: ${email}; id: ${user?.id as string}; doctype: premises; userPermissions: ${JSON.stringify(userPermissions)}`);
-    // const allTags = await fetchAllTags(tenant_id);
-    // console.log("premise tenant: " + (await fetchSectionById(premise.section_id)).tenant_name);
-    // console.log("premise allTags: " + JSON.stringify(allTags));
     return (
         <div className="w-full">
             <div className="flex w-full items-center justify-between">

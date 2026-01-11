@@ -388,6 +388,8 @@ export async function fetchLegalEntityForm(
          le.kpp,
          le.region_id,
          le.section_id,
+         le.editing_by_user_id,
+         le.editing_since,
           le.user_tags,
           le.access_tags,
          r.name as region_name,

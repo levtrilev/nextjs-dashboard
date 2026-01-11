@@ -47,29 +47,53 @@ async function Page(props: { params: Promise<{ id: string }> }) {
   }
 
   //#region Lock Document
+  // const isEditable =
+  //   location.editing_by_user_id === null ||
+  //   location.editing_by_user_id === user.id ||
+  //   (location.editing_since && new Date(location.editing_since) < new Date(Date.now() - 30 * 60 * 1000));
+
+  // let canEdit = false;
+  // if (isEditable) {
+  //   const lockResult = await tryLockRecord("locations", location.id, user.id);
+  //   canEdit = lockResult.isEditable;
+  // } else {
+  //   canEdit = false;
+  // }
+
+  // // Перечитываем запись после возможного обновления блокировки
+  // const freshRecord = await getFeshRecord("locations", location.id);
+
+  // const editingByCurrentUser = freshRecord.editing_by_user_id === user.id;
+  // const readonly_locked = !editingByCurrentUser;
+  //#endregion
+
+  // const readonly_permission = checkReadonly(userPermissions, location, pageUser.id);
+  // const readonly = readonly_locked || readonly_permission;
+
+  //#region Lock Document
+  const readonly_permission = checkReadonly(userPermissions, location, pageUser.id);
+  // Пытаемся захватить документ, если имеем права на изменение
   const isEditable =
-    location.editing_by_user_id === null ||
-    location.editing_by_user_id === user.id ||
-    (location.editing_since && new Date(location.editing_since) < new Date(Date.now() - 30 * 60 * 1000));
+    !readonly_permission &&
+    (location.editing_by_user_id === null ||
+      location.editing_by_user_id === user.id ||
+      (location.editing_since && new Date(location.editing_since) < new Date(Date.now() - 30 * 60 * 1000)));
 
   let canEdit = false;
   if (isEditable) {
-    const lockResult = await tryLockRecord("locations", location.id, user.id);
+    const lockResult = await tryLockRecord('locations', location.id, user.id);
     canEdit = lockResult.isEditable;
   } else {
     canEdit = false;
   }
-
   // Перечитываем запись после возможного обновления блокировки
-  const freshRecord = await getFeshRecord("locations", location.id);
+  const freshRecord = !readonly_permission
+    ? await getFeshRecord('locations', location.id)
+    : { editing_by_user_id: '', editing_by_user_email: '', };
 
   const editingByCurrentUser = freshRecord.editing_by_user_id === user.id;
-  const readonly_locked = !editingByCurrentUser;
+  const readonly = readonly_permission ? readonly_permission : !editingByCurrentUser;
   //#endregion
-
-  const readonly_permission = checkReadonly(userPermissions, location, pageUser.id);
-  const readonly = readonly_locked || readonly_permission;
-
   return (
     <div className="w-full">
       <div className="flex w-full items-center justify-between">
@@ -84,7 +108,7 @@ async function Page(props: { params: Promise<{ id: string }> }) {
             права на изменение для пользователя: {user?.email}
           </span>
         )}
-        {!editingByCurrentUser && freshRecord.editing_by_user_email && (
+        {(!readonly_permission && !editingByCurrentUser) && freshRecord.editing_by_user_email && (
           <span className="text-xs font-medium text-gray-400">
             &nbsp;&nbsp;&nbsp;Редактируется пользователем: {freshRecord.editing_by_user_email}
           </span>

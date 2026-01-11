@@ -21,7 +21,7 @@ export function EffectiveSectionsSync({
         setAllowedSections(allowedSections);
         if (effectiveSections.length === 0) {
             setEffectiveSections(initialEffectiveSections);
-            console.log("EffectiveSectionsSync setEffectiveSections", initialEffectiveSections);
+            // console.log("EffectiveSectionsSync setEffectiveSections", initialEffectiveSections);
         }
     }, [allowedSections, initialEffectiveSections, setEffectiveSections, setAllowedSections, effectiveSections]);
 

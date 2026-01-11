@@ -24,11 +24,13 @@ import { lusitana } from "@/app/ui/fonts";
 interface IEditFormProps {
   legalEntity: LegalEntityForm;
   regions: Region[];
-  // allTags: string[];
+  unlockAction: ((tableName: string, id: string, userId: string) => Promise<void>) | null;
   readonly: boolean;
 }
 
 export default function LegalEntitiesEditForm(props: IEditFormProps) {
+  const sessionUser = useDocumentStore.getState().sessionUser;
+
   const [legalEntity, setLegalEntity] = useState(props.legalEntity);
   const docTenantId = useDocumentStore.getState().documentTenantId;
   const isDocumentChanged = useIsDocumentChanged();
@@ -58,14 +60,26 @@ export default function LegalEntitiesEditForm(props: IEditFormProps) {
     }));
     docChanged();
   };
-  const handleBackClick = (e: React.MouseEvent) => {
+  // const handleBackClick = (e: React.MouseEvent) => {
+  //   e.preventDefault();
+  //   if (isDocumentChanged && !msgBox.isOKButtonPressed) {
+  //     setIsShowMessageBoxCancel(true);
+  //     setIsMessageBoxOpen(true);
+  //   } else if (isDocumentChanged && msgBox.isOKButtonPressed) {
+  //   } else if (!isDocumentChanged) {
+  //     // router.push('/erp/legal-entities/');
+  //     window.history.back();
+  //   }
+  // };
+  const handleBackClick = async (e: React.MouseEvent) => {
     e.preventDefault();
+    if (props.unlockAction) await props.unlockAction("legal_entities", props.legalEntity.id, sessionUser.id);
     if (isDocumentChanged && !msgBox.isOKButtonPressed) {
       setIsShowMessageBoxCancel(true);
       setIsMessageBoxOpen(true);
     } else if (isDocumentChanged && msgBox.isOKButtonPressed) {
+      // уже обработано через OK
     } else if (!isDocumentChanged) {
-      // router.push('/erp/legal-entities/');
       window.history.back();
     }
   };
@@ -160,7 +174,8 @@ export default function LegalEntitiesEditForm(props: IEditFormProps) {
             <input
               id="name"
               type="text"
-              className="w-7/8 control rounded-md border border-gray-200 p-2"
+              className="w-7/8 disabled:text-gray-400 disabled:bg-gray-100 break-words control rounded-md border border-gray-200 p-2"
+              disabled={props.readonly}
               value={legalEntity.name}
               onChange={(e) => { setLegalEntity((prev) => ({ ...prev, name: e.target.value, })); docChanged(); }}
             />
@@ -175,7 +190,8 @@ export default function LegalEntitiesEditForm(props: IEditFormProps) {
             <input
               id="fullname"
               type="text"
-              className="w-13/16 control rounded-md border border-gray-200 p-2"
+              className="w-13/16 disabled:text-gray-400 disabled:bg-gray-100 break-words control rounded-md border border-gray-200 p-2"
+              disabled={props.readonly}
               value={legalEntity.fullname}
               onChange={(e) => { setLegalEntity((prev) => ({ ...prev, fullname: e.target.value, })); docChanged(); }}
             />
@@ -190,7 +206,8 @@ export default function LegalEntitiesEditForm(props: IEditFormProps) {
             <input
               id="address_legal"
               type="text"
-              className="w-13/16 control rounded-md border border-gray-200 p-2"
+              className="w-13/16 disabled:text-gray-400 disabled:bg-gray-100 break-words control rounded-md border border-gray-200 p-2"
+              disabled={props.readonly}
               value={legalEntity.address_legal}
               onChange={(e) => { setLegalEntity((prev) => ({ ...prev, address_legal: e.target.value, })); docChanged(); }}
             />
@@ -205,7 +222,8 @@ export default function LegalEntitiesEditForm(props: IEditFormProps) {
             <input
               id="email"
               type="text"
-              className="w-13/16 control rounded-md border border-gray-200 p-2"
+              className="w-13/16 disabled:text-gray-400 disabled:bg-gray-100 break-words control rounded-md border border-gray-200 p-2"
+              disabled={props.readonly}
               value={legalEntity.email}
               onChange={(e) => { setLegalEntity((prev) => ({ ...prev, email: e.target.value, })); docChanged(); }}
             />
@@ -220,7 +238,8 @@ export default function LegalEntitiesEditForm(props: IEditFormProps) {
             <input
               id="phone"
               type="text"
-              className="w-13/16 control rounded-md border border-gray-200 p-2"
+              className="w-13/16 disabled:text-gray-400 disabled:bg-gray-100 break-words control rounded-md border border-gray-200 p-2"
+              disabled={props.readonly}
               value={legalEntity.phone}
               onChange={(e) => { setLegalEntity((prev) => ({ ...prev, phone: e.target.value, })); docChanged(); }}
             />
@@ -238,15 +257,16 @@ export default function LegalEntitiesEditForm(props: IEditFormProps) {
               id="region_name"
               type="text"
               name="region_name"
-              className="w-13/16 pointer-events-none control rounded-md border border-gray-200 p-2"
+              className="w-13/16 disabled:text-gray-400 disabled:bg-gray-100 break-words control rounded-md border border-gray-200 p-2"
+              disabled={props.readonly}
               value={legalEntity.region_name ?? ''}
               readOnly
               onChange={(e) => { setLegalEntity((prev) => ({ ...prev, region_id: e.target.value, })); docChanged(); }}
             />
-            <BtnRegionsRef
+            {!props.readonly && <BtnRegionsRef
               regions={props.regions}
               handleSelectRegion={handleSelectRegion}
-            />
+            />}
           </div>
         </div>
 
@@ -262,7 +282,8 @@ export default function LegalEntitiesEditForm(props: IEditFormProps) {
             <input
               id="contact"
               type="text"
-              className="w-13/16 control rounded-md border border-gray-200 p-2"
+              className="w-13/16 disabled:text-gray-400 disabled:bg-gray-100 break-words control rounded-md border border-gray-200 p-2"
+              disabled={props.readonly}
               value={legalEntity.contact}
               onChange={(e) => { setLegalEntity((prev) => ({ ...prev, contact: e.target.value, })); docChanged(); }}
             />
@@ -277,7 +298,8 @@ export default function LegalEntitiesEditForm(props: IEditFormProps) {
             <input
               id="inn"
               type="text"
-              className="w-13/16 control rounded-md border border-gray-200 p-2"
+              className="w-13/16 disabled:text-gray-400 disabled:bg-gray-100 break-words control rounded-md border border-gray-200 p-2"
+              disabled={props.readonly}
               value={legalEntity.inn}
               onChange={(e) => { setLegalEntity((prev) => ({ ...prev, inn: e.target.value, })); docChanged(); }}
             />
@@ -292,14 +314,15 @@ export default function LegalEntitiesEditForm(props: IEditFormProps) {
             <input
               id="kpp"
               type="text"
-              className="w-13/16 control rounded-md border border-gray-200 p-2"
+              className="w-13/16 disabled:text-gray-400 disabled:bg-gray-100 break-words control rounded-md border border-gray-200 p-2"
+              disabled={props.readonly}
               value={legalEntity.kpp}
               onChange={(e) => { setLegalEntity((prev) => ({ ...prev, kpp: e.target.value, })); docChanged(); }}
             />
           </div>
 
-          <RadioActiveIsCustomer legalEntity={legalEntity} handleChange={handleChangeIsCustomer} />
-          <RadioActiveIsSupplier legalEntity={legalEntity} handleChange={handleChangeIsSupplier} />
+          <RadioActiveIsCustomer legalEntity={legalEntity} handleChange={handleChangeIsCustomer} readonly={props.readonly} />
+          <RadioActiveIsSupplier legalEntity={legalEntity} handleChange={handleChangeIsSupplier} readonly={props.readonly} />
 
           {/* section_name */}
           <div className="flex justify-between mt-1">
@@ -312,13 +335,14 @@ export default function LegalEntitiesEditForm(props: IEditFormProps) {
               id="section_name"
               type="text"
               name="section_name"
-              className="w-13/16 pointer-events-none control rounded-md border border-gray-200 p-2"
+              className="w-13/16 disabled:text-gray-400 disabled:bg-gray-100 break-words control rounded-md border border-gray-200 p-2"
+              disabled={props.readonly}
               value={legalEntity.section_name}
               readOnly
               onChange={(e) => { setLegalEntity((prev) => ({ ...prev, section_id: e.target.value, })); docChanged(); }}
             // onKeyDown={(e) => handleKeyDown(e)}
             />
-            <BtnSectionsRef handleSelectSection={handleSelectSection} />
+            {!props.readonly && <BtnSectionsRef handleSelectSection={handleSelectSection} />}
           </div>
         </div>
       </div>
@@ -329,7 +353,7 @@ export default function LegalEntitiesEditForm(props: IEditFormProps) {
           className={`${lusitana.className} w-[130px] font-medium flex items-center p-2 text-gray-500`}>
           Тэги:
         </label>
-        <TagInput id="user_tags" value={legalEntity.user_tags} onAdd={addUserTag} handleFormInputChange={handleChangeUserTags} readonly={props.readonly}/>
+        <TagInput id="user_tags" value={legalEntity.user_tags} onAdd={addUserTag} handleFormInputChange={handleChangeUserTags} readonly={props.readonly} />
       </div>
       {/* access_tags */}
       <div className="flex max-w-[1150] mt-4">
@@ -338,16 +362,19 @@ export default function LegalEntitiesEditForm(props: IEditFormProps) {
           className={`${lusitana.className} w-[130px] font-medium flex items-center p-2 text-gray-500`}>
           Тэги доступа:
         </label>
-        <TagInput id="access_tags" value={legalEntity.access_tags} onAdd={addAccessTag} handleFormInputChange={handleChangeAccessTags} readonly={props.readonly}/>
+        <TagInput id="access_tags" value={legalEntity.access_tags} onAdd={addAccessTag} handleFormInputChange={handleChangeAccessTags} readonly={props.readonly} />
       </div>
       {/* buttons area */}
       <div className="flex justify-between mt-4 mr-4">
         <div className="flex w-full md:w-1/2">
           <div className="w-full md:w-1/2">
             <button
+              disabled={!props.readonly}
               onClick={handleSaveClick}
-              className="bg-blue-400 text-white w-full rounded-md border p-2 
-              hover:bg-blue-100 hover:text-gray-500 cursor-pointer"
+              className={`w-full rounded-md border p-2 ${props.readonly
+                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                : 'bg-blue-400 text-white hover:bg-blue-100 hover:text-gray-500 cursor-pointer'
+                }`}
             >
               Сохранить
             </button>
@@ -358,7 +385,7 @@ export default function LegalEntitiesEditForm(props: IEditFormProps) {
               className="bg-blue-400 text-white w-full rounded-md border p-2
                  hover:bg-blue-100 hover:text-gray-500 cursor-pointer"
             >
-              Закрыть
+              {props.readonly ? 'Закрыть' : 'Закрыть и освободить'}
             </button>
           </div>
         </div>

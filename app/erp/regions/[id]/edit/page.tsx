@@ -2,12 +2,12 @@
 // LegalEntity Page
 
 import RegionEditForm from "./region-edit-form";
-import { fetchRegionForm, tryLockRecord, unlockRecord } from "../../lib/region-actions";
+import { fetchRegionForm } from "../../lib/region-actions";
 import { RegionForm, User } from "@/app/lib/definitions";
 import { lusitana } from "@/app/ui/fonts";
 import { fetchSectionById, fetchSectionsForm } from "@/app/admin/sections/lib/sections-actions";
 import { auth, getUser } from "@/auth";
-import { getCurrentSections } from "@/app/lib/common-actions";
+import { getCurrentSections, tryLockRecord, unlockRecord, getFeshRecord } from "@/app/lib/common-actions";
 import { fetchAllTags } from "@/app/lib/tags/tags-actions";
 // import { stringify } from "querystring";
 import pool from "@/db";
@@ -24,6 +24,13 @@ async function Page(props: { params: Promise<{ id: string }> }) {
     const email = session_user.email;
     const user = await getUser(email as string);
     if (!user) return (<h3 className="text-xs font-medium text-gray-400">Вы не авторизованы!</h3>);
+    const userPermissions = await fetchDocUserPermissions(user?.id as string, 'regions');
+    if (!(userPermissions.full_access
+        || userPermissions.editor
+        || userPermissions.author
+        || userPermissions.reader)) {
+        return <NotAuthorized />
+    }
     const pageUser = user ? user : {} as User;
 
     const current_sections = await getCurrentSections(email as string);
@@ -37,39 +44,30 @@ async function Page(props: { params: Promise<{ id: string }> }) {
     }
     const sections = await fetchSectionsForm(current_sections);
     const tenant_id = (await fetchSectionById(region.section_id)).tenant_id;
-    const userPermissions = await fetchDocUserPermissions(user?.id as string, 'regions');
-    if (!(userPermissions.full_access
-        || userPermissions.editor
-        || userPermissions.author
-        || userPermissions.reader)) {
-        return <NotAuthorized />
-    }
+
     //#region Lock Document
-    // Проверяем, кто редактирует
+    const readonly_permission = checkReadonly(userPermissions, region, pageUser.id);
+    // Пытаемся захватить документ, если имеем права на изменение
     const isEditable =
-        region.editing_by_user_id === null ||
-        region.editing_by_user_id === user.id ||
-        (region.editing_since && new Date(region.editing_since) < new Date(Date.now() - 30 * 60 * 1000));
-    // Если текущий пользователь — не владелец блокировки, не пытаемся её захватить
-    // Но если он может редактировать — захватываем блокировку
+        !readonly_permission &&
+        (region.editing_by_user_id === null ||
+            region.editing_by_user_id === user.id ||
+            (region.editing_since && new Date(region.editing_since) < new Date(Date.now() - 30 * 60 * 1000)));
+
     let canEdit = false;
     if (isEditable) {
-        const lockResult = await tryLockRecord(region.id, user.id);
+        const lockResult = await tryLockRecord('regions', region.id, user.id);
         canEdit = lockResult.isEditable;
+    } else {
+        canEdit = false;
     }
-    // Перечитаем запись после возможного обновления блокировки
-    const freshRecordRes = await pool.query(
-        `SELECT regions.editing_by_user_id, users.email as editing_by_user_email
-        FROM regions 
-        LEFT JOIN users on regions.editing_by_user_id = users.id 
-        WHERE regions.id = $1`
-        , [region.id]);
-    const freshRecord = freshRecordRes.rows[0];
+    // Перечитываем запись после возможного обновления блокировки
+    const freshRecord = !readonly_permission
+        ? await getFeshRecord('regions', region.id)
+        : { editing_by_user_id: '', editing_by_user_email: '', };
 
     const editingByCurrentUser = freshRecord.editing_by_user_id === user.id;
-    const readonly_locked = !editingByCurrentUser;
-    const readonly_permission = checkReadonly(userPermissions, region, user.id);
-    const readonly = readonly_locked || readonly_permission;
+    const readonly = readonly_permission ? readonly_permission : !editingByCurrentUser;
     //#endregion
     return (
         <div className="w-full">
@@ -80,7 +78,7 @@ async function Page(props: { params: Promise<{ id: string }> }) {
             <div className="flex w-full items-center justify-between">
                 {readonly && <span className="text-xs font-medium text-gray-400">Только чтение для пользователя: {user?.email}</span>}
                 {!readonly && <span className="text-xs font-medium text-gray-400">Права на изменение для пользователя: {user?.email} id:{user?.id}</span>}
-                {!editingByCurrentUser && <span className="text-xs font-medium text-gray-400">    Редактируется пользователем: {freshRecord.editing_by_user_email}</span>}
+                {(!readonly_permission && !editingByCurrentUser) && <span className="text-xs font-medium text-gray-400">    Редактируется пользователем: {freshRecord.editing_by_user_email}</span>}
             </div>
             <DocWrapper
                 pageUser={pageUser}

@@ -28,28 +28,7 @@ export async function fetchDocUserPermissions(
       `,
       [user_id, doctype]
     );
-    // SELECT u.id, u.email, r.name, p.doctype, p.full_access, p.editor, p.author,
-    // p.reader, p.can_delete, p.access_by_tags
-    // FROM users u
-    // LEFT JOIN roles r ON r.id = ANY(u.role_ids)
-    // LEFT JOIN permissions p ON p.role_id = r.id
-    // WHERE u.id = '4b17e04c-f186-4499-b0ea-4c7b5ee50072'::uuid AND p.doctype = 'posts'
-    // GROUP BY u.id
-    // ORDER BY u.id ASC;
 
-    // SELECT
-    //   MAX(p.full_access::INT)::BOOLEAN AS full_access,
-    //   MAX(p.editor::INT)::BOOLEAN AS editor,
-    //   MAX(p.author::INT)::BOOLEAN AS author,
-    //   MAX(p.reader::INT)::BOOLEAN AS reader,
-    //   MAX(p.can_delete::INT)::BOOLEAN AS can_delete,
-    //   MAX(p.access_by_tags::INT)::BOOLEAN AS access_by_tags
-    // FROM users u
-    // LEFT JOIN roles r ON r.id = ANY(u.role_ids)
-    // LEFT JOIN permissions p ON p.role_id = r.id
-    // WHERE u.id = '4b17e04c-f186-4499-b0ea-4c7b5ee50072'::uuid AND p.doctype = 'posts'
-    // GROUP BY u.id
-    // ORDER BY u.id ASC;
     if (data.rows.length > 1) {
       console.log(
         "Multiple permissions found for user " +
@@ -92,15 +71,17 @@ export async function fetchPermissionsSuperadmin() {
     throw new Error("Failed to fetch permissions: " + err);
   }
 }
-export async function fetchPermissionsAdmin(tenant_id: string) {
+export async function fetchPermissionsAdmin(tenant_id: string, role_id?: string) {
+  const role_id_uuid = role_id ? role_id : "00000000-0000-0000-0000-000000000000";
   try {
     const data = await pool.query<Permission>(
       `SELECT id, role_id, role_name, doctype, doctype_name, full_access, editor, 
         author, can_delete, reader, access_by_tags, or_tags, and_tags, no_tags, tenant_id, tenant_name
         FROM permissions
         WHERE tenant_id = $1
+        AND ($2 = '00000000-0000-0000-0000-000000000000' OR role_id = $2::uuid)
         ORDER BY doctype_name ASC`,
-      [tenant_id]
+      [tenant_id, role_id_uuid]
     );
 
     return data.rows;

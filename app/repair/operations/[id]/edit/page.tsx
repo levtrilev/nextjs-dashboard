@@ -48,28 +48,53 @@ async function Page(props: { params: Promise<{ id: string }> }) {
   }
 
   //#region Lock Document
-  const isEditable =
-    operation.editing_by_user_id === null ||
-    operation.editing_by_user_id === user.id ||
-    (operation.editing_since && new Date(operation.editing_since) < new Date(Date.now() - 30 * 60 * 1000));
+  // const isEditable =
+  //   operation.editing_by_user_id === null ||
+  //   operation.editing_by_user_id === user.id ||
+  //   (operation.editing_since && new Date(operation.editing_since) < new Date(Date.now() - 30 * 60 * 1000));
 
-  let canEdit = false;
-  if (isEditable) {
-    const lockResult = await tryLockRecord("operations", operation.id, user.id);
-    canEdit = lockResult.isEditable;
-  } else {
-    canEdit = false;
-  }
+  // let canEdit = false;
+  // if (isEditable) {
+  //   const lockResult = await tryLockRecord("operations", operation.id, user.id);
+  //   canEdit = lockResult.isEditable;
+  // } else {
+  //   canEdit = false;
+  // }
 
-  // Перечитываем запись после возможного обновления блокировки
-  const freshRecord = await getFeshRecord("operations", operation.id);
+  // // Перечитываем запись после возможного обновления блокировки
+  // const freshRecord = await getFeshRecord("operations", operation.id);
 
-  const editingByCurrentUser = freshRecord.editing_by_user_id === user.id;
-  const readonly_locked = !editingByCurrentUser;
+  // const editingByCurrentUser = freshRecord.editing_by_user_id === user.id;
+  // const readonly_locked = !editingByCurrentUser;
   //#endregion
+  // const readonly_permission = checkReadonly(userPermissions, operation, pageUser.id);
+  // const readonly = readonly_locked || readonly_permission;
 
-  const readonly_permission = checkReadonly(userPermissions, operation, pageUser.id);
-  const readonly = readonly_locked || readonly_permission;
+    //#region Lock Document
+    const readonly_permission = checkReadonly(userPermissions, operation, pageUser.id);
+    // Пытаемся захватить документ, если имеем права на изменение
+    const isEditable =
+        !readonly_permission &&
+        (operation.editing_by_user_id === null ||
+            operation.editing_by_user_id === user.id ||
+            (operation.editing_since && new Date(operation.editing_since) < new Date(Date.now() - 30 * 60 * 1000)));
+
+    let canEdit = false;
+    if (isEditable) {
+        const lockResult = await tryLockRecord('operations', operation.id, user.id);
+        canEdit = lockResult.isEditable;
+    } else {
+        canEdit = false;
+    }
+    // Перечитываем запись после возможного обновления блокировки
+    const freshRecord = !readonly_permission
+        ? await getFeshRecord('operations', operation.id)
+        : { editing_by_user_id: '', editing_by_user_email: '', };
+
+    const editingByCurrentUser = freshRecord.editing_by_user_id === user.id;
+    const readonly = readonly_permission ? readonly_permission : !editingByCurrentUser;
+    //#endregion
+
   const works = readonly ? [] : await fetchWorksForm(current_sections);
 
   return (
@@ -86,7 +111,7 @@ async function Page(props: { params: Promise<{ id: string }> }) {
             права на изменение для пользователя: {user?.email}
           </span>
         )}
-        {!editingByCurrentUser && freshRecord.editing_by_user_email && (
+        {!readonly && !editingByCurrentUser && freshRecord.editing_by_user_email && (
           <span className="text-xs font-medium text-gray-400">
             &nbsp;&nbsp;&nbsp;Редактируется пользователем: {freshRecord.editing_by_user_email}
           </span>

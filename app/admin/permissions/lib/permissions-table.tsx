@@ -52,7 +52,7 @@ export const PermissionsTable: React.FC<IDoctypeTableProps> = (props: IDoctypeTa
                                 <th scope="col" className="w-3/16 overflow-hidden px-0 py-5 font-medium sm:pl-6">
                                     Тип документа
                                 </th>
-                                <th scope="col" className="w-1/8 px-3 py-5 font-medium">
+                                <th scope="col" className="w-2/8 px-3 py-5 font-medium">
                                     Роль
                                 </th>
                                 <th scope="col" className="w-2/8 px-3 py-5 font-medium">
@@ -79,7 +79,7 @@ export const PermissionsTable: React.FC<IDoctypeTableProps> = (props: IDoctypeTa
                                                 <p>{(perm.doctype_name + "(" + perm.doctype + ")").substring(0, 20)}</p>}
                                         </div>
                                     </td>
-                                    <td className="w-1/8 overflow-hidden whitespace-nowrap bg-white px-4 py-1 text-sm">
+                                    <td className="w-2/8 overflow-hidden whitespace-nowrap bg-white px-4 py-1 text-sm">
                                         {perm.role_name}
                                     </td>
                                     <td className="w-3/8 overflow-hidden whitespace-nowrap bg-white px-4 py-1 text-sm">

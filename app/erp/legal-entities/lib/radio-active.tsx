@@ -5,6 +5,7 @@ import { LegalEntity } from "@/app/lib/definitions";
 interface IRadioActiveProps {
   legalEntity: LegalEntity,
   handleChange: (event: any)=>void,
+  readonly: boolean,
 }
 
 export default function RadioActiveIsCustomer(props: IRadioActiveProps) {
@@ -24,6 +25,7 @@ export default function RadioActiveIsCustomer(props: IRadioActiveProps) {
                                 id="not_customer"
                                 name="is_customer"
                                 type="radio"
+                                disabled={props.readonly}
                                 value="pending"
                                 defaultChecked={!legalEntity.is_customer}
                                 onChange={(e) => props.handleChange(e)}
@@ -42,6 +44,7 @@ export default function RadioActiveIsCustomer(props: IRadioActiveProps) {
                                 id="is_customer"
                                 name="is_customer"
                                 type="radio"
+                                disabled={props.readonly}
                                 value="true"
                                 defaultChecked={legalEntity.is_customer}
                                 onChange={(e) => props.handleChange(e)}
@@ -78,6 +81,7 @@ export function RadioActiveIsSupplier(props: IRadioActiveProps) {
                                 id="not_supplier"
                                 name="is_supplier"
                                 type="radio"
+                                disabled={props.readonly}
                                 value="pending"
                                 defaultChecked={!legalEntity.is_supplier}
                                 onChange={(e) => props.handleChange(e)}
@@ -96,6 +100,7 @@ export function RadioActiveIsSupplier(props: IRadioActiveProps) {
                                 id="is_supplier"
                                 name="is_supplier"
                                 type="radio"
+                                disabled={props.readonly}
                                 value="true"
                                 defaultChecked={legalEntity.is_supplier}
                                 onChange={(e) => props.handleChange(e)}
