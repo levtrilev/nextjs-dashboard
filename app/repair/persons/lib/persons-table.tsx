@@ -14,12 +14,16 @@ export default async function PersonsTable({
   query,
   currentPage,
   current_sections,
+  columns = 5,
+  rows_per_page = 8,
 }: {
   query: string;
   currentPage: number;
   current_sections: string;
+  columns?: number;
+  rows_per_page?: number;
 }) {
-  const persons = await fetchFilteredPersons(query, currentPage, current_sections);
+  const persons = await fetchFilteredPersons(query, currentPage, current_sections, rows_per_page);
 
   return (
     <div className="w-full">
@@ -33,8 +37,10 @@ export default async function PersonsTable({
                 <thead className="rounded-md bg-gray-50 text-left text-sm font-normal">
                   <tr>
                     <th scope="col" className="w-4/12 px-4 py-5 font-medium sm:pl-6">Имя</th>
-                    <th scope="col" className="w-4/12 px-4 py-5 font-medium sm:pl-6">Пользователь</th>
-                    <th scope="col" className="w-1/12 px-4 py-5 font-medium"></th>
+                    <th scope="col" className="w-4/12 px-4 py-5 font-medium sm:pl-6">Профессия</th>
+                    <th scope="col" className="w-4/12 px-4 py-5 font-medium sm:pl-6">Табельный номер</th>
+                    {columns >= 4 && <th scope="col" className="w-4/12 px-4 py-5 font-medium sm:pl-6">Пользователь</th>}
+                    {columns >= 5 && <th scope="col" className="w-1/12 px-4 py-5 font-medium"></th>}
                   </tr>
                 </thead>
 
@@ -50,13 +56,19 @@ export default async function PersonsTable({
                         </a>
                       </td>
                       <td className="w-4/12 overflow-hidden whitespace-nowrap bg-white py-2 pl-6 pr-3 text-sm text-black">
-                          {person.person_user_name}
+                        {person.profession}
                       </td>
-                      <td className="w-1/12 whitespace-nowrap py-2 pr-3">
+                      <td className="w-4/12 overflow-hidden whitespace-nowrap bg-white py-2 pl-6 pr-3 text-sm text-black">
+                        {person.tabel_number}
+                      </td>
+                      {columns >= 4 && <td className="w-4/12 overflow-hidden whitespace-nowrap bg-white py-2 pl-6 pr-3 text-sm text-black">
+                        {person.person_user_name}
+                      </td>}
+                      {columns >= 5 && <td className="w-1/12 whitespace-nowrap py-2 pr-3">
                         <div className="flex justify-end gap-3">
                           <BtnDeletePerson id={person.id} name={person.name} />
                         </div>
-                      </td>
+                      </td>}
                     </tr>
                   ))}
                 </tbody>

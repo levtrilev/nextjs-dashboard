@@ -267,6 +267,8 @@ export type Person = {
   name: string;
   person_user_name?: string | null;
   person_user_id?: string | null;
+  profession?: string | null;
+  tabel_number?: string | null;
   section_id: string;
   tenant_id: string;
   username?: string;
@@ -282,6 +284,8 @@ export type PersonForm = {
   name: string;
   person_user_name: string;
   person_user_id: string;
+  profession?: string | null;
+  tabel_number?: string | null;
   section_id: string;
   section_name: string;
   tenant_id: string;
@@ -364,6 +368,10 @@ export type Claim = {
   approved_by_person_id: string | null;
   accepted_date?: string | null;
   accepted_by_person_id: string | null;
+  hours_plan?: string | null;
+  hours_done?: string | null;
+  hours_rest?: string | null;
+  hours_percent?: string | null;
   section_id: string;
   tenant_id: string;
   username?: string;
@@ -397,6 +405,10 @@ export type ClaimForm = {
   accepted_date: string | null;
   accepted_by_person_id: string | null;
   accepted_by_person_name: string;
+  hours_plan?: string | null;
+  hours_done?: string | null;
+  hours_rest?: string | null;
+  hours_percent?: string | null;
   section_id: string;
   section_name: string;
   machine_unit_name: string;

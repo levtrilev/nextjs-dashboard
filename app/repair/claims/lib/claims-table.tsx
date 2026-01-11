@@ -12,27 +12,31 @@ export default function ClaimsTable({
   currentPage,
   current_sections,
   machine_id = '00000000-0000-0000-0000-000000000000',
+  columns = 7,
+  rows_per_page = 8,
 }: {
   query: string;
   currentPage: number;
   current_sections: string;
-  machine_id: string;
+  machine_id?: string;
+  columns?: number;
+  rows_per_page?: number;
 }) {
   const [claims, setClaims] = useState<ClaimForm[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-    const loadClaims = async () => {
-      try {
-        setLoading(true);
-        const data = await fetchFilteredClaims(query, currentPage, current_sections, machine_id);
-        setClaims(data);
-      } catch (err) {
-        setError('Не удалось загрузить заявки');
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const loadClaims = async () => {
+    try {
+      setLoading(true);
+      const data = await fetchFilteredClaims(query, currentPage, current_sections, machine_id, rows_per_page);
+      setClaims(data);
+    } catch (err) {
+      setError('Не удалось загрузить заявки');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
   useEffect(() => {
     loadClaims();
   }, [query, currentPage, current_sections, machine_id]);
@@ -53,14 +57,15 @@ export default function ClaimsTable({
                 <thead className="rounded-md bg-gray-50 text-left text-sm font-normal">
                   <tr>
                     <th scope="col" className="w-2/12 px-4 py-5 font-medium sm:pl-6">ЗАЯВКИ</th>
-                    <th scope="col" className="w-2/12 px-4 py-5 font-medium">Дата</th>
-                    <th scope="col" className="w-2/12 px-4 py-5 font-medium">Машина</th>
-                    <th scope="col" className="w-4/12 px-4 py-5 font-medium">Причина постановки в ремонт</th>
-                    <th scope="col" className="w-2/12 px-4 py-5 font-medium">Участок</th>
+                    {columns >= 7 && <th scope="col" className="w-2/12 px-4 py-5 font-medium">Дата</th>}
+                    <th scope="col" className="w-3/24 px-4 py-5 font-medium">Машина</th>
+                    <th scope="col" className="w-3/12 px-4 py-5 font-medium">Причина постановки в ремонт</th>
+                    <th scope="col" className="w-3/24 px-4 py-5 font-medium">Участок</th>
                     {/* <th scope="col" className="w-2/12 px-4 py-5 font-medium">Состояние</th> */}
-                    <th scope="col" className="w-2/12 px-4 py-5 font-medium">Характер ремонта</th>
-                    <th scope="col" className="w-2/12 px-4 py-5 font-medium">Приоритет</th>
-                    <th scope="col" className="w-1/12 px-4 py-5 font-medium"></th>
+                    {columns >= 5 && <th scope="col" className="w-2/12 px-4 py-5 font-medium">Характер ремонта</th>}
+                    {columns >= 6 && <th scope="col" className="w-2/12 px-4 py-5 font-medium">Приоритет</th>}
+                    <th scope="col" className="w-2/12 px-4 py-5 font-medium">Часы Остаток/План/Отработка/%</th>
+                    {columns >= 5 && <th scope="col" className="w-1/12 px-4 py-5 font-medium"></th>}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 text-gray-900">
@@ -74,32 +79,35 @@ export default function ClaimsTable({
                           {claim.name}
                         </a>
                       </td>
-                      <td className="w-2/12 overflow-hidden whitespace-nowrap bg-white py-2 pl-6 pr-3 text-sm text-black">
+                      {columns >= 7 && <td className="w-2/12 overflow-hidden whitespace-nowrap bg-white py-2 pl-6 pr-3 text-sm text-black">
                         {claim.claim_date && new Date(claim.claim_date).toLocaleDateString()}
-                      </td>
-                      <td className="w-2/12 overflow-hidden whitespace-nowrap bg-white py-2 pl-6 pr-3 text-sm text-black">
+                      </td>}
+                      <td className="w-3/24 overflow-hidden whitespace-nowrap bg-white py-2 pl-6 pr-3 text-sm text-black">
                         {claim.machine_name}
                       </td>
-                      <td className="w-4/12 overflow-hidden whitespace-nowrap bg-white py-2 pl-6 pr-3 text-sm text-black">
+                      <td className="w-3/12 overflow-hidden whitespace-nowrap bg-white py-2 pl-6 pr-3 text-sm text-black">
                         {claim.repair_reason}
-                      </td>                      
-                      <td className="w-2/12 overflow-hidden whitespace-nowrap bg-white py-2 pl-6 pr-3 text-sm text-black">
+                      </td>
+                      <td className="w-3/24 overflow-hidden whitespace-nowrap bg-white py-2 pl-6 pr-3 text-sm text-black">
                         {claim.machine_unit_name}
                       </td>
                       {/* <td className="w-1/12 overflow-hidden whitespace-nowrap bg-white py-2 pl-6 pr-3 text-sm text-black">
                         {claim.machine_machine_status}
                       </td> */}
-                      <td className="w-4/12 overflow-hidden whitespace-nowrap bg-white py-2 pl-6 pr-3 text-sm text-black">
+                      {columns >= 5 && <td className="w-4/12 overflow-hidden whitespace-nowrap bg-white py-2 pl-6 pr-3 text-sm text-black">
                         {claim.repair_todo}
-                      </td>
-                      <td className="w-2/12 overflow-hidden whitespace-nowrap bg-white py-2 pl-6 pr-3 text-sm text-black">
+                      </td>}
+                      {columns >= 6 && <td className="w-2/12 overflow-hidden whitespace-nowrap bg-white py-2 pl-6 pr-3 text-sm text-black">
                         {claim.priority}
+                      </td>}
+                      <td className="w-2/12 overflow-hidden whitespace-nowrap bg-white py-2 pl-6 pr-3 text-sm text-black">
+                        {claim.hours_rest} / {claim.hours_plan} / {claim.hours_done} / {claim.hours_percent}%
                       </td>
-                      <td className="w-1/12 whitespace-nowrap py-2 pr-3">
+                      {columns >= 5 && <td className="w-1/12 whitespace-nowrap py-2 pr-3">
                         <div className="flex justify-end gap-3">
                           <BtnDeleteClaim id={claim.id} name={claim.name} onDelete={loadClaims} />
                         </div>
-                      </td>
+                      </td>}
                     </tr>
                   ))}
                 </tbody>

@@ -322,7 +322,7 @@ export async function fetchFilteredMachines(
       LEFT JOIN locations ON machines.location_id = locations.id
       WHERE
         machines.name ILIKE $2 
-        AND ($5 = 'парк' OR machines.machine_status = $5)
+        AND ($5 = 'парк' OR $5 = 'персонал' OR machines.machine_status = $5)
       ORDER BY machines.name ASC
       LIMIT $3 OFFSET $4
     `,

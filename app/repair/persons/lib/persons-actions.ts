@@ -11,23 +11,23 @@ import { PersonForm, Person } from "@/app/lib/definitions";
 
 const ITEMS_PER_PAGE = 8;
 
-//#region Create Task
+//#region createPerson
 
 export async function createPerson(person: Person) {
   const session = await auth();
   const username = session?.user?.name;
   const date_created = new Date().toISOString();
-  const { name, section_id, tenant_id, author_id } = person;
+  const { name, person_user_id, person_user_name, profession, tabel_number, section_id, tenant_id, author_id } = person;
   try {
     await pool.query(
       `
       INSERT INTO persons (
-        name, person_user_id, person_user_name,
+        name, person_user_id, person_user_name, profession, tabel_number,
         username, section_id, timestamptz,
         tenant_id, author_id
-      ) VALUES ($1, $2, $3, $4, $5, $6)
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
     `,
-      [name, username, section_id, date_created, tenant_id, author_id]
+      [name, person_user_id, person_user_name, profession, tabel_number, username, section_id, date_created, tenant_id, author_id]
     );
   } catch (error) {
     console.error("Не удалось создать Person:", error);
@@ -46,7 +46,7 @@ export async function updatePerson(person: Person) {
   const session = await auth();
   const username = session?.user?.name;
 
-  const { id, name, person_user_id, person_user_name, section_id, tenant_id, author_id } = person;
+  const { id, name, person_user_id, person_user_name, profession, tabel_number, section_id, tenant_id, author_id } = person;
 
   try {
     await pool.query(
@@ -55,14 +55,16 @@ export async function updatePerson(person: Person) {
         name = $1,
         person_user_id = $2,
         person_user_name = $3,
-        username = $4,
-        section_id = $5,
-        tenant_id = $6,
-        author_id = $7,
+        profession = $4, 
+        tabel_number = $5,
+        username = $6,
+        section_id = $7,
+        tenant_id = $8,
+        author_id = $9,
         timestamptz = now()
-      WHERE id = $8
+      WHERE id = $10
     `,
-      [name, person_user_id, person_user_name, username, section_id, tenant_id, author_id, id]
+      [name, person_user_id, person_user_name, profession, tabel_number, username, section_id, tenant_id, author_id, id]
     );
   } catch (error) {
     console.error("Не удалось обновить Person:", error);
@@ -102,6 +104,8 @@ export async function fetchPerson(id: string, current_sections: string) {
         name,
         person_user_id,
         COALESCE(person_user_name, '') as person_user_name,
+        profession,
+        tabel_number,
         username,
         editing_by_user_id,
         editing_since,
@@ -132,6 +136,8 @@ export async function fetchPersonForm(id: string, current_sections: string) {
         persons.name,
         persons.person_user_id,
         COALESCE(persons.person_user_name, '') as person_user_name,
+        persons.profession,
+        persons.tabel_number,
         persons.username,
         persons.section_id,
         persons.editing_by_user_id,
@@ -164,6 +170,8 @@ export async function fetchPersons(current_sections: string) {
         name,
         person_user_id,
         COALESCE(person_user_name, '') as person_user_name,
+        profession,
+        tabel_number,
         section_id,
         username,
         timestamptz,
@@ -193,6 +201,8 @@ export async function fetchPersonsForm(current_sections: string) {
         persons.name,
         persons.person_user_id,
         COALESCE(persons.person_user_name, '') as person_user_name,
+        persons.profession,
+        persons.tabel_number,
         persons.username,
         persons.timestamptz,
         sections.name AS section_name
@@ -217,9 +227,10 @@ export async function fetchPersonsForm(current_sections: string) {
 export async function fetchFilteredPersons(
   query: string,
   currentPage: number,
-  current_sections: string
+  current_sections: string,
+  rows_per_page?: number
 ) {
-  const offset = (currentPage - 1) * ITEMS_PER_PAGE;
+  const offset = (currentPage - 1) * (rows_per_page || ITEMS_PER_PAGE);
 
   try {
     const persons = await pool.query<PersonForm>(
@@ -231,16 +242,21 @@ export async function fetchFilteredPersons(
         persons.id,
         persons.name,
         persons.person_user_id,
-        COALESCE(persons.person_user_name, '') as person_user_name,        
+        COALESCE(persons.person_user_name, '') as person_user_name,
+        persons.profession,
+        persons.tabel_number,        
         persons.username,
         persons.timestamptz
       FROM your_persons persons
       WHERE
         persons.name ILIKE $2
+        OR persons.person_user_name ILIKE $2
+        OR persons.profession ILIKE $2
+        OR persons.tabel_number ILIKE $2
       ORDER BY persons.name ASC
       LIMIT $3 OFFSET $4
     `,
-      [current_sections, `%${query}%`, ITEMS_PER_PAGE, offset]
+      [current_sections, `%${query}%`, (rows_per_page || ITEMS_PER_PAGE), offset]
     );
 
     return persons.rows;
@@ -252,7 +268,8 @@ export async function fetchFilteredPersons(
 
 export async function fetchPersonsPages(
   query: string,
-  current_sections: string
+  current_sections: string,
+  rows_per_page?: number
 ) {
   try {
     const count = await pool.query(
@@ -266,7 +283,7 @@ export async function fetchPersonsPages(
       [current_sections, `%${query}%`]
     );
 
-    const totalPages = Math.ceil(Number(count.rows[0].count) / ITEMS_PER_PAGE);
+    const totalPages = Math.ceil(Number(count.rows[0].count) / (rows_per_page || ITEMS_PER_PAGE));
     return totalPages;
   } catch (error) {
     console.error("Ошибка подсчёта страниц Persons:", error);

@@ -34,6 +34,8 @@ const PersonFormSchemaFull = z.object({
   }),
   person_user_id: z.string().nullable().optional(),
   person_user_name: z.string().nullable().optional(),
+  profession: z.string().nullable().optional(),
+  tabel_number: z.string().nullable().optional(),
   section_name: z.string().min(1, {
     message: "Поле Раздел должно быть заполнено.",
   }),
@@ -129,6 +131,8 @@ export default function PersonEditForm(props: IEditFormProps) {
     } catch (error) {
       if (String(error) === 'NEXT_REDIRECT') {
         setMessageBoxText('Документ не сохранен! :' + String(error));
+      } else {
+        setMessageBoxText('Документ не сохранен! :' + String(error));
       }
       // alert('Документ не сохранен! :' + String(error));
     }
@@ -196,14 +200,14 @@ export default function PersonEditForm(props: IEditFormProps) {
     docChanged();
   };
   //#endregion
-const handleSelectUser = (new_user_id: string, new_user_name: string) => {
-  setFormData((prev) => ({
-    ...prev,
-    person_user_id: new_user_id,
-    person_user_name: new_user_name,
-  }));
-  docChanged();
-}
+  const handleSelectUser = (new_user_id: string, new_user_name: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      person_user_id: new_user_id,
+      person_user_name: new_user_name,
+    }));
+    docChanged();
+  }
   const errors = showErrors ? validate() : undefined;
 
   return (
@@ -248,6 +252,21 @@ const handleSelectUser = (new_user_id: string, new_user_name: string) => {
             {/* second column */}
             <div className="flex flex-col gap-4 w-full md:w-1/2">
 
+              {/* tabel_number */}
+              <InputField name="tabel_number" value={formData.tabel_number as string}
+                label="Табельный номер:" type="text" w={["w-4/16", "w-13/16"]}
+                onChange={(value) => handleInputChange('tabel_number', value)}
+                readonly={props.readonly}
+                errors={errors?.tabel_number?._errors as string[] | undefined}
+              />
+
+              {/* profession */}
+              <InputField name="profession" value={formData.profession as string}
+                label="Профессия:" type="text" w={["w-4/16", "w-13/16"]}
+                onChange={(value) => handleInputChange('profession', value)}
+                readonly={props.readonly}
+                errors={errors?.profession?._errors as string[] | undefined}
+              />
 
             </div>
           </div>

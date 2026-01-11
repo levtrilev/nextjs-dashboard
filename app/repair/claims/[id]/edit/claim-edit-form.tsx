@@ -88,6 +88,10 @@ const ClaimFormSchemaFull = z.object({
   accepted_date: z.string().optional().nullable(),
   accepted_by_person_id: z.string().nullable(),
   accepted_by_person_name: z.string(),
+  hours_plan: z.string().optional().nullable(),
+  hours_done: z.string().optional().nullable(),
+  hours_rest: z.string().optional().nullable(),
+  hours_percent: z.string().optional().nullable(),
   machine_unit_name: z.string(),
   machine_machine_status: z.string(),
   section_name: z.string().min(1, {
@@ -121,6 +125,7 @@ export type FormData = z.infer<typeof ClaimFormSchemaFull>;
 export default function ClaimEditForm(props: IEditFormProps) {
   const userSections = useDocumentStore.getState().userSections;
   const sessionUser = useDocumentStore.getState().sessionUser;
+
   //#region unified form hooks and variables 
   const docTenantId = useDocumentStore.getState().documentTenantId;
   // const sessionUserId = useDocumentStore.getState().sessionUser.id;
@@ -498,7 +503,30 @@ export default function ClaimEditForm(props: IEditFormProps) {
                 readonly={true}
                 errors={errors?.approved_by_person_name?._errors as string[] | undefined}
               />
-
+              <div className="flex flex-row justify-between">
+                {/* hours_plan */}
+                <InputField
+                  name="hours_plan"
+                  value={formData.hours_plan as string}
+                  label="План часов:"
+                  type="text"
+                  w={["w-10/16", "w-6/16"]}
+                  onChange={(value) => handleInputChange('hours_plan', value)}
+                  readonly={props.readonly}
+                  errors={errors?.repair_todo?._errors as string[] | undefined}
+                />
+                {/* hours_rest */}
+                <InputField
+                  name="hours_rest"
+                  value={formData.hours_rest as string}
+                  label="Остаток часов:"
+                  type="text"
+                  w={["w-10/16", "w-6/16"]}
+                  onChange={(value) => handleInputChange('hours_rest', value)}
+                  readonly={props.readonly}
+                  errors={errors?.hours_rest?._errors as string[] | undefined}
+                />
+              </div>
             </div>
 
             {/* second column */}
@@ -603,7 +631,30 @@ export default function ClaimEditForm(props: IEditFormProps) {
                 readonly={true}
                 errors={errors?.accepted_by_person_name?._errors as string[] | undefined}
               />
-
+              <div className="flex flex-row justify-between">
+                {/* hours_done */}
+                <InputField
+                  name="hours_done"
+                  value={formData.hours_done as string}
+                  label="Отработка часов:"
+                  type="text"
+                  w={["w-10/16", "w-6/16"]}
+                  onChange={(value) => handleInputChange('hours_done', value)}
+                  readonly={props.readonly}
+                  errors={errors?.hours_done?._errors as string[] | undefined}
+                />
+                {/* hours_percent */}
+                <InputField
+                  name="hours_percent"
+                  value={formData.hours_percent as string}
+                  label="Показатель %:"
+                  type="text"
+                  w={["w-10/16", "w-6/16"]}
+                  onChange={(value) => handleInputChange('hours_percent', value)}
+                  readonly={props.readonly}
+                  errors={errors?.hours_percent?._errors as string[] | undefined}
+                />
+              </div>
             </div>
           </div>
 

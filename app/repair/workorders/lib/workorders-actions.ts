@@ -95,7 +95,7 @@ export async function deleteWorkorder(id: string) {
     await pool.query(`DELETE FROM workorders WHERE id = $1`, [id]);
   } catch (error) {
     console.error("Ошибка удаления Workorder:", error);
-    throw new Error("Ошибка базы данных: Не удалось удалить Workorder.");
+    throw new Error("Ошибка базы данных: Не удалось удалить Workorder: " + String(error));
   }
   revalidatePath("/repair/workorders");
 }

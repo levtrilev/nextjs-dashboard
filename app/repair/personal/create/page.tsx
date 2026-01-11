@@ -9,8 +9,8 @@ import { checkReadonly, formatDateForInput } from "@/app/lib/common-utils";
 import DocWrapper from "@/app/lib/doc-wrapper";
 import { fetchDocUserPermissions } from "@/app/admin/permissions/lib/permissios-actions";
 import { PersonForm } from "@/app/lib/definitions";
-import PersonEditForm from "../[id]/edit/person-edit-form";
 import { fetchUsersAdmin } from "@/app/admin/users/lib/users-actions";
+import PersonEditForm from "../../persons/[id]/edit/person-edit-form";
 
 export default async function Page() {
   //#region unified hooks and variables 
@@ -35,20 +35,20 @@ export default async function Page() {
   const person: PersonForm = {
     id: "",
     name: "",
-    person_user_id: "00000000-0000-0000-0000-000000000000",
+    person_user_id: "",
     person_user_name: "",
-    profession: "",
-    tabel_number: "",
     username: "",
     date_created: new Date(), //formatDateForInput(new Date()),
     schedule_owner_name: "",
-    section_id: "00000000-0000-0000-0000-000000000000",
+    section_id: "",
     section_name: "",
-    tenant_id: "00000000-0000-0000-0000-000000000000",
-    author_id: "00000000-0000-0000-0000-000000000000",
-    editor_id: "00000000-0000-0000-0000-000000000000",
+    premise_id: "",
+    premise_name: "",
+    tenant_id: "",
+    author_id: "",
+    editor_id: "",
     editing_since: "",
-    editing_by_user_id: "00000000-0000-0000-0000-000000000000",
+    editing_by_user_id: "",
   } as PersonForm;
   const readonly_permission = checkReadonly(userPermissions, person, pageUser.id);
   const readonly = readonly_locked || readonly_permission;

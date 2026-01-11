@@ -13,6 +13,7 @@ import { Task } from "@/app/lib/definitions";
 import { fetchPersonsPages } from "./lib/persons-actions";
 import { CreatePerson } from "./lib/persons-buttons";
 import PersonsTable from "./lib/persons-table";
+// import PersonsTable from "./lib/persons-table";
 
 export default async function Page(props: {
 

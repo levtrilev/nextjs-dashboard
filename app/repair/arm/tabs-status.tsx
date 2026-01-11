@@ -51,9 +51,9 @@ const TabsStatus: React.FC<ChildButtonProps> = (props: ChildButtonProps) => {
                 </div>
                 <div className="w-30">
                     <button
-                        className={(props.activeStatusTab === 'Резерв' ? 'bg-blue-600' : 'bg-blue-200') + ' text-white w-full rounded-md border p-2 hover:bg-blue-500'}
+                        className={(props.activeStatusTab === 'резерв' ? 'bg-blue-600' : 'bg-blue-200') + ' text-white w-full rounded-md border p-2 hover:bg-blue-500'}
                         onClick={() => {
-                            props.onClick("Резерв");
+                            props.onClick("резерв");
                             const target = '/repair/machines';
                             if (pathname !== target) {
                                 router.push(target);
@@ -90,15 +90,22 @@ const TabsStatus: React.FC<ChildButtonProps> = (props: ChildButtonProps) => {
                 </div>
                 <div className="w-30">
                     <button
-                        className={(props.activeStatusTab === 'Персонал' ? 'bg-blue-600' : 'bg-blue-200') + ' text-white w-full rounded-md border p-2 hover:bg-blue-500'}
-                        onClick={() => props.onClick("Персонал")}>
+                        className={(props.activeStatusTab === 'персонал' ? 'bg-blue-600' : 'bg-blue-200') + ' text-white w-full rounded-md border p-2 hover:bg-blue-500'}
+                        // onClick={() => props.onClick("Персонал")}>
+                        onClick={() => {
+                            props.onClick("персонал");
+                            const target = '/repair/personal';
+                            if (pathname !== target) {
+                                router.push(target);
+                            }
+                        }}>                            
                         Персонал
                     </button>
                 </div>
                 <div className="max-w-58">
                     <button
-                        className={(props.activeStatusTab === 'Выданные запчасти' ? 'bg-blue-600' : 'bg-blue-200') + ' text-white w-full rounded-md border p-2 hover:bg-blue-500'}
-                        onClick={() => props.onClick("Выданные запчасти")}>
+                        className={(props.activeStatusTab === 'выданные запчасти' ? 'bg-blue-600' : 'bg-blue-200') + ' text-white w-full rounded-md border p-2 hover:bg-blue-500'}
+                        onClick={() => props.onClick("выданные запчасти")}>
                         Выданные запчасти
                     </button>
                 </div>

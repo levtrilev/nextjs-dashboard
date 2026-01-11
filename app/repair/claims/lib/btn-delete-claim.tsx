@@ -5,6 +5,7 @@ import { TrashIcon } from '@heroicons/react/24/outline';
 import { useState, useRef } from 'react';
 import MessageBoxSrv from '@/app/lib/message-box-srv';
 import { deleteClaim } from './claims-actions';
+import { setIsShowMessageBoxCancel } from '@/app/store/del_useMessageBoxStore';
 
 export default function BtnDeleteClaim({ id, name, onDelete }: { id: string; name: string; onDelete: () => void }) {
   const [isMessageBoxOpen, setIsMessageBoxOpen] = useState(false);
@@ -19,10 +20,17 @@ export default function BtnDeleteClaim({ id, name, onDelete }: { id: string; nam
 
   const deleteClaimWithId = askUserForDeleting.bind(null, id, name);
 
-  const handleOK = () => {
-    deleteClaim(idToDelete.current);
-    onDelete();
-    setIsMessageBoxOpen(false);
+  const handleOK = async () => {
+    try {
+      await deleteClaim(idToDelete.current);
+      onDelete();
+    } catch (error) {
+      setMessageBoxText(String(error));
+      setIsMessageBoxOpen(true);
+      setIsShowMessageBoxCancel(false);
+    }
+
+    // setIsMessageBoxOpen(false);
   };
 
   const handleCancel = () => {

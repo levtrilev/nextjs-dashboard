@@ -19,9 +19,16 @@ export default function BtnDeleteWorkorder({ id, name }: { id: string; name: str
 
   const deleteWorkorderWithId = askUserForDeleting.bind(null, id, name);
 
-  const handleOK = () => {
-    deleteWorkorder(idToDelete.current);
-    setIsMessageBoxOpen(false);
+  const handleOK = async () => {
+        try {
+          await deleteWorkorder(idToDelete.current);
+          // onDelete();
+        } catch (error) {
+          setMessageBoxText(String(error));
+          setIsMessageBoxOpen(true);
+          // setIsShowMessageBoxCancel(false);
+        }
+    // setIsMessageBoxOpen(false);
   };
 
   const handleCancel = () => {
