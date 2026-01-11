@@ -9,10 +9,12 @@ export default async function RegionsTable({
   query,
   currentPage,
   current_sections,
+  showDeleteButton = false,
 }: {
   query: string;
   currentPage: number;
   current_sections: string;
+  showDeleteButton?: boolean;
 }) {
 
   const regions = await fetchFilteredRegions(query, currentPage, current_sections);
@@ -76,9 +78,7 @@ export default async function RegionsTable({
                       </td>
                       <td className="w-1/16 whitespace-nowrap pl-4 py-1 pr-3">
                         <div className="flex justify-end gap-3">
-                          {/* <BtnEditTenantModal tenant={tenant} /> */}
-                          <BtnDeleteRegion region={region} />
-                          {/* <BtnEditLegalEntityLink id={legalEntity.id} /> */}
+                          {showDeleteButton && <BtnDeleteRegion region={region} />}
                         </div>
                       </td>
                     </tr>
@@ -100,7 +100,7 @@ export default async function RegionsTable({
                         </a>
                       </h3>
                       <div className="flex gap-2">
-                        <BtnDeleteRegion region={region} />
+                        {showDeleteButton && <BtnDeleteRegion region={region} />}
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-2">

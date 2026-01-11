@@ -8,10 +8,12 @@ export default async function PremisesTable({
   query,
   currentPage,
   current_sections,
+  showDeleteButton = false,
 }: {
   query: string;
   currentPage: number;
   current_sections: string;
+  showDeleteButton?: boolean;
 }) {
 
   const premises = await fetchFilteredPremises(query, currentPage, current_sections);
@@ -72,9 +74,7 @@ export default async function PremisesTable({
                       </td>
                       <td className="w-1/16 whitespace-nowrap pl-4 py-1 pr-3">
                         <div className="flex justify-end gap-3">
-                          {/* <BtnEditTenantModal tenant={tenant} /> */}
-                          <BtnDeletePremise id={premise.id} name={premise.name}/>
-                          {/* <BtnEditLegalEntityLink id={legalEntity.id} /> */}
+                          {showDeleteButton && <BtnDeletePremise id={premise.id} name={premise.name}/>}
                         </div>
                       </td>
                     </tr>
@@ -114,7 +114,7 @@ export default async function PremisesTable({
                       <div className="flex justify-between">
                         <span className="font-medium">Раздел:</span>
                         <span>{premise.section_name}</span>
-                        <BtnDeletePremise id={premise.id} name={premise.name}/>
+                        {showDeleteButton && <BtnDeletePremise id={premise.id} name={premise.name}/>}
                       </div>
 
                     </div>

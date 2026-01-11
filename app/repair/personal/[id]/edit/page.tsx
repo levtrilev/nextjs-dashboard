@@ -9,9 +9,9 @@ import pool from "@/db";
 import { fetchSectionsForm } from "@/app/admin/sections/lib/sections-actions";
 import { checkReadonly } from "@/app/lib/common-utils";
 import { PersonForm } from "@/app/lib/definitions";
-import { fetchPersonForm } from "../../lib/persons-actions";
-import PersonEditForm from "./person-edit-form";
 import { fetchUsersAdmin } from "@/app/admin/users/lib/users-actions";
+import { fetchPersonForm } from "@/app/repair/persons/lib/persons-actions";
+import PersonEditForm from "@/app/repair/persons/[id]/edit/person-edit-form";
 
 async function Page(props: { params: Promise<{ id: string }> }) {
     //#region unified hooks and variables 

@@ -100,7 +100,7 @@ export async function deleteObject(id: string) {
     await pool.query(`DELETE FROM objects WHERE id = $1`, [id]);
   } catch (error) {
     console.error("Ошибка удаления Object:", error);
-    throw new Error("Ошибка базы данных: Не удалось удалить Object.");
+    throw new Error("Ошибка базы данных: Не удалось удалить Object: " + String(error));
   }
   revalidatePath("/repair/objects");
 }

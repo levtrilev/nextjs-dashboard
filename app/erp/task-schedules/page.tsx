@@ -6,11 +6,13 @@ import Search from "@/app/ui/search";
 import { lusitana } from "@/app/ui/fonts";
 // import { CreateTaskSchedule } from "./lib/buttons";
 // import TaskSchedulesTable from "./lib/taskSchedulesTable";
-import { auth } from "@/auth";
+import { auth, getUser } from "@/auth";
 import { getCurrentSections } from "@/app/lib/common-actions";
 import { fetchTaskSchedulesPages } from "./lib/tsch-actions";
 import { CreateTaskSchedule } from "./lib/tsch-buttons";
 import TaskSchedulesTable from "./lib/taskSchedulesTable";
+import { fetchDocUserPermissions } from "@/app/admin/permissions/lib/permissios-actions";
+import { checkReadonly } from "@/app/lib/common-utils";
 
 export default async function Page(props: {
   searchParams?: Promise<{
@@ -21,6 +23,15 @@ export default async function Page(props: {
   const session = await auth();
   const email = session ? (session.user ? session.user.email : "") : "";
   const current_sections = await getCurrentSections(email as string);
+
+  const user = await getUser(email as string);
+  if (!user) {
+    return <h3 className="text-xs font-medium text-gray-400">Вы не авторизованы!</h3>;
+  }
+  const pageUser = user;
+  const userPermissions = await fetchDocUserPermissions(user.id, 'task_schedules');
+  const task_schedules = {};
+  const readonly_permission = checkReadonly(userPermissions, task_schedules, pageUser.id);
 
   const searchParams = await props.searchParams;
   const query = searchParams?.query || '';
@@ -41,7 +52,12 @@ export default async function Page(props: {
           <CreateTaskSchedule />
         </div>
 
-        <TaskSchedulesTable query={query} currentPage={currentPage} current_sections={current_sections}/>
+        <TaskSchedulesTable
+          query={query}
+          currentPage={currentPage}
+          current_sections={current_sections}
+          showDeleteButton={!readonly_permission}
+        />
         <div className="mt-5 flex w-full justify-center">
           <Pagination totalPages={totalPages} />
         </div>

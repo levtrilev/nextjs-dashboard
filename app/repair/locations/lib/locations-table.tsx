@@ -12,10 +12,12 @@ export default async function LocationsTable({
   query,
   currentPage,
   current_sections,
+  showDeleteButton = false,
 }: {
   query: string;
   currentPage: number;
   current_sections: string;
+  showDeleteButton?: boolean;
 }) {
   const locations = await fetchFilteredLocations(query, currentPage, current_sections);
 
@@ -49,7 +51,7 @@ export default async function LocationsTable({
 
                       <td className="w-1/12 whitespace-nowrap py-2 pr-3">
                         <div className="flex justify-end gap-3">
-                          <BtnDeleteLocation id={location.id} name={location.name} />
+                          {showDeleteButton && <BtnDeleteLocation id={location.id} name={location.name} />}
                         </div>
                       </td>
                     </tr>
@@ -72,7 +74,7 @@ export default async function LocationsTable({
                       </h3>
                       <div className="flex gap-2">
                         <BtnEditLocationLink id={location.id} />
-                        <BtnDeleteLocation id={location.id} name={location.name} />
+                        {showDeleteButton && <BtnDeleteLocation id={location.id} name={location.name} />}
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-2">

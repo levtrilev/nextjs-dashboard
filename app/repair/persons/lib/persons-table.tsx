@@ -14,12 +14,14 @@ export default async function PersonsTable({
   query,
   currentPage,
   current_sections,
+  showDeleteButton = false,
   columns = 5,
   rows_per_page = 8,
 }: {
   query: string;
   currentPage: number;
   current_sections: string;
+  showDeleteButton?: boolean;
   columns?: number;
   rows_per_page?: number;
 }) {
@@ -66,7 +68,7 @@ export default async function PersonsTable({
                       </td>}
                       {columns >= 5 && <td className="w-1/12 whitespace-nowrap py-2 pr-3">
                         <div className="flex justify-end gap-3">
-                          <BtnDeletePerson id={person.id} name={person.name} />
+                          {showDeleteButton && <BtnDeletePerson id={person.id} name={person.name} />}
                         </div>
                       </td>}
                     </tr>
@@ -89,7 +91,7 @@ export default async function PersonsTable({
                       </h3>
                       <div className="flex gap-2">
                         <BtnEditPersonLink id={person.id} />
-                        <BtnDeletePerson id={person.id} name={person.name} />
+                        {showDeleteButton && <BtnDeletePerson id={person.id} name={person.name} />}
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-2">

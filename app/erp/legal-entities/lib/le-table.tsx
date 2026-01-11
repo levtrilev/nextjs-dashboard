@@ -10,10 +10,12 @@ export default async function LegalEntitiesTable({
   query,
   currentPage,
   current_sections,
+  showDeleteButton = false,
 }: {
   query: string;
   currentPage: number;
   current_sections: string;
+  showDeleteButton?: boolean;
 }) {
 
   const legalEntities = await fetchFilteredLegalEntities(query, currentPage, current_sections);
@@ -75,9 +77,7 @@ export default async function LegalEntitiesTable({
                       </td>
                       <td className="w-1/16 whitespace-nowrap pl-4 py-1 pr-3">
                         <div className="flex justify-end gap-3">
-                          {/* <BtnEditTenantModal tenant={tenant} /> */}
-                          <BtnDeleteLegalEntity legalEntity={legalEntity} />
-                          {/* <BtnEditLegalEntityLink id={legalEntity.id} /> */}
+                          {showDeleteButton && <BtnDeleteLegalEntity legalEntity={legalEntity} />}
                         </div>
                       </td>
                     </tr>
@@ -121,7 +121,7 @@ export default async function LegalEntitiesTable({
                       </p>
                     </div>
                     <div className="mt-3 flex justify-end gap-3">
-                      <BtnDeleteLegalEntity legalEntity={legalEntity} />
+                      {showDeleteButton && <BtnDeleteLegalEntity legalEntity={legalEntity} />}
                     </div>
                   </div>
                 ))}

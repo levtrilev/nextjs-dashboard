@@ -12,10 +12,12 @@ export default async function OperationsTable({
   query,
   currentPage,
   current_sections,
+  showDeleteButton = false,
 }: {
   query: string;
   currentPage: number;
   current_sections: string;
+  showDeleteButton?: boolean;
 }) {
   const operations = await fetchFilteredOperations(query, currentPage, current_sections);
 
@@ -52,7 +54,7 @@ export default async function OperationsTable({
                       </td>
                       <td className="w-1/12 whitespace-nowrap py-2 pr-3">
                         <div className="flex justify-end gap-3">
-                          <BtnDeleteOperation id={operation.id} name={operation.name} />
+                          {showDeleteButton && <BtnDeleteOperation id={operation.id} name={operation.name} />}
                         </div>
                       </td>
                     </tr>
@@ -75,11 +77,10 @@ export default async function OperationsTable({
                       </h3>
                       <div className="flex gap-2">
                         <BtnEditOperationLink id={operation.id} />
-                        <BtnDeleteOperation id={operation.id} name={operation.name} />
+                        {showDeleteButton && <BtnDeleteOperation id={operation.id} name={operation.name} />}
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-2">
-                      {/* Дополнительные поля при необходимости */}
                     </div>
                   </div>
                 ))}

@@ -12,6 +12,7 @@ export default function ClaimsTable({
   currentPage,
   current_sections,
   machine_id = '00000000-0000-0000-0000-000000000000',
+  showDeleteButton = false,
   columns = 7,
   rows_per_page = 8,
 }: {
@@ -19,6 +20,7 @@ export default function ClaimsTable({
   currentPage: number;
   current_sections: string;
   machine_id?: string;
+  showDeleteButton?: boolean;
   columns?: number;
   rows_per_page?: number;
 }) {
@@ -105,7 +107,7 @@ export default function ClaimsTable({
                       </td>
                       {columns >= 5 && <td className="w-1/12 whitespace-nowrap py-2 pr-3">
                         <div className="flex justify-end gap-3">
-                          <BtnDeleteClaim id={claim.id} name={claim.name} onDelete={loadClaims} />
+                          {showDeleteButton && <BtnDeleteClaim id={claim.id} name={claim.name} onDelete={loadClaims} />}
                         </div>
                       </td>}
                     </tr>
@@ -128,7 +130,7 @@ export default function ClaimsTable({
                       </h3>
                       <div className="flex gap-2">
                         <BtnEditClaimLink id={claim.id} />
-                        <BtnDeleteClaim id={claim.id} name={claim.name} onDelete={loadClaims} />
+                        {showDeleteButton && <BtnDeleteClaim id={claim.id} name={claim.name} onDelete={loadClaims} />}
                       </div>
                     </div>
                   </div>

@@ -74,18 +74,21 @@ const RegionFormSchema = z.object({
   section_id: z.string().min(2, {
     message: "Поле Раздел должно содержать не менее 2-х символов.",
   }),
+  author_id: z.string().uuid(),
 });
 
 const CreateRegion = RegionFormSchema.omit({ id: true });
 const UpdateRegion = RegionFormSchema.omit({ id: true });
 
 export async function createRegion(prevState: RegionState, formData: FormData) {
+  // console.log("createRegion action formData: ", JSON.stringify(formData));
   const validatedFields = CreateRegion.safeParse({
     name: formData.get("name"),
     capital: formData.get("capital"),
     area: formData.get("area"),
     code: formData.get("code"),
     section_id: formData.get("section_id"),
+    author_id: formData.get("author_id"),
   });
   // If form validation fails, return errors early. Otherwise, continue.
   if (!validatedFields.success) {
@@ -96,7 +99,7 @@ export async function createRegion(prevState: RegionState, formData: FormData) {
     };
   }
   // Prepare data for insertion into the database
-  const { name, capital, area, code } = validatedFields.data;
+  const { name, capital, area, code, section_id, author_id } = validatedFields.data;
   // SELECT event_time_tz AT TIME ZONE 'Europe/Moscow' FROM example;
   const date = new Date().toISOString(); //.split("T")[0]
   // const is_customer = str_is_customer === "true" ? true : false;
@@ -104,14 +107,14 @@ export async function createRegion(prevState: RegionState, formData: FormData) {
 
   const session = await auth();
   const username = session?.user?.name;
-  const section_id = "e21e9372-91c5-4856-a123-b6f3b53efc0f";
+  // const section_id = "e21e9372-91c5-4856-a123-b6f3b53efc0f";
   try {
     await pool.query(
       `
-      INSERT INTO regions (name, capital, area, code, section_id, username, date)
-      VALUES ($1, $2, $3, $4, $5, $6, $7) 
+      INSERT INTO regions (name, capital, area, code, section_id, author_id, username, date)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
     `,
-      [name, capital, area, code, section_id, username, date]
+      [name, capital, area, code, section_id, author_id, username, date]
     );
   } catch (error) {
     console.error("Failed to create newRegion:", error);
@@ -157,10 +160,13 @@ SET
     code = $4,
     section_id = $5,
     username = $6,
-    date = $7,
-    user_tags = $8,
-    access_tags = $9
-WHERE id = $10;
+    author_id = $7,
+    editor_id = $8,
+    timestamptz = now(),
+    date = $9,
+    user_tags = $10,
+    access_tags = $11
+WHERE id = $12;
     `,
       [
         region.name,
@@ -169,6 +175,8 @@ WHERE id = $10;
         region.code,
         region.section_id,
         username,
+        region.author_id,
+        region.editor_id,
         date,
         JSON.stringify(region.user_tags),
         JSON.stringify(region.access_tags),
@@ -201,6 +209,8 @@ export async function fetchRegion(id: string, current_sections: string) {
         code,
         section_id,
         username,
+    author_id,
+    editor_id,
         timestamptz,
         date,
         user_tags,
@@ -235,6 +245,8 @@ export async function fetchRegionForm(id: string, current_sections: string) {
         regions.code,
         regions.section_id,
         regions.username,
+        regions.author_id,
+        regions.editor_id,
         regions.timestamptz,
         regions.date,
         regions.user_tags,
@@ -271,6 +283,8 @@ export async function fetchRegions(current_sections: string) {
         code,
         section_id,
         username,
+        author_id,
+        editor_id,
         timestamptz,
         date
       FROM your_regions regions
@@ -302,6 +316,8 @@ export async function fetchRegionsForm(current_sections: string) {
         regions.code,
         regions.section_id,
         regions.username,
+        regions.author_id,
+        regions.editor_id,
         regions.timestamptz,
         regions.date,
         s.name as section_name
@@ -340,6 +356,8 @@ export async function fetchFilteredRegions(
         regions.code,
         regions.section_id,
         regions.username,
+        regions.author_id,
+        regions.editor_id,
         regions.timestamptz,
         regions.date,
         s.name as section_name

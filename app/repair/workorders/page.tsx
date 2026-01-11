@@ -68,7 +68,12 @@ export default async function Page(props: {
       </div>
 
       {/* <WorkordersTable query={query} currentPage={currentPage} current_sections={current_sections} /> */}
-      <WorkordersTable query={query} currentPage={currentPage} current_sections={effectiveSectionIdsString} />
+      <WorkordersTable
+        query={query}
+        currentPage={currentPage}
+        current_sections={effectiveSectionIdsString}
+        showDeleteButton={!readonly_permission}
+      />
       <div className="mt-5 flex w-full justify-center">
         <Pagination totalPages={totalPages} />
       </div>

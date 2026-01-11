@@ -13,10 +13,12 @@ export default async function TaskSchedulesTable({
   query,
   currentPage,
   current_sections,
+  showDeleteButton = false,
 }: {
   query: string;
   currentPage: number;
   current_sections: string;
+  showDeleteButton?: boolean;
 }) {
   const taskSchedules = await fetchFilteredTaskSchedules(query, currentPage, current_sections);
 
@@ -77,7 +79,7 @@ export default async function TaskSchedulesTable({
                       </td>
                       <td className="w-1/16 whitespace-nowrap pl-4 py-1 pr-3">
                         <div className="flex justify-end gap-3">
-                          <BtnDeleteTaskSchedule id={taskSchedule.id} name={taskSchedule.name}/>
+                          {showDeleteButton && <BtnDeleteTaskSchedule id={taskSchedule.id} name={taskSchedule.name}/>}
                         </div>
                       </td>
                     </tr>
@@ -120,7 +122,7 @@ export default async function TaskSchedulesTable({
                         <div className="flex justify-between">
                           <span className="font-medium">Раздел:</span>
                           <span>{taskSchedule.section_name}</span>
-                          <BtnDeleteTaskSchedule id={taskSchedule.id} name={taskSchedule.name}/>
+                          {showDeleteButton && <BtnDeleteTaskSchedule id={taskSchedule.id} name={taskSchedule.name}/>}
                         </div>
 
                       </div>

@@ -35,7 +35,7 @@ export default async function Page(props: {
   }
   const pageUser = user;
   const current_sections = await getCurrentSections(email as string);
-  const userPermissions = await fetchDocUserPermissions(user.id, 'claims'); // ← изменил 'tasks' → 'claims'
+  const userPermissions = await fetchDocUserPermissions(user.id, 'claims');
   const claims = {};
   const readonly_permission = checkReadonly(userPermissions, claims, pageUser.id);
   //#endregion
@@ -76,6 +76,7 @@ export default async function Page(props: {
         current_sections={effectiveSectionIdsString}
         key={1}
         machine_id={'00000000-0000-0000-0000-000000000000'}
+        showDeleteButton={!readonly_permission}
       />
       <div className="mt-5 flex w-full justify-center">
         <Pagination totalPages={totalPages} />

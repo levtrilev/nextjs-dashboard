@@ -14,10 +14,12 @@ export default async function WorksTable({
   query,
   currentPage,
   current_sections,
+  showDeleteButton = false,
 }: {
   query: string;
   currentPage: number;
   current_sections: string;
+  showDeleteButton?: boolean;
 }) {
   const works = await fetchFilteredWorks(query, currentPage, current_sections);
 
@@ -51,7 +53,7 @@ export default async function WorksTable({
 
                       <td className="w-1/12 whitespace-nowrap py-2 pr-3">
                         <div className="flex justify-end gap-3">
-                          <BtnDeleteWork id={work.id} name={work.name} />
+                          {showDeleteButton && <BtnDeleteWork id={work.id} name={work.name} />}
                         </div>
                       </td>
                     </tr>
@@ -74,7 +76,7 @@ export default async function WorksTable({
                       </h3>
                       <div className="flex gap-2">
                         <BtnEditWorkLink id={work.id} />
-                        <BtnDeleteWork id={work.id} name={work.name} />
+                        {showDeleteButton && <BtnDeleteWork id={work.id} name={work.name} />}
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-2">

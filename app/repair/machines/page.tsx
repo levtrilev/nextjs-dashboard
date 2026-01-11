@@ -41,7 +41,7 @@ export default async function Page(props: {
   //#region arm sections
   const current_sections_array = await getCurrentSectionsArray(email as string);
   const effective_sections_array = await getUserCurrentSections(email);     // с учётом сохранённых из АРМ
-  const effectiveSectionIdsString = '{' + effective_sections_array.map(s=>s.id).join(",") + '}';
+  const effectiveSectionIdsString = '{' + effective_sections_array.map(s => s.id).join(",") + '}';
   //#endregion
 
 
@@ -54,7 +54,7 @@ export default async function Page(props: {
   return (
 
     <div className="w-full">
-      <ArmTabsPage current_sections_array={current_sections_array}/>
+      <ArmTabsPage current_sections_array={current_sections_array} />
       {/* Синхронизация Zustand-tabs после выбора пользователем с сервером */}
       <EffectiveSectionsSync
         userId={user.id}
@@ -70,7 +70,12 @@ export default async function Page(props: {
       </div>
 
       {/* <MachinesTable query={query} currentPage={currentPage} current_sections={current_sections} /> */}
-      <MachinesTable query={query} currentPage={currentPage} current_sections={effectiveSectionIdsString} />
+      <MachinesTable
+        query={query}
+        currentPage={currentPage}
+        current_sections={effectiveSectionIdsString}
+        showDeleteButton={!readonly_permission}
+      />
       <div className="mt-5 flex w-full justify-center">
         <Pagination totalPages={totalPages} />
       </div>

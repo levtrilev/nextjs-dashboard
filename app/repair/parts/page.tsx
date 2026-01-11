@@ -52,7 +52,12 @@ export default async function Page(props: {
           <CreatePart readonly={readonly_permission} />
         </div>
 
-        <PartsTable query={query} currentPage={currentPage} current_sections={current_sections} />
+        <PartsTable
+          query={query}
+          currentPage={currentPage}
+          current_sections={current_sections}
+          showDeleteButton={!readonly_permission}
+        />
         <div className="mt-5 flex w-full justify-center">
           <Pagination totalPages={totalPages} />
         </div>

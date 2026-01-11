@@ -12,10 +12,12 @@ export default async function PartsTable({
   query,
   currentPage,
   current_sections,
+  showDeleteButton = false,
 }: {
   query: string;
   currentPage: number;
   current_sections: string;
+  showDeleteButton?: boolean;
 }) {
   const parts = await fetchFilteredParts(query, currentPage, current_sections);
 
@@ -49,7 +51,7 @@ export default async function PartsTable({
 
                       <td className="w-1/12 whitespace-nowrap py-2 pr-3">
                         <div className="flex justify-end gap-3">
-                          <BtnDeletePart id={part.id} name={part.name} />
+                          {showDeleteButton && <BtnDeletePart id={part.id} name={part.name} />}
                         </div>
                       </td>
                     </tr>
@@ -72,7 +74,7 @@ export default async function PartsTable({
                       </h3>
                       <div className="flex gap-2">
                         <BtnEditPartLink id={part.id} />
-                        <BtnDeletePart id={part.id} name={part.name} />
+                        {showDeleteButton && <BtnDeletePart id={part.id} name={part.name} />}
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-2">

@@ -12,10 +12,12 @@ export default async function SystemsTable({
   query,
   currentPage,
   current_sections,
+  showDeleteButton = false,
 }: {
   query: string;
   currentPage: number;
   current_sections: string;
+  showDeleteButton?: boolean;
 }) {
   const systems = await fetchFilteredSystems(query, currentPage, current_sections);
 
@@ -49,7 +51,7 @@ export default async function SystemsTable({
 
                       <td className="w-1/12 whitespace-nowrap py-2 pr-3">
                         <div className="flex justify-end gap-3">
-                          <BtnDeleteSystem id={system.id} name={system.name} />
+                          {showDeleteButton && <BtnDeleteSystem id={system.id} name={system.name} />}
                         </div>
                       </td>
                     </tr>
@@ -72,7 +74,7 @@ export default async function SystemsTable({
                       </h3>
                       <div className="flex gap-2">
                         <BtnEditSystemLink id={system.id} />
-                        <BtnDeleteSystem id={system.id} name={system.name} />
+                        {showDeleteButton && <BtnDeleteSystem id={system.id} name={system.name} />}
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-2">

@@ -702,6 +702,8 @@ export type Region = {
   code: string;
   section_id: string;
   username: string;
+  author_id: string;
+  editor_id: string;
   timestamptz: string;
   date: DateTime;
   access_tags: string[];
@@ -717,6 +719,8 @@ export type RegionForm = {
   code: string;
   section_id: string;
   username: string;
+  author_id: string;
+  editor_id: string;
   timestamptz: string;
   date: DateTime;
   section_name: string;

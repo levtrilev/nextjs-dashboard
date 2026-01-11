@@ -20,9 +20,15 @@ export default function BtnDeleteObject({ id, name }: { id: string, name: string
 
   const deleteTaskWithId = askUserForDeleting.bind(null, id, name);
 
-  const handleOK = () => {
-    deleteObject(idToDelete.current);
-    setIsMessageBoxOpen(false);
+  const handleOK = async () => {
+    try {
+      await deleteObject(idToDelete.current);
+      setIsMessageBoxOpen(false);
+    } catch (error) {
+      setMessageBoxText(String(error));
+      setIsMessageBoxOpen(true);
+    }
+
   };
 
   const handleCancel = () => {

@@ -13,6 +13,7 @@ import { fetchAllTags } from "@/app/lib/tags/tags-actions";
 import pool from "@/db";
 import DocWrapper from "@/app/lib/doc-wrapper";
 import { fetchDocUserPermissions } from "@/app/admin/permissions/lib/permissios-actions";
+import { checkReadonly } from "@/app/lib/common-utils";
 
 async function Page(props: { params: Promise<{ id: string }> }) {
     const session = await auth();
@@ -49,8 +50,6 @@ async function Page(props: { params: Promise<{ id: string }> }) {
     if (isEditable) {
         const lockResult = await tryLockRecord(region.id, user.id);
         canEdit = lockResult.isEditable;
-    } else {
-        canEdit = false;
     }
     // Перечитаем запись после возможного обновления блокировки
     const freshRecordRes = await pool.query(
@@ -62,7 +61,9 @@ async function Page(props: { params: Promise<{ id: string }> }) {
     const freshRecord = freshRecordRes.rows[0];
 
     const editingByCurrentUser = freshRecord.editing_by_user_id === user.id;
-    const readonly = !editingByCurrentUser;
+    const readonly_locked = !editingByCurrentUser;
+    const readonly_permission = checkReadonly(userPermissions, region, user.id);
+    const readonly = readonly_locked || readonly_permission;
     //#endregion
     return (
         <div className="w-full">

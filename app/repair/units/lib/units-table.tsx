@@ -9,10 +9,12 @@ export default async function UnitsTable({
   query,
   currentPage,
   current_sections,
+  showDeleteButton = false,
 }: {
   query: string;
   currentPage: number;
   current_sections: string;
+  showDeleteButton?: boolean;
 }) {
   const units = await fetchFilteredUnits(query, currentPage, current_sections);
 
@@ -48,7 +50,7 @@ export default async function UnitsTable({
                       </td>
                       <td className="w-1/12 whitespace-nowrap py-2 pr-3">
                         <div className="flex justify-end gap-3">
-                          <BtnDeleteUnit id={unit.id} name={unit.name} />
+                          {showDeleteButton && <BtnDeleteUnit id={unit.id} name={unit.name} />}
                         </div>
                       </td>
                     </tr>
@@ -71,7 +73,7 @@ export default async function UnitsTable({
                       </h3>
                       <div className="flex gap-2">
                         <BtnEditUnitLink id={unit.id} />
-                        <BtnDeleteUnit id={unit.id} name={unit.name} />
+                        {showDeleteButton && <BtnDeleteUnit id={unit.id} name={unit.name} />}
                       </div>
                     </div>
                   </div>

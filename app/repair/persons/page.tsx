@@ -56,7 +56,12 @@ export default async function Page(props: {
           <CreatePerson readonly={readonly_permission} />
         </div>
 
-        <PersonsTable query={query} currentPage={currentPage} current_sections={current_sections} />
+        <PersonsTable
+          query={query}
+          currentPage={currentPage}
+          current_sections={current_sections}
+          showDeleteButton={!readonly_permission}
+        />
         <div className="mt-5 flex w-full justify-center">
           <Pagination totalPages={totalPages} />
         </div>

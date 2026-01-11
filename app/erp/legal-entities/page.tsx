@@ -7,9 +7,11 @@ import LegalEntitiesTable from "@/app/erp/legal-entities/lib/le-table";
 import Search from "@/app/ui/search";
 import { CreateLegalEntity } from "@/app/erp/legal-entities/lib/le-buttons";
 import { lusitana } from "@/app/ui/fonts";
-import { auth } from "@/auth";
+import { auth, getUser } from "@/auth";
 import { getCurrentSections } from "@/app/lib/common-actions";
 import UserSessionComponent from "./user-session-component";
+import { fetchDocUserPermissions } from "@/app/admin/permissions/lib/permissios-actions";
+import { checkReadonly } from "@/app/lib/common-utils";
 
 export default async function Page(props: {
   searchParams?: Promise<{
@@ -18,12 +20,19 @@ export default async function Page(props: {
   }>;
 }) {
 
-  const  session = await auth();
-  const email = session ? (session.user? session.user.email : "") : "";
+  const session = await auth();
+  const email = session ? (session.user ? session.user.email : "") : "";
   const current_sections = await getCurrentSections(email as string);
 
 
-  // console.log("current_sections: " + current_sections);
+  const user = await getUser(email as string);
+  if (!user) {
+    return <h3 className="text-xs font-medium text-gray-400">Вы не авторизованы!</h3>;
+  }
+  const pageUser = user;
+  const userPermissions = await fetchDocUserPermissions(user.id, 'legal_entities');
+  const legal_entities = {};
+  const readonly_permission = checkReadonly(userPermissions, legal_entities, pageUser.id);
 
   const searchParams = await props.searchParams;
   const query = searchParams?.query || '';
@@ -42,7 +51,12 @@ export default async function Page(props: {
           <CreateLegalEntity />
         </div>
 
-        <LegalEntitiesTable query={query} currentPage={currentPage} current_sections={current_sections}/>
+        <LegalEntitiesTable
+          query={query}
+          currentPage={currentPage}
+          current_sections={current_sections}
+          showDeleteButton={!readonly_permission}
+        />
         {/* <UserSessionComponent query={query} currentPage={currentPage} /> */}
         <div className="mt-5 flex w-full justify-center">
           <Pagination totalPages={totalPages} />

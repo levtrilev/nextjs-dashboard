@@ -3,7 +3,7 @@
 
 'use client';
 
-import { Region } from '@/app/lib/definitions';
+import { Region, User } from '@/app/lib/definitions';
 import Link from 'next/link';
 import {
   CheckIcon,
@@ -12,18 +12,40 @@ import {
   UserCircleIcon,
 } from '@heroicons/react/24/outline';
 import { Button } from '@/app/ui/button';
-import { useActionState, useState } from 'react';
+import { useActionState, useEffect, useState } from 'react';
 import { createRegion, RegionState } from '@/app/erp/regions/lib/region-actions';
+import { useDocumentStore } from '@/app/store/useDocumentStore';
 
 export default function Form() {
+  const [sectionId, setSectionId] = useState<string | null>(null);
+  const [pageUser, setPageUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    const sections = useDocumentStore.getState().userSections;
+    const sessionUser = useDocumentStore.getState().sessionUser;
+    if (sections?.[0]?.id) {
+      setSectionId(sections[0].id);
+    }
+    if (sessionUser?.id) {
+      setPageUser(sessionUser);
+    }
+  }, []);
+
+  if (!(sectionId && pageUser)) return <div>Loading...</div>;
+
+  // const pageUser = useDocumentStore.getState().sessionUser;
+  // const someUserSectionId = useDocumentStore.getState().userSections[0].id;
   const [region, setRegion] = useState({
-    id: "",
+    // id: "",
     name: "",
     capital: "",
     area: "",
     code: "",
-    section_id: "",
+    section_id: sectionId,
+    author_id: pageUser.id,
+    // editor_id: "",
   } as Region);
+  // console.log('create Region region: ', JSON.stringify(region));
   const initialState: RegionState = { message: null, errors: {} };
   const [state, formAction] = useActionState(createRegion, initialState);
 
@@ -44,7 +66,7 @@ export default function Form() {
             className="block w-full rounded-md py-2 px-3 text-sm placeholder:text-gray-500"
             placeholder="Название региона"
             aria-describedby="name-error"
-            onChange={(e) => setRegion((prev) => ({...prev, name: e.target.value,}))}
+            onChange={(e) => setRegion((prev) => ({ ...prev, name: e.target.value }))}
           />
           <div id="name-error" aria-live="polite" aria-atomic="true">
             {state.errors?.name &&
@@ -70,7 +92,7 @@ export default function Form() {
             className="block w-full rounded-md py-2 px-3 text-sm placeholder:text-gray-500"
             placeholder="Столица"
             aria-describedby="capital-error"
-            onChange={(e) => setRegion((prev) => ({...prev, capital: e.target.value,}))}
+            onChange={(e) => setRegion((prev) => ({ ...prev, capital: e.target.value, }))}
 
           />
           <div id="capital-error" aria-live="polite" aria-atomic="true">
@@ -97,7 +119,7 @@ export default function Form() {
             className="block w-full rounded-md py-2 px-3 text-sm placeholder:text-gray-500"
             placeholder="Округ"
             aria-describedby="area-error"
-            onChange={(e) => setRegion((prev) => ({...prev, area: e.target.value,}))}
+            onChange={(e) => setRegion((prev) => ({ ...prev, area: e.target.value, }))}
           />
           <div id="area-error" aria-live="polite" aria-atomic="true">
             {state.errors?.area &&
@@ -123,7 +145,7 @@ export default function Form() {
             className="block w-full rounded-md py-2 px-3 text-sm placeholder:text-gray-500"
             placeholder="Код"
             aria-describedby="code-error"
-            onChange={(e) => setRegion((prev) => ({...prev, code: e.target.value,}))}
+            onChange={(e) => setRegion((prev) => ({ ...prev, code: e.target.value, }))}
           />
           <div id="code-error" aria-live="polite" aria-atomic="true">
             {state.errors?.code &&
@@ -138,7 +160,7 @@ export default function Form() {
         {/* section_id */}
         <div className="mb-4">
           <label htmlFor="section_id" className="mb-2 block text-sm font-medium">
-          Id Раздела
+            Id Раздела
           </label>
           <input
             type="text"
@@ -149,8 +171,26 @@ export default function Form() {
             className="block w-full rounded-md py-2 px-3 text-sm placeholder:text-gray-500"
             placeholder="Id Раздела"
             aria-describedby="section_id-error"
-            onChange={(e) => setRegion((prev) => ({...prev, section_id: e.target.value,}))}
+            onChange={(e) => setRegion((prev) => ({ ...prev, section_id: e.target.value, }))}
           />
+
+          {/* author_id */}
+          {/* <div className="mb-4"> */}
+          <label htmlFor="section_id" className="mb-2 block text-sm font-medium">
+            author_id
+          </label>
+          <input
+            type="text"
+            name="author_id"
+            value={region.author_id}
+            maxLength={64}
+            id="author_id"
+            className="block w-full rounded-md py-2 px-3 text-sm placeholder:text-gray-500"
+            placeholder="author_id"
+            aria-describedby="author_id-error"
+            onChange={(e) => setRegion((prev) => ({ ...prev, author_id: e.target.value, }))}
+          />
+
           <div id="section_id-error" aria-live="polite" aria-atomic="true">
             {state.errors?.section_id &&
               state.errors.section_id.map((error: string) => (

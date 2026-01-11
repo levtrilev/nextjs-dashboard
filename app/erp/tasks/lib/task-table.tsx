@@ -12,10 +12,12 @@ export default async function TasksTable({
   query,
   currentPage,
   current_sections,
+  showDeleteButton = false,
 }: {
   query: string;
   currentPage: number;
   current_sections: string;
+  showDeleteButton?: boolean;
 }) {
   const tasks = await fetchFilteredTasks(query, currentPage);
 
@@ -60,8 +62,7 @@ export default async function TasksTable({
                       </td>
                       <td className="w-1/12 whitespace-nowrap py-2 pr-3">
                         <div className="flex justify-end gap-3">
-                          {/* <BtnEditTaskLink id={task.id} /> */}
-                          <BtnDeleteTask id={task.id} name={task.name} />
+                          {showDeleteButton && <BtnDeleteTask id={task.id} name={task.name} />}
                         </div>
                       </td>
                     </tr>
@@ -84,7 +85,7 @@ export default async function TasksTable({
                       </h3>
                       <div className="flex gap-2">
                         <BtnEditTaskLink id={task.id} />
-                        <BtnDeleteTask id={task.id} name={task.name} />
+                        {showDeleteButton && <BtnDeleteTask id={task.id} name={task.name} />}
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-2">

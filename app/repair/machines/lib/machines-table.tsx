@@ -11,10 +11,12 @@ export default function MachinesTable({
   query,
   currentPage,
   current_sections,
+  showDeleteButton = false,
 }: {
   query: string;
   currentPage: number;
   current_sections: string;
+  showDeleteButton?: boolean;
 }) {
   const [machines, setMachines] = useState<Awaited<ReturnType<typeof fetchFilteredMachines>> | null>(null);
   const [loading, setLoading] = useState(true);
@@ -91,7 +93,7 @@ export default function MachinesTable({
                       </td>
                       <td className="w-1/12 whitespace-nowrap py-2 pr-3">
                         <div className="flex justify-end gap-3">
-                          <BtnDeleteMachine id={machine.id} name={machine.name} onDelete={loadMachines}/>
+                          {showDeleteButton && <BtnDeleteMachine id={machine.id} name={machine.name} onDelete={loadMachines}/>}
                         </div>
                       </td>
                     </tr>
@@ -114,7 +116,7 @@ export default function MachinesTable({
                       </h3>
                       <div className="flex gap-2">
                         <BtnEditMachineLink id={machine.id} />
-                        <BtnDeleteMachine id={machine.id} name={machine.name} onDelete={loadMachines} />
+                        {showDeleteButton && <BtnDeleteMachine id={machine.id} name={machine.name} onDelete={loadMachines} />}
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-2">
