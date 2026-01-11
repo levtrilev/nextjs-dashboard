@@ -12,6 +12,7 @@ import { UnitForm } from "@/app/lib/definitions";
 import { fetchUnitForm } from "../../lib/units-actions";
 import UnitEditForm from "./unit-edit-form";
 import { fetchObjectsForm } from "@/app/repair/objects/lib/objects-actions";
+import NotAuthorized from "@/app/lib/not_authorized";
 
 export default async function Page(props: { params: Promise<{ id: string }> }) {
   const session = await auth();
@@ -29,7 +30,12 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
   const sections = await fetchSectionsForm(current_sections);
   const tenant_id = user.tenant_id;
   const userPermissions = await fetchDocUserPermissions(user.id, 'units');
-
+  if (!(userPermissions.full_access
+    || userPermissions.editor
+    || userPermissions.author
+    || userPermissions.reader)) {
+    return <NotAuthorized />
+  }
   const unit: UnitForm = await fetchUnitForm(id, current_sections);
   if (!unit) {
     return <h3 className="text-xs font-medium text-gray-400">Not found! id: {id}</h3>;

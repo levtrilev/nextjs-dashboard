@@ -11,6 +11,7 @@ import { auth, getUser } from "@/auth";
 import { getCurrentSections } from "@/app/lib/common-actions";
 import { fetchDocUserPermissions } from "@/app/admin/permissions/lib/permissios-actions";
 import { checkReadonly } from "@/app/lib/common-utils";
+import NotAuthorized from "@/app/lib/not_authorized";
 
 export default async function Page(props: {
   searchParams?: Promise<{
@@ -28,6 +29,12 @@ export default async function Page(props: {
   }
   const pageUser = user;
   const userPermissions = await fetchDocUserPermissions(user.id, 'regions');
+  if (!(userPermissions.full_access
+    || userPermissions.editor
+    || userPermissions.author
+    || userPermissions.reader)) {
+    return <NotAuthorized />
+  }
   const regions = {};
   const readonly_permission = checkReadonly(userPermissions, regions, pageUser.id);
 

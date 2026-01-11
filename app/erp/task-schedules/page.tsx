@@ -13,6 +13,7 @@ import { CreateTaskSchedule } from "./lib/tsch-buttons";
 import TaskSchedulesTable from "./lib/taskSchedulesTable";
 import { fetchDocUserPermissions } from "@/app/admin/permissions/lib/permissios-actions";
 import { checkReadonly } from "@/app/lib/common-utils";
+import NotAuthorized from "@/app/lib/not_authorized";
 
 export default async function Page(props: {
   searchParams?: Promise<{
@@ -30,6 +31,12 @@ export default async function Page(props: {
   }
   const pageUser = user;
   const userPermissions = await fetchDocUserPermissions(user.id, 'task_schedules');
+  if (!(userPermissions.full_access
+    || userPermissions.editor
+    || userPermissions.author
+    || userPermissions.reader)) {
+    return <NotAuthorized />
+  }
   const task_schedules = {};
   const readonly_permission = checkReadonly(userPermissions, task_schedules, pageUser.id);
 

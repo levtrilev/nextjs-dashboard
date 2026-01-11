@@ -11,6 +11,7 @@ import { Unit } from "@/app/lib/definitions";
 import { fetchUnitsPages } from "./lib/units-actions";
 import { CreateUnit } from "./lib/units-buttons";
 import UnitsTable from "./lib/units-table";
+import NotAuthorized from "@/app/lib/not_authorized";
 
 export default async function Page(props: {
   searchParams?: Promise<{
@@ -32,6 +33,12 @@ export default async function Page(props: {
 
   const current_sections = await getCurrentSections(email);
   const userPermissions = await fetchDocUserPermissions(user.id, 'units');
+  if (!(userPermissions.full_access
+    || userPermissions.editor
+    || userPermissions.author
+    || userPermissions.reader)) {
+    return <NotAuthorized />
+  }
   const readonly_permission = checkReadonly(userPermissions, {}, user.id);
 
   const searchParams = await props.searchParams;

@@ -14,6 +14,7 @@ import pool from "@/db";
 import DocWrapper from "@/app/lib/doc-wrapper";
 import { fetchDocUserPermissions } from "@/app/admin/permissions/lib/permissios-actions";
 import { checkReadonly } from "@/app/lib/common-utils";
+import NotAuthorized from "@/app/lib/not_authorized";
 
 async function Page(props: { params: Promise<{ id: string }> }) {
     const session = await auth();
@@ -37,7 +38,12 @@ async function Page(props: { params: Promise<{ id: string }> }) {
     const sections = await fetchSectionsForm(current_sections);
     const tenant_id = (await fetchSectionById(region.section_id)).tenant_id;
     const userPermissions = await fetchDocUserPermissions(user?.id as string, 'regions');
-
+    if (!(userPermissions.full_access
+        || userPermissions.editor
+        || userPermissions.author
+        || userPermissions.reader)) {
+        return <NotAuthorized />
+    }
     //#region Lock Document
     // Проверяем, кто редактирует
     const isEditable =

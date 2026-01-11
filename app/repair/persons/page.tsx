@@ -13,6 +13,7 @@ import { Task } from "@/app/lib/definitions";
 import { fetchPersonsPages } from "./lib/persons-actions";
 import { CreatePerson } from "./lib/persons-buttons";
 import PersonsTable from "./lib/persons-table";
+import NotAuthorized from "@/app/lib/not_authorized";
 // import PersonsTable from "./lib/persons-table";
 
 export default async function Page(props: {
@@ -34,6 +35,12 @@ export default async function Page(props: {
   const pageUser = user;
   const current_sections = await getCurrentSections(email as string);
   const userPermissions = await fetchDocUserPermissions(user.id, 'persons');
+  if (!(userPermissions.full_access
+    || userPermissions.editor
+    || userPermissions.author
+    || userPermissions.reader)) {
+    return <NotAuthorized />
+  }
   const persons = {};
   const readonly_permission = checkReadonly(userPermissions, persons, pageUser.id);
 

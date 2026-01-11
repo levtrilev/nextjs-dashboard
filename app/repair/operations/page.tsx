@@ -10,6 +10,7 @@ import { checkReadonly } from "@/app/lib/common-utils";
 import { fetchOperationsPages } from "./lib/operations-actions";
 import { CreateOperation } from "./lib/operations-buttons";
 import OperationsTable from "./lib/operations-table";
+import NotAuthorized from "@/app/lib/not_authorized";
 // import { fetchOperationsPages } from "./lib/operations-actions";
 // import { CreateOperation } from "./lib/operations-buttons";
 // import OperationsTable from "./lib/operations-table";
@@ -35,6 +36,12 @@ export default async function Page(props: {
   const pageUser = user;
   const current_sections = await getCurrentSections(email as string);
   const userPermissions = await fetchDocUserPermissions(user.id, 'operations');
+  if (!(userPermissions.full_access
+    || userPermissions.editor
+    || userPermissions.author
+    || userPermissions.reader)) {
+    return <NotAuthorized />
+  }
   const operations = {};
   const readonly_permission = checkReadonly(userPermissions, operations, pageUser.id);
   //#endregion

@@ -12,6 +12,7 @@ import { getCurrentSections } from "@/app/lib/common-actions";
 import UserSessionComponent from "./user-session-component";
 import { fetchDocUserPermissions } from "@/app/admin/permissions/lib/permissios-actions";
 import { checkReadonly } from "@/app/lib/common-utils";
+import NotAuthorized from "@/app/lib/not_authorized";
 
 export default async function Page(props: {
   searchParams?: Promise<{
@@ -31,6 +32,12 @@ export default async function Page(props: {
   }
   const pageUser = user;
   const userPermissions = await fetchDocUserPermissions(user.id, 'legal_entities');
+  if (!(userPermissions.full_access
+    || userPermissions.editor
+    || userPermissions.author
+    || userPermissions.reader)) {
+    return <NotAuthorized />
+  }
   const legal_entities = {};
   const readonly_permission = checkReadonly(userPermissions, legal_entities, pageUser.id);
 

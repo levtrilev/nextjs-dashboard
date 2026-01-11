@@ -12,6 +12,7 @@ import { getCurrentSections } from "@/app/lib/common-actions";
 import { fetchAllTags } from "@/app/lib/tags/tags-actions";
 import DocWrapper from "@/app/lib/doc-wrapper";
 import { fetchDocUserPermissions } from "@/app/admin/permissions/lib/permissios-actions";
+import NotAuthorized from "@/app/lib/not_authorized";
 // import { useSelector } from "react-redux";
 // import { userSessionSlice, UserSessionState } from "@/app/lib/features/userSession/userSessionSlice";
 
@@ -28,6 +29,12 @@ async function Page(props: { params: Promise<{ id: string }> }) {
     const regions = await fetchRegions(current_sections);
     const sections = await fetchSectionsForm(current_sections);
     const userPermissions = await fetchDocUserPermissions(user?.id as string, 'legal_entities');
+        if (!(userPermissions.full_access
+            || userPermissions.editor
+            || userPermissions.author
+            || userPermissions.reader)) {
+            return <NotAuthorized />
+        }
     const params = await props.params;
     const id = params.id;
     // console.log("current_sections: " + current_sections);

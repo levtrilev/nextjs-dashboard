@@ -11,6 +11,7 @@ import { OperationForm } from "@/app/lib/definitions";
 import { fetchOperationForm } from "../../lib/operations-actions";
 import OperationEditForm from "./operation-edit-form";
 import { fetchWorksForm } from "@/app/repair/works/lib/works-actions";
+import NotAuthorized from "@/app/lib/not_authorized";
 
 async function Page(props: { params: Promise<{ id: string }> }) {
   //#region unified hooks and variables 
@@ -31,7 +32,12 @@ async function Page(props: { params: Promise<{ id: string }> }) {
   const sections = await fetchSectionsForm(current_sections);
   const tenant_id = pageUser.tenant_id;
   const userPermissions = await fetchDocUserPermissions(user.id, 'operations');
-
+  if (!(userPermissions.full_access
+    || userPermissions.editor
+    || userPermissions.author
+    || userPermissions.reader)) {
+    return <NotAuthorized />
+  }
   const params = await props.params;
   const id = params.id;
   //#endregion
@@ -65,7 +71,7 @@ async function Page(props: { params: Promise<{ id: string }> }) {
   const readonly_permission = checkReadonly(userPermissions, operation, pageUser.id);
   const readonly = readonly_locked || readonly_permission;
   const works = readonly ? [] : await fetchWorksForm(current_sections);
-  
+
   return (
     <div className="w-full">
       <div className="flex w-full items-center justify-between">

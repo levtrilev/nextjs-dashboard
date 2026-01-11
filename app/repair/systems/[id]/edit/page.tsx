@@ -11,6 +11,7 @@ import { checkReadonly } from "@/app/lib/common-utils";
 import { SystemForm } from "@/app/lib/definitions";
 import { fetchSystemForm } from "../../lib/systems-actions";
 import SystemEditForm from "./system-edit-form";
+import NotAuthorized from "@/app/lib/not_authorized";
 
 async function Page(props: { params: Promise<{ id: string }> }) {
     //#region unified hooks and variables 
@@ -28,7 +29,12 @@ async function Page(props: { params: Promise<{ id: string }> }) {
     // const tenant_id = (await fetchSectionById(object.section_id)).tenant_id;
     const tenant_id = pageUser.tenant_id;
     const userPermissions = await fetchDocUserPermissions(user.id, 'objects');
-
+    if (!(userPermissions.full_access
+        || userPermissions.editor
+        || userPermissions.author
+        || userPermissions.reader)) {
+        return <NotAuthorized />
+    }
     const params = await props.params;
     const id = params.id;
     //    #endregion

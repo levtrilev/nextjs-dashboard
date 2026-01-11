@@ -18,6 +18,7 @@ import { fetchTaskScheduleForm } from "../../lib/tsch-actions";
 import { fetchScheduleTasksForm, fetchTasksForm } from "@/app/erp/tasks/lib/task-actions";
 import DocWrapper from "@/app/lib/doc-wrapper";
 import { fetchDocUserPermissions } from "@/app/admin/permissions/lib/permissios-actions";
+import NotAuthorized from "@/app/lib/not_authorized";
 
 async function Page(props: { params: Promise<{ id: string }> }) {
 
@@ -45,6 +46,12 @@ async function Page(props: { params: Promise<{ id: string }> }) {
     // const tenant_id = (await fetchSectionById(taskSchedule.section_id)).tenant_id;
     const tenant_id = pageUser.tenant_id;
     const userPermissions = await fetchDocUserPermissions(user?.id as string, 'task_schedules');
+    if (!(userPermissions.full_access
+        || userPermissions.editor
+        || userPermissions.author
+        || userPermissions.reader)) {
+        return <NotAuthorized />
+    }
     return (
         <div className="w-full">
             <div className="flex w-full items-center justify-between">
