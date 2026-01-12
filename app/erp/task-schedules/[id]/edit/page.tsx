@@ -8,7 +8,7 @@ import { lusitana } from "@/app/ui/fonts";
 import { fetchSectionById, fetchSectionsForm } from "@/app/admin/sections/lib/sections-actions";
 import { fetchRegionsForm } from "@/app/erp/regions/lib/region-actions";
 import PremiseEditForm from "./tsch-edit-form";
-import { fetchLegalEntities } from "@/app/erp/legal-entities/lib/le-actions";
+import { fetchLegalEntities, fetchLegalEntitiesForm } from "@/app/erp/legal-entities/lib/legal-entities-actions";
 import { current } from "@reduxjs/toolkit";
 import { auth, getUser } from "@/auth";
 import { getCurrentSections } from "@/app/lib/common-actions";
@@ -40,7 +40,7 @@ async function Page(props: { params: Promise<{ id: string }> }) {
     }
     const sections = await fetchSectionsForm(current_sections);
     const premises = await fetchPremisesForm(current_sections);
-    const legalEntities = await fetchLegalEntities(current_sections);
+    const legalEntities = await fetchLegalEntitiesForm(current_sections);
     const tasks = await fetchScheduleTasksForm(id);
 
     // const tenant_id = (await fetchSectionById(taskSchedule.section_id)).tenant_id;

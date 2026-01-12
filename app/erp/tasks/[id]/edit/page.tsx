@@ -1,5 +1,5 @@
 
-// LegalEntity Page
+// Task Page
 
 import { TaskForm, User } from "@/app/lib/definitions";
 import { lusitana } from "@/app/ui/fonts";

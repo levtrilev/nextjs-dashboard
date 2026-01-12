@@ -381,6 +381,8 @@ export type Claim = {
   date_created?: Date;
   editing_by_user_id: string | null;
   editing_since: string | null;
+  access_tags: string[] | null;
+  user_tags: string[] | null;
 };
 export type ClaimForm = {
   id: string;
@@ -421,6 +423,8 @@ export type ClaimForm = {
   date_created?: Date;
   editing_by_user_id: string | null;
   editing_since: string | null;
+  access_tags: string[] | null;
+  user_tags: string[] | null;
 };
 export type Machine = {
   id: string;
@@ -732,20 +736,19 @@ export type RegionForm = {
 export type LegalEntity = {
   id: string;
   name: string;
-  fullname: string;
-  inn: string;
-  address_legal: string;
-  phone: string;
-  email: string;
-  contact: string;
+  fullname?: string | null; 
+  inn: string;          
+  address_legal?: string | null;
+  phone?: string | null;
+  email?: string | null;   
+  contact?: string | null;
   is_customer: boolean;
   is_supplier: boolean;
-  kpp: string;
+  kpp?: string | null;
   region_id: string;
   section_id: string;
-  access_tags: string[];
-  user_tags: string[];
-
+  access_tags: string[] | null;
+  user_tags: string[] | null;
   tenant_id: string;
   username?: string;
   author_id: string;
@@ -758,23 +761,22 @@ export type LegalEntity = {
 
 export type LegalEntityForm = {
   id: string;
-  name: string;
-  fullname: string;
-  inn: string;
-  address_legal: string;
-  phone: string;
-  email: string;
-  contact: string;
-  is_customer: boolean;
-  is_supplier: boolean;
-  kpp: string;
+  name: string;         // Название:
+  fullname?: string | null;     // Полное:
+  inn: string;          // ИНН:
+  address_legal?: string | null; // Юр.адрес:
+  phone?: string | null;        // Телефон:
+  email?: string | null;      // Email:
+  contact?: string | null;   // Контакт:
+  is_customer: boolean; // Покупатель?
+  is_supplier: boolean; // Поставщик?
+  kpp?: string | null;          // КПП:
   region_id: string;
   section_id: string;
-  region_name: string;
-  section_name: string;
-  access_tags: string[];
-  user_tags: string[];
-
+  region_name: string;      // Регион:
+  section_name: string;     // Раздел:
+  access_tags: string[] | null;    // Теги доступа:
+  user_tags: string[] | null;      // Теги:
   tenant_id: string;
   username?: string;
   author_id: string;

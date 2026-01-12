@@ -5,7 +5,7 @@ import TaskScheduleEditForm from "../[id]/edit/tsch-edit-form";
 import { TaskScheduleForm, User } from "@/app/lib/definitions";
 import { lusitana } from "@/app/ui/fonts";
 import { fetchSectionsForm } from "@/app/admin/sections/lib/sections-actions";
-import { fetchLegalEntities } from "@/app/erp/legal-entities/lib/le-actions";
+import { fetchLegalEntities, fetchLegalEntitiesForm } from "@/app/erp/legal-entities/lib/legal-entities-actions";
 import { auth, getUser } from "@/auth";
 import { getCurrentSections } from "@/app/lib/common-actions";
 import Breadcrumbs from '@/app/ui/invoices/breadcrumbs';
@@ -52,7 +52,7 @@ export default async function Page() {
 
   const sections = await fetchSectionsForm(current_sections);
   const premises = await fetchPremisesForm(current_sections);
-  const legalEntities = await fetchLegalEntities(current_sections);
+  const legalEntities = await fetchLegalEntitiesForm(current_sections);
   return (
     <main>
       <Breadcrumbs

@@ -37,6 +37,8 @@ export async function createClaim(claim: Claim) {
     hours_done,
     hours_rest,
     hours_percent,
+    user_tags,
+    access_tags,
     section_id,
     tenant_id,
     author_id,
@@ -61,7 +63,9 @@ export async function createClaim(claim: Claim) {
     hours_plan,
     hours_done,
     hours_rest,
-    hours_percent, 
+    hours_percent,
+    user_tags,
+    access_tags, 
         username, section_id, timestamptz,
         tenant_id, author_id
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22)
@@ -87,7 +91,8 @@ export async function createClaim(claim: Claim) {
         hours_done,
         hours_rest,
         hours_percent,
-        username,
+        JSON.stringify(user_tags),
+        JSON.stringify(access_tags),        username,
         section_id,
         date_created,
         tenant_id,
@@ -132,6 +137,8 @@ export async function updateClaim(claim: Claim) {
     hours_done,
     hours_rest,
     hours_percent,
+    user_tags,
+    access_tags,
     section_id,
     tenant_id,
     author_id,
@@ -160,12 +167,14 @@ export async function updateClaim(claim: Claim) {
           hours_done = $17,
           hours_rest = $18,
           hours_percent = $19,
-        username = $20,
-        section_id = $21,
-        tenant_id = $22,
-        author_id = $23,
+            user_tags = $20,
+            access_tags = $21,
+        username = $22,
+        section_id = $23,
+        tenant_id = $24,
+        author_id = $25,
         timestamptz = now()
-      WHERE id = $24
+      WHERE id = $26
     `,
       [
         name,
@@ -184,10 +193,12 @@ export async function updateClaim(claim: Claim) {
         approved_by_person_id,
         new Date(accepted_date as string),
         accepted_by_person_id,
-          hours_plan,
-          hours_done,
-          hours_rest,
-          hours_percent,
+        hours_plan,
+        hours_done,
+        hours_rest,
+        hours_percent,
+        JSON.stringify(user_tags),
+        JSON.stringify(access_tags),
         username,
         section_id,
         tenant_id,
@@ -208,7 +219,9 @@ export async function deleteClaim(id: string) {
     await pool.query(`DELETE FROM claims WHERE id = $1`, [id]);
   } catch (error) {
     console.error("Ошибка удаления Claim:", error);
-    throw new Error("Ошибка базы данных: Не удалось удалить Claim: " + String(error));
+    throw new Error(
+      "Ошибка базы данных: Не удалось удалить Claim: " + String(error)
+    );
   }
   revalidatePath("/repair/claims");
 }
@@ -244,7 +257,9 @@ export async function fetchClaim(id: string, current_sections: string) {
     hours_plan,
     hours_done,
     hours_rest,
-    hours_percent,        
+    hours_percent,
+    user_tags,
+    access_tags,        
         username,
         editing_by_user_id,
         editing_since,
@@ -290,7 +305,9 @@ export async function fetchClaimForm(id: string, current_sections: string) {
       claims.hours_plan,
       claims.hours_done,
       claims.hours_rest,
-      claims.hours_percent,         
+      claims.hours_percent,
+      claims.user_tags,
+      claims.access_tags,         
         claims.username,
         claims.section_id,
         claims.tenant_id,
@@ -355,7 +372,9 @@ export async function fetchClaims(current_sections: string) {
     hours_plan,
     hours_done,
     hours_rest,
-    hours_percent,          
+    hours_percent,
+    user_tags,
+    access_tags,          
         section_id,
         tenant_id,
         author_id,
@@ -402,7 +421,9 @@ export async function fetchClaimsForm(current_sections: string) {
       claims.hours_plan,
       claims.hours_done,
       claims.hours_rest,
-      claims.hours_percent,        
+      claims.hours_percent,
+      claims.user_tags,
+      claims.access_tags,        
         claims.username,
         claims.section_id,
         claims.tenant_id,
@@ -479,7 +500,9 @@ export async function fetchFilteredClaims(
       claims.hours_plan,
       claims.hours_done,
       claims.hours_rest,
-      claims.hours_percent,        
+      claims.hours_percent,
+      claims.user_tags,
+      claims.access_tags,        
         claims.username,
         claims.section_id,
         claims.tenant_id,
@@ -511,7 +534,13 @@ export async function fetchFilteredClaims(
       ORDER BY claims.name ASC
       LIMIT $4 OFFSET $5
     `,
-      [current_sections, `%${query}%`, machine_id, (rows_per_page || ITEMS_PER_PAGE), offset]
+      [
+        current_sections,
+        `%${query}%`,
+        machine_id,
+        rows_per_page || ITEMS_PER_PAGE,
+        offset,
+      ]
     );
 
     return claims.rows;
@@ -540,7 +569,9 @@ export async function fetchClaimsPages(
       [current_sections, `%${query}%`]
     );
 
-    const totalPages = Math.ceil(Number(count.rows[0].count) / (rows_per_page || ITEMS_PER_PAGE));
+    const totalPages = Math.ceil(
+      Number(count.rows[0].count) / (rows_per_page || ITEMS_PER_PAGE)
+    );
     return totalPages;
   } catch (error) {
     console.error("Ошибка подсчёта страниц Claims:", error);
@@ -553,7 +584,10 @@ export async function fetchClaimsPages(
 //#region FetchPersonByUser Claim
 
 // client side: userId = useDocumentStore.getState().sessionUser.id;
-export async function fetchPersonByUser(userId: string, current_sections: string[]) {
+export async function fetchPersonByUser(
+  userId: string,
+  current_sections: string[]
+) {
   try {
     const data = await pool.query<Person>(
       `

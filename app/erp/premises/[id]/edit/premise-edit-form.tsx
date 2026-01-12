@@ -1,7 +1,7 @@
 // Premise EditForm
 'use client';
 import { useEffect, useState } from "react";
-import { LegalEntity, PremiseForm, RegionForm, SectionForm } from "@/app/lib/definitions";
+import { LegalEntityForm, PremiseForm, RegionForm, SectionForm } from "@/app/lib/definitions";
 import { createPremise, updatePremise } from "../../lib/premises-actions";
 import BtnSectionsRef from "@/app/admin/sections/lib/btn-sections-ref";
 import BtnRegionsRef from "@/app/erp/regions/lib/btn-regions-ref";
@@ -23,7 +23,7 @@ interface IEditFormProps {
   readonly: boolean,
   // sections: SectionForm[],
   regions: RegionForm[],
-  legalEntities: LegalEntity[],
+  legalEntities: LegalEntityForm[],
 }
 //#region zod schema
 const PremiseFormSchemaFull = z.object({
@@ -121,7 +121,7 @@ export default function PremiseEditForm(props: IEditFormProps) {
     }));
   }, [sessionUserId]);
   //#endregion
-  
+
   const [formData, setFormData] = useState<FormData>(props.premise);
   const validate = () => {
     const res = PremiseFormSchema.safeParse({
@@ -141,8 +141,8 @@ export default function PremiseEditForm(props: IEditFormProps) {
     const errors = validate();
     if (errors) {
       setShowErrors(true);
-      console.log("ошибки есть: " + JSON.stringify(errors));
-      console.log(`author_id: ${formData.author_id}, editor_id: ${formData.editor_id}`);
+      // console.log("ошибки есть: " + JSON.stringify(errors));
+      // console.log(`author_id: ${formData.author_id}, editor_id: ${formData.editor_id}`);
       return;
     }
     if (formData.user_tags) {
@@ -363,7 +363,7 @@ export default function PremiseEditForm(props: IEditFormProps) {
               />
               {!props.readonly && <BtnLegalEntitiesRef
                 legalEntities={props.legalEntities}
-                handleSelectLE={handleSelectOperator}
+                handleSelectLegalEntity={handleSelectOperator}
                 elementIdPrefix="operator_name_"
               />}
             </div>
@@ -396,7 +396,7 @@ export default function PremiseEditForm(props: IEditFormProps) {
               />
               {!props.readonly && <BtnLegalEntitiesRef
                 legalEntities={props.legalEntities}
-                handleSelectLE={handleSelectOwner}
+                handleSelectLegalEntity={handleSelectOwner}
                 elementIdPrefix="owner_name_"
               />}
             </div>
@@ -623,6 +623,13 @@ export default function PremiseEditForm(props: IEditFormProps) {
           handleFormInputChange={handleChangeAccessTags}
           readonly={props.readonly}
         />
+      </div>
+      <div id="form-error" aria-live="polite" aria-atomic="true">
+        {errors &&
+          <p className="mt-2 text-sm text-red-500" key={'form_errors'}>
+            {JSON.stringify(errors)}
+          </p>
+        }
       </div>
       {/* button area */}
       <div className="flex justify-between mt-4 mr-4">

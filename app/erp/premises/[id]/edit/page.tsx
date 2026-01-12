@@ -7,13 +7,13 @@ import { lusitana } from "@/app/ui/fonts";
 import { fetchSectionById, fetchSectionsForm } from "@/app/admin/sections/lib/sections-actions";
 import { fetchRegionsForm } from "@/app/erp/regions/lib/region-actions";
 import PremiseEditForm from "./premise-edit-form";
-import { fetchLegalEntities } from "@/app/erp/legal-entities/lib/le-actions";
 import { auth, getUser } from "@/auth";
 import { getCurrentSections } from "@/app/lib/common-actions";
 import { fetchDocUserPermissions } from "@/app/admin/permissions/lib/permissios-actions";
 import DocWrapper from "../../../../lib/doc-wrapper";
 import { checkReadonly } from "@/app/lib/common-utils";
 import NotAuthorized from "@/app/lib/not_authorized";
+import { fetchLegalEntities, fetchLegalEntitiesForm } from "@/app/erp/legal-entities/lib/legal-entities-actions";
 
 async function Page(props: { params: Promise<{ id: string }> }) {
 
@@ -31,7 +31,7 @@ async function Page(props: { params: Promise<{ id: string }> }) {
     }
     const sections = await fetchSectionsForm(current_sections);
     const regions = await fetchRegionsForm(current_sections);
-    const legalEntities = await fetchLegalEntities(current_sections);
+    const legalEntities = await fetchLegalEntitiesForm(current_sections);
     const tenant_id = (await fetchSectionById(premise.section_id)).tenant_id;
     const user = await getUser(email as string);
     const userPermissions = await fetchDocUserPermissions(user?.id as string, 'premises');

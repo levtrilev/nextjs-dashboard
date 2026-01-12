@@ -3,7 +3,7 @@
 
 'use client';
 import { useEffect, useState } from "react";
-import { LegalEntity, TaskScheduleForm, RegionForm, SectionForm, PremiseForm, TaskForm } from "@/app/lib/definitions";
+import { LegalEntity, TaskScheduleForm, RegionForm, SectionForm, PremiseForm, TaskForm, LegalEntityForm } from "@/app/lib/definitions";
 import { createTaskSchedule, updateTaskSchedule } from "../../lib/tsch-actions";
 import { formatDateForInput } from "@/app/lib/common-utils";
 import BtnSectionsRef from "@/app/admin/sections/lib/btn-sections-ref";
@@ -24,7 +24,7 @@ interface IEditFormProps {
   taskSchedule: TaskScheduleForm,
   // sections: SectionForm[],
   premises: PremiseForm[],
-  legalEntities: LegalEntity[],
+  legalEntities: LegalEntityForm[],
   tasks: TaskForm[],
 }
 
@@ -259,7 +259,7 @@ export default function TaskScheduleEditForm(props: IEditFormProps) {
               <InputField name="schedule_owner_name" value={formData.schedule_owner_name}
                 label="Владелец плана:" type="text" w={["w-6/16", "w-11/16"]}
                 onChange={(value) => handleInputChange('schedule_owner_name', value)}
-                refBook={<BtnLegalEntitiesRef legalEntities={props.legalEntities} handleSelectLE={handleSelectOwner} elementIdPrefix="schedule_owner_name_" />}
+                refBook={<BtnLegalEntitiesRef legalEntities={props.legalEntities} handleSelectLegalEntity={handleSelectOwner} elementIdPrefix="schedule_owner_name_" />}
                 readonly={readonly}
                 errors={errors?.schedule_owner_name as string[] | undefined}
               />

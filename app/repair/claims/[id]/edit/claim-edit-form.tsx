@@ -17,6 +17,7 @@ import {
   useIsDocumentChanged,
   useMessageBox
 } from "@/app/store/useDocumentStore";
+import { useAccessTagStore, useUserTagStore } from "@/app/lib/tags/tag-store";
 import InputField from "@/app/lib/input-field";
 import { useRouter } from "next/navigation";
 import { createClaim, fetchPersonByUser, updateClaim } from "../../lib/claims-actions";
@@ -26,6 +27,9 @@ import BtnLocationsRef from "@/app/repair/locations/lib/btn-locations-ref";
 import { machine } from "os";
 import BtnSystemsRef from "@/app/repair/systems/lib/btn-systems-ref";
 import BtnPersonsRef from "@/app/repair/persons/lib/btn-persons-ref";
+import { lusitana } from "@/app/ui/fonts";
+import { TagInput } from "@/app/lib/tags/tag-input";
+import { upsertTags } from "@/app/lib/tags/tags-actions";
 
 interface IEditFormProps {
   claim: ClaimForm;
@@ -107,6 +111,8 @@ const ClaimFormSchemaFull = z.object({
   tenant_id: z.string(),
   editing_by_user_id: z.string().nullable(),
   editing_since: z.string().nullable(),
+  access_tags: z.array(z.string()).nullable(),
+  user_tags: z.array(z.string()).nullable(),
 });
 
 const ClaimFormSchema = ClaimFormSchemaFull.omit({
@@ -125,6 +131,8 @@ export type FormData = z.infer<typeof ClaimFormSchemaFull>;
 export default function ClaimEditForm(props: IEditFormProps) {
   const userSections = useDocumentStore.getState().userSections;
   const sessionUser = useDocumentStore.getState().sessionUser;
+  const addUserTag = useUserTagStore().addTag;
+  const addAccessTag = useAccessTagStore().addTag;
 
   //#region unified form hooks and variables 
   const docTenantId = useDocumentStore.getState().documentTenantId;
@@ -182,6 +190,15 @@ export default function ClaimEditForm(props: IEditFormProps) {
     }
 
     try {
+      if (formData.user_tags) {
+        await upsertTags(formData.user_tags, docTenantId);
+        useDocumentStore.getState().addAllTags(formData.user_tags);
+      }
+      if (formData.access_tags) {
+        await upsertTags(formData.access_tags, docTenantId);
+        useDocumentStore.getState().addAllTags(formData.access_tags);
+      }
+
       if (formData.id === "") {
         await createClaim(formData);
         setTimeout(() => {
@@ -328,6 +345,22 @@ export default function ClaimEditForm(props: IEditFormProps) {
     }));
     docChanged();
   }
+  const handleChangeUserTags = (event: any) => {
+    const currentTags = useUserTagStore.getState().selectedTags
+    setFormData((prev) => ({
+      ...prev,
+      user_tags: currentTags,
+    }));
+    docChanged();
+  };
+  const handleChangeAccessTags = (event: any) => {
+    const currentTags = useAccessTagStore.getState().selectedTags
+    setFormData((prev) => ({
+      ...prev,
+      access_tags: currentTags,
+    }));
+    docChanged();
+  };
   const handleRedirectBack = () => {
     window.history.back();
   };
@@ -656,6 +689,38 @@ export default function ClaimEditForm(props: IEditFormProps) {
                 />
               </div>
             </div>
+
+          </div>
+
+          {/* user_tags */}
+          <div className="flex max-w-[1150] mt-1">
+            <label
+              htmlFor="user_tags"
+              className={`${lusitana.className} w-[130px] font-medium flex items-center p-2 text-gray-500`}>
+              Тэги:
+            </label>
+            <TagInput
+              id="user_tags"
+              value={formData.user_tags}
+              onAdd={addUserTag}
+              handleFormInputChange={handleChangeUserTags}
+              readonly={props.readonly}
+            />
+          </div>
+          {/* access_tags */}
+          <div className="flex max-w-[1150] mt-1">
+            <label
+              htmlFor="access_tags"
+              className={`${lusitana.className} w-[130px] font-medium flex items-center p-2 text-gray-500`}>
+              Тэги доступа:
+            </label>
+            <TagInput
+              id="access_tags"
+              value={formData.access_tags}
+              onAdd={addAccessTag}
+              handleFormInputChange={handleChangeAccessTags}
+              readonly={props.readonly}
+            />
           </div>
 
           {/* button area */}

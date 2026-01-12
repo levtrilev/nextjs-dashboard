@@ -90,7 +90,6 @@ export async function createRegion(prevState: RegionState, formData: FormData) {
     section_id: formData.get("section_id"),
     author_id: formData.get("author_id"),
   });
-  // If form validation fails, return errors early. Otherwise, continue.
   if (!validatedFields.success) {
     console.log(validatedFields.error.flatten().fieldErrors);
     return {
@@ -98,12 +97,9 @@ export async function createRegion(prevState: RegionState, formData: FormData) {
       message: "Неверные данные! Failed to Create region.",
     };
   }
-  // Prepare data for insertion into the database
   const { name, capital, area, code, section_id, author_id } = validatedFields.data;
-  // SELECT event_time_tz AT TIME ZONE 'Europe/Moscow' FROM example;
   const date = new Date().toISOString(); //.split("T")[0]
-  // const is_customer = str_is_customer === "true" ? true : false;
-  // const is_supplier = str_is_supplier === "true" ? false : true;
+
 
   const session = await auth();
   const username = session?.user?.name;

@@ -6,7 +6,6 @@ import { PremiseForm, User } from "@/app/lib/definitions";
 import { lusitana } from "@/app/ui/fonts";
 import { fetchSectionsForm } from "@/app/admin/sections/lib/sections-actions";
 import { fetchRegionsForm } from "@/app/erp/regions/lib/region-actions";
-import { fetchLegalEntities } from "@/app/erp/legal-entities/lib/le-actions";
 import { auth, getUser } from "@/auth";
 import { getCurrentSections } from "@/app/lib/common-actions";
 import Breadcrumbs from '@/app/ui/invoices/breadcrumbs';
@@ -14,13 +13,13 @@ import { DateTime } from "next-auth/providers/kakao";
 import { checkReadonly, formatDateForInput } from "@/app/lib/common-utils";
 import { fetchDocUserPermissions } from "@/app/admin/permissions/lib/permissios-actions";
 import DocWrapper from "../../../lib/doc-wrapper";
+import { fetchLegalEntities, fetchLegalEntitiesForm } from "../../legal-entities/lib/legal-entities-actions";
 
 export default async function Page() {
   const session = await auth();
   const email = session ? (session.user ? session.user.email : "") : "";
   const user = await getUser(email as string);
   const current_sections = await getCurrentSections(email as string);
-  // const userPermissions = await fetchDocUserPermissions(session?.user?.id as string, 'premises');
   const userPermissions = await fetchDocUserPermissions(user?.id as string, 'premises');
   const pageUser = user ? user : {} as User
   const tenant_id = user ? user.tenant_id : "00000000-0000-0000-0000-000000000000";
@@ -64,7 +63,7 @@ export default async function Page() {
 
   const sections = await fetchSectionsForm(current_sections);
   const regions = await fetchRegionsForm(current_sections);
-  const legalEntities = await fetchLegalEntities(current_sections);
+  const legalEntities = await fetchLegalEntitiesForm(current_sections);
   return (
     <main>
       <Breadcrumbs
