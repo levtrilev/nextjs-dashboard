@@ -13,11 +13,11 @@ const pool_bak = new Pool({
 });
 
 const pool = new Pool({
-  host: process.env.POSTGRES_HOST,
+  host: process.env.NEON_PGHOST,
   // host: process.env.POSTGRES_URL,
-  user: process.env.POSTGRES_USER,
-  password: process.env.POSTGRES_PASSWORD,
-  database: process.env.POSTGRES_DATABASE,
+  user: process.env.NEON_POSTGRES_USER,
+  password: process.env.NEON_POSTGRES_PASSWORD,
+  database: process.env.NEON_POSTGRES_DATABASE,
   port: 5432, // порт PostgreSQL по умолчанию
   max: 20, // максимальное количество клиентов в пуле
   idleTimeoutMillis: 300000, // время ожидания перед закрытием неактивного соединения
