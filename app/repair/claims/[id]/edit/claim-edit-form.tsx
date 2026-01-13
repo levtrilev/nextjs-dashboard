@@ -67,6 +67,10 @@ const ClaimFormSchemaFull = z.object({
   }),
   claim_date: z.string()
     .regex(/^\d{4}-\d{2}-\d{2}$/, 'Неверный формат даты')
+    .nullable()
+    .refine((val) => val !== null, {
+      message: 'Дата заявки не указана',
+    })
     .refine((s) => !isNaN(Date.parse(s)), 'Некорректная дата'),
   // claim_date: ClaimDateSchema,
   created_by_person_id: z.string().uuid(),
@@ -428,7 +432,15 @@ export default function ClaimEditForm(props: IEditFormProps) {
                     onChange={(e) => handleClaimDateChange(String(e.target.value))}
                     disabled={props.readonly}
                   />
-                  {/* // errors={errors?.claim_date?._errors as string[] | undefined} */}
+                  {/* Блок с выводом ошибок */}
+                  <div id={"claim_date-error"} aria-live="polite" aria-atomic="true">
+                    {errors &&
+                      errors?.claim_date?._errors.map((error, index) => (
+                        <p className="mt-2 text-xs text-red-500" key={index}>
+                          {error}
+                        </p>
+                      ))}
+                  </div>
 
                   {/* priority */}
                   <label htmlFor="priority" className="text-sm font-medium flex items-center p-2">Приоритет:</label>
@@ -722,7 +734,13 @@ export default function ClaimEditForm(props: IEditFormProps) {
               readonly={props.readonly}
             />
           </div>
-
+          <div id="form-error" aria-live="polite" aria-atomic="true">
+            {errors &&
+              <p className="mt-2 text-sm text-red-500" key={'form_errors'}>
+                {JSON.stringify(errors)}
+              </p>
+            }
+          </div>
           {/* button area */}
           <div className="flex justify-between mt-4 mr-4">
             <div className="flex w-full md:w-3/4">

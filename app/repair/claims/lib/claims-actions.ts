@@ -68,7 +68,7 @@ export async function createClaim(claim: Claim) {
     access_tags, 
         username, section_id, timestamptz,
         tenant_id, author_id
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22)
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24)
     `,
       [
         name,
@@ -92,7 +92,8 @@ export async function createClaim(claim: Claim) {
         hours_rest,
         hours_percent,
         JSON.stringify(user_tags),
-        JSON.stringify(access_tags),        username,
+        JSON.stringify(access_tags),        
+        username,
         section_id,
         date_created,
         tenant_id,
@@ -302,10 +303,10 @@ export async function fetchClaimForm(id: string, current_sections: string) {
       claims.approved_by_person_id,
       TO_CHAR(claims.accepted_date AT TIME ZONE 'Europe/Moscow', 'YYYY-MM-DD"T"HH24:MI') AS accepted_date,
       claims.accepted_by_person_id,
-      claims.hours_plan,
-      claims.hours_done,
-      claims.hours_rest,
-      claims.hours_percent,
+      COALESCE(claims.hours_plan, '') as hours_plan,
+      COALESCE(claims.hours_done, '') as hours_done,
+      COALESCE(claims.hours_rest, '') as hours_rest,
+      COALESCE(claims.hours_percent, '') as hours_percent,
       claims.user_tags,
       claims.access_tags,         
         claims.username,

@@ -7,7 +7,7 @@ import Breadcrumbs from '@/app/ui/invoices/breadcrumbs';
 import { checkReadonly, formatDateForInput } from "@/app/lib/common-utils";
 import DocWrapper from "@/app/lib/doc-wrapper";
 import { fetchDocUserPermissions } from "@/app/admin/permissions/lib/permissios-actions";
-import { ClaimForm } from "@/app/lib/definitions";
+import { Claim, ClaimForm } from "@/app/lib/definitions";
 import ClaimEditForm from "../[id]/edit/claim-edit-form";
 import { read } from "fs";
 import { fetchMachinesForm } from "../../machines/lib/machines-actions";
@@ -73,6 +73,9 @@ export default async function Page() {
     editor_id: "",
     editing_since: null,
     editing_by_user_id: null,
+    // approved_date, accepted_date, machine_unit_name, machine_machine_status
+    access_tags: null,    // Теги доступа:
+    user_tags: null, 
   } as ClaimForm;
 
   const readonly_permission = checkReadonly(userPermissions, claim, pageUser.id);
