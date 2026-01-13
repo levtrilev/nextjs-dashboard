@@ -1,6 +1,6 @@
 import { Pool } from 'pg';
 
-const pool__localhost = new Pool({
+const pool_localhost = new Pool({
   // host: process.env.DB_HOST,
   host: process.env.DB_HOST_127,
   // host: process.env.DB_HOST_MYSITE,
