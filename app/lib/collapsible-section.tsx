@@ -21,7 +21,11 @@ const CollapsibleSection = (props: ICollapsibleSectionProps) => {
 
             {/* Контент, который сворачивается */}
             <div
-                className={`overflow-hidden transition-all duration-300 ease-in-out ${isCollapsed ? 'max-h-0 opacity-0' : 'max-h-96 opacity-100'
+                // className={`overflow-hidden transition-all duration-300 ease-in-out ${isCollapsed ? 'max-h-0 opacity-0' : 'max-h-96 opacity-100'
+                //     }`}
+                className={`overflow-hidden transition-all duration-300 ease-in-out ${isCollapsed
+                    ? 'max-h-0 opacity-0'
+                    : 'max-h-[2000px] opacity-100'
                     }`}
             >
                 <div className="mt-2 text-gray-700">

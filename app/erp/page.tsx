@@ -1,9 +1,32 @@
 import CollapsibleSection from "../lib/collapsible-section";
+import DocumentationPage from "./doc/page";
 
 export default function Page() {
   return (
     <div className="flex flex-col gap-y-2 items-left max-w-[1300px]">
-      <h2>нафиг ERP main page</h2>
+      <div className="flex">
+        <h2>нафиг ERP main page</h2>
+        <a
+          className="ml-4 flex items-center text-blue-600 hover:text-blue-800 transition-colors"
+          href="https://github.com/levtrilev/nowayerp"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <svg
+            className="w-5 h-5 mr-2"
+            fill="currentColor"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path
+              fillRule="evenodd"
+              d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.866-.013-1.7-2.782.605-3.369-1.342-3.369-1.342-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.954 0-1.091.39-1.984 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.026 2.747-1.026.546 1.378.203 2.397.1 2.65.64.704 1.028 1.597 1.028 2.688 0 3.845-2.339 4.693-4.566 4.94.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482C18.136 20.194 21 16.439 21 12.017 21 6.484 16.523 2 12 2z"
+              clipRule="evenodd"
+            />
+          </svg>
+          nowayerp — репозиторий на GitHub
+        </a>
+      </div>
       <CollapsibleSection header={"ERP - это тяжело. Это надо объяснять?"}>
         <p>
           ERP это дорого, долго, нудно, некрасиво. Даже когда ERP уже развернута - люди с трудом и главное с неохотой ее осваивают.
@@ -63,6 +86,49 @@ export default function Page() {
           Доступ по НЕ-тэгам : SELECT * FROM records WHERE NOT (tags ? 'confidential')
         </div>
       </CollapsibleSection>
+      <CollapsibleSection header={"Концепция RBAC — Role-Based Access Control (контроль доступа на основе ролей)"}>
+        <>
+          <h3 className="mt-4 text-lg font-semibold">Суть RBAC</h3>
+          <p>
+            RBAC — это модель управления доступом, при которой права пользователей к ресурсам системы определяются не напрямую, а через <strong>роли</strong>, которые этим пользователям назначены. Каждая роль содержит набор <strong>разрешений</strong> (permissions), определяющих, какие действия разрешено выполнять над какими объектами.
+          </p>
+
+          <h3 className="mt-4 text-lg font-semibold">Основные компоненты RBAC</h3>
+          <ol className="list-decimal pl-5 space-y-1 mt-2">
+            <li><strong>Пользователь (User)</strong> — субъект, который взаимодействует с системой.</li>
+            <li><strong>Роль (Role)</strong> — семантическая группа привилегий (например: «Администратор», «Редактор», «Читатель»).</li>
+            <li><strong>Разрешение (Permission)</strong> — право выполнять конкретное действие над конкретным ресурсом (например: <code className="bg-gray-100 px-1 rounded">document:read</code>, <code className="bg-gray-100 px-1 rounded">document:write</code>, <code className="bg-gray-100 px-1 rounded">user:delete</code>).</li>
+            <li><strong>Назначение ролей</strong> — связь между пользователем и одной или несколькими ролями.</li>
+            <li><strong>Наследование ролей</strong> (опционально) — одна роль может включать другую (например, «Администратор» наследует все права «Редактора»).</li>
+          </ol>
+
+          <h3 className="mt-4 text-lg font-semibold">Пример</h3>
+          <ul className="list-disc pl-5 space-y-1 mt-2">
+            <li>Роль <strong>«Читатель»</strong> → разрешения: <code className="bg-gray-100 px-1 rounded">document:read</code></li>
+            <li>Роль <strong>«Редактор»</strong> → разрешения: <code className="bg-gray-100 px-1 rounded">document:read</code>, <code className="bg-gray-100 px-1 rounded">document:write</code></li>
+            <li>Пользователь <strong>Анна</strong> → роли: «Редактор» → может читать и редактировать документы.</li>
+          </ul>
+
+          <h3 className="mt-4 text-lg font-semibold">Преимущества RBAC</h3>
+          <ul className="list-disc pl-5 space-y-1 mt-2">
+            <li>Упрощает управление доступом: вместо настройки прав для каждого пользователя — настраивается несколько ролей.</li>
+            <li>Повышает безопасность за счёт централизованного контроля.</li>
+            <li>Облегчает аудит и соответствие требованиям.</li>
+            <li>Масштабируется при росте числа пользователей и ресурсов.</li>
+          </ul>
+
+          <h3 className="mt-4 text-lg font-semibold">RBAC в контексте SaaS</h3>
+          <p>В SaaS-приложениях RBAC часто комбинируется с <em>multi-tenancy</em>:</p>
+          <ul className="list-disc pl-5 space-y-1 mt-2">
+            <li>Роли могут быть <strong>глобальными</strong> (например, «Суперадмин платформы») или <strong>тенант-специфичными</strong> (например, «Менеджер в компании X»).</li>
+            <li>Разрешения применяются <strong>в рамках одного тенанта</strong>, чтобы пользователи из разных организаций не имели доступа друг к другу.</li>
+          </ul>
+          <p>
+            Также RBAC интегрируется с механизмами <strong>блокировки документов</strong>: например, только пользователи с ролью «Редактор» могут установить эксклюзивную блокировку на документ для совместного редактирования.
+          </p>
+        </>
+      </CollapsibleSection>
+      <DocumentationPage />
     </div>
   );
 }

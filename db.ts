@@ -1,6 +1,6 @@
 import { Pool } from 'pg';
 
-const pool_bak = new Pool({
+const pool_localhost = new Pool({
   // host: process.env.DB_HOST,
   host: process.env.DB_HOST_127,
   // host: process.env.DB_HOST_MYSITE,
@@ -12,7 +12,7 @@ const pool_bak = new Pool({
   idleTimeoutMillis: 300000, // время ожидания перед закрытием неактивного соединения
 });
 
-const pool = new Pool({
+const pool_neon = new Pool({
   host: process.env.NEON_PGHOST,
   // host: process.env.POSTGRES_URL,
   user: process.env.NEON_POSTGRES_USER,
@@ -24,7 +24,7 @@ const pool = new Pool({
   ssl: { rejectUnauthorized: true },
 });
 
-//   sslmode: require,
+const pool = pool_neon;
 
 
 export default pool;

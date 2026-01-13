@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Архитектура типового прикладного объекта</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.6;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 2rem;
+      color: #333;
+    }
+    h1, h2, h3 {
+      cursor: pointer;
+      user-select: none;
+    }
+    h1 {
+      border-bottom: 2px solid #0070f3;
+      padding-bottom: 0.5rem;
+      margin-top: 2rem;
+    }
+    h2 {
+      margin-top: 1.5rem;
+      color: #0070f3;
+    }
+    h3 {
+      margin-top: 1rem;
+      color: #555;
+    }
+    .content {
+      display: none;
+      padding-left: 1rem;
+      border-left: 2px solid #eee;
+      margin: 0.5rem 0 1.5rem 0;
+    }
+    .content.active {
+      display: block;
+    }
+    pre {
+      background: #f6f8fa;
+      padding: 1rem;
+      border-radius: 6px;
+      overflow-x: auto;
+    }
+    code {
+      font-family: SFMono-Regular, Consolas, 'Liberation Mono', monospace;
+    }
+  </style>
+</head>
+<body>
+  <h1 onclick="toggleAll()">Архитектура типового прикладного объекта</h1>
+
+  <h2 onclick="toggle(this)">1. Организация доступа для независимых организаций (Multi-Tenant SaaS)</h2>
+  <div class="content">
+    <p>Каждая запись содержит обязательное поле <code>tenant_id</code> типа <code>uuid</code>. Это позволяет:</p>
+    <ul>
+      <li>Изолировать данные разных клиентов (тенантов) на уровне приложения.</li>
+      <li>Использовать одну и ту же кодовую базу для множества организаций.</li>
+      <li>Обеспечивать безопасность: пользователь никогда не видит данные чужого тенанта, даже при прямом указании <code>id</code>.</li>
+    </ul>
+    <p>Все запросы к БД фильтруются по <code>tenant_id</code> и <code>section_id</code> — даже если клиентская часть скомпрометирована.</p>
+  </div>
+
+  <h2 onclick="toggle(this)">2. Использование разделов (Sections) для разграничения доступа</h2>
+  <div class="content">
+    <p>Поле <code>section_id</code> связывает запись с конкретным разделом (например, «Цех №1»). Разделы:</p>
+    <ul>
+      <li>Принадлежат одному <code>tenant_id</code>.</li>
+      <li>Назначаются пользователю при регистрации или администратором.</li>
+      <li>Определяют, какие данные он может просматривать/редактировать.</li>
+    </ul>
+    <p>Все SQL-запросы используют конструкцию:</p>
+    <pre><code>WITH your_claims AS (
+  SELECT * FROM claims WHERE section_id = ANY ($1::uuid[])
+)</code></pre>
+    <p>где <code>$1</code> — массив <code>section_id</code>, доступных текущему пользователю.</p>
+  </div>
+
+  <h2 onclick="toggle(this)">3. Ролевая модель: много ролей одному пользователю</h2>
+  <div class="content">
+    <p>Пользователь может иметь несколько ролей одновременно. Для каждой сущности определяются:</p>
+    <ul>
+      <li><code>full_access</code></li>
+      <li><code>editor</code></li>
+      <li><code>author</code></li>
+      <li><code>reader</code></li>
+    </ul>
+    <p>Роли хранятся в таблице <code>doc_user_permissions</code> и загружаются при входе.</p>
+    <p>Права применяются в сочетании с разделами: пользователь может быть редактором в одном разделе и только читателем — в другом.</p>
+    <p>Интерфейс автоматически блокирует кнопки «Создать», «Удалить» при отсутствии прав.</p>
+  </div>
+
+  <h2 onclick="toggle(this)">4. Многопользовательская работа</h2>
+  <div class="content">
+    <p>Для предотвращения конфликтов используется механизм оптимистичной блокировки:</p>
+    <ul>
+      <li>При открытии документа вызывается <code>tryLockRecord(tableName, id, userId)</code>.</li>
+      <li>Если документ уже заблокирован — форма открывается в режиме «только для чтения».</li>
+      <li>Блокировка снимается при закрытии формы или по таймауту (30 минут).</li>
+    </ul>
+    <p>Поля: <code>editing_by_user_id</code>, <code>editing_since</code>.</p>
+  </div>
+
+  <h2 onclick="toggle(this)">5. Простота кода и поддерживаемость</h2>
+  <div class="content">
+    <h3 onclick="toggle(this)">5.1 «Простые» объекты без сложных приёмов</h3>
+    <div class="content">
+      <p>Каждый прикладной объект:</p>
+      <ul>
+        <li>Не использует метапрограммирование, декораторы, сложные абстракции.</li>
+        <li>Следует единообразной структуре: Page → Form → Actions → Table.</li>
+        <li>Содержит понятные комментарии на русском языке прямо в интерфейсах (<code>// Название:</code>).</li>
+      </ul>
+    </div>
+
+    <h3 onclick="toggle(this)">5.2 Сумма мало связанных объектов</h3>
+    <div class="content">
+      <p>Вся система — это набор автономных папок (например, <code>/claims/</code>, <code>/legal-entities/</code>).</p>
+      <p>Добавление новой сущности = копирование шаблона + замена имён.</p>
+      <p>Маршруты Next.js App Router автоматически соответствуют структуре файлов.</p>
+    </div>
+
+    <h3 onclick="toggle(this)">5.3 Логичное именование для LLM</h3>
+    <div class="content">
+      <p>Имена близки к естественному английскому языку:</p>
+      <ul>
+        <li>Типы: <code>LegalEntity</code>, <code>ClaimForm</code></li>
+        <li>Файлы: <code>legal-entities-actions.ts</code>, <code>claim-edit-form.tsx</code></li>
+        <li>Поля: <code>fullname</code>, <code>is_customer</code>, <code>section_name</code></li>
+      </ul>
+      <p>Это позволяет успешно генерировать новые модули с помощью LLM, но технические решения остаются за автором системы.</p>
+    </div>
+  </div>
+
+  <h2 onclick="toggle(this)">6. Оценка архитектуры</h2>
+  <div class="content">
+    <p><strong>Преимущества:</strong></p>
+    <ul>
+      <li>Безопасность «из коробки»: изоляция tenant + section на сервере.</li>
+      <li>Готовность к SaaS: multi-tenancy, RBAC, блокировка документов.</li>
+      <li>LLM-friendly: предсказуемая структура, типизация, комментарии.</li>
+      <li>Низкий порог входа для junior-разработчиков.</li>
+    </ul>
+    <p><strong>Недостатки / риски:</strong></p>
+    <ul>
+      <li>Дублирование кода между сущностями (нет shared abstraction layer).</li>
+      <li>Отсутствие RLS (Row Level Security) в PostgreSQL — всё в приложении.</li>
+      <li>При большом числе сущностей (>50) поддержка усложняется.</li>
+    </ul>
+  </div>
+
+  <h2 onclick="toggle(this)">7. План развития системы</h2>
+  <div class="content">
+    <ol>
+      <li><strong>Стандартизация:</strong> выделить ядро (<code>/lib/core</code>), создать CLI-генератор (<code>npx create-entity LegalEntity</code>).</li>
+      <li><strong>Устранение дублирования:</strong> generic-компоненты, reusable hooks.</li>
+      <li><strong>Расширение функционала:</strong> аудит изменений, экспорт в PDF/Excel, интеграция с RLS.</li>
+      <li><strong>Сообщество:</strong> демо-сайт, шаблоны CI/CD, поддержка плагинов.</li>
+    </ol>
+  </div>
+
+  <h2 onclick="toggle(this)">8. Почему это привлекательно для open-source?</h2>
+  <div class="content">
+    <ul>
+      <li>✅ Низкий порог входа</li>
+      <li>✅ Полная типизация (TypeScript + Zod)</li>
+      <li>✅ Готовность к SaaS «из коробки»</li>
+      <li>✅ Современный стек: Next.js App Router, Server Actions, RSC</li>
+      <li>✅ Безопасность по умолчанию</li>
+      <li>✅ LLM-friendly архитектура</li>
+    </ul>
+    <p>Система не требует денег — только практическое применение и обратную связь от сообщества.</p>
+  </div>
+
+  <script>
+    function toggle(el) {
+      const content = el.nextElementSibling;
+      content.classList.toggle('active');
+    }
+    function toggleAll() {
+      document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+    }
+  </script>
+</body>
+</html>

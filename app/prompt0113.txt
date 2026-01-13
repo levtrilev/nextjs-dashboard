@@ -1,0 +1,2482 @@
+В моем приложении NEXT JS есть типовой объект, соответствующий серверному маршруту, 
+обслуживающий основную сущность(тип) и сохраняющий данные в основную таблицу БД. 
+Зависимости для аналогичных объектов унифицированы. 
+Я предоставлю тебе образец (набор файлов) и описание типа новой сущности.
+Прошу написать документацию, описывающую используемые подходы. 
+Целевая аудитория - ИТ-менеджеры и специалисты разработки и поддержки.
+Нужно раскрыть темы:
+1.Организация доступа для независимых организаций (Multytensnt-enabled пригоднсть для SaaS сервиса)
+2.Использование разделов Sections для разграничения доступа
+3.Использование ролевой модели - много ролей одному пользователю, 
+каждая роль - разграничение по разделам плюс разграничение по функциям
+4.Организация многопользовательской работы
+5.Простота написанного кода позволяет специалистам самой разной квалификации 
+легко разобраться и развивать и поддерживать систему:
+5.1 Кроме ядра системы прикладные объекты представляют собой "простые" объекты, 
+написанные без сложных приемов. 
+5.2 Вся система представляет собой сумму мало связанных между собой
+однотипных объектов, добавление и удаление которых производится простым добавление папок с файлами 
+(и соответствующих марщрутов)
+5.3 Логичное наименование объектов, близкое к естественному английскому языку, обеспечивает успешное 
+генерирование аналогичных прикладных объектов для новых сущностей с помощью LLM, при этом управление 
+техническими решениями не возлагается на LLM, а обеспечивается автором системы
+6. Честно оценить преимущества и недостатки используемой архитектуры и подходов с точки зрения
+безопасности, масштабируемости, удобства расширения и сопровождения (с учетом современных возможностей LLM)
+7. Предложи план по развитию и улучшению системы, чтобы заинтересовать будущих приобретателей 
+(в широком смысле приобретателей. Система будет - я стремлюсь к этому - поддержана 
+opensorce-сообществом. Денег платить не надо, но надо внедрить в свою практику и обслуживать своих пользователей)
+8. Опиши другие необходимые аспекты, чтобы документация выглядела привлекательно для opensorce-сообщества.
+
+объем документации на твое усмотрение, как будет необходимо для поставленных целей.
+
+Запроси другие объекты системы, если они необходимы для рассмотрения
+
+вот базовый тип нового прикладного объекта - в таком виде передаются исходные данные в LLM
+при генерации нового прикладного объекта
+(поля с комментариями должны быть представлены на форме редактирования):
+export type LegalEntity = {
+  id: string;
+  name: string;
+  fullname: string; 
+  inn: string;          
+  address_legal: string; 
+  phone: string;        
+  email: string;        
+  contact: string;
+  is_customer: boolean;
+  is_supplier: boolean;
+  kpp: string;
+  region_id: string;
+  section_id: string;
+  access_tags: string[];
+  user_tags: string[];
+  tenant_id: string;
+  username?: string;
+  author_id: string;
+  editor_id: string;
+  timestamptz?: string;
+  date_created?: Date;
+  editing_by_user_id: string | null;
+  editing_since: string | null;
+};
+
+export type LegalEntityForm = {
+  id: string;
+  name: string;         // Название:
+  fullname: string;     // Полное:
+  inn: string;          // ИНН:
+  address_legal: string; // Юр.адрес:
+  phone: string;        // Телефон:
+  email: string;        // Email:
+  contact: string;      // Контакт:
+  is_customer: boolean; // Покупатель?
+  is_supplier: boolean; // Поставщик?
+  kpp: string;          // КПП:
+  region_id: string;
+  section_id: string;
+  region_name: string;      // Регион:
+  section_name: string;     // Раздел:
+  access_tags: string[];    // Теги доступа:
+  user_tags: string[];      // Теги:
+  tenant_id: string;
+  username?: string;
+  author_id: string;
+  editor_id: string;
+  timestamptz?: string;
+  date_created?: Date;
+  editing_by_user_id: string | null;
+  editing_since: string | null;
+}; 
+в коде новых объектов сохраняются аналогичные моим комментарии.
+вот образец типового объекта:
+[1]
+// Claims Page
+
+import Pagination from "@/app/ui/pagination";
+import Search from "@/app/ui/search";
+import { lusitana } from "@/app/ui/fonts";
+import { auth, getUser } from "@/auth";
+import { getCurrentSections, getCurrentSectionsArray } from "@/app/lib/common-actions";
+import { fetchDocUserPermissions } from "@/app/admin/permissions/lib/permissios-actions";
+import { checkReadonly } from "@/app/lib/common-utils";
+import { Claim } from "@/app/lib/definitions";
+import { fetchClaimsPages } from "./lib/claims-actions";
+import { CreateClaim } from "./lib/claims-buttons";
+import ClaimsTable from "./lib/claims-table";
+import { EffectiveSectionsSync } from "../arm/effective-sections-sync";
+import { getUserCurrentSections } from "../arm/arm-actions";
+import ArmTabsPage from "../arm/tabs-page";
+import NotAuthorized from "@/app/lib/not_authorized";
+
+export default async function Page(props: {
+  searchParams?: Promise<{
+    query?: string;
+    page?: string;
+  }>;
+}) {
+  //#region unified hooks and variables 
+  const session = await auth();
+  const session_user = session ? session.user : null;
+  if (!session_user || !session_user.email) {
+    return <h3 className="text-xs font-medium text-gray-400">Вы не авторизованы!</h3>;
+  }
+
+  const email = session_user.email;
+  const user = await getUser(email as string);
+  if (!user) {
+    return <h3 className="text-xs font-medium text-gray-400">Вы не авторизованы!</h3>;
+  }
+  const pageUser = user;
+  const current_sections = await getCurrentSections(email as string);
+  const userPermissions = await fetchDocUserPermissions(user.id, 'claims');
+  if (!(userPermissions.full_access
+    || userPermissions.editor
+    || userPermissions.author
+    || userPermissions.reader)) {
+    return <NotAuthorized />
+  }
+  const claims = {};
+  const readonly_permission = checkReadonly(userPermissions, claims, pageUser.id);
+  //#endregion
+  //#region arm sections
+  const current_sections_array = await getCurrentSectionsArray(email as string);
+  const effective_sections_array = await getUserCurrentSections(email);     // с учётом сохранённых из АРМ
+  const effectiveSectionIdsString = '{' + effective_sections_array.map(s => s.id).join(",") + '}';
+  //#endregion
+  const searchParams = await props.searchParams;
+  const query = searchParams?.query || '';
+  const currentPage = Number(searchParams?.page) || 1;
+
+  // const totalPages = await fetchClaimsPages(query, current_sections);
+  const totalPages = await fetchClaimsPages(query, effectiveSectionIdsString);
+
+  return (
+
+    <div className="w-full">
+      <ArmTabsPage current_sections_array={current_sections_array} />
+      {/* Синхронизация Zustand-tabs после выбора пользователем с сервером */}
+      <EffectiveSectionsSync
+        userId={user.id}
+        allowedSections={current_sections_array.map((s) => s.id)}
+        initialEffectiveSections={effective_sections_array.map((s) => s.id)}
+      />
+      <div className="flex w-full items-center justify-between">
+        <h1 className={`${lusitana.className} text-2xl`}>Заявки</h1>
+      </div>
+      <div className="mt-4 flex items-center justify-between gap-2 md:mt-8">
+        <Search placeholder="Найти заявку..." />
+        <CreateClaim readonly={readonly_permission} />
+      </div>
+
+      {/* <ClaimsTable query={query} currentPage={currentPage} current_sections={current_sections} /> */}
+      <ClaimsTable
+        query={query}
+        currentPage={currentPage}
+        current_sections={effectiveSectionIdsString}
+        key={1}
+        machine_id={'00000000-0000-0000-0000-000000000000'}
+        showDeleteButton={!readonly_permission}
+      />
+      <div className="mt-5 flex w-full justify-center">
+        <Pagination totalPages={totalPages} />
+      </div>
+    </div>
+
+  );
+}
+[2]
+import { useState } from "react";
+import { BookOpenIcon } from "@heroicons/react/24/outline";
+import { ClaimForm } from "@/app/lib/definitions";
+import dynamic from 'next/dynamic';
+import ClaimsRefTable from "./claims-ref-table";
+const Modal = dynamic(() => import('@/app/lib/common-modal'), { ssr: false });
+
+interface IBtnClaimsRefProps {
+  claims: ClaimForm[],
+  handleSelectClaim: (new_claim_id: string, new_claim_name: string, new_claim_machine_id: string, new_claim_machine_name: string) => void,
+}
+
+export default function BtnClaimsRef(props: IBtnClaimsRefProps) {
+  const [modal, setModal] = useState(false);
+
+  const openModal = (e: React.MouseEvent<HTMLElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setModal(true);
+  };
+  const closeModal = () => {
+    setModal(false);
+  };
+  const [term, setTerm] = useState<string>("");
+
+  return (
+    <div>
+      <button
+        onClick={openModal}
+        className="rounded-md border border-gray-200 p-2 h-10 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <BookOpenIcon className="w-5 h-5 text-gray-800" />
+      </button>
+      <Modal open={modal} >
+        <ClaimsRefTable
+          claims={props.claims}
+          handleSelectClaim={props.handleSelectClaim}
+          closeModal={closeModal}
+          setTerm={setTerm}
+          term={term}
+        />
+        <div className="flex justify-between space-x-2" >
+          <button
+            onClick={() => { alert("действие!") }}
+            className="bg-blue-400 text-white w-full rounded-md border p-2 hover:bg-blue-100 hover:text-gray-500"
+          >
+            Save
+          </button>
+          <button
+            onClick={()=>{closeModal(); setTerm("");}}
+            className="bg-blue-400 text-white w-full rounded-md border p-2 hover:bg-blue-100 hover:text-gray-500"
+          >
+            Exit
+          </button>
+        </div>
+      </Modal>
+    </div>
+  );
+}
+[3]
+// Delete Claim button.tsx
+
+'use client';
+import { TrashIcon } from '@heroicons/react/24/outline';
+import { useState, useRef } from 'react';
+import MessageBoxSrv from '@/app/lib/message-box-srv';
+import { deleteClaim } from './claims-actions';
+import { setIsShowMessageBoxCancel } from '@/app/store/del_useMessageBoxStore';
+
+export default function BtnDeleteClaim({ id, name, onDelete }: { id: string; name: string; onDelete: () => void }) {
+  const [isMessageBoxOpen, setIsMessageBoxOpen] = useState(false);
+  const [messageBoxText, setMessageBoxText] = useState('');
+  const idToDelete = useRef('');
+
+  const askUserForDeleting = (id: string, name: string) => {
+    setIsMessageBoxOpen(true);
+    idToDelete.current = id;
+    setMessageBoxText(`Заявка: ${name} \nУдалить заявку?`);
+  };
+
+  const deleteClaimWithId = askUserForDeleting.bind(null, id, name);
+
+  const handleOK = async () => {
+    try {
+      await deleteClaim(idToDelete.current);
+      onDelete();
+    } catch (error) {
+      setMessageBoxText(String(error));
+      setIsMessageBoxOpen(true);
+      setIsShowMessageBoxCancel(false);
+    }
+
+    // setIsMessageBoxOpen(false);
+  };
+
+  const handleCancel = () => {
+    setIsMessageBoxOpen(false);
+  };
+
+  return (
+    <>
+      <button
+        type="button"
+        className="rounded-md border border-gray-200 p-2 h-10 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        onClick={deleteClaimWithId}
+      >
+        <span className="sr-only">Delete</span>
+        <TrashIcon className="w-5 h-5 text-gray-800" />
+      </button>
+      <MessageBoxSrv
+        isMessageBoxOpen={isMessageBoxOpen}
+        messageBoxText={messageBoxText}
+        isShowCancel={true}
+        isShowOk={true}
+        cbOk={handleOK}
+        cbCancel={handleCancel}
+      />
+    </>
+  );
+}
+[4]
+// Claims actions
+
+"use server";
+
+import { z } from "zod";
+import pool from "@/db";
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { auth } from "@/auth";
+import { ClaimForm, Claim, Priority, Person } from "@/app/lib/definitions";
+
+const ITEMS_PER_PAGE = 8;
+
+//#region Create Claim
+
+export async function createClaim(claim: Claim) {
+  const session = await auth();
+  const username = session?.user?.name;
+  const date_created = new Date().toISOString();
+  const {
+    name,
+    claim_date,
+    priority,
+    machine_id,
+    location_id,
+    system_id,
+    repair_todo,
+    repair_reason,
+    breakdown_reasons,
+    emergency_act,
+    created_by_person_id,
+    // approved_date,
+    approved_by_person_id,
+    // accepted_date,
+    accepted_by_person_id,
+    hours_plan,
+    hours_done,
+    hours_rest,
+    hours_percent,
+    user_tags,
+    access_tags,
+    section_id,
+    tenant_id,
+    author_id,
+  } = claim;
+  try {
+    await pool.query(
+      `
+      INSERT INTO claims (
+        name, 
+    claim_date,
+    priority,
+    machine_id,
+    location_id,
+    system_id,
+    repair_todo,
+    repair_reason,
+    breakdown_reasons,
+    emergency_act,
+    created_by_person_id,
+    approved_by_person_id,
+    accepted_by_person_id,
+    hours_plan,
+    hours_done,
+    hours_rest,
+    hours_percent,
+    user_tags,
+    access_tags, 
+        username, section_id, timestamptz,
+        tenant_id, author_id
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22)
+    `,
+      [
+        name,
+        // (claim_date as Date).toISOString(),
+        new Date(claim_date as string),
+        priority,
+        machine_id,
+        location_id,
+        system_id,
+        repair_todo,
+        repair_reason,
+        breakdown_reasons,
+        emergency_act,
+        created_by_person_id,
+        // new Date(approved_date as string),
+        approved_by_person_id,
+        // new Date(accepted_date as string),
+        accepted_by_person_id,
+        hours_plan,
+        hours_done,
+        hours_rest,
+        hours_percent,
+        JSON.stringify(user_tags),
+        JSON.stringify(access_tags),        username,
+        section_id,
+        date_created,
+        tenant_id,
+        author_id,
+      ]
+    );
+  } catch (error) {
+    console.error("Не удалось создать Claim:", error);
+    throw new Error("Не удалось создать Claim:" + String(error));
+  }
+
+  revalidatePath("/repair/claims");
+  // redirect("/repair/claims");
+}
+
+//#endregion
+
+//#region Update/Delete Claim
+
+export async function updateClaim(claim: Claim) {
+  const session = await auth();
+  const username = session?.user?.name;
+
+  const {
+    id,
+    name,
+    claim_date,
+    created_by_person_id,
+    priority,
+    machine_id,
+    location_id,
+    system_id,
+    repair_todo,
+    repair_reason,
+    breakdown_reasons,
+    emergency_act,
+    approved_date,
+    approved_by_person_id,
+    accepted_date,
+    accepted_by_person_id,
+    hours_plan,
+    hours_done,
+    hours_rest,
+    hours_percent,
+    user_tags,
+    access_tags,
+    section_id,
+    tenant_id,
+    author_id,
+  } = claim;
+
+  try {
+    await pool.query(
+      `
+      UPDATE claims SET
+        name = $1,
+        claim_date = $2,
+        created_by_person_id = $3,
+        priority = $4,
+        machine_id = $5,
+        location_id = $6,
+        system_id = $7,
+        repair_todo = $8,
+        repair_reason = $9,
+        breakdown_reasons = $10,
+        emergency_act = $11,
+        approved_date = $12,
+        approved_by_person_id = $13,
+        accepted_date = $14,
+        accepted_by_person_id = $15,
+          hours_plan = $16,
+          hours_done = $17,
+          hours_rest = $18,
+          hours_percent = $19,
+            user_tags = $20,
+            access_tags = $21,
+        username = $22,
+        section_id = $23,
+        tenant_id = $24,
+        author_id = $25,
+        timestamptz = now()
+      WHERE id = $26
+    `,
+      [
+        name,
+        // (claim_date as Date).toISOString(),
+        new Date(claim_date as string),
+        created_by_person_id,
+        priority,
+        machine_id,
+        location_id,
+        system_id,
+        repair_todo,
+        repair_reason,
+        breakdown_reasons,
+        emergency_act,
+        new Date(approved_date as string),
+        approved_by_person_id,
+        new Date(accepted_date as string),
+        accepted_by_person_id,
+        hours_plan,
+        hours_done,
+        hours_rest,
+        hours_percent,
+        JSON.stringify(user_tags),
+        JSON.stringify(access_tags),
+        username,
+        section_id,
+        tenant_id,
+        author_id,
+        id,
+      ]
+    );
+  } catch (error) {
+    console.error("Не удалось обновить Claim:", error);
+    throw new Error("Ошибка базы данных: Не удалось обновить Claim: " + error);
+  }
+
+  revalidatePath("/repair/claims");
+}
+
+export async function deleteClaim(id: string) {
+  try {
+    await pool.query(`DELETE FROM claims WHERE id = $1`, [id]);
+  } catch (error) {
+    console.error("Ошибка удаления Claim:", error);
+    throw new Error(
+      "Ошибка базы данных: Не удалось удалить Claim: " + String(error)
+    );
+  }
+  revalidatePath("/repair/claims");
+}
+
+//#endregion
+
+//#region Fetch Claims
+
+export async function fetchClaim(id: string, current_sections: string) {
+  try {
+    const data = await pool.query<Claim>(
+      `
+      WITH your_claims AS ( SELECT * FROM claims where section_id = 
+        ANY ($1::uuid[]))
+
+        SELECT
+        id,
+        name,
+    TO_CHAR(claim_date, 'YYYY-MM-DD') AS claim_date,
+    created_by_person_id,
+    priority,
+    machine_id,
+    location_id,
+    system_id,
+    repair_todo,
+    repair_reason,
+    breakdown_reasons,
+    emergency_act,
+    TO_CHAR(approved_date AT TIME ZONE 'Europe/Moscow', 'YYYY-MM-DD"T"HH24:MI') AS approved_date,
+    approved_by_person_id,
+    TO_CHAR(accepted_date AT TIME ZONE 'Europe/Moscow', 'YYYY-MM-DD"T"HH24:MI') AS accepted_date,
+    accepted_by_person_id,
+    hours_plan,
+    hours_done,
+    hours_rest,
+    hours_percent,
+    user_tags,
+    access_tags,        
+        username,
+        editing_by_user_id,
+        editing_since,
+        timestamptz,
+        date_created
+      FROM your_claims
+      WHERE id = $2
+    `,
+      [current_sections, id]
+    );
+
+    return data.rows[0];
+  } catch (err) {
+    console.error("Ошибка получения Claim по ID:", err);
+    throw new Error("Не удалось получить Claim:" + String(err));
+  }
+}
+
+export async function fetchClaimForm(id: string, current_sections: string) {
+  try {
+    const data = await pool.query<ClaimForm>(
+      `
+      WITH your_claims AS ( SELECT * FROM claims where section_id = 
+        ANY ($1::uuid[]))
+
+        SELECT
+        claims.id,
+        claims.name,
+        TO_CHAR(claims.claim_date, 'YYYY-MM-DD') AS claim_date,
+    created_by_person_id,       
+    claims.priority,
+    claims.machine_id,
+    claims.location_id,
+    claims.system_id,
+    claims.repair_todo,
+    claims.repair_reason,
+    claims.breakdown_reasons,
+    claims.emergency_act,
+      TO_CHAR(claims.approved_date AT TIME ZONE 'Europe/Moscow', 'YYYY-MM-DD"T"HH24:MI') AS approved_date,
+      claims.approved_by_person_id,
+      TO_CHAR(claims.accepted_date AT TIME ZONE 'Europe/Moscow', 'YYYY-MM-DD"T"HH24:MI') AS accepted_date,
+      claims.accepted_by_person_id,
+      claims.hours_plan,
+      claims.hours_done,
+      claims.hours_rest,
+      claims.hours_percent,
+      claims.user_tags,
+      claims.access_tags,         
+        claims.username,
+        claims.section_id,
+        claims.tenant_id,
+        claims.author_id,
+        claims.editing_by_user_id,
+        claims.editing_since,
+        claims.timestamptz,
+        COALESCE(machines.name, '') as machine_name,
+        COALESCE(locations.name, '') as location_name,
+        COALESCE(systems.name, '') as system_name,
+        COALESCE(create_persons.name, '') as created_by_person_name,
+        COALESCE(acc_persons.name, '') as accepted_by_person_name,
+        COALESCE(app_persons.name, '') as approved_by_person_name,
+        COALESCE(sections.name, '') as section_name,
+        COALESCE(units.name, '') as machine_unit_name,
+        COALESCE(machines.machine_status, '') as machine_machine_status
+      FROM your_claims claims
+      LEFT JOIN sections ON claims.section_id = sections.id
+      LEFT JOIN machines ON claims.machine_id = machines.id
+      LEFT JOIN locations ON claims.location_id = locations.id
+      LEFT JOIN systems ON claims.system_id = systems.id
+      LEFT JOIN persons create_persons ON claims.created_by_person_id = create_persons.id
+      LEFT JOIN persons acc_persons ON claims.accepted_by_person_id = acc_persons.id
+      LEFT JOIN persons app_persons ON claims.approved_by_person_id = app_persons.id
+      LEFT JOIN units ON machines.unit_id = units.id
+      WHERE claims.id = $2
+    `,
+      [current_sections, id]
+    );
+
+    return data.rows[0];
+  } catch (err) {
+    console.error("Ошибка получения формы Claim:", err);
+    throw new Error("Не удалось получить данные формы Claim:" + String(err));
+  }
+}
+
+export async function fetchClaims(current_sections: string) {
+  try {
+    const data = await pool.query<Claim>(
+      `
+      WITH your_claims AS ( SELECT * FROM claims where section_id = 
+        ANY ($1::uuid[]))
+
+        SELECT
+        id,
+        name,
+    TO_CHAR(claim_date, 'YYYY-MM-DD') AS claim_date,
+    created_by_person_id,
+    priority,
+    machine_id,
+    location_id,
+    system_id,
+    repair_todo,
+    repair_reason,
+    breakdown_reasons,
+    emergency_act,
+    TO_CHAR(approved_date AT TIME ZONE 'Europe/Moscow', 'YYYY-MM-DD"T"HH24:MI') AS approved_date,
+    approved_by_person_id,
+    TO_CHAR(accepted_date AT TIME ZONE 'Europe/Moscow', 'YYYY-MM-DD"T"HH24:MI') AS accepted_date,
+    accepted_by_person_id,
+    hours_plan,
+    hours_done,
+    hours_rest,
+    hours_percent,
+    user_tags,
+    access_tags,          
+        section_id,
+        tenant_id,
+        author_id,
+        username,
+        timestamptz,
+        date_created
+      FROM your_claims
+      ORDER BY name ASC
+    `,
+      [current_sections]
+    );
+
+    return data.rows;
+  } catch (err) {
+    console.error("Ошибка получения списка заявок:", err);
+    throw new Error("Не удалось загрузить список заявок:" + String(err));
+  }
+}
+
+export async function fetchClaimsForm(current_sections: string) {
+  try {
+    const data = await pool.query<ClaimForm>(
+      `
+      WITH your_claims AS ( SELECT * FROM claims where section_id = 
+        ANY ($1::uuid[]))
+
+        SELECT
+        claims.id,
+        claims.name,
+    TO_CHAR(claims.claim_date, 'YYYY-MM-DD') AS claim_date,
+    claims.created_by_person_id,
+    claims.priority,
+    claims.machine_id,
+    claims.location_id,
+    claims.system_id,
+    claims.repair_todo,
+    claims.repair_reason,
+    claims.breakdown_reasons,
+    claims.emergency_act,
+      TO_CHAR(claims.approved_date AT TIME ZONE 'Europe/Moscow', 'YYYY-MM-DD"T"HH24:MI') AS approved_date,
+      claims.approved_by_person_id,
+      TO_CHAR(claims.accepted_date AT TIME ZONE 'Europe/Moscow', 'YYYY-MM-DD"T"HH24:MI') AS accepted_date,
+      claims.accepted_by_person_id,
+      claims.hours_plan,
+      claims.hours_done,
+      claims.hours_rest,
+      claims.hours_percent,
+      claims.user_tags,
+      claims.access_tags,        
+        claims.username,
+        claims.section_id,
+        claims.tenant_id,
+        claims.author_id,
+        claims.editing_by_user_id,
+        claims.editing_since,
+        claims.timestamptz,
+        COALESCE(machines.name, '') as machine_name,
+        COALESCE(locations.name, '') as location_name,
+        COALESCE(systems.name, '') as system_name,
+        COALESCE(create_persons.name, '') as created_by_person_name,
+        COALESCE(acc_persons.name, '') as accepted_by_person_name,
+        COALESCE(app_persons.name, '') as approved_by_person_name,
+        COALESCE(sections.name, '') as section_name,
+        COALESCE(units.name, '') as machine_unit_name,
+        COALESCE(machines.machine_status, '') as machine_machine_status
+      FROM your_claims claims
+      LEFT JOIN sections ON claims.section_id = sections.id
+      LEFT JOIN machines ON claims.machine_id = machines.id
+      LEFT JOIN locations ON claims.location_id = locations.id
+      LEFT JOIN systems ON claims.system_id = systems.id
+      LEFT JOIN persons create_persons ON claims.created_by_person_id = create_persons.id
+      LEFT JOIN persons acc_persons ON claims.accepted_by_person_id = acc_persons.id
+      LEFT JOIN persons app_persons ON claims.approved_by_person_id = app_persons.id
+      LEFT JOIN units ON machines.unit_id = units.id
+      ORDER BY claims.name ASC
+    `,
+      [current_sections]
+    );
+
+    return data.rows;
+  } catch (err) {
+    console.error("Ошибка получения форм Claims:", err);
+    throw new Error("Не удалось загрузить формы Claims:" + String(err));
+  }
+}
+
+//#endregion
+
+//#region Filtered Claims
+
+export async function fetchFilteredClaims(
+  query: string,
+  currentPage: number,
+  current_sections: string,
+  machine_id: string = "00000000-0000-0000-0000-000000000000",
+  rows_per_page?: number
+) {
+  const offset = (currentPage - 1) * (rows_per_page || ITEMS_PER_PAGE);
+
+  try {
+    const claims = await pool.query<ClaimForm>(
+      `
+      WITH your_claims AS ( SELECT * FROM claims where section_id = 
+        ANY ($1::uuid[]))
+
+        SELECT
+        claims.id,
+        claims.name,
+    TO_CHAR(claims.claim_date, 'YYYY-MM-DD') AS claim_date,
+    claims.created_by_person_id,
+    claims.priority,
+    claims.machine_id,
+    claims.location_id,
+    claims.system_id,
+    claims.repair_todo,
+    claims.repair_reason,
+    claims.breakdown_reasons,
+    claims.emergency_act,
+      TO_CHAR(claims.approved_date AT TIME ZONE 'Europe/Moscow', 'YYYY-MM-DD"T"HH24:MI') AS approved_date,
+      claims.approved_by_person_id,
+      TO_CHAR(claims.accepted_date AT TIME ZONE 'Europe/Moscow', 'YYYY-MM-DD"T"HH24:MI') AS accepted_date,
+      claims.accepted_by_person_id,
+      claims.hours_plan,
+      claims.hours_done,
+      claims.hours_rest,
+      claims.hours_percent,
+      claims.user_tags,
+      claims.access_tags,        
+        claims.username,
+        claims.section_id,
+        claims.tenant_id,
+        claims.author_id,
+        claims.editing_by_user_id,
+        claims.editing_since,
+        claims.timestamptz,
+        sections.name AS section_name,
+    machines.name AS machine_name,
+    locations.name AS location_name,
+    systems.name AS system_name,
+    create_persons.name AS created_by_person_name,
+    acc_persons.name AS accepted_by_person_name,
+    app_persons.name AS approved_by_person_name,
+    units.name as machine_unit_name,
+    machines.machine_status as machine_machine_status
+      FROM your_claims claims
+      LEFT JOIN sections ON claims.section_id = sections.id
+      LEFT JOIN machines ON claims.machine_id = machines.id
+      LEFT JOIN locations ON claims.location_id = locations.id
+      LEFT JOIN persons create_persons ON claims.created_by_person_id = create_persons.id
+      LEFT JOIN persons acc_persons ON claims.accepted_by_person_id = acc_persons.id
+      LEFT JOIN persons app_persons ON claims.approved_by_person_id = app_persons.id
+      LEFT JOIN systems ON claims.system_id = systems.id
+      LEFT JOIN units ON machines.unit_id = units.id
+      WHERE
+        claims.name ILIKE $2
+        AND ($3 = '00000000-0000-0000-0000-000000000000'::uuid OR claims.machine_id = $3)
+      ORDER BY claims.name ASC
+      LIMIT $4 OFFSET $5
+    `,
+      [
+        current_sections,
+        `%${query}%`,
+        machine_id,
+        rows_per_page || ITEMS_PER_PAGE,
+        offset,
+      ]
+    );
+
+    return claims.rows;
+  } catch (error) {
+    console.error("Ошибка фильтрации Claims (таблица claims):", error);
+    throw new Error(
+      "Не удалось загрузить отфильтрованные Claims:" + String(error)
+    );
+  }
+}
+
+export async function fetchClaimsPages(
+  query: string,
+  current_sections: string,
+  rows_per_page?: number
+) {
+  try {
+    const count = await pool.query(
+      `
+      WITH your_claims AS ( SELECT * FROM claims where section_id = 
+        ANY ($1::uuid[]))
+
+        SELECT COUNT(*) FROM your_claims claims
+      WHERE claims.name ILIKE $2
+    `,
+      [current_sections, `%${query}%`]
+    );
+
+    const totalPages = Math.ceil(
+      Number(count.rows[0].count) / (rows_per_page || ITEMS_PER_PAGE)
+    );
+    return totalPages;
+  } catch (error) {
+    console.error("Ошибка подсчёта страниц Claims:", error);
+    throw new Error("Не удалось определить количество страниц.");
+  }
+}
+
+//#endregion
+
+//#region FetchPersonByUser Claim
+
+// client side: userId = useDocumentStore.getState().sessionUser.id;
+export async function fetchPersonByUser(
+  userId: string,
+  current_sections: string[]
+) {
+  try {
+    const data = await pool.query<Person>(
+      `
+      WITH your_persons AS ( SELECT * FROM persons where section_id = 
+        ANY ($1::uuid[]))
+
+        SELECT
+        id,
+        name,
+        person_user_id,
+        person_user_name
+        from your_persons
+        WHERE person_user_id = $2
+      `,
+      [current_sections, userId]
+    );
+
+    return data.rows[0];
+  } catch (err) {
+    console.error("Ошибка получения Person по ID:", err);
+    throw new Error("Не удалось получить Person:" + String(err));
+  }
+}
+//#endregion
+[5]
+// ClaimButtons.tsx
+
+import { PencilIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { updateClaim } from './claims-actions';
+import Link from 'next/link';
+import { Claim } from '@/app/lib/definitions';
+
+export function CreateClaim({ readonly }: { readonly: boolean }) {
+  return (
+    <Link
+      href={!readonly ? "/repair/claims/create" : "#"}
+      className={`flex h-10 items-center rounded-lg 
+        ${readonly ? 'bg-gray-300 px-4 text-sm font-medium text-gray-500 transition-colors  hover:bg-gray-400'
+          : ' bg-blue-600 px-4 text-sm font-medium text-white transition-colors  hover:bg-blue-500 '}
+     focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-blue-600`}
+    >
+      <span className="hidden md:block">Создать заявку</span>
+      <PlusIcon className="h-5 md:ml-4" />
+    </Link>
+  );
+}
+
+export function BtnUpdateClaim({ claim }: { claim: Claim }) {
+  const updateClaimWithData = updateClaim.bind(null, claim);
+  return (
+    <form action={updateClaimWithData} className="w-full">
+      <button
+        type="submit"
+        className="bg-blue-400 text-white w-full rounded-md border p-2 hover:bg-blue-100 hover:text-gray-500"
+      >
+        Save
+      </button>
+    </form>
+  );
+}
+
+export function BtnEditClaimLink({ id }: { id: string }) {
+  const LinkIcon = PencilIcon;
+  return (
+    <Link
+      key={"Edit"}
+      href={"/repair/claims/" + id + "/edit"}
+      className='flex h-10 items-center justify-center space-x-2 rounded-md border border-gray-200 
+      bg-white p-2 text-sm font-medium hover:bg-gray-100 md:flex-none md:justify-start md:p-2 md:px-3'
+    >
+      <LinkIcon className="w-5 h-5 text-gray-800" />
+      <p className="hidden md:block text-gray-700">Edit</p>
+    </Link>
+  );
+}
+[6]
+import { Claim, ClaimForm } from "@/app/lib/definitions";
+import RefSearch from "@/app/ui/ref-search";
+
+interface IClaimsRefTableProps {
+    claims: ClaimForm[],
+    handleSelectClaim: (new_claim_id: string, new_claim_name: string, new_claim_machine_id: string, new_claim_machine_name: string) => void,
+    closeModal: () => void,
+    setTerm: (value: string) => void,
+    term: string,
+}
+
+export default function ClaimsRefTable(props: IClaimsRefTableProps) {
+
+    const handleSearch = (input: string) => {
+        props.setTerm(input);
+    }
+    return (
+        <div className="w-full">
+            <p>Выберите обращение:</p>
+            <RefSearch callback={handleSearch} term={props.term} elementIdPrefix="claim" />
+            <div className="mt-0 flow-root">
+                <div className="overflow-x-auto md:block hidden">
+                    <div className="inline-block min-w-full align-middle">
+                        <div className="overflow-hidden rounded-md bg-gray-50 p-1 md:pt-0">
+                            <table className="table-fixed hidden w-full rounded-md text-gray-900 md:table">
+                                <thead className="rounded-md bg-gray-50 text-left text-sm font-normal">
+                                    <tr>
+                                        <th scope="col" className="w-1/2 overflow-hidden px-0 py-5 font-medium sm:pl-6">
+                                            Заявка
+                                        </th>
+                                        <th scope="col" className="w-6/16 px-3 py-5 font-medium">
+                                            Машина
+                                        </th>
+                                    </tr>
+                                </thead>
+                            </table>
+                        </div>
+                        <div className="max-h-[300px] overflow-y-auto rounded-md bg-gray-50 p-2 md:pt-0">
+                            <table className="table-fixed hidden w-full rounded-md text-gray-900 md:table">
+                                <tbody className="divide-y divide-gray-200 text-gray-900">
+                                    {props.claims.map((claim) => (((
+                                        claim.name.toLowerCase().includes(props.term.toLowerCase())
+                                        || props.term.length === 0) &&
+                                        <tr key={claim.id} className="group">
+                                            <td className="w-1/2 overflow-hidden whitespace-nowrap text-ellipsis bg-white py-1 pl-0 text-left pr-3 text-sm text-black group-first-of-type:rounded-md group-last-of-type:rounded-md sm:pl-6">
+                                                <div className="flex items-left gap-3">
+                                                    <a
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            e.stopPropagation();
+                                                            props.handleSelectClaim(claim.id, claim.name, claim.machine_id, claim.machine_name);
+                                                            props.setTerm("");
+                                                            props.closeModal();
+                                                        }}
+                                                        className="text-blue-800 underline cursor-pointer hover:text-blue-600"
+                                                    >{claim.name.substring(0, 36)}</a>
+                                                </div>
+                                            </td>
+                                            <td className="w-6/16 overflow-hidden whitespace-nowrap bg-white px-4 py-1 text-sm">
+                                                {claim.machine_name}
+                                            </td>
+                                        </tr>
+                                    )))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div className="block md:hidden">
+                    <div className="max-h-[300px] overflow-y-auto rounded-md bg-gray-50 p-2">
+                        {props.claims
+                            .filter((claim) =>
+                                claim.name.toLowerCase().includes(props.term.toLowerCase()) ||
+                                props.term.length === 0
+                            )
+                            .map((claim) => (
+                                <div
+                                    key={claim.id}
+                                    className="border-b border-gray-200 bg-white p-4 text-sm text-gray-900 last:border-b-0"
+                                >
+                                    <div className="font-medium text-black">
+                                        <a
+                                            onClick={(e) => {
+                                                props.handleSelectClaim(claim.id, claim.name, claim.machine_id, claim.machine_name);
+                                                props.setTerm("");
+                                                props.closeModal();
+                                            }}
+                                            className="text-blue-800 underline cursor-pointer hover:text-blue-600"
+                                        >
+                                            {claim.machine_name.substring(0, 36)}
+                                        </a>
+                                    </div>
+                                    <div className="text-gray-500">{claim.name}</div>
+                                </div>
+                            ))}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+[7]
+// claims-table.tsx
+'use client';
+
+import { useEffect, useState } from 'react';
+import { ClaimForm } from '@/app/lib/definitions';
+import { fetchFilteredClaims } from './claims-actions';
+import BtnDeleteClaim from './btn-delete-claim';
+import { BtnEditClaimLink } from './claims-buttons';
+
+export default function ClaimsTable({
+  query,
+  currentPage,
+  current_sections,
+  machine_id = '00000000-0000-0000-0000-000000000000',
+  showDeleteButton = false,
+  columns = 7,
+  rows_per_page = 8,
+}: {
+  query: string;
+  currentPage: number;
+  current_sections: string;
+  machine_id?: string;
+  showDeleteButton?: boolean;
+  columns?: number;
+  rows_per_page?: number;
+}) {
+  const [claims, setClaims] = useState<ClaimForm[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const loadClaims = async () => {
+    try {
+      setLoading(true);
+      const data = await fetchFilteredClaims(query, currentPage, current_sections, machine_id, rows_per_page);
+      setClaims(data);
+    } catch (err) {
+      setError('Не удалось загрузить заявки');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
+    loadClaims();
+  }, [query, currentPage, current_sections, machine_id]);
+
+  if (loading) return <div>Загрузка...</div>;
+  if (error) return <div className="text-red-500">{error}</div>;
+  if (claims.length === 0) return <div className='mt-4'>Нет заявок</div>;
+
+  return (
+    <div id="claims-table" className="w-full">
+      <div className="mt-6 flow-root">
+        <div className="overflow-x-auto">
+          <div className="inline-block min-w-full align-middle">
+            <div className="overflow-hidden rounded-md bg-gray-50 p-2 md:pt-0">
+
+              {/* Таблица для больших экранов */}
+              <table className="table-fixed hidden w-full rounded-md text-gray-900 md:table">
+                <thead className="rounded-md bg-gray-50 text-left text-sm font-normal">
+                  <tr>
+                    <th scope="col" className="w-2/12 px-4 py-5 font-medium sm:pl-6">ЗАЯВКИ</th>
+                    {columns >= 7 && <th scope="col" className="w-2/12 px-4 py-5 font-medium">Дата</th>}
+                    <th scope="col" className="w-3/24 px-4 py-5 font-medium">Машина</th>
+                    <th scope="col" className="w-3/12 px-4 py-5 font-medium">Причина постановки в ремонт</th>
+                    <th scope="col" className="w-3/24 px-4 py-5 font-medium">Участок</th>
+                    {/* <th scope="col" className="w-2/12 px-4 py-5 font-medium">Состояние</th> */}
+                    {columns >= 5 && <th scope="col" className="w-2/12 px-4 py-5 font-medium">Характер ремонта</th>}
+                    {columns >= 6 && <th scope="col" className="w-2/12 px-4 py-5 font-medium">Приоритет</th>}
+                    <th scope="col" className="w-2/12 px-4 py-5 font-medium">Часы Остаток/План/Отработка/%</th>
+                    {columns >= 5 && <th scope="col" className="w-1/12 px-4 py-5 font-medium"></th>}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200 text-gray-900">
+                  {claims.map((claim) => (
+                    <tr key={claim.id} className="group">
+                      <td className="w-2/12 overflow-hidden whitespace-nowrap bg-white py-2 pl-6 pr-3 text-sm text-black">
+                        <a
+                          href={`/repair/claims/${claim.id}/edit`}
+                          className="text-blue-800 underline"
+                        >
+                          {claim.name}
+                        </a>
+                      </td>
+                      {columns >= 7 && <td className="w-2/12 overflow-hidden whitespace-nowrap bg-white py-2 pl-6 pr-3 text-sm text-black">
+                        {claim.claim_date && new Date(claim.claim_date).toLocaleDateString()}
+                      </td>}
+                      <td className="w-3/24 overflow-hidden whitespace-nowrap bg-white py-2 pl-6 pr-3 text-sm text-black">
+                        {claim.machine_name}
+                      </td>
+                      <td className="w-3/12 overflow-hidden whitespace-nowrap bg-white py-2 pl-6 pr-3 text-sm text-black">
+                        {claim.repair_reason}
+                      </td>
+                      <td className="w-3/24 overflow-hidden whitespace-nowrap bg-white py-2 pl-6 pr-3 text-sm text-black">
+                        {claim.machine_unit_name}
+                      </td>
+                      {/* <td className="w-1/12 overflow-hidden whitespace-nowrap bg-white py-2 pl-6 pr-3 text-sm text-black">
+                        {claim.machine_machine_status}
+                      </td> */}
+                      {columns >= 5 && <td className="w-4/12 overflow-hidden whitespace-nowrap bg-white py-2 pl-6 pr-3 text-sm text-black">
+                        {claim.repair_todo}
+                      </td>}
+                      {columns >= 6 && <td className="w-2/12 overflow-hidden whitespace-nowrap bg-white py-2 pl-6 pr-3 text-sm text-black">
+                        {claim.priority}
+                      </td>}
+                      <td className="w-2/12 overflow-hidden whitespace-nowrap bg-white py-2 pl-6 pr-3 text-sm text-black">
+                        {claim.hours_rest} / {claim.hours_plan} / {claim.hours_done} / {claim.hours_percent}%
+                      </td>
+                      {columns >= 5 && <td className="w-1/12 whitespace-nowrap py-2 pr-3">
+                        <div className="flex justify-end gap-3">
+                          {showDeleteButton && <BtnDeleteClaim id={claim.id} name={claim.name} onDelete={loadClaims} />}
+                        </div>
+                      </td>}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              {/* Карточки для мобильных устройств */}
+              <div className="md:hidden">
+                {claims.map((claim) => (
+                  <div
+                    key={claim.id}
+                    className="mb-4 rounded-lg bg-white p-4 shadow-sm"
+                  >
+                    <div className="flex justify-between items-center mb-2">
+                      <h3 className="text-lg font-medium text-blue-800 underline">
+                        <a href={`/erp/claims/${claim.id}/edit`}>
+                          {claim.name}
+                        </a>
+                      </h3>
+                      <div className="flex gap-2">
+                        <BtnEditClaimLink id={claim.id} />
+                        {showDeleteButton && <BtnDeleteClaim id={claim.id} name={claim.name} onDelete={loadClaims} />}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+[8]
+// Claim create Page
+
+import { fetchSectionsForm } from "@/app/admin/sections/lib/sections-actions";
+import { auth, getUser } from "@/auth";
+import { getCurrentSections } from "@/app/lib/common-actions";
+import Breadcrumbs from '@/app/ui/invoices/breadcrumbs';
+import { checkReadonly, formatDateForInput } from "@/app/lib/common-utils";
+import DocWrapper from "@/app/lib/doc-wrapper";
+import { fetchDocUserPermissions } from "@/app/admin/permissions/lib/permissios-actions";
+import { ClaimForm } from "@/app/lib/definitions";
+import ClaimEditForm from "../[id]/edit/claim-edit-form";
+import { read } from "fs";
+import { fetchMachinesForm } from "../../machines/lib/machines-actions";
+import { fetchLocationsForm } from "../../locations/lib/locations-actions";
+import { fetchSystemsForm } from "../../systems/lib/systems-actions";
+import { fetchPersonsForm } from "../../persons/lib/persons-actions";
+
+export default async function Page() {
+  //#region unified hooks and variables 
+  const session = await auth();
+  const session_user = session ? session.user : null;
+  if (!session_user || !session_user.email) {
+    return <h3 className="text-xs font-medium text-gray-400">Вы не авторизованы!</h3>;
+  }
+
+  const email = session_user.email;
+  const user = await getUser(email as string);
+  if (!user) {
+    return <h3 className="text-xs font-medium text-gray-400">Вы не авторизованы!</h3>;
+  }
+  const pageUser = user;
+
+  const current_sections = await getCurrentSections(email as string);
+  const sections = await fetchSectionsForm(current_sections);
+  const tenant_id = pageUser.tenant_id;
+  const userPermissions = await fetchDocUserPermissions(user.id as string, 'claims');
+  const readonly_locked = false;
+  //#endregion
+
+  const claim: ClaimForm = {
+    id: "",
+    name: "",
+    claim_date: null,
+    created_by_person_id: "",
+    created_by_person_name: "",
+    priority: "низкий",
+    machine_id: "",
+    machine_name: "",
+    location_id: "",
+    location_name: "",
+    system_id: "00000000-0000-0000-0000-000000000000",
+    system_name: "",
+    repair_todo: "",
+    repair_reason: "",
+    breakdown_reasons: "",
+    emergency_act: "",
+    approved_by_person_id: "00000000-0000-0000-0000-000000000000",
+    approved_by_person_name: "",
+    // approved_date: "",
+    accepted_by_person_id: "00000000-0000-0000-0000-000000000000",
+    accepted_by_person_name: "",
+    // accepted_date: "",
+    hours_plan: "",
+    hours_done: "",
+    hours_rest: "",
+    hours_percent: "",
+    username: "",
+    date_created: new Date(),
+    section_id: "",
+    section_name: "",
+    tenant_id: "",
+    author_id: "",
+    editor_id: "",
+    editing_since: null,
+    editing_by_user_id: null,
+  } as ClaimForm;
+
+  const readonly_permission = checkReadonly(userPermissions, claim, pageUser.id);
+  const readonly = readonly_locked || readonly_permission;
+  const machines = readonly ? [] : await fetchMachinesForm(current_sections);
+  const locations = readonly ? [] : await fetchLocationsForm(current_sections);
+  const systems = readonly ? [] : await fetchSystemsForm(current_sections);
+  const persons = readonly ? [] : await fetchPersonsForm(current_sections);
+  return (
+    <main>
+      <Breadcrumbs
+        breadcrumbs={[
+          { label: 'Заявки', href: '/repair/claims' },
+          {
+            label: 'Создать новую',
+            href: '/repair/claims/create',
+            active: true,
+          },
+        ]}
+      />
+      <div className="flex w-full items-center justify-between">
+        {readonly && (
+          <span className="text-xs font-medium text-gray-400">
+            только чтение для пользователя: {user?.email}
+          </span>
+        )}
+        {!readonly && (
+          <span className="text-xs font-medium text-gray-400">
+            права на изменение для пользователя: {user?.email}
+          </span>
+        )}
+      </div>
+      <DocWrapper
+        pageUser={pageUser}
+        userSections={sections}
+        userPermissions={userPermissions}
+        docTenantId={tenant_id}
+      >
+        <ClaimEditForm
+          claim={claim}
+          machines={machines}
+          locations={locations}
+          systems={systems}
+          persons={persons}
+          lockedByUserId={null}
+          unlockAction={null}
+          readonly={readonly}
+        />
+      </DocWrapper>
+    </main>
+  );
+}
+[9]
+// Claim Edit Page
+
+import { lusitana } from "@/app/ui/fonts";
+import { auth, getUser } from "@/auth";
+import { getCurrentSections, getFeshRecord, tryLockRecord, unlockRecord } from "@/app/lib/common-actions";
+import DocWrapper from "@/app/lib/doc-wrapper";
+import { fetchDocUserPermissions } from "@/app/admin/permissions/lib/permissios-actions";
+import pool from "@/db";
+import { fetchSectionsForm } from "@/app/admin/sections/lib/sections-actions";
+import { checkReadonly } from "@/app/lib/common-utils";
+import { ClaimForm } from "@/app/lib/definitions";
+import { fetchClaimForm } from "../../lib/claims-actions";
+import ClaimEditForm from "./claim-edit-form";
+import { fetchMachinesForm } from "@/app/repair/machines/lib/machines-actions";
+import { fetchLocationsForm } from "@/app/repair/locations/lib/locations-actions";
+import { fetchSystemsForm } from "@/app/repair/systems/lib/systems-actions";
+import { fetchPersonsForm } from "@/app/repair/persons/lib/persons-actions";
+import NotAuthorized from "@/app/lib/not_authorized";
+
+async function Page(props: { params: Promise<{ id: string }> }) {
+  //#region unified hooks and variables 
+  const session = await auth();
+  const session_user = session ? session.user : null;
+  if (!session_user || !session_user.email) {
+    return <h3 className="text-xs font-medium text-gray-400">Вы не авторизованы!</h3>;
+  }
+
+  const email = session_user.email;
+  const user = await getUser(email as string);
+  if (!user) {
+    return <h3 className="text-xs font-medium text-gray-400">Вы не авторизованы!</h3>;
+  }
+  const pageUser = user;
+
+  const current_sections = await getCurrentSections(email as string);
+  const sections = await fetchSectionsForm(current_sections);
+  const tenant_id = pageUser.tenant_id;
+  const userPermissions = await fetchDocUserPermissions(user.id, 'claims');
+  if (!(userPermissions.full_access
+    || userPermissions.editor
+    || userPermissions.author
+    || userPermissions.reader)) {
+    return <NotAuthorized />
+  }
+  const params = await props.params;
+  const id = params.id;
+  //#endregion
+
+  const claim: ClaimForm = await fetchClaimForm(id, current_sections);
+  if (!claim) {
+    return <h3 className="text-xs font-medium text-gray-400">Not found! id: {id}</h3>;
+  }
+
+  //#region Lock Document
+  // const isEditable =
+  //   claim.editing_by_user_id === null ||
+  //   claim.editing_by_user_id === user.id ||
+  //   (claim.editing_since && new Date(claim.editing_since) < new Date(Date.now() - 30 * 60 * 1000));
+
+
+  // let canEdit = false;
+  // if (isEditable) {
+  //   const lockResult = await tryLockRecord('claims', claim.id, user.id);
+  //   canEdit = lockResult.isEditable;
+  // } else {
+  //   canEdit = false;
+  // }
+
+  // // Перечитываем запись после возможного обновления блокировки
+
+  // const freshRecord = await getFeshRecord('claims', claim.id);
+
+  // const editingByCurrentUser = freshRecord.editing_by_user_id === user.id;
+  // const readonly_locked = !editingByCurrentUser;
+  //#endregion
+
+  //#region Lock Document
+  const readonly_permission = checkReadonly(userPermissions, claim, pageUser.id);
+  // Пытаемся захватить документ, если имеем права на изменение
+  const isEditable =
+    !readonly_permission &&
+    (claim.editing_by_user_id === null ||
+      claim.editing_by_user_id === user.id ||
+      (claim.editing_since && new Date(claim.editing_since) < new Date(Date.now() - 30 * 60 * 1000)));
+
+  let canEdit = false;
+  if (isEditable) {
+    const lockResult = await tryLockRecord('claims', claim.id, user.id);
+    canEdit = lockResult.isEditable;
+  } else {
+    canEdit = false;
+  }
+  // Перечитываем запись после возможного обновления блокировки
+  const freshRecord = !readonly_permission
+    ? await getFeshRecord('claims', claim.id)
+    : { editing_by_user_id: '', editing_by_user_email: '', };
+
+  const editingByCurrentUser = freshRecord.editing_by_user_id === user.id;
+  const readonly = readonly_permission ? readonly_permission : !editingByCurrentUser;
+  //#endregion
+
+  // const readonly_permission = checkReadonly(userPermissions, claim, pageUser.id);
+  // const readonly = readonly_locked || readonly_permission;
+
+  const machines = readonly ? [] : await fetchMachinesForm(current_sections);
+  const locations = readonly ? [] : await fetchLocationsForm(current_sections);
+  const systems = readonly ? [] : await fetchSystemsForm(current_sections);
+  const persons = readonly ? [] : await fetchPersonsForm(current_sections);
+  return (
+    <div className="w-full">
+      <div className="flex w-full items-center justify-between">
+        <h1 className={`${lusitana.className} text-2xl`}>Заявка</h1>
+        {readonly && (
+          <span className="text-xs font-medium text-gray-400">
+            только чтение для пользователя: {user?.email}
+          </span>
+        )}
+        {!readonly && (
+          <span className="text-xs font-medium text-gray-400">
+            права на изменение для пользователя: {user?.email}
+          </span>
+        )}
+        {(!readonly_permission && !editingByCurrentUser) && (
+          <span className="text-xs font-medium text-gray-400">
+            &nbsp;&nbsp;&nbsp;Редактируется пользователем: {freshRecord.editing_by_user_email}
+          </span>
+        )}
+      </div>
+      <h3 className="text-xs font-medium text-gray-400">id: {id}</h3>
+
+      <DocWrapper
+        pageUser={pageUser}
+        userSections={sections}
+        userPermissions={userPermissions}
+        docTenantId={tenant_id}
+      >
+        <ClaimEditForm
+          claim={claim}
+          machines={machines}
+          locations={locations}
+          systems={systems}
+          persons={persons}
+          lockedByUserId={null}
+          unlockAction={unlockRecord}
+          readonly={readonly}
+        />
+      </DocWrapper>
+    </div>
+  );
+}
+
+export default Page;
+[10]
+// Claim EditForm
+
+'use client';
+import { useEffect, useState } from "react";
+import { ClaimForm, LocationForm, MachineForm, PersonForm, SystemForm } from "@/app/lib/definitions";
+import { formatDateForInput, utcISOToLocalDateTimeInput } from "@/app/lib/common-utils";
+import BtnSectionsRef from "@/app/admin/sections/lib/btn-sections-ref";
+import { z } from "zod";
+import { pdf, PDFViewer } from '@react-pdf/renderer';
+import MessageBoxOKCancel from "@/app/lib/message-box-ok-cancel";
+import {
+  setIsDocumentChanged,
+  setIsMessageBoxOpen,
+  setIsShowMessageBoxCancel,
+  setMessageBoxText,
+  useDocumentStore,
+  useIsDocumentChanged,
+  useMessageBox
+} from "@/app/store/useDocumentStore";
+import { useAccessTagStore, useUserTagStore } from "@/app/lib/tags/tag-store";
+import InputField from "@/app/lib/input-field";
+import { useRouter } from "next/navigation";
+import { createClaim, fetchPersonByUser, updateClaim } from "../../lib/claims-actions";
+import PdfDocument from "./claim-pdf-document";
+import BtnMachinesRef from "@/app/repair/machines/lib/btn-machines-ref";
+import BtnLocationsRef from "@/app/repair/locations/lib/btn-locations-ref";
+import { machine } from "os";
+import BtnSystemsRef from "@/app/repair/systems/lib/btn-systems-ref";
+import BtnPersonsRef from "@/app/repair/persons/lib/btn-persons-ref";
+import { lusitana } from "@/app/ui/fonts";
+import { TagInput } from "@/app/lib/tags/tag-input";
+import { upsertTags } from "@/app/lib/tags/tags-actions";
+
+interface IEditFormProps {
+  claim: ClaimForm;
+  machines: MachineForm[];
+  locations: LocationForm[];
+  persons: PersonForm[];
+  systems: SystemForm[];
+  lockedByUserId: string | null;
+  unlockAction: ((tableName: string, id: string, userId: string) => Promise<void>) | null;
+  readonly: boolean;
+}
+
+//#region Claim zod schema
+const PrioritySchema = z.enum(['высокий', 'низкий']);
+const ClaimDateSchema = z.object({
+  claim_date: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, 'Неверный формат даты')
+    .refine(
+      (dateStr) => {
+        const d = new Date(dateStr);
+        return !isNaN(d.getTime()) && d.toISOString().slice(0, 10) === dateStr;
+      },
+      { message: 'Некорректная дата' }
+    ),
+  // Опционально: запрет будущих дат
+  // .refine((dateStr) => new Date(dateStr) <= new Date(), {
+  //   message: 'Дата не может быть в будущем',
+  // }),
+});
+const ClaimFormSchemaFull = z.object({
+  id: z.string().uuid(),
+  name: z.string().min(2, {
+    message: "Название должно содержать не менее 2-х символов.",
+  }),
+  claim_date: z.string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, 'Неверный формат даты')
+    .refine((s) => !isNaN(Date.parse(s)), 'Некорректная дата'),
+  // claim_date: ClaimDateSchema,
+  created_by_person_id: z.string().uuid(),
+  created_by_person_name: z.string().min(1, {
+    message: "Поле Создал(исполнитель) должно быть заполнено.",
+  }),
+  priority: PrioritySchema,
+  machine_id: z.string().uuid(),
+  machine_name: z.string().min(1, {
+    message: "Поле Машина должно быть заполнено.",
+  }),
+  location_id: z.string(),
+  location_name: z.string(),
+  system_id: z.string().nullable(),
+  system_name: z.string(),
+  repair_todo: z.string(),
+  repair_reason: z.string(),
+  breakdown_reasons: z.string(),
+  emergency_act: z.string(),
+  approved_date: z.string().optional().nullable(),
+  approved_by_person_id: z.string().nullable(),
+  approved_by_person_name: z.string(),
+  accepted_date: z.string().optional().nullable(),
+  accepted_by_person_id: z.string().nullable(),
+  accepted_by_person_name: z.string(),
+  hours_plan: z.string().optional().nullable(),
+  hours_done: z.string().optional().nullable(),
+  hours_rest: z.string().optional().nullable(),
+  hours_percent: z.string().optional().nullable(),
+  machine_unit_name: z.string(),
+  machine_machine_status: z.string(),
+  section_name: z.string().min(1, {
+    message: "Поле Раздел должно быть заполнено.",
+  }),
+  section_id: z.string().min(1, {
+    message: "Поле section_id должно быть заполнено.",
+  }),
+  username: z.string().optional(),
+  timestamptz: z.string().optional(),
+  author_id: z.string(),
+  editor_id: z.string(),
+  tenant_id: z.string(),
+  editing_by_user_id: z.string().nullable(),
+  editing_since: z.string().nullable(),
+  access_tags: z.array(z.string()).nullable(),
+  user_tags: z.array(z.string()).nullable(),
+});
+
+const ClaimFormSchema = ClaimFormSchemaFull.omit({
+  id: true,
+  timestamptz: true,
+  username: true,
+  editing_by_user_id: true,
+  editing_since: true,
+  machine_unit_name: true,
+  machine_machine_status: true,
+});
+
+export type FormData = z.infer<typeof ClaimFormSchemaFull>;
+//#endregion
+
+export default function ClaimEditForm(props: IEditFormProps) {
+  const userSections = useDocumentStore.getState().userSections;
+  const sessionUser = useDocumentStore.getState().sessionUser;
+  const addUserTag = useUserTagStore().addTag;
+  const addAccessTag = useAccessTagStore().addTag;
+
+  //#region unified form hooks and variables 
+  const docTenantId = useDocumentStore.getState().documentTenantId;
+  // const sessionUserId = useDocumentStore.getState().sessionUser.id;
+  const [showErrors, setShowErrors] = useState(false);
+  const isDocumentChanged = useIsDocumentChanged();
+  const msgBox = useMessageBox();
+  const router = useRouter();
+
+  const docChanged = () => {
+    setIsDocumentChanged(true);
+    setMessageBoxText('Документ изменен. Закрыть без сохранения?');
+  };
+
+  useEffect(() => {
+    setFormData((prev) => ({
+      ...prev,
+      author_id: sessionUser.id,
+      editor_id: sessionUser.id,
+    }));
+  }, [sessionUser.id]);
+  //#endregion
+
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [formData, setFormData] = useState<FormData>(props.claim as FormData);
+
+  useEffect(() => {
+    setFormData((prev) => ({
+      ...prev,
+      author_id: sessionUser.id,
+      tenant_id: docTenantId,
+    }));
+  }, []);
+
+  const validate = () => {
+    const res = ClaimFormSchema.safeParse({
+      ...formData,
+    });
+    if (res.success) {
+      return undefined;
+    }
+    return res.error.format();
+  };
+
+  //#region handles
+  const handleSubmit = async (e: React.MouseEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    const errors = validate();
+    if (errors) {
+      setShowErrors(true);
+      console.log("ошибки есть: " + JSON.stringify(errors));
+      console.log("claim_date: " + formData.claim_date);
+      return;
+    }
+
+    try {
+      if (formData.user_tags) {
+        await upsertTags(formData.user_tags, docTenantId);
+        useDocumentStore.getState().addAllTags(formData.user_tags);
+      }
+      if (formData.access_tags) {
+        await upsertTags(formData.access_tags, docTenantId);
+        useDocumentStore.getState().addAllTags(formData.access_tags);
+      }
+
+      if (formData.id === "") {
+        await createClaim(formData);
+        setTimeout(() => {
+          router.push('/repair/claims');
+        }, 2000);
+      } else {
+        console.log("claim-edit-form formData.approved_date: " + formData.approved_date);
+        await updateClaim(formData);
+        router.refresh();
+      }
+      setIsDocumentChanged(false);
+      setMessageBoxText('Документ сохранен.');
+    } catch (error) {
+      setMessageBoxText('Документ не сохранен! :' + String(error));
+    }
+
+    setIsShowMessageBoxCancel(false);
+    setIsMessageBoxOpen(true);
+  };
+
+  const handleBackClick = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (props.unlockAction) await props.unlockAction("claims", props.claim.id, sessionUser.id);
+    if (isDocumentChanged && !msgBox.isOKButtonPressed) {
+      setIsShowMessageBoxCancel(true);
+      setIsMessageBoxOpen(true);
+    } else if (isDocumentChanged && msgBox.isOKButtonPressed) {
+      // уже обработано через OK
+    } else if (!isDocumentChanged) {
+      window.history.back();
+    }
+  };
+
+  const handleSelectSection = (new_section_id: string, new_section_name: string, new_section_tenant_id: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      section_id: new_section_id,
+      section_name: new_section_name,
+      tenant_id: new_section_tenant_id,
+    }));
+    useDocumentStore.getState().setDocumentTenantId(new_section_tenant_id);
+    docChanged();
+  };
+
+  const handleSelectLocation = (new_location_id: string, new_location_name: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      location_id: new_location_id,
+      location_name: new_location_name,
+    }));
+    docChanged();
+  };
+
+  const handleSelectPerson_approved = (new_person_id: string, new_person_name: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      approved_by_person_id: new_person_id,
+      approved_by_person_name: new_person_name,
+    }));
+    docChanged();
+  };
+  const handleSelectPerson_accepted = (new_person_id: string, new_person_name: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      accepted_by_person_id: new_person_id,
+      accepted_by_person_name: new_person_name,
+    }));
+    docChanged();
+  };
+  const handleSelectPerson_created = (new_person_id: string, new_person_name: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      created_by_person_id: new_person_id,
+      created_by_person_name: new_person_name,
+    }));
+    docChanged();
+  };
+  const handleSelectSystem = (new_system_id: string, new_system_name: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      system_id: new_system_id,
+      system_name: new_system_name,
+    }));
+    docChanged();
+  };
+  const handleSelectMachine = (new_machine_id: string, new_machine_name: string, new_location_id: string, new_location_name: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      machine_id: new_machine_id,
+      machine_name: new_machine_name,
+      location_id: new_location_id,
+      location_name: new_location_name,
+    }));
+    docChanged();
+  };
+  const handleInputChange = (field: string, value: string | Date) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    docChanged();
+  };
+  const handleStringInputChange = (field: string, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    docChanged();
+  };
+  const handleClaimDateChange = (value: string) => {
+    setFormData((prev) => ({ ...prev, claim_date: value }));
+  };
+  const handleSetAccepted = async () => {
+    const accepted_by_person = await fetchPersonByUser(sessionUser.id, userSections.map((s) => s.id));
+
+    setFormData((prev) => ({
+      ...prev,
+      accepted_date: (function () {
+        const d = new Date();
+        return d.getFullYear() + '-' +
+          String(d.getMonth() + 1).padStart(2, '0') + '-' +
+          String(d.getDate()).padStart(2, '0') + 'T' +
+          String(d.getHours()).padStart(2, '0') + ':' +
+          String(d.getMinutes()).padStart(2, '0');
+      })(),
+      // accepted_by_person_id: '06fbf58c-35e6-4a1e-9194-faa1fa2cc65c',
+      // accepted_by_person_name: 'Миненко',
+      accepted_by_person_id: accepted_by_person ? accepted_by_person.id : '00000000-0000-0000-0000-000000000000',
+      accepted_by_person_name: accepted_by_person ? accepted_by_person.name : sessionUser.name,
+    }));
+    docChanged();
+  }
+  const handleSetApproved = async () => {
+    const approved_by_person = await fetchPersonByUser(sessionUser.id, userSections.map((s) => s.id));
+
+    setFormData((prev) => ({
+      ...prev,
+      approved_date: (function () {
+        const d = new Date();
+        return d.getFullYear() + '-' +
+          String(d.getMonth() + 1).padStart(2, '0') + '-' +
+          String(d.getDate()).padStart(2, '0') + 'T' +
+          String(d.getHours()).padStart(2, '0') + ':' +
+          String(d.getMinutes()).padStart(2, '0');
+      })(),
+      // approved_by_person_id: 'c0adf0d0-3801-438c-8407-7f7c9bf23767',
+      // approved_by_person_name: 'Попруженко',
+      approved_by_person_id: approved_by_person ? approved_by_person.id : '00000000-0000-0000-0000-000000000000',
+      approved_by_person_name: approved_by_person ? approved_by_person.name : sessionUser.name,
+    }));
+    docChanged();
+  }
+  const handleChangeUserTags = (event: any) => {
+    const currentTags = useUserTagStore.getState().selectedTags
+    setFormData((prev) => ({
+      ...prev,
+      user_tags: currentTags,
+    }));
+    docChanged();
+  };
+  const handleChangeAccessTags = (event: any) => {
+    const currentTags = useAccessTagStore.getState().selectedTags
+    setFormData((prev) => ({
+      ...prev,
+      access_tags: currentTags,
+    }));
+    docChanged();
+  };
+  const handleRedirectBack = () => {
+    window.history.back();
+  };
+  function handleSelectPriority(event: any) {
+    setFormData((prev) => ({
+      ...prev,
+      priority: event.target.value,
+      // priority: event.target.selectedOptions[0].text,
+    }));
+    docChanged();
+  }
+  const handleShowPDF = async () => {
+    try {
+      const blob = await pdf(<PdfDocument formData={formData} />).toBlob();
+      const url = URL.createObjectURL(blob);
+      setPdfUrl(url);
+    } catch (error) {
+      console.error('Ошибка при экспорте PDF:', error);
+    }
+  };
+
+  const handleClosePDF = () => {
+    if (pdfUrl) {
+      URL.revokeObjectURL(pdfUrl);
+      setPdfUrl(null);
+    }
+  };
+  //#endregion
+
+  const errors = showErrors ? validate() : undefined;
+
+  return (
+    <div>
+      {!pdfUrl && (
+        <form id="claim-form" onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <div className="flex flex-col md:flex-row gap-4 w-full">
+
+            {/* first column */}
+            <div className="flex flex-col gap-4 w-full md:w-1/2">
+
+              {/* name */}
+              <InputField
+                name="name"
+                value={formData.name}
+                label="Название:"
+                type="text"
+                w={["w-4/16", "w-13/16"]}
+                onChange={(value) => handleInputChange('name', value)}
+                readonly={props.readonly}
+                errors={errors?.name?._errors as string[] | undefined}
+              />
+
+              <div className="flex flex-row justify-between">
+                {/* claim_date */}
+                <div className="flex-2 flex items-center">
+                  <label
+                    htmlFor="claim_date"
+                    className="w-5/16 text-sm text-blue-900 font-medium flex items-center p-1 pl-2"
+                  >Дата заявки:</label>
+                  <input
+                    name="claim_date"
+                    value={formData.claim_date ?? ''}
+                    type="date"
+                    className="w-5/16 disabled:text-gray-400 disabled:bg-gray-100 break-words control rounded-md border border-gray-200 p-1"
+                    onChange={(e) => handleClaimDateChange(String(e.target.value))}
+                    disabled={props.readonly}
+                  />
+                  {/* // errors={errors?.claim_date?._errors as string[] | undefined} */}
+
+                  {/* priority */}
+                  <label htmlFor="priority" className="text-sm font-medium flex items-center p-2">Приоритет:</label>
+                  <select
+                    name="priority" id="priority"
+                    className="w-5/16 h-10 cursor-pointer rounded-md border border-gray-300 px-1 py-2 hover:bg-gray-50 focus:outline-none focus:ring focus:ring-blue-300"
+                    disabled={props.readonly}
+                    value={formData.priority}
+                    onChange={(e) => handleSelectPriority(e)}
+                  >
+                    <option value="" disabled>
+                      Приоритет
+                    </option>
+                    <option key={'низкий'} value={'низкий'}>
+                      низкий
+                    </option>
+                    <option key={'высокий'} value={'высокий'}>
+                      высокий
+                    </option>
+                  </select>
+                </div>
+              </div>
+              {/* created_by_person_name */}
+              <InputField
+                name="created_by_person_name"
+                value={formData.created_by_person_name as string}
+                label="Создал(исполнитель):"
+                type="text"
+                w={["w-6/16", "w-11/16"]}
+                onChange={(value) => { }}
+                refBook={<BtnPersonsRef handleSelectPerson={handleSelectPerson_created} persons={props.persons} />}
+                readonly={props.readonly}
+                errors={errors?.created_by_person_name?._errors as string[] | undefined}
+              />
+              {/* machine_name */}
+              <InputField
+                name="machine_name"
+                value={formData.machine_name as string}
+                label="Машина:"
+                type="text"
+                w={["w-4/16", "w-13/16"]}
+                onChange={(value) => { }}
+                refBook={<BtnMachinesRef handleSelectMachine={handleSelectMachine} machines={props.machines} />}
+                readonly={props.readonly}
+                errors={errors?.machine_name?._errors as string[] | undefined}
+              />
+
+              {/* location_name */}
+              <InputField
+                name="location_name"
+                value={formData.location_name as string}
+                label="Местонахождение:"
+                type="text"
+                w={["w-6/16", "w-11/16"]}
+                onChange={(value) => { }}
+                refBook={<BtnLocationsRef handleSelectLocation={handleSelectLocation} locations={props.locations} />}
+                readonly={props.readonly}
+                errors={errors?.location_name?._errors as string[] | undefined}
+              />
+
+              {/* repair_todo */}
+              <InputField
+                name="repair_todo"
+                value={formData.repair_todo}
+                label="Характер Ремонта:"
+                type="text"
+                w={["w-4/16", "w-13/16"]}
+                onChange={(value) => handleInputChange('repair_todo', value)}
+                readonly={props.readonly}
+                errors={errors?.repair_todo?._errors as string[] | undefined}
+              />
+
+              {/* SetApprovedButton & approved_date */}
+              <div className="flex justify-between h-1/4 md:w-full">
+
+                {!props.readonly && <button
+                  type="button"
+                  onClick={() => handleSetApproved()}
+                  disabled={props.readonly}
+                  className={`w-10/16 h-10 mt-1 rounded-md border p-2 ${props.readonly
+                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    : 'bg-blue-400 text-white hover:bg-blue-100 hover:text-gray-500 cursor-pointer'
+                    }`}
+                >
+                  Подтвердить(заказчик)
+                </button>}
+                {/* approved_date */}
+                <InputField name="approved_date" value={utcISOToLocalDateTimeInput(formData.approved_date)}
+                  label="" type="datetime-local" w={["w-1/16", "w-16/16"]}
+                  onChange={(value) => handleStringInputChange('approved_date', String(value))}
+                  readonly={props.readonly}
+                  errors={errors?.approved_date?._errors as string[] | undefined}
+                />
+              </div>
+
+              {/* approved_by_person_name */}
+              <InputField
+                name="approved_by_person_name"
+                value={formData.approved_by_person_name as string}
+                label="Подтвердил(заказчик):"
+                type="text"
+                w={["w-6/16", "w-11/16"]}
+                onChange={(value) => { }}
+                refBook={<BtnPersonsRef handleSelectPerson={handleSelectPerson_approved} persons={props.persons} />}
+                readonly={true}
+                errors={errors?.approved_by_person_name?._errors as string[] | undefined}
+              />
+              <div className="flex flex-row justify-between">
+                {/* hours_plan */}
+                <InputField
+                  name="hours_plan"
+                  value={formData.hours_plan as string}
+                  label="План часов:"
+                  type="text"
+                  w={["w-10/16", "w-6/16"]}
+                  onChange={(value) => handleInputChange('hours_plan', value)}
+                  readonly={props.readonly}
+                  errors={errors?.repair_todo?._errors as string[] | undefined}
+                />
+                {/* hours_rest */}
+                <InputField
+                  name="hours_rest"
+                  value={formData.hours_rest as string}
+                  label="Остаток часов:"
+                  type="text"
+                  w={["w-10/16", "w-6/16"]}
+                  onChange={(value) => handleInputChange('hours_rest', value)}
+                  readonly={props.readonly}
+                  errors={errors?.hours_rest?._errors as string[] | undefined}
+                />
+              </div>
+            </div>
+
+            {/* second column */}
+            <div className="flex flex-col gap-4 w-full md:w-1/2">
+
+              {/* section_name */}
+              <InputField
+                name="section_name"
+                value={formData.section_name as string}
+                label="Раздел:"
+                type="text"
+                w={["w-6/16", "w-11/16"]}
+                onChange={(value) => { }}
+                refBook={<BtnSectionsRef handleSelectSection={handleSelectSection} />}
+                readonly={props.readonly}
+                errors={errors?.section_name?._errors as string[] | undefined}
+              />
+
+              {/* emergency_act */}
+              <InputField
+                name="emergency_act"
+                value={formData.emergency_act}
+                label="Аварийный акт:"
+                type="text"
+                w={["w-4/16", "w-13/16"]}
+                // moreInputClassName="break-words"
+                onChange={(value) => handleInputChange('emergency_act', value)}
+                readonly={props.readonly}
+                errors={errors?.emergency_act?._errors as string[] | undefined}
+              />
+
+              {/* repair_reason */}
+              <InputField
+                name="repair_reason"
+                value={formData.repair_reason}
+                label="Причина постановки в ремонт:"
+                type="text"
+                w={["w-4/16", "w-13/16"]}
+                onChange={(value) => handleInputChange('repair_reason', value)}
+                readonly={props.readonly}
+                textArea={true}
+                errors={errors?.repair_reason?._errors as string[] | undefined}
+              />
+
+              {/* breakdown_reasons */}
+              <InputField
+                name="breakdown_reasons"
+                value={formData.breakdown_reasons}
+                label="Причины, вызвавшие поломку:"
+                type="text"
+                w={["w-4/16", "w-13/16"]}
+                onChange={(value) => handleInputChange('breakdown_reasons', value)}
+                readonly={props.readonly}
+                textArea={true}
+                errors={errors?.breakdown_reasons?._errors as string[] | undefined}
+              />
+
+              {/* system_name */}
+              <InputField
+                name="system_name"
+                value={formData.system_name as string}
+                label="Признак ремонта:"
+                type="text"
+                w={["w-6/16", "w-11/16"]}
+                onChange={(value) => { }}
+                refBook={<BtnSystemsRef handleSelectSystem={handleSelectSystem} systems={props.systems} />}
+                readonly={props.readonly}
+                errors={errors?.system_name?._errors as string[] | undefined}
+              />
+              {/* SetAcceptedButton & accepted_date */}
+              <div className="flex justify-between h-1/4 md:w-full">
+
+                {!props.readonly && <button
+                  type="button"
+                  onClick={() => handleSetAccepted()}
+                  disabled={props.readonly}
+                  className={`w-10/16 h-10 mt-1 rounded-md border p-2 ${props.readonly
+                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    : 'bg-blue-400 text-white hover:bg-blue-100 hover:text-gray-500 cursor-pointer'
+                    }`}
+                >
+                  Принять в работу
+                </button>}
+                {/* accepted_date */}
+                <InputField name="accepted_date" value={utcISOToLocalDateTimeInput(formData.accepted_date)}
+                  label="" type="datetime-local" w={["w-1/16", "w-16/16"]}
+                  onChange={(value) => handleStringInputChange('accepted_date', String(value))}
+                  readonly={props.readonly}
+                  errors={errors?.accepted_date?._errors as string[] | undefined}
+                />
+              </div>
+
+              {/* accepted_by_person_name */}
+              <InputField
+                name="accepted_by_person_name"
+                value={formData.accepted_by_person_name as string}
+                label="Принял(исполнитель):"
+                type="text"
+                w={["w-6/16", "w-11/16"]}
+                onChange={(value) => { }}
+                refBook={<BtnPersonsRef handleSelectPerson={handleSelectPerson_accepted} persons={props.persons} />}
+                readonly={true}
+                errors={errors?.accepted_by_person_name?._errors as string[] | undefined}
+              />
+              <div className="flex flex-row justify-between">
+                {/* hours_done */}
+                <InputField
+                  name="hours_done"
+                  value={formData.hours_done as string}
+                  label="Отработка часов:"
+                  type="text"
+                  w={["w-10/16", "w-6/16"]}
+                  onChange={(value) => handleInputChange('hours_done', value)}
+                  readonly={props.readonly}
+                  errors={errors?.hours_done?._errors as string[] | undefined}
+                />
+                {/* hours_percent */}
+                <InputField
+                  name="hours_percent"
+                  value={formData.hours_percent as string}
+                  label="Показатель %:"
+                  type="text"
+                  w={["w-10/16", "w-6/16"]}
+                  onChange={(value) => handleInputChange('hours_percent', value)}
+                  readonly={props.readonly}
+                  errors={errors?.hours_percent?._errors as string[] | undefined}
+                />
+              </div>
+            </div>
+
+          </div>
+
+          {/* user_tags */}
+          <div className="flex max-w-[1150] mt-1">
+            <label
+              htmlFor="user_tags"
+              className={`${lusitana.className} w-[130px] font-medium flex items-center p-2 text-gray-500`}>
+              Тэги:
+            </label>
+            <TagInput
+              id="user_tags"
+              value={formData.user_tags}
+              onAdd={addUserTag}
+              handleFormInputChange={handleChangeUserTags}
+              readonly={props.readonly}
+            />
+          </div>
+          {/* access_tags */}
+          <div className="flex max-w-[1150] mt-1">
+            <label
+              htmlFor="access_tags"
+              className={`${lusitana.className} w-[130px] font-medium flex items-center p-2 text-gray-500`}>
+              Тэги доступа:
+            </label>
+            <TagInput
+              id="access_tags"
+              value={formData.access_tags}
+              onAdd={addAccessTag}
+              handleFormInputChange={handleChangeAccessTags}
+              readonly={props.readonly}
+            />
+          </div>
+
+          {/* button area */}
+          <div className="flex justify-between mt-4 mr-4">
+            <div className="flex w-full md:w-3/4">
+              <div className="w-full md:w-1/2">
+                <button
+                  disabled={props.readonly}
+                  className={`w-full rounded-md border p-2 ${props.readonly
+                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    : 'bg-blue-400 text-white hover:bg-blue-100 hover:text-gray-500 cursor-pointer'
+                    }`}
+                  type="submit"
+                >
+                  Сохранить
+                </button>
+              </div>
+              <div className="w-full md:w-1/2">
+                <button
+                  onClick={handleBackClick}
+                  className="bg-blue-400 text-white w-full rounded-md border p-2 hover:bg-blue-100 hover:text-gray-500 cursor-pointer"
+                >
+                  {props.readonly ? 'Закрыть' : 'Закрыть и освободить'}
+                </button>
+              </div>
+              <div className="w-full md:w-1/2">
+                <button
+                  type="button"
+                  onClick={handleShowPDF}
+                  className="bg-green-400 text-white w-full rounded-md border p-2 hover:bg-green-100 hover:text-gray-500 cursor-pointer"
+                >
+                  Открыть PDF
+                </button>
+              </div>
+            </div>
+          </div>
+        </form>
+      )
+      }
+
+      {/* Кнопка закрытия PDF */}
+      {
+        pdfUrl && (
+          <button
+            onClick={handleClosePDF}
+            style={{
+              position: 'absolute',
+              top: '50px',
+              right: '50px',
+              padding: '5px 10px',
+              background: 'red',
+              color: 'white',
+              border: 'none',
+              borderRadius: '5px',
+              cursor: 'pointer',
+            }}
+          >
+            Закрыть PDF
+          </button>
+        )
+      }
+
+      {/* Отображение PDF в iframe */}
+      {
+        pdfUrl && (
+          <iframe
+            src={pdfUrl}
+            style={{
+              width: '100%',
+              height: '1200px',
+              border: '2px solid red',
+              marginTop: '20px',
+            }}
+            title="PDF Preview"
+          />
+        )
+      }
+
+      <MessageBoxOKCancel />
+    </div >
+  );
+}
+[11]
+import React from 'react';
+import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
+import { Font } from '@react-pdf/renderer';
+
+Font.register({
+  family: 'Arial',
+  src: 'https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-light-webfont.ttf ',
+});
+
+import { FormData } from './claim-edit-form';
+import { ClaimForm } from '@/app/lib/definitions';
+
+// Создаем стили для PDF
+const styles = StyleSheet.create({
+  page: {
+    flexDirection: 'column',
+    padding: 30,
+    fontSize: 12,
+  },
+  section: {
+    margin: 10,
+    padding: 10,
+    flexGrow: 1,
+  },
+  text: {
+    fontFamily: 'Arial',
+    fontSize: 12,
+  },
+});
+
+const formData: ClaimForm = {
+  id: '',
+  name: '',
+  username: '',
+  section_id: '',
+  editing_by_user_id: null,
+  editing_since: null,
+  timestamptz: '',
+  section_name: '',
+} as ClaimForm;
+
+export default function PdfDocument({ formData }: { formData: FormData }) {
+  return (
+    <Document>
+      <Page size="A4" style={styles.page}>
+        <View style={styles.section}>
+          <Text style={styles.text}>Название заявки: {formData.name}</Text>
+        </View>
+      </Page>
+    </Document>
+  );
+}
+таблица в БД:
+-- Table: public.claims
+
+-- DROP TABLE IF EXISTS public.claims;
+
+CREATE TABLE IF NOT EXISTS public.claims
+(
+    id uuid NOT NULL DEFAULT uuid_generate_v4(),
+    name text COLLATE pg_catalog."default",
+    username text COLLATE pg_catalog."default",
+    timestamptz timestamp with time zone,
+    doc_status text COLLATE pg_catalog."default" DEFAULT 'draft'::text,
+    user_tags jsonb,
+    access_tags jsonb,
+    editing_by_user_id uuid,
+    editing_since timestamp with time zone,
+    author_id uuid NOT NULL,
+    editor_id uuid DEFAULT '00000000-0000-0000-0000-000000000000'::uuid,
+    tenant_id uuid NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000'::uuid,
+    section_id uuid NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000'::uuid,
+    claim_date date,
+    priority text COLLATE pg_catalog."default" DEFAULT 'низкий'::text,
+    machine_id uuid DEFAULT '00000000-0000-0000-0000-000000000000'::uuid,
+    location_id uuid DEFAULT '00000000-0000-0000-0000-000000000000'::uuid,
+    repair_todo text COLLATE pg_catalog."default" DEFAULT ''::text,
+    repair_reason text COLLATE pg_catalog."default" DEFAULT ''::text,
+    breakdown_reasons text COLLATE pg_catalog."default" DEFAULT ''::text,
+    emergency_act text COLLATE pg_catalog."default" DEFAULT ''::text,
+    system_id uuid DEFAULT '00000000-0000-0000-0000-000000000000'::uuid,
+    accepted_date timestamp with time zone,
+    accepted_by_person_id uuid DEFAULT '00000000-0000-0000-0000-000000000000'::uuid,
+    approved_date timestamp with time zone,
+    approved_by_person_id uuid DEFAULT '00000000-0000-0000-0000-000000000000'::uuid,
+    created_by_person_id uuid DEFAULT '00000000-0000-0000-0000-000000000000'::uuid,
+    hours_plan text COLLATE pg_catalog."default" DEFAULT ''::text,
+    hours_rest text COLLATE pg_catalog."default" DEFAULT ''::text,
+    hours_done text COLLATE pg_catalog."default" DEFAULT ''::text,
+    hours_percent text COLLATE pg_catalog."default" DEFAULT ''::text,
+    CONSTRAINT claims_pkey PRIMARY KEY (id),
+    CONSTRAINT machine_fkey FOREIGN KEY (machine_id)
+        REFERENCES public.machines (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID,
+    CONSTRAINT section_fkey FOREIGN KEY (section_id)
+        REFERENCES public.sections (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.claims
+    OWNER to postgres;
+
+для нового объекта имеется такая таблица (если нужно, доработай):
+-- Table: public.legal_entities
+
+-- DROP TABLE IF EXISTS public.legal_entities;
+
+CREATE TABLE IF NOT EXISTS public.legal_entities
+(
+    id uuid NOT NULL DEFAULT uuid_generate_v4(),
+    name text COLLATE pg_catalog."default" NOT NULL,
+    fullname text COLLATE pg_catalog."default",
+    inn text COLLATE pg_catalog."default",
+    address_legal text COLLATE pg_catalog."default",
+    address_fact text COLLATE pg_catalog."default",
+    phone text COLLATE pg_catalog."default",
+    email text COLLATE pg_catalog."default",
+    contact text COLLATE pg_catalog."default",
+    is_customer boolean,
+    is_supplier boolean,
+    kpp text COLLATE pg_catalog."default",
+    date date,
+    username text COLLATE pg_catalog."default" DEFAULT '00000000-0000-0000-0000-000000000000'::uuid,
+    timestamptz time with time zone DEFAULT now(),
+    region_id uuid,
+    section_id uuid,
+    doc_status text COLLATE pg_catalog."default" DEFAULT 'draft'::text,
+    author_id uuid DEFAULT '00000000-0000-0000-0000-000000000000'::uuid,
+    editor_id uuid DEFAULT '00000000-0000-0000-0000-000000000000'::uuid,
+    user_tags jsonb,
+    access_tags jsonb,
+    editing_by_user_id uuid,
+    editing_since timestamp with time zone,
+    CONSTRAINT legal_entities_pkey PRIMARY KEY (id),
+    CONSTRAINT sections_fkey FOREIGN KEY (section_id)
+        REFERENCES public.sections (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.legal_entities
+    OWNER to postgres;
+
+COMMENT ON TABLE public.legal_entities
+    IS 'Юрлица';
+-- Index: i_region_id
+
+-- DROP INDEX IF EXISTS public.i_region_id;
+
+CREATE INDEX IF NOT EXISTS i_region_id
+    ON public.legal_entities USING btree
+    (region_id ASC NULLS LAST)
+    WITH (deduplicate_items=True)
+    TABLESPACE pg_default;
+-- Index: i_section_id
+
+-- DROP INDEX IF EXISTS public.i_section_id;
+
+CREATE INDEX IF NOT EXISTS i_section_id
+    ON public.legal_entities USING btree
+    (section_id ASC NULLS LAST)
+    WITH (deduplicate_items=True)
+    TABLESPACE pg_default;
+
+это все исходные данные
