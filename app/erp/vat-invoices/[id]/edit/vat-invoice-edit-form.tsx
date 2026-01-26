@@ -1,0 +1,559 @@
+'use client';
+import { useEffect, useState } from "react";
+import {
+    LegalEntityForm,
+    PersonForm,
+    VATInvoiceForm,
+    VatInvoiceGoodsForm,
+} from "@/app/lib/definitions";
+import { formatDateForInput, utcISOToLocalDateTimeInput } from "@/app/lib/common-utils";
+import BtnSectionsRef from "@/app/admin/sections/lib/btn-sections-ref";
+import { z } from "zod";
+import { pdf } from '@react-pdf/renderer';
+import MessageBoxOKCancel from "@/app/lib/message-box-ok-cancel";
+import {
+    setIsCancelButtonPressed,
+    setIsDocumentChanged,
+    setIsMessageBoxOpen,
+    setIsOKButtonPressed,
+    setIsShowMessageBoxCancel,
+    setMessageBoxText,
+    useDocumentStore,
+    useIsDocumentChanged,
+    useMessageBox
+} from "@/app/store/useDocumentStore";
+import InputField from "@/app/lib/input-field";
+import { useRouter } from "next/navigation";
+import { createVatInvoice, updateVatInvoice } from "../../lib/vat-invoice-actions";
+import BtnLegalEntitiesRef from "@/app/erp/legal-entities/lib/btn-legal-entities-ref";
+import BtnPersonsRef from "@/app/repair/persons/lib/btn-persons-ref";
+import VatInvoiceGoodsTable from "./vat-invoice-goods-table";
+import { getVatInvoiceGoodsStore, destroyVatInvoiceGoodsStore } from "../../lib/store/vatInvoiceGoodsStoreRegistry";
+import { fetchPersonByUser } from "@/app/repair/claims/lib/claims-actions";
+
+interface IEditFormProps {
+    invoice: VATInvoiceForm;
+    lockedByUserId: string | null;
+    unlockAction: ((tableName: string, id: string, userId: string) => Promise<void>) | null;
+    readonly: boolean;
+    customers: LegalEntityForm[];
+    persons: PersonForm[];
+    vat_invoice_goods: VatInvoiceGoodsForm[] | null;
+}
+
+const DocStatusSchema = z.enum(['draft', 'active', 'deleted']);
+const VatInvoiceFormSchemaFull = z.object({
+    id: z.string().uuid(),
+    name: z.string().min(2, {
+        message: "Название должно содержать не менее 2-х символов.",
+    }),
+    number: z.string().nullable(),
+    // date: z.date({
+    //     required_error: "Поле Дата должно быть заполнено.",
+    //     invalid_type_error: "Поле Дата должно быть датой.",
+    // }).nullable(),
+    date: z.string()
+        .regex(/^\d{4}-\d{2}-\d{2}$/, 'Неверный формат даты')
+        .nullable()
+        .refine((val) => val !== null, {
+            message: 'Дата документа не указана',
+        })
+        .refine((s) => !isNaN(Date.parse(s)), 'Некорректная дата'),
+    description: z.string().nullable(),
+    customer_id: z.string().uuid(),
+    customer_name: z.string().min(1, {
+        message: "Поле Контрагент должно быть заполнено.",
+    }),
+    our_legal_entity_id: z.string().uuid(),
+    our_legal_entity_name: z.string(),
+    amount_incl_vat: z.number(),
+    amount_excl_vat: z.number(),
+    vat_rate: z.number(),
+    vat_amount: z.number(),
+    doc_status: DocStatusSchema.default('draft'),
+    approved_date: z.string().optional().nullable(),
+    approved_by_person_id: z.string().uuid().nullable(),
+    approved_by_person_name: z.string().nullable(),
+    accepted_date: z.string().optional().nullable(),
+    accepted_by_person_id: z.string().uuid().nullable(),
+    accepted_by_person_name: z.string().nullable(),
+    section_id: z.string().uuid(),
+    section_name: z.string().min(1, {
+        message: "Поле Раздел должно быть заполнено.",
+    }),
+    tenant_id: z.string().uuid(),
+    username: z.string().optional(),
+    author_id: z.string().uuid(),
+    editor_id: z.string().uuid(),
+    timestamptz: z.string().optional(),
+    date_created: z.date(),
+    editing_by_user_id: z.string().nullable(),
+    editing_since: z.string().nullable(),
+    access_tags: z.array(z.string()).nullable(),
+    user_tags: z.array(z.string()).nullable(),
+});
+
+const VatInvoiceFormSchema = VatInvoiceFormSchemaFull.omit({
+    id: true,
+    timestamptz: true,
+    username: true,
+    editing_by_user_id: true,
+    editing_since: true,
+    amount_incl_vat: true,
+    amount_excl_vat: true,
+    vat_rate: true,
+    vat_amount: true,
+    // approved_date: true,
+    approved_by_person_id: true,
+    approved_by_person_name: true,
+    // accepted_date: true,
+    accepted_by_person_id: true,
+    accepted_by_person_name: true,
+    date_created: true,
+    access_tags: true,
+    user_tags: true,
+});
+
+export type FormData = z.infer<typeof VatInvoiceFormSchemaFull>;
+
+export default function VatInvoiceEditForm(props: IEditFormProps) {
+    const userSections = useDocumentStore.getState().userSections;
+    const sessionUser = useDocumentStore.getState().sessionUser;
+    const docTenantId = useDocumentStore.getState().documentTenantId;
+    const sessionUserId = sessionUser.id;
+    const [showErrors, setShowErrors] = useState(false);
+    const isDocumentChanged = useIsDocumentChanged();
+    const msgBox = useMessageBox();
+    const router = useRouter();
+
+    const docChanged = () => {
+        setIsDocumentChanged(true);
+        setMessageBoxText('Документ изменен. Закрыть без сохранения?');
+    };
+
+    const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+    const [formData, setFormData] = useState<FormData>({
+        ...props.invoice,
+        date: props.invoice.date ?? '',
+        date_created: props.invoice.date_created ?? new Date(),
+        approved_date: props.invoice.approved_date ?? '',
+    });
+
+    const useCurrentVatInvoiceGoodsStore = getVatInvoiceGoodsStore(formData.id);
+    const {
+        vat_invoice_goods,
+        saveNewGoodsToDB,
+        deleteMarkedGoodsFromDB,
+        setInitialGoods,
+    } = useCurrentVatInvoiceGoodsStore();
+
+    useEffect(() => {
+        return () => {
+            destroyVatInvoiceGoodsStore(formData.id);
+        };
+    }, [formData.id]);
+
+    useEffect(() => {
+        if (props.vat_invoice_goods) {
+            setInitialGoods(
+                props.vat_invoice_goods.map(g => ({
+                    id: g.id,
+                    row_number: g.row_number,
+                    good_id: g.good_id,
+                    good_name: g.good_name,
+                    quantity: String(g.quantity),
+                    price: String(g.price),
+                    amount: String(g.amount),
+                    isEditing: false,
+                    isToBeDeleted: false,
+                }))
+            );
+        }
+    }, [props.vat_invoice_goods, useCurrentVatInvoiceGoodsStore]);
+
+    useEffect(() => {
+        setFormData((prev) => ({
+            ...prev,
+            author_id: sessionUserId,
+            editor_id: '00000000-0000-0000-0000-000000000000',
+            tenant_id: docTenantId,
+        }));
+    }, []);
+
+    const validate = () => {
+        const res = VatInvoiceFormSchema.safeParse(formData);
+        if (res.success) {
+            return undefined;
+        }
+        return res.error.format();
+    };
+
+    const handleSubmit = async (e: React.MouseEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        const errors = validate();
+        if (errors) {
+            setShowErrors(true);
+            return;
+        }
+
+        try {
+            if (formData.id === "") {
+                await createVatInvoice(formData);
+                setTimeout(() => {
+                    router.push('/erp/vat-invoices');
+                }, 2000);
+            } else {
+                await Promise.all([
+                    updateVatInvoice(formData),
+                    deleteMarkedGoodsFromDB(),
+                    saveNewGoodsToDB(formData.id, formData.section_id),
+                ]);
+            }
+            setIsDocumentChanged(false);
+            setMessageBoxText('Документ сохранен.');
+        } catch (error) {
+            setMessageBoxText('Документ не сохранен! :' + String(error));
+        }
+        setIsShowMessageBoxCancel(false);
+        setIsMessageBoxOpen(true);
+    };
+
+    const handleBackClick = async (e: React.MouseEvent) => {
+        e.preventDefault();
+        if (props.unlockAction) await props.unlockAction("vat_invoices", props.invoice.id, sessionUserId);
+        if (isDocumentChanged && !msgBox.isOKButtonPressed) {
+            setIsShowMessageBoxCancel(true);
+            setIsMessageBoxOpen(true);
+        } else if (!isDocumentChanged) {
+            window.history.back();
+        }
+    };
+
+    const handleSelectSection = (new_section_id: string, new_section_name: string, new_section_tenant_id: string) => {
+        setFormData((prev) => ({
+            ...prev,
+            section_id: new_section_id,
+            section_name: new_section_name,
+            tenant_id: new_section_tenant_id,
+        }));
+        useDocumentStore.getState().setDocumentTenantId(new_section_tenant_id);
+        docChanged();
+    };
+
+    const handleSelectCustomer = (new_customer_id: string, new_customer_name: string) => {
+        setFormData((prev) => ({
+            ...prev,
+            customer_id: new_customer_id,
+            customer_name: new_customer_name,
+        }));
+        docChanged();
+    };
+    const handleSelectOurLegalEntity = (new_our_legal_entity_id: string, new_our_legal_entity_name: string) => {
+        setFormData((prev) => ({
+            ...prev,
+            our_legal_entity_id: new_our_legal_entity_id,
+            our_legal_entity_name: new_our_legal_entity_name,
+        }));
+        docChanged();
+    };
+    const handleSelectApprovedPerson = (new_person_id: string, new_person_name: string) => {
+        setFormData((prev) => ({
+            ...prev,
+            approved_by_person_id: new_person_id,
+            approved_by_person_name: new_person_name,
+        }));
+        docChanged();
+    };
+
+    const handleSelectAcceptedPerson = (new_person_id: string, new_person_name: string) => {
+        setFormData((prev) => ({
+            ...prev,
+            accepted_by_person_id: new_person_id,
+            accepted_by_person_name: new_person_name,
+        }));
+        docChanged();
+    };
+
+    const handleInputChange = (field: string, value: string | Date | null) => {
+        setFormData((prev) => ({ ...prev, [field]: value }));
+        docChanged();
+    };
+    const handleDateChange = (value: string) => {
+        setFormData((prev) => ({ ...prev, date: value }));
+        docChanged();
+    };
+    const handleSetAccepted = async () => {
+        const accepted_by_person = await fetchPersonByUser(sessionUser.id, userSections.map((s) => s.id));
+
+        setFormData((prev) => ({
+            ...prev,
+            accepted_date: (function () {
+                const d = new Date();
+                return d.getFullYear() + '-' +
+                    String(d.getMonth() + 1).padStart(2, '0') + '-' +
+                    String(d.getDate()).padStart(2, '0') + 'T' +
+                    String(d.getHours()).padStart(2, '0') + ':' +
+                    String(d.getMinutes()).padStart(2, '0');
+            })(),
+
+            accepted_by_person_id: accepted_by_person ? accepted_by_person.id : '00000000-0000-0000-0000-000000000000',
+            accepted_by_person_name: accepted_by_person ? accepted_by_person.name : sessionUser.name,
+        }));
+        docChanged();
+    }
+    const handleSetApproved = async() => {
+        const approved_by_person = await fetchPersonByUser(sessionUser.id, userSections.map((s) => s.id));
+
+        setFormData((prev) => ({
+            ...prev,
+            approved_date: (function () {
+                const d = new Date();
+                return d.getFullYear() + '-' +
+                    String(d.getMonth() + 1).padStart(2, '0') + '-' +
+                    String(d.getDate()).padStart(2, '0') + 'T' +
+                    String(d.getHours()).padStart(2, '0') + ':' +
+                    String(d.getMinutes()).padStart(2, '0');
+            })(),
+
+            approved_by_person_id: approved_by_person ? approved_by_person.id : '00000000-0000-0000-0000-000000000000',
+            approved_by_person_name: approved_by_person ? approved_by_person.name : sessionUser.name,
+        }));
+        docChanged();
+    }
+    const errors = showErrors ? validate() : undefined;
+
+    return (
+        <div>
+            {!pdfUrl && (
+                <form id="vat-invoice-form" onSubmit={handleSubmit} className="flex flex-col gap-4 pb-24">
+                    <div className="flex flex-col md:flex-row gap-4 w-full">
+                        {/* первая колонка */}
+                        <div className="flex flex-col gap-4 w-full md:w-1/2">
+                            <InputField
+                                name="number"
+                                value={formData.number || ""}
+                                label="Номер:"
+                                type="text"
+                                w={["w-4/16", "w-13/16"]}
+                                onChange={(value) => handleInputChange('number', value)}
+                                readonly={props.readonly}
+                                errors={errors?.number?._errors as string[] | undefined}
+                            />
+                            {/* date */}
+                            <div className="flex-2 flex items-center">
+                                <label
+                                    htmlFor="date"
+                                    className="w-5/16 text-sm text-blue-900 font-medium flex items-center p-2 pl-2"
+                                >Дата:</label>
+                                <input
+                                    name="date"
+                                    value={formData.date ?? ''}
+                                    type="date"
+                                    className="w-5/16 disabled:text-gray-400 disabled:bg-gray-100 break-words control rounded-md border border-gray-200 p-2"
+                                    onChange={(e) => handleDateChange(String(e.target.value))}
+                                    disabled={props.readonly}
+                                />
+                                {/* Блок с выводом ошибок */}
+                                <div id={"date-error"} aria-live="polite" aria-atomic="true">
+                                    {errors &&
+                                        errors?.date?._errors.map((error, index) => (
+                                            <p className="mt-2 text-xs text-red-500" key={index}>
+                                                {error}
+                                            </p>
+                                        ))}
+                                </div>
+                            </div>
+                            {/* customer_name */}
+                            <InputField
+                                name="customer_name"
+                                value={formData.customer_name}
+                                label="Контрагент:"
+                                type="text"
+                                w={["w-6/16", "w-11/16"]}
+                                onChange={() => { }}
+                                refBook={<BtnLegalEntitiesRef handleSelectLegalEntity={handleSelectCustomer} legalEntities={props.customers} elementIdPrefix="customer" />}
+                                readonly={props.readonly}
+                                errors={errors?.customer_name?._errors as string[] | undefined}
+                            />
+                            {/* SetApprovedButton & approved_date */}
+                            <div className="flex justify-between h-1/4 md:w-full">
+
+                                {!props.readonly && <button
+                                    type="button"
+                                    onClick={() => handleSetApproved()}
+                                    disabled={props.readonly}
+                                    className={`w-10/16 h-10 mt-1 rounded-md border p-2 ${props.readonly
+                                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                        : 'bg-blue-400 text-white hover:bg-blue-100 hover:text-gray-500 cursor-pointer'
+                                        }`}
+                                >
+                                    Проверил
+                                </button>}
+                                {/* approved_date */}
+                                <InputField name="approved_date" value={utcISOToLocalDateTimeInput(formData.approved_date)}
+                                    label="" type="datetime-local" w={["w-1/16", "w-16/16"]}
+                                    onChange={(value) => handleInputChange('approved_date', String(value))}
+                                    readonly={props.readonly}
+                                    errors={errors?.approved_date?._errors as string[] | undefined}
+                                />
+                            </div>
+                            {/* approved_by_person_name */}
+                            <InputField
+                                name="approved_by_person_name"
+                                value={formData.approved_by_person_name || ""}
+                                label="Проверил:"
+                                type="text"
+                                w={["w-6/16", "w-11/16"]}
+                                onChange={() => { }}
+                                refBook={<BtnPersonsRef handleSelectPerson={handleSelectApprovedPerson} persons={props.persons} />}
+                                readonly={props.readonly}
+                            />
+                        </div>
+
+                        {/* вторая колонка */}
+                        <div className="flex flex-col gap-4 w-full md:w-1/2">
+                            {/* name */}
+                            <InputField
+                                name="name"
+                                value={formData.name}
+                                label="Название:"
+                                type="text"
+                                w={["w-4/16", "w-13/16"]}
+                                onChange={(value) => handleInputChange('name', value)}
+                                readonly={props.readonly}
+                                errors={errors?.name?._errors as string[] | undefined}
+                            />
+                            {/* customer_name */}
+                            <InputField
+                                name="our_legal_entity_name"
+                                value={formData.our_legal_entity_name}
+                                label="Юрлицо(наше):"
+                                type="text"
+                                w={["w-6/16", "w-11/16"]}
+                                onChange={() => { }}
+                                refBook={<BtnLegalEntitiesRef handleSelectLegalEntity={handleSelectOurLegalEntity} legalEntities={props.customers} elementIdPrefix="our_legal_entity" />}
+                                readonly={props.readonly}
+                                errors={errors?.our_legal_entity_name?._errors as string[] | undefined}
+                            />
+                            <InputField
+                                name="section_name"
+                                value={formData.section_name}
+                                label="Раздел:"
+                                type="text"
+                                w={["w-6/16", "w-11/16"]}
+                                onChange={() => { }}
+                                refBook={<BtnSectionsRef handleSelectSection={handleSelectSection} />}
+                                readonly={props.readonly}
+                                errors={errors?.section_name?._errors as string[] | undefined}
+                            />
+                            {/* SetAcceptedButton & accepted_date */}
+                            <div className="flex justify-between h-1/4 md:w-full">
+
+                                {!props.readonly && <button
+                                    type="button"
+                                    onClick={() => handleSetAccepted()}
+                                    disabled={props.readonly}
+                                    className={`w-10/16 h-10 mt-1 rounded-md border p-2 ${props.readonly
+                                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                        : 'bg-blue-400 text-white hover:bg-blue-100 hover:text-gray-500 cursor-pointer'
+                                        }`}
+                                >
+                                    Подписал
+                                </button>}
+                                {/* accepted_date */}
+                                <InputField name="accepted_date" value={utcISOToLocalDateTimeInput(formData.accepted_date)}
+                                    label="" type="datetime-local" w={["w-1/16", "w-16/16"]}
+                                    onChange={(value) => handleInputChange('accepted_date', String(value))}
+                                    readonly={props.readonly}
+                                    errors={errors?.accepted_date?._errors as string[] | undefined}
+                                />
+                            </div>
+                            <InputField
+                                name="accepted_by_person_name"
+                                value={formData.accepted_by_person_name || ""}
+                                label="Подписал:"
+                                type="text"
+                                w={["w-6/16", "w-11/16"]}
+                                onChange={() => { }}
+                                refBook={<BtnPersonsRef handleSelectPerson={handleSelectAcceptedPerson} persons={props.persons} />}
+                                readonly={props.readonly}
+                            />
+
+                        </div>
+                    </div>
+
+                    {props.vat_invoice_goods && (
+                        <VatInvoiceGoodsTable
+                            readonly={props.readonly}
+                            onDocumentChanged={docChanged}
+                            vatInvoiceId={formData.id}
+                            sectionId={formData.section_id}
+                        />
+                    )}
+
+                    <div className="sticky bottom-0 bg-white py-4 z-10">
+                        <div className="flex justify-between mt-4 mr-4">
+                            <div className="flex w-full md:w-3/4">
+                                <div className="w-full md:w-1/2">
+                                    <button
+                                        disabled={props.readonly}
+                                        className={`w-full rounded-md border p-2 ${props.readonly
+                                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                            : 'bg-blue-400 text-white hover:bg-blue-100 hover:text-gray-500 cursor-pointer'
+                                            }`}
+                                        type="submit"
+                                    >
+                                        Сохранить
+                                    </button>
+                                </div>
+                                <div className="w-full md:w-1/2">
+                                    <button
+                                        onClick={handleBackClick}
+                                        className="bg-blue-400 text-white w-full rounded-md border p-2 hover:bg-blue-100 hover:text-gray-500 cursor-pointer"
+                                    >
+                                        {props.readonly ? 'Закрыть' : 'Закрыть и освободить'}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            )}
+
+            {pdfUrl && (
+                <button
+                    onClick={() => {
+                        URL.revokeObjectURL(pdfUrl);
+                        setPdfUrl(null);
+                    }}
+                    style={{
+                        position: 'absolute',
+                        top: '50px',
+                        right: '50px',
+                        padding: '5px 10px',
+                        background: 'red',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '5px',
+                        cursor: 'pointer',
+                    }}
+                >
+                    Закрыть PDF
+                </button>
+            )}
+            {pdfUrl && (
+                <iframe
+                    src={pdfUrl}
+                    style={{
+                        width: '100%',
+                        height: '1200px',
+                        border: '2px solid red',
+                        marginTop: '20px',
+                    }}
+                    title="PDF Preview"
+                />
+            )}
+            <MessageBoxOKCancel />
+        </div>
+    );
+}

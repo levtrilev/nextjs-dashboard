@@ -38,6 +38,12 @@ export async function fetchDocUserPermissions(
       );
     }
     if (data.rows.length === 0 || data.rows.length > 1) {
+      console.log(
+        "data.rows.length === 0 for user id " +
+          user_id +
+          " and doctype " +
+          doctype
+      );
       return {
         full_access: false,
         editor: false,
@@ -116,7 +122,8 @@ export async function fetchDoctypes() {
         FROM information_schema.tables
         WHERE table_schema = 'public'
         AND table_type = 'BASE TABLE'
-        AND table_name NOT IN ('users', 'roles', 'sections', 'tenants', 'users-id-num', 'permissions')
+        AND table_name NOT IN ('users', 'roles', 'sections', 'tenants', 'users-id-num'
+        , 'permissions', 'stock_balances', 'stock_movements', 'tags', 'periods')
         ORDER BY table_name ASC`
     );
 

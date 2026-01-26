@@ -44,22 +44,22 @@ interface IEditFormProps {
 
 //#region Claim zod schema
 const PrioritySchema = z.enum(['высокий', 'низкий']);
-const ClaimDateSchema = z.object({
-  claim_date: z
-    .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, 'Неверный формат даты')
-    .refine(
-      (dateStr) => {
-        const d = new Date(dateStr);
-        return !isNaN(d.getTime()) && d.toISOString().slice(0, 10) === dateStr;
-      },
-      { message: 'Некорректная дата' }
-    ),
-  // Опционально: запрет будущих дат
-  // .refine((dateStr) => new Date(dateStr) <= new Date(), {
-  //   message: 'Дата не может быть в будущем',
-  // }),
-});
+// const ClaimDateSchema = z.object({
+//   claim_date: z
+//     .string()
+//     .regex(/^\d{4}-\d{2}-\d{2}$/, 'Неверный формат даты')
+//     .refine(
+//       (dateStr) => {
+//         const d = new Date(dateStr);
+//         return !isNaN(d.getTime()) && d.toISOString().slice(0, 10) === dateStr;
+//       },
+//       { message: 'Некорректная дата' }
+//     ),
+//   // Опционально: запрет будущих дат
+//   // .refine((dateStr) => new Date(dateStr) <= new Date(), {
+//   //   message: 'Дата не может быть в будущем',
+//   // }),
+// });
 const ClaimFormSchemaFull = z.object({
   id: z.string().uuid(),
   name: z.string().min(2, {
@@ -308,6 +308,7 @@ export default function ClaimEditForm(props: IEditFormProps) {
   };
   const handleClaimDateChange = (value: string) => {
     setFormData((prev) => ({ ...prev, claim_date: value }));
+    docChanged();
   };
   const handleSetAccepted = async () => {
     const accepted_by_person = await fetchPersonByUser(sessionUser.id, userSections.map((s) => s.id));

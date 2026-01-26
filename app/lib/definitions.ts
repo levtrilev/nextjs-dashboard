@@ -16,6 +16,148 @@ export type WoPart = {
   quantity: number;
   section_id: string;
 };
+
+
+export type VATInvoice = {
+  id: string;
+  name: string;
+  date: string | null;
+  number: string | null;
+  description: string | null;
+  customer_id: string;
+  our_legal_entity_id: string;
+  amount_incl_vat: number;
+  amount_excl_vat: number;
+  vat_rate: number;
+  vat_amount: number;
+  doc_status: DocStatus;
+  approved_date?: string | null;
+  approved_by_person_id: string | null;
+  accepted_date?: string | null;
+  accepted_by_person_id: string | null;
+  section_id: string;
+  tenant_id: string;
+  username?: string;
+  author_id: string;
+  editor_id: string;
+  timestamptz?: string;
+  date_created?: Date;
+  editing_by_user_id: string | null;
+  editing_since: string | null;
+  access_tags: string[] | null;
+  user_tags: string[] | null;
+};
+export type VATInvoiceForm = {
+  id: string;
+  name: string;
+  date: string | null;
+  number: string | null;
+  description: string | null;
+  customer_id: string;
+  customer_name: string;
+  our_legal_entity_id: string;
+  our_legal_entity_name: string;
+  amount_incl_vat: number;
+  amount_excl_vat: number;
+  vat_rate: number;
+  vat_amount: number;
+  doc_status: DocStatus;
+  approved_date?: string | null;
+  approved_by_person_id: string | null;
+  approved_by_person_name: string | null;
+  accepted_date?: string | null;
+  accepted_by_person_id: string | null;
+  accepted_by_person_name: string | null;
+  section_id: string;
+  section_name: string;
+  tenant_id: string;
+  username?: string;
+  author_id: string;
+  editor_id: string;
+  timestamptz?: string;
+  date_created?: Date;
+  editing_by_user_id: string | null;
+  editing_since: string | null;
+  access_tags: string[] | null;
+  user_tags: string[] | null;
+};
+export type VatInvoiceGoodsForm = {
+  id: string;
+  vat_invoice_id: string;
+  row_number: string;
+  good_id: string;
+  good_name: string;
+  quantity: number;
+  price: number;
+  amount: number;
+  section_id: string;
+};
+export type Warehouse = {
+  id: string;
+  name: string;         
+  section_id: string;
+  tenant_id: string;
+  username?: string;
+  timestamptz?: string;
+  editing_by_user_id: string | null;
+  editing_since: string | null;
+  author_id: string | undefined;
+};
+export type WarehouseForm = {
+  id: string;
+  name: string;         
+  section_id: string;
+  section_name: string;
+  tenant_id: string;
+  username?: string;
+  timestamptz?: string;
+  editing_by_user_id: string | null;
+  editing_since: string | null;
+  author_id: string | undefined;
+};
+export type Good = {
+  id: string;
+  name: string;         
+  brand: string;        
+  product_code: string; 
+  supplier_id: string;
+  dimensions_height: number;
+  dimensions_width: number;
+  dimensions_length: number;
+  weight: number;
+  price_retail: number;
+  price_wholesale: number;
+  price_cost: number;
+  section_id: string;
+  tenant_id: string;
+  username?: string;
+  timestamptz?: string;
+  editing_by_user_id: string | null;
+  editing_since: string | null;
+};
+export type GoodForm = {
+  id: string;
+  name: string;         // Название
+  brand: string;        // Брэнд
+  product_code: string; // Артикул
+  supplier_id: string;
+  supplier_name: string;  // Поставщик
+  dimensions_height: number;  // Размеры высота (см)
+  dimensions_width: number;   // Размеры ширина (см)
+  dimensions_length: number;  // Размеры длина (см)
+  weight: number;             // Вес
+  price_retail: number;       // Цена розница
+  price_wholesale: number;    // Цена опт
+  price_cost: number;         // Цена закупки
+  section_id: string;
+  section_name: string;       // Раздел
+  tenant_id: string;
+  username?: string;
+  timestamptz?: string;
+  editing_by_user_id: string | null;
+  editing_since: string | null;
+};
+
 export type WoPartForm = {
   id: string;
   name: string;

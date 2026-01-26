@@ -3,6 +3,8 @@
 import {
   UserGroupIcon,
   HomeIcon,
+  MapPinIcon,
+  SparklesIcon,
   DocumentDuplicateIcon,
   BuildingOfficeIcon,
   BookOpenIcon,
@@ -16,13 +18,14 @@ import { useEffect, useRef, useState } from 'react';
 // Map of links to display in the side navigation.
 const links = [
   { name: 'Ремонт', href: '#', icon: HomeIcon },
-  { name: 'Главное', href: '/erp', icon: HomeIcon },
+  { name: 'Главное', href: '/erp', icon: MapPinIcon },
   { name: 'Руководителю', href: '/dashboard', icon: ArrowRightCircleIcon },
-  {
-    name: 'Счета к получению',
-    href: '/erp/invoices',
-    icon: DocumentDuplicateIcon,
-  },
+  { name: 'Продажи', href: '#', icon: SparklesIcon },
+  // {
+  //   name: 'Счета к получению',
+  //   href: '/erp/invoices',
+  //   icon: DocumentDuplicateIcon,
+  // },
 
   { name: 'Справочники', href: '#', icon: BookOpenIcon },
   { name: 'Помещения', href: '#', icon: BuildingOfficeIcon }, //premise
@@ -30,6 +33,8 @@ const links = [
   // { name: 'Lesson', href: '/dashboard/lesson', icon: HomeIcon },
 ];
 const subMenu = [
+  { mainItem: 'Продажи', name: 'Счета-фактуры', href: '/erp/vat-invoices' },
+  { mainItem: 'Продажи', name: 'Счета к получению', href: '/erp/invoices' },
   { mainItem: 'Администрирование', name: 'Пользователи', href: '/admin/users' },
   { mainItem: 'Администрирование', name: 'Организации', href: '/admin/tenants' },
   { mainItem: 'Администрирование', name: 'Разделы', href: '/admin/sections' },
@@ -37,6 +42,8 @@ const subMenu = [
   { mainItem: 'Администрирование', name: 'Полномочия', href: '/admin/permissions' },
   { mainItem: 'Справочники', name: 'Юридические лица', href: '/erp/legal-entities' },
   { mainItem: 'Справочники', name: 'Регионы', href: '/erp/regions' },
+  { mainItem: 'Справочники', name: 'Товары', href: '/erp/goods' },
+  { mainItem: 'Справочники', name: 'Склады', href: '/erp/warehouses' },
   { mainItem: 'Помещения', name: 'Помещения', href: '/erp/premises' },
   { mainItem: 'Помещения', name: 'Планы обслуживания', href: '/erp/task-schedules' },
   { mainItem: 'Помещения', name: 'Задачи обслуживания', href: '/erp/tasks' },
