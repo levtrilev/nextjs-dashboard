@@ -10,9 +10,9 @@ import { VATInvoiceForm } from "@/app/lib/definitions";
 import VatInvoiceEditForm from "./vat-invoice-edit-form";
 import { fetchVatInvoiceForm } from "../../lib/vat-invoice-actions";
 import { fetchLegalEntitiesForm } from "@/app/erp/legal-entities/lib/legal-entities-actions";
-import { fetchPersonsForm } from "@/app/repair/persons/lib/persons-actions";
+import { fetchPersonsForm } from "@/app/erp/persons/lib/persons-actions";
 import { fetchVatInvoiceGoodsForm } from "../../lib/vat-invoice-goods-actions";
-import NotAuthorized from "@/app/lib/not_authorized";
+import NotAuthorized, { isUserAuthorized } from "@/app/lib/not_authorized";
 
 async function Page(props: { params: Promise<{ id: string }> }) {
   //#region unified hooks and variables
@@ -32,10 +32,7 @@ async function Page(props: { params: Promise<{ id: string }> }) {
   const tenant_id = pageUser.tenant_id;
   const userPermissions = await fetchDocUserPermissions(user.id as string, 'vat_invoices');
 
-  if (!(userPermissions.full_access
-    || userPermissions.editor
-    || userPermissions.author
-    || userPermissions.reader)) {
+  if (!isUserAuthorized(userPermissions, pageUser)) {
     return <NotAuthorized />
   }
   const params = await props.params;

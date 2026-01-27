@@ -12,7 +12,7 @@ import { PersonForm } from "@/app/lib/definitions";
 import { fetchPersonForm } from "../../lib/persons-actions";
 import PersonEditForm from "./person-edit-form";
 import { fetchUsersAdmin } from "@/app/admin/users/lib/users-actions";
-import NotAuthorized from "@/app/lib/not_authorized";
+import NotAuthorized, { isUserAuthorized } from "@/app/lib/not_authorized";
 
 async function Page(props: { params: Promise<{ id: string }> }) {
     //#region unified hooks and variables 
@@ -30,10 +30,7 @@ async function Page(props: { params: Promise<{ id: string }> }) {
     // const tenant_id = (await fetchSectionById(object.section_id)).tenant_id;
     const tenant_id = pageUser.tenant_id;
     const userPermissions = await fetchDocUserPermissions(user.id, 'persons');
-    if (!(userPermissions.full_access
-        || userPermissions.editor
-        || userPermissions.author
-        || userPermissions.reader)) {
+    if (!isUserAuthorized(userPermissions, pageUser)) {
         return <NotAuthorized />
     }
     const params = await props.params;

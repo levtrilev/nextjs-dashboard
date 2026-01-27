@@ -34,8 +34,8 @@ export async function createPerson(person: Person) {
     throw new Error("Не удалось создать Person:" + String(error));
   }
 
-  revalidatePath("/repair/persons");
-  // redirect("/repair/persons");
+  revalidatePath("/erp/persons");
+  // redirect("/erp/persons");
 }
 
 //#endregion
@@ -73,7 +73,7 @@ export async function updatePerson(person: Person) {
     );
   }
 
-  revalidatePath("/repair/persons");
+  revalidatePath("/erp/persons");
 }
 
 export async function deletePerson(id: string) {
@@ -85,7 +85,7 @@ export async function deletePerson(id: string) {
       "Ошибка базы данных: Не удалось удалить Person: " + String(error)
     );
   }
-  revalidatePath("/repair/persons");
+  revalidatePath("/erp/persons");
 }
 
 //#endregion

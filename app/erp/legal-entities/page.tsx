@@ -10,7 +10,7 @@ import { LegalEntity, Section } from "@/app/lib/definitions";
 import { fetchLegalEntitiesPages } from "./lib/legal-entities-actions";
 import { CreateLegalEntity } from "./lib/legal-entities-buttons";
 import LegalEntitiesTable from "./lib/legal-entities-table";
-import NotAuthorized from "@/app/lib/not_authorized";
+import NotAuthorized, { isUserAuthorized } from "@/app/lib/not_authorized";
 import ArmTabsPage from "@/app/repair/arm/tabs-page";
 import { EffectiveSectionsSync } from "@/app/repair/arm/effective-sections-sync";
 import { getUserCurrentSections } from "@/app/repair/arm/arm-actions";
@@ -35,10 +35,7 @@ export default async function Page(props: {
   const pageUser = user;
   const current_sections = await getCurrentSections(email as string);
   const userPermissions = await fetchDocUserPermissions(user.id, 'legal_entities');
-  if (!(userPermissions.full_access
-    || userPermissions.editor
-    || userPermissions.author
-    || userPermissions.reader)) {
+  if (!isUserAuthorized(userPermissions, pageUser)) {
     return <NotAuthorized />
   }
   const legalEntities = {};
@@ -46,25 +43,26 @@ export default async function Page(props: {
   //#endregion
 
   //#region arm sections
-  const current_sections_array = await getCurrentSectionsArray(email as string);
-  const effective_sections_array = await getUserCurrentSections(email);     // с учётом сохранённых из АРМ
-  const effectiveSectionIdsString = '{' + effective_sections_array.map(s => s.id).join(",") + '}';
+  // const current_sections_array = await getCurrentSectionsArray(email as string);
+  // const effective_sections_array = await getUserCurrentSections(email);     // с учётом сохранённых из АРМ
+  // const effectiveSectionIdsString = '{' + effective_sections_array.map(s => s.id).join(",") + '}';
   //#endregion
 
   const searchParams = await props.searchParams;
   const query = searchParams?.query || '';
   const currentPage = Number(searchParams?.page) || 1;
-  const totalPages = await fetchLegalEntitiesPages(query, effectiveSectionIdsString);
+  // const totalPages = await fetchLegalEntitiesPages(query, effectiveSectionIdsString);
+  const totalPages = await fetchLegalEntitiesPages(query, current_sections);
 
   return (
     <div className="w-full">
-      <ArmTabsPage current_sections_array={current_sections_array} />
+      {/* <ArmTabsPage current_sections_array={current_sections_array} /> */}
       {/* Синхронизация Zustand-tabs после выбора пользователем с сервером */}
-      <EffectiveSectionsSync
+      {/* <EffectiveSectionsSync
         userId={user.id}
         allowedSections={current_sections_array.map((s) => s.id)}
-        initialEffectiveSections={effective_sections_array.map((s:Section) => s.id)}
-      />
+        initialEffectiveSections={effective_sections_array.map((s: Section) => s.id)}
+      /> */}
       <div className="flex w-full items-center justify-between">
         <h1 className={`${lusitana.className} text-2xl`}>Юридические лица</h1>
       </div>
@@ -75,7 +73,7 @@ export default async function Page(props: {
       <LegalEntitiesTable
         query={query}
         currentPage={currentPage}
-        current_sections={effectiveSectionIdsString}
+        current_sections={current_sections}
         key={1}
         showDeleteButton={!readonly_permission}
       />

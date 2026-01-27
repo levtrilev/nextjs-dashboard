@@ -12,7 +12,7 @@ import { getCurrentSections } from "@/app/lib/common-actions";
 import { fetchDocUserPermissions } from "@/app/admin/permissions/lib/permissios-actions";
 import DocWrapper from "../../../../lib/doc-wrapper";
 import { checkReadonly } from "@/app/lib/common-utils";
-import NotAuthorized from "@/app/lib/not_authorized";
+import NotAuthorized, { isUserAuthorized } from "@/app/lib/not_authorized";
 import { fetchLegalEntities, fetchLegalEntitiesForm } from "@/app/erp/legal-entities/lib/legal-entities-actions";
 
 async function Page(props: { params: Promise<{ id: string }> }) {
@@ -35,14 +35,11 @@ async function Page(props: { params: Promise<{ id: string }> }) {
     const tenant_id = (await fetchSectionById(premise.section_id)).tenant_id;
     const user = await getUser(email as string);
     const userPermissions = await fetchDocUserPermissions(user?.id as string, 'premises');
-    if (!(userPermissions.full_access
-        || userPermissions.editor
-        || userPermissions.author
-        || userPermissions.reader)) {
+
+    const pageUser = user ? user : {} as User
+    if (!isUserAuthorized(userPermissions, pageUser)) {
         return <NotAuthorized />
     }
-    const pageUser = user ? user : {} as User
-
     const readonly = checkReadonly(userPermissions, premise, pageUser.id);
 
     return (

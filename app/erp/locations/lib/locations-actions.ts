@@ -46,8 +46,8 @@ export async function createLocation(location: Location) {
     throw new Error("Не удалось создать Location:" + String(error));
   }
 
-  revalidatePath("/repair/locations");
-  // redirect("/repair/locations");
+  revalidatePath("/erp/locations");
+  // redirect("/erp/locations");
 }
 
 //#endregion
@@ -92,7 +92,7 @@ export async function updateLocation(location: Location) {
     throw new Error("Ошибка базы данных: Не удалось обновить Location: " + error);
   }
 
-  revalidatePath("/repair/locations");
+  revalidatePath("/erp/locations");
 }
 
 export async function deleteLocation(id: string) {
@@ -102,7 +102,7 @@ export async function deleteLocation(id: string) {
     console.error("Ошибка удаления Location:", error);
     throw new Error("Ошибка базы данных: Не удалось удалить Location.");
   }
-  revalidatePath("/repair/locations");
+  revalidatePath("/erp/locations");
 }
 
 //#endregion

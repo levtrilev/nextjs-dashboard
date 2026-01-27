@@ -10,8 +10,9 @@ import { fetchSectionsForm } from "@/app/admin/sections/lib/sections-actions";
 import { checkReadonly } from "@/app/lib/common-utils";
 import { PersonForm } from "@/app/lib/definitions";
 import { fetchUsersAdmin } from "@/app/admin/users/lib/users-actions";
-import { fetchPersonForm } from "@/app/repair/persons/lib/persons-actions";
-import PersonEditForm from "@/app/repair/persons/[id]/edit/person-edit-form";
+import { fetchPersonForm } from "@/app/erp/persons/lib/persons-actions";
+import PersonEditForm from "@/app/erp/persons/[id]/edit/person-edit-form";
+import NotAuthorized, { isUserAuthorized } from "@/app/lib/not_authorized";
 
 async function Page(props: { params: Promise<{ id: string }> }) {
     //#region unified hooks and variables 
@@ -29,7 +30,9 @@ async function Page(props: { params: Promise<{ id: string }> }) {
     // const tenant_id = (await fetchSectionById(object.section_id)).tenant_id;
     const tenant_id = pageUser.tenant_id;
     const userPermissions = await fetchDocUserPermissions(user.id, 'persons');
-
+    if (!isUserAuthorized(userPermissions, pageUser)) {
+        return <NotAuthorized />
+    }
     const params = await props.params;
     const id = params.id;
     //    #endregion

@@ -8,7 +8,7 @@ import { checkReadonly } from "@/app/lib/common-utils";
 import { WarehouseForm } from "@/app/lib/definitions";
 import { fetchWarehouseForm } from "../../lib/warehouses-actions";
 import WarehouseEditForm from "./warehouse-edit-form";
-import NotAuthorized from "@/app/lib/not_authorized";
+import NotAuthorized, { isUserAuthorized } from "@/app/lib/not_authorized";
 
 async function Page(props: { params: Promise<{ id: string }> }) {
   //#region unified hooks and variables
@@ -27,10 +27,7 @@ async function Page(props: { params: Promise<{ id: string }> }) {
   const sections = await fetchSectionsForm(current_sections);
   const tenant_id = pageUser.tenant_id;
   const userPermissions = await fetchDocUserPermissions(user.id, 'warehouses');
-  if (!(userPermissions.full_access
-    || userPermissions.editor
-    || userPermissions.author
-    || userPermissions.reader)) {
+  if (!isUserAuthorized(userPermissions, pageUser)) {
     return <NotAuthorized />
   }
   const params = await props.params;

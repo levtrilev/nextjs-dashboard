@@ -10,7 +10,7 @@ import { Warehouse } from "@/app/lib/definitions";
 import { fetchWarehousesPages } from "./lib/warehouses-actions";
 import { CreateWarehouse } from "./lib/warehouses-buttons";
 import WarehousesTable from "./lib/warehouses-table";
-import NotAuthorized from "@/app/lib/not_authorized";
+import NotAuthorized, { isUserAuthorized } from "@/app/lib/not_authorized";
 
 export default async function Page(props: {
   searchParams?: Promise<{
@@ -32,10 +32,7 @@ export default async function Page(props: {
   const pageUser = user;
   const current_sections = await getCurrentSections(email as string);
   const userPermissions = await fetchDocUserPermissions(user.id, 'warehouses');
-  if (!(userPermissions.full_access
-    || userPermissions.editor
-    || userPermissions.author
-    || userPermissions.reader)) {
+  if (!isUserAuthorized(userPermissions, pageUser)) {
     return <NotAuthorized />
   }
   const warehouses = {};

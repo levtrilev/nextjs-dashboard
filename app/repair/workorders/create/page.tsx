@@ -10,7 +10,7 @@ import { fetchDocUserPermissions } from "@/app/admin/permissions/lib/permissios-
 import { WorkorderForm } from "@/app/lib/definitions";
 import WorkorderEditForm from "../[id]/edit/workorder-edit-form";
 import { fetchClaimsForm } from "../../claims/lib/claims-actions";
-import { fetchPersonsForm } from "../../persons/lib/persons-actions";
+import { fetchPersonsForm } from "../../../erp/persons/lib/persons-actions";
 
 export default async function Page() {
   //#region unified hooks and variables 

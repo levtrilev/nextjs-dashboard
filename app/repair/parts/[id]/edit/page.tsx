@@ -11,7 +11,7 @@ import { checkReadonly } from "@/app/lib/common-utils";
 import { PartForm } from "@/app/lib/definitions";
 import { fetchPartForm } from "../../lib/parts-actions";
 import PartEditForm from "./part-edit-form";
-import NotAuthorized from "@/app/lib/not_authorized";
+import NotAuthorized, { isUserAuthorized } from "@/app/lib/not_authorized";
 
 async function Page(props: { params: Promise<{ id: string }> }) {
     //#region unified hooks and variables 
@@ -29,10 +29,7 @@ async function Page(props: { params: Promise<{ id: string }> }) {
     // const tenant_id = (await fetchSectionById(object.section_id)).tenant_id;
     const tenant_id = pageUser.tenant_id;
     const userPermissions = await fetchDocUserPermissions(user.id, 'parts');
-    if (!(userPermissions.full_access
-        || userPermissions.editor
-        || userPermissions.author
-        || userPermissions.reader)) {
+    if (!isUserAuthorized(userPermissions, pageUser)) {
         return <NotAuthorized />
     }
     const params = await props.params;

@@ -13,14 +13,15 @@ import { checkReadonly } from "@/app/lib/common-utils";
 import { getUserCurrentSections } from "../arm/arm-actions";
 import ArmTabsPage from "../arm/tabs-page";
 import { EffectiveSectionsSync } from "../arm/effective-sections-sync";
-import { fetchPersonsPages } from "../persons/lib/persons-actions";
-import { CreatePerson } from "../persons/lib/persons-buttons";
+import { fetchPersonsPages } from "../../erp/persons/lib/persons-actions";
+import { CreatePerson } from "../../erp/persons/lib/persons-buttons";
 import { CreateMachine } from "../machines/lib/machines-buttons";
 import MachinesTable from "../machines/lib/machines-table";
 import { fetchMachinesPages } from "../machines/lib/machines-actions";
 import ClaimsTable from "../claims/lib/claims-table";
-import PersonsTable from "../persons/lib/persons-table";
+import PersonsTable from "../../erp/persons/lib/persons-table";
 import { fetchClaimsPages } from "../claims/lib/claims-actions";
+import NotAuthorized, { isUserAuthorized } from "@/app/lib/not_authorized";
 
 export default async function Page(props: {
 
@@ -41,6 +42,9 @@ export default async function Page(props: {
   const pageUser = user;
   const current_sections = await getCurrentSections(email as string);
   const userPermissions = await fetchDocUserPermissions(user.id, 'persons');
+  if (!isUserAuthorized(userPermissions, pageUser)) {
+    return <NotAuthorized />
+  }
   const persons = {};
   const readonly_permission = checkReadonly(userPermissions, persons, pageUser.id);
 

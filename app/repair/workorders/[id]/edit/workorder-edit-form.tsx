@@ -18,7 +18,7 @@ import { useRouter } from "next/navigation";
 import PdfDocument from "./workorder-pdf-document";
 import { createWorkorder, updateWorkorder } from "../../lib/workorders-actions";
 import BtnClaimsRef from "@/app/repair/claims/lib/btn-claims-ref";
-import BtnPersonsRef from "@/app/repair/persons/lib/btn-persons-ref";
+import BtnPersonsRef from "@/app/erp/persons/lib/btn-persons-ref";
 import WoOperationsTable from "./wo-operations-table";
 import WoPartsTable from "./wo-parts-table";
 import { getWoOperationsStore, destroyWoOperationsStore } from "../../lib/store/woOperationsStoreRegistry";

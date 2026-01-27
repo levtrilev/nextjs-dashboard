@@ -13,7 +13,7 @@ import GoodsTable from "./lib/goods-table";
 // import { EffectiveSectionsSync } from "../arm/effective-sections-sync";
 // import { getUserCurrentSections } from "../arm/arm-actions";
 // import ArmTabsPage from "../arm/tabs-page";
-import NotAuthorized from "@/app/lib/not_authorized";
+import NotAuthorized, { isUserAuthorized } from "@/app/lib/not_authorized";
 
 export default async function Page(props: {
   searchParams?: Promise<{
@@ -35,10 +35,13 @@ export default async function Page(props: {
   const pageUser = user;
   const current_sections = await getCurrentSections(email as string);
   const userPermissions = await fetchDocUserPermissions(user.id, 'goods');
-  if (!(userPermissions.full_access
-    || userPermissions.editor
-    || userPermissions.author
-    || userPermissions.reader)) {
+  // if (!(userPermissions.full_access
+  //   || userPermissions.editor
+  //   || userPermissions.author
+  //   || userPermissions.reader)) {
+  //   return <NotAuthorized />
+  // }
+  if (!isUserAuthorized(userPermissions, pageUser)) {
     return <NotAuthorized />
   }
   const goods = {};
@@ -47,8 +50,8 @@ export default async function Page(props: {
 
   //#region arm sections
   const current_sections_array = await getCurrentSectionsArray(email as string);
-//   const effective_sections_array = await getUserCurrentSections(email);     // с учётом сохранённых из АРМ
-//   const effectiveSectionIdsString = '{' + effective_sections_array.map(s => s.id).join(",") + '}';
+  //   const effective_sections_array = await getUserCurrentSections(email);     // с учётом сохранённых из АРМ
+  //   const effectiveSectionIdsString = '{' + effective_sections_array.map(s => s.id).join(",") + '}';
   //#endregion
 
   const searchParams = await props.searchParams;

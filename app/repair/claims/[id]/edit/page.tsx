@@ -12,10 +12,10 @@ import { ClaimForm } from "@/app/lib/definitions";
 import { fetchClaimForm } from "../../lib/claims-actions";
 import ClaimEditForm from "./claim-edit-form";
 import { fetchMachinesForm } from "@/app/repair/machines/lib/machines-actions";
-import { fetchLocationsForm } from "@/app/repair/locations/lib/locations-actions";
+import { fetchLocationsForm } from "@/app/erp/locations/lib/locations-actions";
 import { fetchSystemsForm } from "@/app/repair/systems/lib/systems-actions";
-import { fetchPersonsForm } from "@/app/repair/persons/lib/persons-actions";
-import NotAuthorized from "@/app/lib/not_authorized";
+import { fetchPersonsForm } from "@/app/erp/persons/lib/persons-actions";
+import NotAuthorized, { isUserAuthorized } from "@/app/lib/not_authorized";
 
 async function Page(props: { params: Promise<{ id: string }> }) {
   //#region unified hooks and variables 
@@ -36,10 +36,7 @@ async function Page(props: { params: Promise<{ id: string }> }) {
   const sections = await fetchSectionsForm(current_sections);
   const tenant_id = pageUser.tenant_id;
   const userPermissions = await fetchDocUserPermissions(user.id, 'claims');
-  if (!(userPermissions.full_access
-    || userPermissions.editor
-    || userPermissions.author
-    || userPermissions.reader)) {
+  if (!isUserAuthorized(userPermissions, pageUser)) {
     return <NotAuthorized />
   }
   const params = await props.params;

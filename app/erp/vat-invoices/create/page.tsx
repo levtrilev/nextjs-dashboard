@@ -8,7 +8,7 @@ import { fetchDocUserPermissions } from "@/app/admin/permissions/lib/permissios-
 import { VATInvoiceForm } from "@/app/lib/definitions";
 import VatInvoiceEditForm from "../[id]/edit/vat-invoice-edit-form";
 import { fetchLegalEntitiesForm } from "../../legal-entities/lib/legal-entities-actions";
-import { fetchPersonsForm } from "@/app/repair/persons/lib/persons-actions";
+import { fetchPersonsForm } from "@/app/erp/persons/lib/persons-actions";
 // import { fetchPersonsForm } from "../../persons/lib/persons-actions";
 
 export default async function Page() {

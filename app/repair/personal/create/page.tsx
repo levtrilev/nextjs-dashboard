@@ -10,7 +10,7 @@ import DocWrapper from "@/app/lib/doc-wrapper";
 import { fetchDocUserPermissions } from "@/app/admin/permissions/lib/permissios-actions";
 import { PersonForm } from "@/app/lib/definitions";
 import { fetchUsersAdmin } from "@/app/admin/users/lib/users-actions";
-import PersonEditForm from "../../persons/[id]/edit/person-edit-form";
+import PersonEditForm from "../../../erp/persons/[id]/edit/person-edit-form";
 
 export default async function Page() {
   //#region unified hooks and variables 

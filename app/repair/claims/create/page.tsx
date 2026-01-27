@@ -11,9 +11,9 @@ import { Claim, ClaimForm } from "@/app/lib/definitions";
 import ClaimEditForm from "../[id]/edit/claim-edit-form";
 import { read } from "fs";
 import { fetchMachinesForm } from "../../machines/lib/machines-actions";
-import { fetchLocationsForm } from "../../locations/lib/locations-actions";
+import { fetchLocationsForm } from "../../../erp/locations/lib/locations-actions";
 import { fetchSystemsForm } from "../../systems/lib/systems-actions";
-import { fetchPersonsForm } from "../../persons/lib/persons-actions";
+import { fetchPersonsForm } from "../../../erp/persons/lib/persons-actions";
 
 export default async function Page() {
   //#region unified hooks and variables 

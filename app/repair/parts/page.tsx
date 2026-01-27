@@ -10,7 +10,7 @@ import { checkReadonly } from "@/app/lib/common-utils";
 import { fetchPartsPages } from "./lib/parts-actions";
 import { CreatePart } from "./lib/parts-buttons";
 import PartsTable from "./lib/parts-table";
-import NotAuthorized from "@/app/lib/not_authorized";
+import NotAuthorized, { isUserAuthorized } from "@/app/lib/not_authorized";
 
 export default async function Page(props: {
 
@@ -31,10 +31,7 @@ export default async function Page(props: {
   const pageUser = user;
   const current_sections = await getCurrentSections(email as string);
   const userPermissions = await fetchDocUserPermissions(user.id, 'parts');
-  if (!(userPermissions.full_access
-    || userPermissions.editor
-    || userPermissions.author
-    || userPermissions.reader)) {
+  if (!isUserAuthorized(userPermissions, pageUser)) {
     return <NotAuthorized />
   }
   const parts = {};

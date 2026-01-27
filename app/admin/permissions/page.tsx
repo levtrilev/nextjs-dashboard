@@ -6,7 +6,7 @@ import { RoleForm, User } from "@/app/lib/definitions";
 import { lusitana } from "@/app/ui/fonts";
 // import { NewRole } from "./lib/newRole";
 import { auth, getUser } from "@/auth";
-import { fetchPermissionsSuperadmin, fetchPermissionsAdmin, fetchDoctypes } from "./lib/permissios-actions";
+import { fetchPermissionsSuperadmin, fetchPermissionsAdmin, fetchDoctypes, fetchUserPermissions } from "./lib/permissios-actions";
 import PermissionsTable from "./lib/permissions-table";
 import { fetchTenantsAdmin, fetchTenantsSuperadmin } from "../tenants/lib/tenants-actions";
 import { NewPermission } from "./lib/new-permission";
@@ -21,7 +21,7 @@ async function Page() {
     const isAdmin = user.is_admin;
     // console.log("user.id: ", user?.id);
     const permissions = isSuperadmin ? await fetchPermissionsSuperadmin()
-        : isAdmin ? await fetchPermissionsAdmin(user.tenant_id) : [];
+        : isAdmin ? await fetchPermissionsAdmin(user.tenant_id) : await fetchUserPermissions(user.tenant_id, user.id);
     //     : user ? await getUserRoles(user.id) : [];
     const tenants = isSuperadmin ? await fetchTenantsSuperadmin() : await fetchTenantsAdmin(user.tenant_id);
     const doctypes: { table_name: string }[] = await fetchDoctypes();

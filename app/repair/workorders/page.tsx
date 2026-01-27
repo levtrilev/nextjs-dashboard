@@ -13,7 +13,7 @@ import WorkordersTable from "./lib/workorders-table";
 import { getUserCurrentSections } from "../arm/arm-actions";
 import { EffectiveSectionsSync } from "../arm/effective-sections-sync";
 import ArmTabsPage from "../arm/tabs-page";
-import NotAuthorized from "@/app/lib/not_authorized";
+import NotAuthorized, { isUserAuthorized } from "@/app/lib/not_authorized";
 
 export default async function Page(props: {
   searchParams?: Promise<{
@@ -36,10 +36,7 @@ export default async function Page(props: {
   const pageUser = user;
   const current_sections = await getCurrentSections(email as string);
   const userPermissions = await fetchDocUserPermissions(user.id, 'workorders');
-  if (!(userPermissions.full_access
-    || userPermissions.editor
-    || userPermissions.author
-    || userPermissions.reader)) {
+  if (!isUserAuthorized(userPermissions, pageUser)) {
     return <NotAuthorized />
   }
   const workorders = {};

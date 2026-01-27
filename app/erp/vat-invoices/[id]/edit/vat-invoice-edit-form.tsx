@@ -26,7 +26,7 @@ import InputField from "@/app/lib/input-field";
 import { useRouter } from "next/navigation";
 import { createVatInvoice, updateVatInvoice } from "../../lib/vat-invoice-actions";
 import BtnLegalEntitiesRef from "@/app/erp/legal-entities/lib/btn-legal-entities-ref";
-import BtnPersonsRef from "@/app/repair/persons/lib/btn-persons-ref";
+import BtnPersonsRef from "@/app/erp/persons/lib/btn-persons-ref";
 import VatInvoiceGoodsTable from "./vat-invoice-goods-table";
 import { getVatInvoiceGoodsStore, destroyVatInvoiceGoodsStore } from "../../lib/store/vatInvoiceGoodsStoreRegistry";
 import { fetchPersonByUser } from "@/app/repair/claims/lib/claims-actions";

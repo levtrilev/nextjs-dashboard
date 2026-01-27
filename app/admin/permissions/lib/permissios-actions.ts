@@ -1,6 +1,7 @@
 // Roles actions.ts
 
 "use server";
+import { getUserRoles } from "@/app/lib/common-actions";
 import { DocUserPermissions, Permission } from "@/app/lib/definitions";
 import pool from "@/db"; // Импорт пула подключений
 import { revalidatePath } from "next/cache";
@@ -37,13 +38,13 @@ export async function fetchDocUserPermissions(
           doctype
       );
     }
-    if (data.rows.length === 0 || data.rows.length > 1) {
-      console.log(
-        "data.rows.length === 0 for user id " +
-          user_id +
-          " and doctype " +
-          doctype
-      );
+    if (data.rows.length === 0) {
+      // console.log(
+      //   "fetchDocUserPermissions: data.rows.length === 0 for user id " +
+      //     user_id +
+      //     " and doctype " +
+      //     doctype
+      // );
       return {
         full_access: false,
         editor: false,
@@ -88,6 +89,47 @@ export async function fetchPermissionsAdmin(tenant_id: string, role_id?: string)
         AND ($2 = '00000000-0000-0000-0000-000000000000' OR role_id = $2::uuid)
         ORDER BY doctype_name ASC`,
       [tenant_id, role_id_uuid]
+    );
+
+    return data.rows;
+  } catch (err) {
+    console.error("Database Error:", err);
+    throw new Error("Failed to fetch permissions: " + err);
+  }
+}
+
+export async function fetchRolePermissions(tenant_id: string, role_id?: string) {
+  // const role_id_uuid = role_id ? role_id : "00000000-0000-0000-0000-000000000000";
+  try {
+    const data = await pool.query<Permission>(
+      `SELECT id, role_id, role_name, doctype, doctype_name, full_access, editor, 
+        author, can_delete, reader, access_by_tags, or_tags, and_tags, no_tags, tenant_id, tenant_name
+        FROM permissions
+        WHERE tenant_id = $1
+        AND role_id = $2::uuid
+        ORDER BY doctype_name ASC`,
+      [tenant_id, role_id]
+    );
+
+    return data.rows;
+  } catch (err) {
+    console.error("Database Error:", err);
+    throw new Error("Failed to fetch permissions: " + err);
+  }
+}
+
+export async function fetchUserPermissions(tenant_id: string, user_id: string) {
+  // const role_id_uuid = role_id ? role_id : "00000000-0000-0000-0000-000000000000";
+  try {
+    const user_roles = (await getUserRoles(user_id)).map((role) => role.id);
+    const data = await pool.query<Permission>(
+      `SELECT id, role_id, role_name, doctype, doctype_name, full_access, editor, 
+        author, can_delete, reader, access_by_tags, or_tags, and_tags, no_tags, tenant_id, tenant_name
+        FROM permissions
+        WHERE tenant_id = $1
+        AND role_id = ANY($2::uuid[])
+        ORDER BY doctype_name ASC`,
+      [tenant_id, user_roles]
     );
 
     return data.rows;

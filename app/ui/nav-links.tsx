@@ -44,6 +44,8 @@ const subMenu = [
   { mainItem: 'Справочники', name: 'Регионы', href: '/erp/regions' },
   { mainItem: 'Справочники', name: 'Товары', href: '/erp/goods' },
   { mainItem: 'Справочники', name: 'Склады', href: '/erp/warehouses' },
+  { mainItem: 'Справочники', name: 'Локации', href: '/erp/locations' },
+  { mainItem: 'Справочники', name: 'Сотрудники', href: '/erp/persons' },
   { mainItem: 'Помещения', name: 'Помещения', href: '/erp/premises' },
   { mainItem: 'Помещения', name: 'Планы обслуживания', href: '/erp/task-schedules' },
   { mainItem: 'Помещения', name: 'Задачи обслуживания', href: '/erp/tasks' },
@@ -57,8 +59,6 @@ const subMenu = [
   { mainItem: 'Ремонт', name: 'Системы', href: '/repair/systems' },
   { mainItem: 'Ремонт', name: 'Работы', href: '/repair/works' },
   { mainItem: 'Ремонт', name: 'Операции', href: '/repair/operations' },
-  { mainItem: 'Ремонт', name: 'Локации', href: '/repair/locations' },
-  { mainItem: 'Ремонт', name: 'Сотрудники', href: '/repair/persons' },
 
   // { mainItem: 'Home', name: 'About', href: '/dashboard' },
   // { mainItem: 'Home', name: 'Contacts', href: '/dashboard' },

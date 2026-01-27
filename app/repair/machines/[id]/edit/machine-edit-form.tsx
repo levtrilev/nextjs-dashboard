@@ -18,7 +18,7 @@ import { useRouter } from "next/navigation";
 import { createMachine, updateMachine } from "../../lib/machines-actions";
 import PdfDocument from "./machine-pdf-document";
 import BtnUnitsRef from "@/app/repair/units/lib/btn-units-ref";
-import BtnLocationsRef from "@/app/repair/locations/lib/btn-locations-ref";
+import BtnLocationsRef from "@/app/erp/locations/lib/btn-locations-ref";
 import { createClaim } from "@/app/repair/claims/lib/claims-actions";
 import ClaimsTable from "@/app/repair/claims/lib/claims-table";
 import Pagination from "@/app/ui/pagination";

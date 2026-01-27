@@ -11,7 +11,7 @@ import { fetchDocUserPermissions } from "@/app/admin/permissions/lib/permissios-
 import { MachineForm } from "@/app/lib/definitions";
 import MachineEditForm from "../[id]/edit/machine-edit-form";
 import { fetchUnitsForm } from "../../units/lib/units-actions";
-import { fetchLocationsForm } from "../../locations/lib/locations-actions";
+import { fetchLocationsForm } from "../../../erp/locations/lib/locations-actions";
 
 export default async function Page() {
   //#region unified hooks and variables 

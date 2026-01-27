@@ -14,7 +14,7 @@ import { fetchDocUserPermissions } from "@/app/admin/permissions/lib/permissios-
 import pool from "@/db";
 import { fetchSectionsForm } from "@/app/admin/sections/lib/sections-actions";
 import { checkReadonly } from "@/app/lib/common-utils";
-import NotAuthorized from "@/app/lib/not_authorized";
+import NotAuthorized, { isUserAuthorized } from "@/app/lib/not_authorized";
 
 async function Page(props: { params: Promise<{ id: string }> }) {
     //#region unified hooks and variables 
@@ -32,10 +32,7 @@ async function Page(props: { params: Promise<{ id: string }> }) {
     // const tenant_id = (await fetchSectionById(task.section_id)).tenant_id;
     const tenant_id = pageUser.tenant_id;
     const userPermissions = await fetchDocUserPermissions(user.id, 'tasks');
-    if (!(userPermissions.full_access
-        || userPermissions.editor
-        || userPermissions.author
-        || userPermissions.reader)) {
+    if (!isUserAuthorized(userPermissions, pageUser)) {
         return <NotAuthorized />
     }
     const params = await props.params;

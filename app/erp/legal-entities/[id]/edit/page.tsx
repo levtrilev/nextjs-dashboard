@@ -8,7 +8,7 @@ import { checkReadonly } from "@/app/lib/common-utils";
 import { LegalEntityForm } from "@/app/lib/definitions";
 import { fetchLegalEntityForm } from "../../lib/legal-entities-actions";
 import LegalEntityEditForm from "./legal-entity-edit-form";
-import NotAuthorized from "@/app/lib/not_authorized";
+import NotAuthorized, { isUserAuthorized } from "@/app/lib/not_authorized";
 import { fetchRegionsForm } from "@/app/erp/regions/lib/region-actions";
 
 async function Page(props: { params: Promise<{ id: string }> }) {
@@ -28,10 +28,7 @@ async function Page(props: { params: Promise<{ id: string }> }) {
     const sections = await fetchSectionsForm(current_sections);
     const tenant_id = pageUser.tenant_id;
     const userPermissions = await fetchDocUserPermissions(user.id, 'legal_entities');
-    if (!(userPermissions.full_access
-        || userPermissions.editor
-        || userPermissions.author
-        || userPermissions.reader)) {
+    if (!isUserAuthorized(userPermissions, pageUser)) {
         return <NotAuthorized />
     }
     const params = await props.params;

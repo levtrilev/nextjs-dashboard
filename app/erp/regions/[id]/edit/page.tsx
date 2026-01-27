@@ -14,7 +14,7 @@ import pool from "@/db";
 import DocWrapper from "@/app/lib/doc-wrapper";
 import { fetchDocUserPermissions } from "@/app/admin/permissions/lib/permissios-actions";
 import { checkReadonly } from "@/app/lib/common-utils";
-import NotAuthorized from "@/app/lib/not_authorized";
+import NotAuthorized, { isUserAuthorized } from "@/app/lib/not_authorized";
 
 async function Page(props: { params: Promise<{ id: string }> }) {
     const session = await auth();
@@ -25,14 +25,11 @@ async function Page(props: { params: Promise<{ id: string }> }) {
     const user = await getUser(email as string);
     if (!user) return (<h3 className="text-xs font-medium text-gray-400">Вы не авторизованы!</h3>);
     const userPermissions = await fetchDocUserPermissions(user?.id as string, 'regions');
-    if (!(userPermissions.full_access
-        || userPermissions.editor
-        || userPermissions.author
-        || userPermissions.reader)) {
+
+    const pageUser = user ? user : {} as User;
+    if (!isUserAuthorized(userPermissions, pageUser)) {
         return <NotAuthorized />
     }
-    const pageUser = user ? user : {} as User;
-
     const current_sections = await getCurrentSections(email as string);
 
     const params = await props.params;
