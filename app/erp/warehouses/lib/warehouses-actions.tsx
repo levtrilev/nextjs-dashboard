@@ -12,7 +12,7 @@ const ITEMS_PER_PAGE = 8;
 export async function createWarehouse(warehouse: Warehouse) {
   const session = await auth();
   const username = session?.user?.name;
-  const date_created = new Date().toISOString();
+  // const date_created = new Date().toISOString();
   const {
     name,
     section_id,
@@ -33,7 +33,6 @@ export async function createWarehouse(warehouse: Warehouse) {
         name,
         username,
         section_id,
-        date_created,
         tenant_id,
       ]
     );
