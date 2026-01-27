@@ -51,7 +51,7 @@ export default async function PersonsTable({
                     <tr key={person.id} className="group">
                       <td className="w-4/12 overflow-hidden whitespace-nowrap bg-white py-2 pl-6 pr-3 text-sm text-black">
                         <a
-                          href={`/repair/persons/${person.id}/edit`}
+                          href={`/erp/persons/${person.id}/edit`}
                           className="text-blue-800 underline"
                         >
                           {person.name}
@@ -85,7 +85,7 @@ export default async function PersonsTable({
                   >
                     <div className="flex justify-between items-center mb-2">
                       <h3 className="text-lg font-medium text-blue-800 underline">
-                        <a href={`/repair/persons/${person.id}/edit`}>
+                        <a href={`/erp/persons/${person.id}/edit`}>
                           {person.name}
                         </a>
                       </h3>

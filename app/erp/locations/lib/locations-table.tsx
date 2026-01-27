@@ -42,7 +42,7 @@ export default async function LocationsTable({
                     <tr key={location.id} className="group">
                       <td className="w-4/12 overflow-hidden whitespace-nowrap bg-white py-2 pl-6 pr-3 text-sm text-black">
                         <a
-                          href={`/repair/locations/${location.id}/edit`}
+                          href={`/erp/locations/${location.id}/edit`}
                           className="text-blue-800 underline"
                         >
                           {location.name}
@@ -68,7 +68,7 @@ export default async function LocationsTable({
                   >
                     <div className="flex justify-between items-center mb-2">
                       <h3 className="text-lg font-medium text-blue-800 underline">
-                        <a href={`/repair/locations/${location.id}/edit`}>
+                        <a href={`/erp/locations/${location.id}/edit`}>
                           {location.name}
                         </a>
                       </h3>
