@@ -27,7 +27,7 @@ interface IEditFormProps {
 //#region Good zod schema
 import { z } from "zod";
 import { createGood, updateGood } from "../../lib/goods-actions";
-import GoodPdfDocument from "../../lib/good-pdf-document";
+import GoodPdfDocument from "./good-pdf-document";
 import BtnLegalEntitiesRef from "@/app/erp/legal-entities/lib/btn-legal-entities-ref";
 import BtnSectionsRef from "@/app/admin/sections/lib/btn-sections-ref";
 const GoodFormSchemaFull = z.object({
@@ -49,6 +49,7 @@ const GoodFormSchemaFull = z.object({
     (val) => (typeof val === 'string' ? parseFloat(val) : val),
     z.number().min(0, { message: "Цена не может быть отрицательной." })
   ),
+  measure_unit: z.string().min(1, { message: "Единица измерения обязательна." }).default('шт.'),
   dimensions_height: z.preprocess(
     (val) => (typeof val === 'string' ? parseFloat(val) : val),
     z.number().min(0)
@@ -280,10 +281,6 @@ export default function GoodEditForm(props: IEditFormProps) {
                 readonly={props.readonly}
                 errors={errors?.dimensions_width?._errors as string[] | undefined}
               />
-            </div>
-
-            {/* second column */}
-            <div className="flex flex-col gap-4 w-full md:w-1/2">
               <InputField
                 name="dimensions_length"
                 value={String(formData.dimensions_length)}
@@ -293,6 +290,20 @@ export default function GoodEditForm(props: IEditFormProps) {
                 onChange={(value) => handleNumberChange('dimensions_length', String(value))}
                 readonly={props.readonly}
                 errors={errors?.dimensions_length?._errors as string[] | undefined}
+              />
+            </div>
+
+            {/* second column */}
+            <div className="flex flex-col gap-4 w-full md:w-1/2">
+              <InputField
+                name="measure_unit"
+                value={formData.measure_unit}
+                label="Единица измерения:"
+                type="text"
+                w={["w-4/16", "w-13/16"]}
+                onChange={(value) => handleInputChange('measure_unit', String(value))}
+                readonly={props.readonly}
+                errors={errors?.measure_unit?._errors as string[] | undefined}
               />
               <InputField
                 name="weight"

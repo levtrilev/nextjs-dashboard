@@ -111,7 +111,7 @@ export default function VatInvoiceGoodsTable({
     });
   };
 
-  const handleInputChange = (index: number, field: 'row_number' | 'quantity' | 'price', value: string) => {
+  const handleInputChange = (index: number, field: 'row_number' | 'quantity' | 'price' | 'discount', value: string) => {
     updateGoodField(index, field, value);
     // Очищаем ошибку при изменении
     setErrors(prev => {
@@ -152,9 +152,12 @@ export default function VatInvoiceGoodsTable({
             <thead>
               <tr>
                 <th scope="col" className="py-2 px-2 text-left text-xs font-medium uppercase tracking-wide">№</th>
+                <th scope="col" className="py-2 px-2 text-left text-xs font-medium uppercase tracking-wide">Артикул</th>
                 <th scope="col" className="py-2 px-2 text-left text-xs font-medium uppercase tracking-wide">Товар</th>
+                <th scope="col" className="py-2 px-2 text-left text-xs font-medium uppercase tracking-wide">Ед.изм.</th>
                 <th scope="col" className="py-2 px-2 text-left text-xs font-medium uppercase tracking-wide">Кол-во</th>
                 <th scope="col" className="py-2 px-2 text-left text-xs font-medium uppercase tracking-wide">Цена</th>
+                <th scope="col" className="py-2 px-2 text-left text-xs font-medium uppercase tracking-wide">Скидка</th>
                 <th scope="col" className="py-2 px-2 text-left text-xs font-medium uppercase tracking-wide">Сумма</th>
                 <th scope="col" className="py-2 px-2 text-right text-xs font-medium uppercase tracking-wide">Действия</th>
               </tr>
@@ -179,6 +182,15 @@ export default function VatInvoiceGoodsTable({
                           )}
                         </td>
                         <td className="whitespace-nowrap py-2 px-2">
+                          <input
+                            type="text"
+                            value={good.product_code}
+                            onChange={() => { }}
+                            className="w-12 border rounded px-1"
+                            disabled={true}
+                          />
+                        </td>
+                        <td className="whitespace-nowrap py-2 px-2">
                           <div className="flex items-center">
                             <input
                               type="text"
@@ -196,6 +208,15 @@ export default function VatInvoiceGoodsTable({
                           {errors[`${index}-good_name`] && (
                             <p className="text-red-600 text-xs mt-1">{errors[`${index}-good_name`]}</p>
                           )}
+                        </td>
+                        <td className="whitespace-nowrap py-2 px-2">
+                          <input
+                            type="text"
+                            value={good.measure_unit}
+                            onChange={() => { }}
+                            className="w-12 border rounded px-1"
+                            disabled={true}
+                          />
                         </td>
                         <td className="whitespace-nowrap py-2 px-2">
                           <input
@@ -221,6 +242,18 @@ export default function VatInvoiceGoodsTable({
                             <p className="text-red-600 text-xs mt-1">{errors[`${index}-price`]}</p>
                           )}
                         </td>
+                        <td className="whitespace-nowrap py-2 px-2">
+                          <input
+                            type="text"
+                            value={good.discount}
+                            onChange={(e) => handleInputChange(index, 'discount', e.target.value)}
+                            className="w-20 border rounded px-1"
+                            disabled={readonly}
+                          />
+                          {errors[`${index}-discount`] && (
+                            <p className="text-red-600 text-xs mt-1">{errors[`${index}-discount`]}</p>
+                          )}
+                        </td>
                         <td className="whitespace-nowrap py-2 px-2">{good.amount}</td>
                         <td className="whitespace-nowrap py-2 px-2 text-right">
                           <button
@@ -242,9 +275,12 @@ export default function VatInvoiceGoodsTable({
                     ) : (
                       <>
                         <td className="whitespace-nowrap py-2 px-2">{good.row_number}</td>
+                        <td className="whitespace-nowrap py-2 px-2">{good.product_code}</td>
                         <td className="whitespace-nowrap py-2 px-2">{good.good_name}</td>
+                        <td className="whitespace-nowrap py-2 px-2">{good.measure_unit}</td>
                         <td className="whitespace-nowrap py-2 px-2">{good.quantity}</td>
                         <td className="whitespace-nowrap py-2 px-2">{good.price}</td>
+                        <td className="whitespace-nowrap py-2 px-2">{good.discount}</td>
                         <td className="whitespace-nowrap py-2 px-2">{good.amount}</td>
                         <td className="whitespace-nowrap py-2 px-2 text-right">
                           {!readonly && (

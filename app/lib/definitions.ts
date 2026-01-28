@@ -87,8 +87,12 @@ export type VatInvoiceGoodsForm = {
   row_number: string;
   good_id: string;
   good_name: string;
+  product_code: string;
+  brand: string;
+  measure_unit: string;
   quantity: number;
   price: number;
+  discount: number;
   amount: number;
   section_id: string;
 };
@@ -121,6 +125,7 @@ export type Good = {
   brand: string;        
   product_code: string; 
   supplier_id: string;
+  measure_unit: string;
   dimensions_height: number;
   dimensions_width: number;
   dimensions_length: number;
@@ -142,6 +147,7 @@ export type GoodForm = {
   product_code: string; // Артикул
   supplier_id: string;
   supplier_name: string;  // Поставщик
+  measure_unit: string;
   dimensions_height: number;  // Размеры высота (см)
   dimensions_width: number;   // Размеры ширина (см)
   dimensions_length: number;  // Размеры длина (см)

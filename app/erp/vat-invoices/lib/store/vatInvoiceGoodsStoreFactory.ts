@@ -11,9 +11,13 @@ export interface VatInvoiceGoodItem {
   row_number: string;
   good_id: string;
   good_name: string;
+  product_code: string;
+  brand: string;
+  measure_unit: string;
   quantity: string; // строка для удобства ввода
   price: string;
-  amount: string; // вычисляется как quantity * price
+  discount: string;
+  amount: string; // вычисляется как quantity * price * (1 - discount / 100)
   isEditing: boolean;
   isToBeDeleted: boolean;
 }
@@ -46,8 +50,12 @@ export const createVatInvoiceGoodsStore = (initialGoods: VatInvoiceGoodItem[] = 
             row_number: rowNumber,
             good_id: '',
             good_name: '',
+            product_code: '',
+            brand: '',
+            measure_unit: '',
             quantity: '1',
             price: '0',
+            discount: '0',
             amount: '0',
             isEditing: true,
             isToBeDeleted: false,
@@ -124,8 +132,12 @@ export const createVatInvoiceGoodsStore = (initialGoods: VatInvoiceGoodItem[] = 
           good_name: good.good_name,
           quantity: parseFloat(good.quantity) || 0,
           price: parseFloat(good.price) || 0,
+          discount: parseFloat(good.discount) || 0,
           amount: parseFloat(good.amount) || 0,
           section_id: sectionId,
+          product_code: good.product_code,
+          brand: good.brand,
+          measure_unit: good.measure_unit,
         };
 
         // Если id — это UUID из БД (36 символов и содержит дефисы), то обновляем

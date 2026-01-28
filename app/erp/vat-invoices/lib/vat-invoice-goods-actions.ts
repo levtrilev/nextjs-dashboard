@@ -11,10 +11,11 @@ export async function createVatInvoiceGood(good: {
   good_name: string;
   quantity: number;
   price: number;
+  discount: number;
   amount: number;
   section_id: string;
 }): Promise<string> {
-  const { vat_invoice_id, row_number, good_id, good_name, quantity, price, amount, section_id } = good;
+  const { vat_invoice_id, row_number, good_id, good_name, quantity, price, discount, amount, section_id } = good;
   try {
     const result = await pool.query(
       `
@@ -25,12 +26,13 @@ export async function createVatInvoiceGood(good: {
         good_name,
         quantity,
         price,
+        discount,
         amount,
         section_id
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8::uuid)
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9::uuid)
       RETURNING id
       `,
-      [vat_invoice_id, row_number, good_id, good_name, quantity, price, amount, section_id]
+      [vat_invoice_id, row_number, good_id, good_name, quantity, price, discount, amount, section_id]
     );
     return result.rows[0].id;
   } catch (error) {
@@ -42,7 +44,7 @@ export async function createVatInvoiceGood(good: {
 
 //#region Update/Delete vat-invoice-good
 export async function updateVatInvoiceGood(good: VatInvoiceGoodsForm) {
-  const { id, vat_invoice_id, row_number, good_id, good_name, quantity, price, amount, section_id } = good;
+  const { id, vat_invoice_id, row_number, good_id, good_name, quantity, price, discount, amount, section_id } = good;
   try {
     await pool.query(
       `
@@ -54,11 +56,12 @@ export async function updateVatInvoiceGood(good: VatInvoiceGoodsForm) {
         good_name = $5,
         quantity = $6,
         price = $7,
-        amount = $8,
-        section_id = $9
+        discount = $8,
+        amount = $9,
+        section_id = $10
       WHERE id = $1
       `,
-      [id, vat_invoice_id, row_number, good_id, good_name, quantity, price, amount, section_id]
+      [id, vat_invoice_id, row_number, good_id, good_name, quantity, price, discount, amount, section_id]
     );
   } catch (error) {
     console.error("Не удалось обновить vat-invoice-good:", error);
@@ -89,9 +92,14 @@ export async function fetchVatInvoiceGoodsForm(vat_invoice_id: string, current_s
         g.good_name,
         g.quantity,
         g.price,
+        g.discount,
         g.amount,
-        g.section_id
+        g.section_id,
+        COALESCE(goods.product_code, '') AS product_code,
+        COALESCE(goods.brand, '') AS brand,
+        COALESCE(goods.measure_unit, '') AS measure_unit
       FROM your_goods g
+      LEFT JOIN goods ON g.good_id = goods.id
       WHERE g.vat_invoice_id = $2
       `,
       [current_sections, vat_invoice_id]

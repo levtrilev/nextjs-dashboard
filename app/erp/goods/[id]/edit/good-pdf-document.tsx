@@ -1,7 +1,7 @@
 import React from 'react';
 import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
 import { Font } from '@react-pdf/renderer';
-import { FormData } from '../[id]/edit/good-edit-form';
+import { FormData } from './good-edit-form';
 
 Font.register({
   family: 'Arial',

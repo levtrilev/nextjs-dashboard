@@ -36,6 +36,7 @@ export default async function Page() {
     product_code: "",
     supplier_id: "",
     supplier_name: "",
+    measure_unit: "",
     dimensions_height: 0,
     dimensions_width: 0,
     dimensions_length: 0,

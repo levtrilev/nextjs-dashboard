@@ -30,6 +30,7 @@ import BtnPersonsRef from "@/app/erp/persons/lib/btn-persons-ref";
 import VatInvoiceGoodsTable from "./vat-invoice-goods-table";
 import { getVatInvoiceGoodsStore, destroyVatInvoiceGoodsStore } from "../../lib/store/vatInvoiceGoodsStoreRegistry";
 import { fetchPersonByUser } from "@/app/repair/claims/lib/claims-actions";
+import VatInvoicePdfDocument from "./vat-invoice-pdf-document";
 
 interface IEditFormProps {
     invoice: VATInvoiceForm;
@@ -161,8 +162,12 @@ export default function VatInvoiceEditForm(props: IEditFormProps) {
                     row_number: g.row_number,
                     good_id: g.good_id,
                     good_name: g.good_name,
+                    product_code: g.product_code,
+                    brand: g.brand,
+                    measure_unit: g.measure_unit,
                     quantity: String(g.quantity),
                     price: String(g.price),
+                    discount: String(g.discount),
                     amount: String(g.amount),
                     isEditing: false,
                     isToBeDeleted: false,
@@ -228,7 +233,15 @@ export default function VatInvoiceEditForm(props: IEditFormProps) {
             window.history.back();
         }
     };
-
+    const handleShowPDF = async () => {
+        try {
+            const blob = await pdf(<VatInvoicePdfDocument formData={formData} goods={vat_invoice_goods} />).toBlob();
+            const url = URL.createObjectURL(blob);
+            setPdfUrl(url);
+        } catch (error) {
+            console.error('Ошибка при экспорте PDF:', error);
+        }
+    };
     const handleSelectSection = (new_section_id: string, new_section_name: string, new_section_tenant_id: string) => {
         setFormData((prev) => ({
             ...prev,
@@ -301,7 +314,7 @@ export default function VatInvoiceEditForm(props: IEditFormProps) {
         }));
         docChanged();
     }
-    const handleSetApproved = async() => {
+    const handleSetApproved = async () => {
         const approved_by_person = await fetchPersonByUser(sessionUser.id, userSections.map((s) => s.id));
 
         setFormData((prev) => ({
@@ -514,12 +527,22 @@ export default function VatInvoiceEditForm(props: IEditFormProps) {
                                         {props.readonly ? 'Закрыть' : 'Закрыть и освободить'}
                                     </button>
                                 </div>
+                                <div className="w-full md:w-1/2">
+                                    <button
+                                        type="button"
+                                        onClick={handleShowPDF}
+                                        className="bg-green-400 text-white w-full rounded-md border p-2 hover:bg-green-100 hover:text-gray-500 cursor-pointer"
+                                    >
+                                        Открыть PDF
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </form>
             )}
 
+            {/* Кнопка закрытия PDF */}
             {pdfUrl && (
                 <button
                     onClick={() => {
@@ -541,6 +564,8 @@ export default function VatInvoiceEditForm(props: IEditFormProps) {
                     Закрыть PDF
                 </button>
             )}
+
+            {/* Отображение PDF в iframe */}
             {pdfUrl && (
                 <iframe
                     src={pdfUrl}
