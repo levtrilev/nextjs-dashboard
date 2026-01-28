@@ -4,7 +4,7 @@ import RefSearch from "@/app/ui/ref-search";
 
 interface IGoodsRefTableProps {
   goods: GoodForm[];
-  handleSelectGood: (id: string, name: string) => void;
+  handleSelectGood: (id: string, name: string, product_code: string, measure_unit: string, price_retail: number) => void;
   closeModal: () => void;
   setTerm: (value: string) => void;
   term: string;
@@ -49,7 +49,7 @@ export default function GoodsRefTable(props: IGoodsRefTableProps) {
                               onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
-                                props.handleSelectGood(good.id, good.name);
+                                props.handleSelectGood(good.id, good.name, good.product_code, good.measure_unit, good.price_retail);
                                 props.setTerm("");
                                 props.closeModal();
                               }}
@@ -87,7 +87,7 @@ export default function GoodsRefTable(props: IGoodsRefTableProps) {
                   <div className="font-medium text-black">
                     <a
                       onClick={(e) => {
-                        props.handleSelectGood(good.id, good.name);
+                        props.handleSelectGood(good.id, good.name, good.product_code, good.measure_unit, good.price_retail);
                         props.setTerm("");
                         props.closeModal();
                       }}

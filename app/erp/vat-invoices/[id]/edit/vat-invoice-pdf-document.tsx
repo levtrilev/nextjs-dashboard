@@ -206,7 +206,7 @@ export default function VatInvoicePdfDocument({ formData, goods }
               <Text style={styles.tableCell_100}>{good.price}</Text>
             </View>
             <View style={styles.tableCol_10}>
-              <Text style={styles.tableCell_100}>{good.discount}</Text>
+              <Text style={styles.tableCell_100}>{good.discount+'%'}</Text>
             </View>
             <View style={[styles.tableCol_20, styles.lastCol]}>
               <Text style={styles.tableCell_100}>{good.amount}</Text>

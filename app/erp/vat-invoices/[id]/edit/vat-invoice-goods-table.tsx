@@ -86,7 +86,8 @@ export default function VatInvoiceGoodsTable({
     // Автоматически пересчитываем amount
     const quantity = parseFloat(good.quantity) || 0;
     const price = parseFloat(good.price) || 0;
-    const amount = (quantity * price).toFixed(2);
+    const discount = parseFloat(good.discount) || 0;
+    const amount = (quantity * price * (1 - discount / 100)).toFixed(2);
     updateGoodField(index, 'amount', amount);
     onDocumentChanged();
     setErrors(prev => {
@@ -121,8 +122,8 @@ export default function VatInvoiceGoodsTable({
     });
   };
 
-  const handleSelectGood = (index: number, good_id: string, good_name: string) => {
-    setGoodFromRefBook(index, good_id, good_name);
+  const handleSelectGood = (index: number, good_id: string, good_name: string, product_code: string, measure_unit: string, price_retail: number) => {
+    setGoodFromRefBook(index, good_id, good_name, product_code, measure_unit, price_retail);
     setErrors(prev => {
       const newErrors = { ...prev };
       delete newErrors[`${index}-good_name`];
@@ -200,7 +201,7 @@ export default function VatInvoiceGoodsTable({
                             />
                             {!readonly && (
                               <BtnGoodsRef
-                                handleSelectGood={(id, name) => handleSelectGood(index, id, name)}
+                                handleSelectGood={(id, name, product_code, measure_unit, price) => handleSelectGood(index, id, name, product_code, measure_unit, price)}
                                 goods={goodsList}
                               />
                             )}
@@ -280,7 +281,7 @@ export default function VatInvoiceGoodsTable({
                         <td className="whitespace-nowrap py-2 px-2">{good.measure_unit}</td>
                         <td className="whitespace-nowrap py-2 px-2">{good.quantity}</td>
                         <td className="whitespace-nowrap py-2 px-2">{good.price}</td>
-                        <td className="whitespace-nowrap py-2 px-2">{good.discount}</td>
+                        <td className="whitespace-nowrap py-2 px-2">{good.discount+' %'}</td>
                         <td className="whitespace-nowrap py-2 px-2">{good.amount}</td>
                         <td className="whitespace-nowrap py-2 px-2 text-right">
                           {!readonly && (

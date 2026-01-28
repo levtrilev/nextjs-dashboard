@@ -30,7 +30,7 @@ interface VatInvoiceGoodsStore {
   markGoodForDeletion: (index: number) => void;
   unmarkGoodForDeletion: (index: number) => void;
   updateGoodField: (index: number, field: keyof VatInvoiceGoodItem, value: any) => void;
-  setGoodFromRefBook: (index: number, good_id: string, good_name: string) => void;
+  setGoodFromRefBook: (index: number, good_id: string, good_name: string, product_code: string, measure_unit: string, price_retail: number) => void;
   saveNewGoodsToDB: (vatInvoiceId: string, sectionId: string) => Promise<void>;
   deleteMarkedGoodsFromDB: () => Promise<void>;
 }
@@ -91,13 +91,16 @@ export const createVatInvoiceGoodsStore = (initialGoods: VatInvoiceGoodItem[] = 
         return { vat_invoice_goods: newGoods };
       }),
 
-    setGoodFromRefBook: (index, good_id, good_name) =>
+    setGoodFromRefBook: (index, good_id, good_name, product_code, measure_unit, price_retail) =>
       set((state) => {
         const newGoods = [...state.vat_invoice_goods];
         newGoods[index] = {
           ...newGoods[index],
           good_id,
           good_name,
+          product_code,
+          measure_unit,
+          price: price_retail.toString(),
           isEditing: newGoods[index].isEditing, // сохраняем флаг редактирования
         };
         return { vat_invoice_goods: newGoods };

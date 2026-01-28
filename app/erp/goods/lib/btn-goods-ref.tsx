@@ -9,7 +9,7 @@ const Modal = dynamic(() => import('@/app/lib/common-modal'), { ssr: false });
 
 interface IBtnGoodsRefProps {
   goods: GoodForm[];
-  handleSelectGood: (new_good_id: string, new_good_name: string) => void;
+  handleSelectGood: (id: string, name: string, product_code: string, measure_unit: string, price_retail: number) => void;
 }
 
 export default function BtnGoodsRef(props: IBtnGoodsRefProps) {

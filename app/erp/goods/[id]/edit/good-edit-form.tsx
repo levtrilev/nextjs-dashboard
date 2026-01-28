@@ -134,7 +134,7 @@ export default function GoodEditForm(props: IEditFormProps) {
       if (formData.id === "") {
         await createGood(formData);
         setTimeout(() => {
-          router.push('/goods');
+          router.push('erp/goods');
         }, 2000);
       } else {
         await updateGood(formData);
