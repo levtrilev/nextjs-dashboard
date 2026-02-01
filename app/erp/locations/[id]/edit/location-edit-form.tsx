@@ -3,7 +3,7 @@
 'use client';
 import { useEffect, useState } from "react";
 import { LocationForm } from "@/app/lib/definitions";
-import { formatDateForInput } from "@/app/lib/common-utils";
+// import { formatDateForInput } from "@/app/lib/common-utils";
 import BtnSectionsRef from "@/app/admin/sections/lib/btn-sections-ref";
 import { z } from "zod";
 import { pdf, PDFViewer } from '@react-pdf/renderer';
@@ -107,7 +107,7 @@ export default function LocationEditForm(props: IEditFormProps) {
       if (formData.id === "") {
         await createLocation(formData);
         setTimeout(() => {
-          router.push('/repair/locations');
+          router.push('/erp/locations');
         }, 2000);
       } else {
         await updateLocation(formData);

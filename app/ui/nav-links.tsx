@@ -21,12 +21,6 @@ const links = [
   { name: 'Главное', href: '/erp', icon: MapPinIcon },
   { name: 'Руководителю', href: '/dashboard', icon: ArrowRightCircleIcon },
   { name: 'Продажи', href: '#', icon: SparklesIcon },
-  // {
-  //   name: 'Счета к получению',
-  //   href: '/erp/invoices',
-  //   icon: DocumentDuplicateIcon,
-  // },
-
   { name: 'Справочники', href: '#', icon: BookOpenIcon },
   { name: 'Помещения', href: '#', icon: BuildingOfficeIcon }, //premise
   { name: 'Администрирование', href: '/admin', icon: UserGroupIcon },
@@ -35,6 +29,7 @@ const links = [
 const subMenu = [
   { mainItem: 'Продажи', name: 'Счета-фактуры', href: '/erp/vat-invoices' },
   { mainItem: 'Продажи', name: 'Счета к получению', href: '/erp/invoices' },
+  { mainItem: 'Продажи', name: 'Остатки товаров', href: '/ledger/stock' },
   { mainItem: 'Администрирование', name: 'Пользователи', href: '/admin/users' },
   { mainItem: 'Администрирование', name: 'Организации', href: '/admin/tenants' },
   { mainItem: 'Администрирование', name: 'Разделы', href: '/admin/sections' },

@@ -4,19 +4,55 @@
 import { DateTime } from "next-auth/providers/kakao";
 import { number } from "zod";
 
+export type InOutType = 'in' | 'out';
 export type DocStatus = "draft" | "active" | "deleted";
 export type Priority = "высокий" | "низкий";
 export type MachineStatus = "норма" | "ремонт" | "ожидание" | "неизвестно";
-export type WoPart = {
+
+export type Period = {
   id: string;
   name: string;
-  workorder_id: string;
-  work_id: string;
-  part_id: string;
-  quantity: number;
-  section_id: string;
+  date_start: Date | string;
+  date_end: Date | string;
 };
-
+export type StockMovement = {
+  id: string;
+  doc_id: string;
+  doc_type: string;
+  timestamptz?: string;
+  section_id: string;
+  tenant_id: string;
+  user_id: string;
+  period_id: string;
+  record_date: string;
+  record_text: string;
+  record_in_out: InOutType;
+  quantity: number;
+  amount: number;
+  good_id: string;
+  warehouse_id: string;
+  editing_by_user_id: string | null;
+  editing_since: string | null;
+  movement_status: DocStatus;
+};
+export type StockMovementForm = StockMovement & {
+  good_name: string;
+  warehouse_name: string;
+  section_name: string;
+  period_name: string;
+};
+export type StockBalance = {
+    period_id: string;
+    balance_quantity: number;
+    balance_amount: number;
+    inflows_qantity: number;
+    outflows_quantity: number;
+    inflows_amount: number;
+    outflows_amount: number;
+    good_id: string;
+    warehouse_id: string;
+    section_id: string;
+};
 
 export type VATInvoice = {
   id: string;
@@ -98,7 +134,7 @@ export type VatInvoiceGoodsForm = {
 };
 export type Warehouse = {
   id: string;
-  name: string;         
+  name: string;
   section_id: string;
   tenant_id: string;
   username?: string;
@@ -109,7 +145,7 @@ export type Warehouse = {
 };
 export type WarehouseForm = {
   id: string;
-  name: string;         
+  name: string;
   section_id: string;
   section_name: string;
   tenant_id: string;
@@ -121,9 +157,9 @@ export type WarehouseForm = {
 };
 export type Good = {
   id: string;
-  name: string;         
-  brand: string;        
-  product_code: string; 
+  name: string;
+  brand: string;
+  product_code: string;
   supplier_id: string;
   measure_unit: string;
   dimensions_height: number;
@@ -142,28 +178,36 @@ export type Good = {
 };
 export type GoodForm = {
   id: string;
-  name: string;         // Название
-  brand: string;        // Брэнд
+  name: string; // Название
+  brand: string; // Брэнд
   product_code: string; // Артикул
   supplier_id: string;
-  supplier_name: string;  // Поставщик
+  supplier_name: string; // Поставщик
   measure_unit: string;
-  dimensions_height: number;  // Размеры высота (см)
-  dimensions_width: number;   // Размеры ширина (см)
-  dimensions_length: number;  // Размеры длина (см)
-  weight: number;             // Вес
-  price_retail: number;       // Цена розница
-  price_wholesale: number;    // Цена опт
-  price_cost: number;         // Цена закупки
+  dimensions_height: number; // Размеры высота (см)
+  dimensions_width: number; // Размеры ширина (см)
+  dimensions_length: number; // Размеры длина (см)
+  weight: number; // Вес
+  price_retail: number; // Цена розница
+  price_wholesale: number; // Цена опт
+  price_cost: number; // Цена закупки
   section_id: string;
-  section_name: string;       // Раздел
+  section_name: string; // Раздел
   tenant_id: string;
   username?: string;
   timestamptz?: string;
   editing_by_user_id: string | null;
   editing_since: string | null;
 };
-
+export type WoPart = {
+  id: string;
+  name: string;
+  workorder_id: string;
+  work_id: string;
+  part_id: string;
+  quantity: number;
+  section_id: string;
+};
 export type WoPartForm = {
   id: string;
   name: string;
@@ -884,11 +928,11 @@ export type RegionForm = {
 export type LegalEntity = {
   id: string;
   name: string;
-  fullname?: string | null; 
-  inn: string;          
+  fullname?: string | null;
+  inn: string;
   address_legal?: string | null;
   phone?: string | null;
-  email?: string | null;   
+  email?: string | null;
   contact?: string | null;
   is_customer: boolean;
   is_supplier: boolean;
@@ -909,22 +953,22 @@ export type LegalEntity = {
 
 export type LegalEntityForm = {
   id: string;
-  name: string;         // Название:
-  fullname?: string | null;     // Полное:
-  inn: string;          // ИНН:
+  name: string; // Название:
+  fullname?: string | null; // Полное:
+  inn: string; // ИНН:
   address_legal?: string | null; // Юр.адрес:
-  phone?: string | null;        // Телефон:
-  email?: string | null;      // Email:
-  contact?: string | null;   // Контакт:
+  phone?: string | null; // Телефон:
+  email?: string | null; // Email:
+  contact?: string | null; // Контакт:
   is_customer: boolean; // Покупатель?
   is_supplier: boolean; // Поставщик?
-  kpp?: string | null;          // КПП:
+  kpp?: string | null; // КПП:
   region_id: string;
   section_id: string;
-  region_name: string;      // Регион:
-  section_name: string;     // Раздел:
-  access_tags: string[] | null;    // Теги доступа:
-  user_tags: string[] | null;      // Теги:
+  region_name: string; // Регион:
+  section_name: string; // Раздел:
+  access_tags: string[] | null; // Теги доступа:
+  user_tags: string[] | null; // Теги:
   tenant_id: string;
   username?: string;
   author_id: string;

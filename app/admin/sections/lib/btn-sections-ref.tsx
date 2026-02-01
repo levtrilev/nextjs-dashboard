@@ -11,17 +11,17 @@ const Modal = dynamic(() => import('@/app/lib/common-modal'), { ssr: false });
 
 
 interface IBtnSectionsRefProps {
-  // sections: SectionForm[],
+  sections?: SectionForm[],
   handleSelectSection: (
-    new_section_id: string, 
-    new_section_name: string, 
-    new_section_tenant_id: string, 
+    new_section_id: string,
+    new_section_name: string,
+    new_section_tenant_id: string,
     new_section_tenant_name: string
   ) => void,
 }
 
 export default function BtnSectionsRef(props: IBtnSectionsRefProps) {
-  const sections = useDocumentStore.getState().userSections;
+  const sections = props.sections? props.sections : useDocumentStore.getState().userSections;
   const [modal, setModal] = useState(false);
 
   const openModal = (e: React.MouseEvent<HTMLElement>) => {
@@ -42,12 +42,12 @@ export default function BtnSectionsRef(props: IBtnSectionsRefProps) {
       </button>
       <Modal open={modal} >
 
-        <SectionsRefTable 
-        sections={sections} 
-        handleSelectSection={props.handleSelectSection}
-        closeModal={closeModal}
-        setTerm={setTerm}
-        term={term}
+        <SectionsRefTable
+          sections={sections}
+          handleSelectSection={props.handleSelectSection}
+          closeModal={closeModal}
+          setTerm={setTerm}
+          term={term}
         />
 
         {/* buttons */}

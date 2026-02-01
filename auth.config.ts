@@ -13,6 +13,7 @@ export const authConfig = {
       const isOnDashboard = nextUrl.pathname.startsWith("/dashboard");
       const isOnAdmin = nextUrl.pathname.startsWith("/admin");
       const isOnERP = nextUrl.pathname.startsWith("/erp");
+      const isOnLedger = nextUrl.pathname.startsWith("/ledger");
       const isOnRepair = nextUrl.pathname.startsWith("/repair");
       const isOnRoot = nextUrl.pathname === "/";
       if (isOnDashboard) {
@@ -22,6 +23,9 @@ export const authConfig = {
         if (isLoggedIn) return true;
         return false;
       } else if (isOnERP) {
+        if (isLoggedIn) return true;
+        return false;
+      } else if (isOnLedger) {
         if (isLoggedIn) return true;
         return false;
       } else if (isOnRepair) {

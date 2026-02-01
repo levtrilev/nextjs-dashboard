@@ -159,7 +159,7 @@ export async function fetchSectionById(id: string) {
       FROM sections s 
       JOIN tenants t ON s.tenant_id = t.id
       WHERE s.id = $1
-    `, [id]); // Параметр $1
+    `, [id]);
 
     return result.rows[0];
   } catch (err) {

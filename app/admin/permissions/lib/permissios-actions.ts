@@ -165,7 +165,7 @@ export async function fetchDoctypes() {
         WHERE table_schema = 'public'
         AND table_type = 'BASE TABLE'
         AND table_name NOT IN ('users', 'roles', 'sections', 'tenants', 'users-id-num'
-        , 'permissions', 'stock_balances', 'stock_movements', 'tags', 'periods')
+        , 'permissions', 'stock_balances', 'stock_movements', 'tags', 'periods', 'vat_invoice_goods')
         ORDER BY table_name ASC`
     );
 
