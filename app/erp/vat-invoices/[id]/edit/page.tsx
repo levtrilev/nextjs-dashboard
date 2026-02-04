@@ -13,6 +13,8 @@ import { fetchLegalEntitiesForm } from "@/app/erp/legal-entities/lib/legal-entit
 import { fetchPersonsForm } from "@/app/erp/persons/lib/persons-actions";
 import { fetchVatInvoiceGoodsForm } from "../../lib/vat-invoice-goods-actions";
 import NotAuthorized, { isUserAuthorized } from "@/app/lib/not_authorized";
+import { fetchGoodsForm } from "@/app/erp/goods/lib/goods-actions";
+import { fetchWarehousesForm } from "@/app/erp/warehouses/lib/warehouses-actions";
 
 async function Page(props: { params: Promise<{ id: string }> }) {
   //#region unified hooks and variables
@@ -71,7 +73,8 @@ async function Page(props: { params: Promise<{ id: string }> }) {
 
   const customers = readonly ? [] : await fetchLegalEntitiesForm(current_sections);
   const persons = readonly ? [] : await fetchPersonsForm(current_sections);
-
+  const goods = readonly ? [] : await fetchGoodsForm(current_sections);
+  const warehouses = readonly ? [] : await fetchWarehousesForm(current_sections);
   return (
     <div className="w-full">
       <div className="flex w-full items-center justify-between">
@@ -106,6 +109,8 @@ async function Page(props: { params: Promise<{ id: string }> }) {
           readonly={readonly}
           customers={customers}
           persons={persons}
+          goods={goods}
+          warehouses={warehouses}
           vat_invoice_goods={vat_invoice_goods}
         />
       </DocWrapper>

@@ -9,6 +9,8 @@ import { VATInvoiceForm } from "@/app/lib/definitions";
 import VatInvoiceEditForm from "../[id]/edit/vat-invoice-edit-form";
 import { fetchLegalEntitiesForm } from "../../legal-entities/lib/legal-entities-actions";
 import { fetchPersonsForm } from "@/app/erp/persons/lib/persons-actions";
+import { fetchGoodsForm } from "../../goods/lib/goods-actions";
+import { fetchWarehousesForm } from "../../warehouses/lib/warehouses-actions";
 // import { fetchPersonsForm } from "../../persons/lib/persons-actions";
 
 export default async function Page() {
@@ -33,6 +35,7 @@ export default async function Page() {
 
   const invoice: VATInvoiceForm = {
     id: "",
+    ledger_record_id: "00000000-0000-0000-0000-000000000000",
     name: "",
     date: null,
     number: null,
@@ -41,6 +44,8 @@ export default async function Page() {
     customer_name: "",
     our_legal_entity_id: "00000000-0000-0000-0000-000000000000",
     our_legal_entity_name: "",
+    warehouse_id: "00000000-0000-0000-0000-000000000000",
+    warehouse_name: "",
     amount_incl_vat: 0,
     amount_excl_vat: 0,
     vat_rate: 0,
@@ -70,7 +75,8 @@ export default async function Page() {
   const readonly = readonly_locked || readonly_permission;
   const customers = readonly ? [] : await fetchLegalEntitiesForm(current_sections);
   const persons = readonly ? [] : await fetchPersonsForm(current_sections);
-
+  const goods = readonly ? [] : await fetchGoodsForm(current_sections);
+  const warehouses = readonly ? [] : await fetchWarehousesForm(current_sections);
   return (
     <main>
       <Breadcrumbs
@@ -97,6 +103,8 @@ export default async function Page() {
           customers={customers}
           persons={persons}
           vat_invoice_goods={null}
+          goods={goods}
+          warehouses={warehouses}
         />
       </DocWrapper>
     </main>

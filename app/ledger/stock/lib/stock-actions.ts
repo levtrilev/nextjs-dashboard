@@ -1,6 +1,7 @@
 "use server";
 import pool from "@/db";
-import { Period, StockMovement } from "@/app/lib/definitions";
+import { revalidatePath } from "next/cache";
+import { LedgerRecord, Period, StockMovement } from "@/app/lib/definitions";
 import { StockBalanceForm } from "./stock-types";
 
 export type StockMovementForm = StockMovement & {
@@ -364,5 +365,205 @@ export async function fetchPeriods() {
   } catch (error) {
     console.error("getPeriodByDate Database Error:", error);
     throw new Error("Failed to fetch period by date:" + String(error));
+  }
+}
+
+export async function createStockMovements(
+  ledgerRecord: LedgerRecord,
+  stockMovements: StockMovement[],
+) {
+  if (stockMovements.length === 0) {
+    return {
+      success: false,
+      ledgerId: String(""),
+      movementsCount: 0,
+    };
+  }
+  const client = await pool.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    // Вставка в ledger_records
+    const ledgerResult = await client.query(
+      `INSERT INTO public.ledger_records (
+        record_date, doc_type, doc_id, record_text, section_id, tenant_id
+      ) VALUES ($1, $2, $3, $4, $5, $6)
+      RETURNING id`,
+      [
+        ledgerRecord.record_date,
+        ledgerRecord.doc_type,
+        ledgerRecord.doc_id,
+        ledgerRecord.record_text,
+        ledgerRecord.section_id,
+        ledgerRecord.tenant_id,
+        // ledgerRecord.timestamptz || new Date().toISOString(),
+      ],
+    );
+
+    const ledgerId = ledgerResult.rows[0].id;
+
+    // Пакетная вставка в stock_movements
+    if (stockMovements.length > 0) {
+      const placeholders = stockMovements
+        .map((_, idx) => {
+          const offset = idx * 17 + 1;
+          return `(${Array.from({ length: 17 }, (_, i) => `$${offset + i}`).join(", ")})`;
+        })
+        .join(", ");
+
+      const queryValues = stockMovements.flatMap((m) => [
+        m.doc_id,
+        m.doc_type,
+        m.section_id,
+        m.tenant_id,
+        m.user_id,
+        m.period_id,
+        m.record_text,
+        m.record_in_out,
+        m.quantity,
+        m.amount,
+        m.good_id,
+        m.warehouse_id,
+        m.editing_by_user_id,
+        m.editing_since,
+        m.movement_status,
+        m.record_date,
+        ledgerId,
+      ]);
+
+      await client.query(
+        `
+        INSERT INTO public.stock_movements (
+          doc_id,
+          doc_type,
+          section_id,
+          tenant_id,
+          user_id,
+          period_id,
+          record_text,
+          record_in_out,
+          quantity,
+          amount,
+          good_id,
+          warehouse_id,
+          editing_by_user_id,
+          editing_since,
+          movement_status,
+          record_date,
+          ledger_record_id
+        ) VALUES ${placeholders}
+        `,
+        queryValues,
+      );
+    }
+
+    await client.query(
+      `
+      UPDATE public.vat_invoices
+	      SET ledger_record_id=$2
+	      WHERE id=$1
+    `,
+      [ledgerRecord.doc_id, ledgerId],
+    );
+
+    await client.query("COMMIT");
+    revalidatePath("/ledger/stock");
+
+    return {
+      success: true,
+      ledgerId: String(ledgerId),
+      movementsCount: stockMovements.length,
+    };
+  } catch (error) {
+    await client.query("ROLLBACK");
+    console.error("Ошибка:", error);
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
+export async function deleteLedgerRecordWithMovements(ledgerRecordId: string, vat_invoice_doc_id?: string) {
+  const client = await pool.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    // 1. Проверка существования записи
+    const checkResult = await client.query(
+      "SELECT id FROM public.ledger_records WHERE id = $1",
+      [ledgerRecordId],
+    );
+
+    if (checkResult.rows.length === 0) {
+      await client.query("ROLLBACK");
+      client.release();
+
+      return {
+        success: false,
+        notFound: true,
+        deletedMovementsCount: 0,
+        message: "Запись не найдена",
+      };
+    }
+
+    // 2. Подсчёт связанных движений
+    const countResult = await client.query(
+      "SELECT COUNT(*) as movement_count FROM public.stock_movements WHERE ledger_record_id = $1",
+      [ledgerRecordId],
+    );
+
+    const movementCount = parseInt(countResult.rows[0].movement_count);
+
+    // 3. Удаление движений склада
+    if (movementCount > 0) {
+      await client.query(
+        "DELETE FROM public.stock_movements WHERE ledger_record_id = $1",
+        [ledgerRecordId],
+      );
+    }
+
+    // 4. Удаление записи учёта
+    await client.query("DELETE FROM public.ledger_records WHERE id = $1", [
+      ledgerRecordId,
+    ]);
+
+    // 5. Удаление ссылки из документа
+    if (vat_invoice_doc_id) {
+      await client.query(
+        `
+        UPDATE public.vat_invoices
+        SET ledger_record_id=$2
+        WHERE id=$1
+      `,
+        [vat_invoice_doc_id, '00000000-0000-0000-0000-000000000000'],
+      );
+    }
+
+    await client.query("COMMIT");
+    client.release();
+
+    // revalidatePath('/stock');
+    revalidatePath("/ledger/stock");
+
+    return {
+      success: true,
+      notFound: false,
+      deletedMovementsCount: movementCount,
+      message: `Удалена запись учёта и ${movementCount} связанных движений stock_movements`,
+    };
+  } catch (error) {
+    await client.query("ROLLBACK");
+    client.release();
+
+    console.error("Ошибка при удалении записи учёта:", error);
+
+    return {
+      success: false,
+      notFound: false,
+      deletedMovementsCount: 0,
+      message: error instanceof Error ? error.message : "Неизвестная ошибка",
+    };
   }
 }

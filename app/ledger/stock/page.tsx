@@ -1,7 +1,7 @@
 'use server';
 
 import { auth, getUser } from "@/auth";
-import SomeEditForm from "./some-edit-form";
+import CreateStockMovementButton from "./movements/create/page";
 import { getCurrentSections } from "@/app/lib/common-actions";
 import StockBalancesPage from "./stock-balances-page";
 import { fetchGoodsForm } from "@/app/erp/goods/lib/goods-actions";
@@ -28,7 +28,7 @@ export default async function Page() {
     const periods = await fetchPeriods();
     return (
         <>
-            <SomeEditForm
+            <CreateStockMovementButton
                 goods={goods}
                 warehouses={warehouses}
                 sections={sections}

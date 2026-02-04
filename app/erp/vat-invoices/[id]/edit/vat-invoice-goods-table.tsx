@@ -22,6 +22,7 @@ interface IVatInvoiceGoodsTableProps {
   onDocumentChanged: () => void;
   vatInvoiceId: string;
   sectionId: string;
+  goods: GoodForm[];
 }
 
 export default function VatInvoiceGoodsTable({
@@ -29,6 +30,7 @@ export default function VatInvoiceGoodsTable({
   onDocumentChanged,
   vatInvoiceId,
   sectionId,
+  goods
 }: IVatInvoiceGoodsTableProps) {
   const useCurrentStore = getVatInvoiceGoodsStore(vatInvoiceId);
   const {
@@ -49,7 +51,7 @@ export default function VatInvoiceGoodsTable({
   useEffect(() => {
     const loadGoods = async () => {
       if (!readonly) {
-        const goods = await fetchGoodsForm(`{${sectionId}}`);
+        // const goods = await fetchGoodsForm(`{${sectionId}}`);
         setGoodsList(goods);
       }
     };

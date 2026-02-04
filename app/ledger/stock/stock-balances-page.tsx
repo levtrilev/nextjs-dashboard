@@ -9,6 +9,8 @@ import BtnWarehousesRef from '@/app/erp/warehouses/lib/btn-warehouses-ref';
 import { Good, GoodForm, Period, WarehouseForm } from '@/app/lib/definitions';
 import BtnGoodsRef from '@/app/erp/goods/lib/btn-goods-ref';
 import BtnRefGeneric from '@/app/lib/btn-ref-generic';
+import { CalendarIcon, BuildingStorefrontIcon, CubeIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline'
+
 
 interface StockBalancesPageProps {
   current_sections: string;
@@ -91,64 +93,121 @@ export default function StockBalancesPage(
   }
   return (
     <div className="container mx-auto p-6 max-w-7xl">
-      <div className='flex'>
-        {/* Период */}
-        <div className='flex flex-row'>
-          <label className="w-1/8 block text-sm font-medium">Период</label>
-          <input
-            type="text"
-            value={filterPeriod.name}
-            onChange={() => { }}
-            disabled
-            className="w-full p-2 border rounded"
-          />
-          <BtnRefGeneric<Period>
-            items={periodsWithEmpty}
-            handleSelectItem={handleSelectPeriod}
-            title="Выберите период:"
-            additionalColumns={[
-              { key: 'date_start', label: 'Начало', width: 'w-1/4' },
-              { key: 'date_end', label: 'Окончание', width: 'w-1/4' }
-            ]}
-            searchPlaceholder="Поиск склада..."
-            saveButtonText="Сохранить"
-            exitButtonText="Отмена"
-          />
-        </div>
+      {/* Фильтры */}
+      <div className="bg-white rounded-xl shadow-lg p-6 mb-6 border border-gray-200">
+        <div className="flex flex-wrap gap-4">
+          {/* Период */}
+          <div className="flex-1 min-w-[280px]">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 min-w-[100px]">
+                <div className="bg-blue-100 p-2 rounded-lg">
+                  <CalendarIcon className="h-5 w-5 text-blue-600" />
+                </div>
+                <label className="block text-sm font-semibold text-gray-700">Период</label>
+              </div>
 
-        {/* Склад */}
-        <div className='flex flex-row'>
-          <label className="w-1/8 block text-sm font-medium">Cклад</label>
-          <input
-            type="text"
-            value={filterWarehouse.name}
-            onChange={() => { }}
-            disabled
-            className="w-full p-2 border rounded"
-          />
-          <BtnWarehousesRef handleSelectWarehouse={handleSelectWarehouse} warehouses={warehousesWithEmpty} />
-        </div>
+              <div className="flex-1 relative">
+                <input
+                  type="text"
+                  value={filterPeriod.name}
+                  onChange={() => { }}
+                  disabled
+                  className="w-full p-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-gray-50 text-gray-800"
+                  placeholder="Выберите период"
+                />
+                <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                  <CalendarIcon className="h-5 w-5" />
+                </div>
+              </div>
 
-        {/* Товар */}
-        <div className='flex flex-row'>
-          <label className="w-1/8 block text-sm font-medium">Товар</label>
-          <input
-            type="text"
-            value={filterGood.name}
-            onChange={() => { }}
-            disabled
-            className="w-full p-2 border rounded"
-          />
-          <BtnGoodsRef handleSelectGood={handleSelectGood} goods={goodsWithEmpty} />
+              <BtnRefGeneric<Period>
+                items={periodsWithEmpty}
+                handleSelectItem={handleSelectPeriod}
+                title="Выберите период:"
+                additionalColumns={[
+                  { key: 'date_start', label: 'Начало', width: 'w-1/4' },
+                  { key: 'date_end', label: 'Окончание', width: 'w-1/4' }
+                ]}
+                searchPlaceholder="Поиск периода..."
+                saveButtonText="Сохранить"
+                exitButtonText="Отмена"
+              // className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow-md transition-all duration-200"
+              />
+            </div>
+          </div>
+
+          {/* Склад */}
+          <div className="flex-1 min-w-[280px]">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 min-w-[100px]">
+                <div className="bg-orange-100 p-2 rounded-lg">
+                  <BuildingStorefrontIcon className="h-5 w-5 text-orange-600" />
+                </div>
+                <label className="block text-sm font-semibold text-gray-700">Склад</label>
+              </div>
+
+              <div className="flex-1 relative">
+                <input
+                  type="text"
+                  value={filterWarehouse.name}
+                  onChange={() => { }}
+                  disabled
+                  className="w-full p-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 bg-gray-50 text-gray-800"
+                  placeholder="Выберите склад"
+                />
+                <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                  <BuildingStorefrontIcon className="h-5 w-5" />
+                </div>
+              </div>
+
+              <BtnWarehousesRef
+                handleSelectWarehouse={handleSelectWarehouse}
+                warehouses={warehousesWithEmpty}
+              // className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg shadow-md transition-all duration-200"
+              />
+            </div>
+          </div>
+
+          {/* Товар */}
+          <div className="flex-1 min-w-[280px]">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 min-w-[100px]">
+                <div className="bg-green-100 p-2 rounded-lg">
+                  <CubeIcon className="h-5 w-5 text-green-600" />
+                </div>
+                <label className="block text-sm font-semibold text-gray-700">Товар</label>
+              </div>
+
+              <div className="flex-1 relative">
+                <input
+                  type="text"
+                  value={filterGood.name}
+                  onChange={() => { }}
+                  disabled
+                  className="w-full p-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 bg-gray-50 text-gray-800"
+                  placeholder="Выберите товар"
+                />
+                <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                  <CubeIcon className="h-5 w-5" />
+                </div>
+              </div>
+
+              <BtnGoodsRef
+                handleSelectGood={handleSelectGood}
+                goods={goodsWithEmpty}
+              // className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg shadow-md transition-all duration-200"
+              />
+            </div>
+          </div>
         </div>
       </div>
 
+      {/* Таблица */}
       <StockBalancesTable
         key={filterWarehouse.id || 'all'}
         balances={filteredBalances}
         isLoading={isLoading}
         error={error}
-      // filterWarehouseId={filterWarehouse.id}
       />
     </div>
   );

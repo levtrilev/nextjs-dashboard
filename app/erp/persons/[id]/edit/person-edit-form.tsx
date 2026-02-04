@@ -121,7 +121,7 @@ export default function PersonEditForm(props: IEditFormProps) {
         await createPerson(formData);
         // setMessageBoxText('Документ сохранен.');
         setTimeout(() => {
-          router.push('/repair/persons');
+          router.push('/erp/persons');
         }, 2000);
       } else {
         await updatePerson(formData);

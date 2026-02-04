@@ -3,15 +3,15 @@
 
 import StockMovementEditForm from '@/app/ledger/stock/movements/[id]/stock-movement-edit-form';
 import { GoodForm, SectionForm, StockMovement, StockMovementForm, WarehouseForm } from '@/app/lib/definitions';
-import { useStockMovementFormStore } from './lib/stockMovementFormStore';
+import { useStockMovementFormStore } from '../../lib/stockMovementFormStore';
 import { useState } from 'react';
-import { createStockMovement, getPeriodByDate, updateStockMovement } from './lib/stock-actions';
+import { createStockMovement, getPeriodByDate, updateStockMovement } from '../../lib/stock-actions';
 import { setIsDocumentChanged, useDocumentStore, useIsDocumentChanged, useMessageBox } from '@/app/store/useDocumentStore';
 import { useRouter } from 'next/navigation';
 import { setIsMessageBoxOpen, setIsShowMessageBoxCancel, setMessageBoxText } from '@/app/store/del_useMessageBoxStore';
 import MessageBoxOKCancel from '@/app/lib/message-box-ok-cancel';
 
-export default function SomeEditForm(
+export default function CreateStockMovementButton(
   { goods, warehouses, sections }: { goods: GoodForm[]; warehouses: WarehouseForm[]; sections: SectionForm[] }
 ) {
   const docTenantId = useDocumentStore.getState().documentTenantId;
@@ -81,8 +81,11 @@ export default function SomeEditForm(
 
   return (
     <div>
-      <button onClick={handleCreateMovement} className="mb-4 px-4 py-2 bg-green-600 text-white rounded">
-        Добавить движение
+      <button
+        type='button'
+        onClick={handleCreateMovement}
+        className="bg-green-400 text-white w-full rounded-md border p-2 hover:bg-green-100 hover:text-gray-500 cursor-pointer"
+      >                                        Добавить движение
       </button>
 
       {form && (

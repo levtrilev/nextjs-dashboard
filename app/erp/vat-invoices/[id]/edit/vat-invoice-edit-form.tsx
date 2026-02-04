@@ -1,10 +1,15 @@
 'use client';
 import { useEffect, useState } from "react";
 import {
+    GoodForm,
+    InOutType,
+    LedgerRecord,
     LegalEntityForm,
     PersonForm,
+    StockMovement,
     VATInvoiceForm,
     VatInvoiceGoodsForm,
+    WarehouseForm,
 } from "@/app/lib/definitions";
 import { formatDateForInput, utcISOToLocalDateTimeInput } from "@/app/lib/common-utils";
 import BtnSectionsRef from "@/app/admin/sections/lib/btn-sections-ref";
@@ -31,6 +36,9 @@ import VatInvoiceGoodsTable from "./vat-invoice-goods-table";
 import { getVatInvoiceGoodsStore, destroyVatInvoiceGoodsStore } from "../../lib/store/vatInvoiceGoodsStoreRegistry";
 import { fetchPersonByUser } from "@/app/repair/claims/lib/claims-actions";
 import VatInvoicePdfDocument from "./vat-invoice-pdf-document";
+import CreateStockMovementButton from "@/app/ledger/stock/movements/create/page";
+import { createStockMovement, createStockMovements, deleteLedgerRecordWithMovements, getPeriodByDate } from "@/app/ledger/stock/lib/stock-actions";
+import BtnWarehousesRef from "@/app/erp/warehouses/lib/btn-warehouses-ref";
 
 interface IEditFormProps {
     invoice: VATInvoiceForm;
@@ -40,11 +48,14 @@ interface IEditFormProps {
     customers: LegalEntityForm[];
     persons: PersonForm[];
     vat_invoice_goods: VatInvoiceGoodsForm[] | null;
+    goods: GoodForm[];
+    warehouses: WarehouseForm[];
 }
 
 const DocStatusSchema = z.enum(['draft', 'active', 'deleted']);
 const VatInvoiceFormSchemaFull = z.object({
     id: z.string().uuid(),
+    ledger_record_id: z.string().uuid(),
     name: z.string().min(2, {
         message: "Название должно содержать не менее 2-х символов.",
     }),
@@ -67,6 +78,10 @@ const VatInvoiceFormSchemaFull = z.object({
     }),
     our_legal_entity_id: z.string().uuid(),
     our_legal_entity_name: z.string(),
+    warehouse_id: z.string().uuid(),
+    warehouse_name: z.string().min(1, {
+        message: "Поле Склад должно быть заполнено.",
+    }),
     amount_incl_vat: z.number(),
     amount_excl_vat: z.number(),
     vat_rate: z.number(),
@@ -269,6 +284,14 @@ export default function VatInvoiceEditForm(props: IEditFormProps) {
         }));
         docChanged();
     };
+    const handleSelectWarehouse = (new_warehouse_id: string, new_warehouse_name: string) => {
+        setFormData((prev) => ({
+            ...prev,
+            warehouse_id: new_warehouse_id,
+            warehouse_name: new_warehouse_name,
+        }));
+        docChanged();
+    }
     const handleSelectApprovedPerson = (new_person_id: string, new_person_name: string) => {
         setFormData((prev) => ({
             ...prev,
@@ -334,6 +357,79 @@ export default function VatInvoiceEditForm(props: IEditFormProps) {
         docChanged();
     }
     const errors = showErrors ? validate() : undefined;
+    const handleCreateDeleteStockMovements = async (vat_invoice_goods: VatInvoiceGoodsForm[], formData: FormData) => {
+        if (formData.ledger_record_id !== '00000000-0000-0000-0000-000000000000') {
+            try {
+                const deleteResult = await deleteLedgerRecordWithMovements(formData.ledger_record_id, formData.id);
+                if (!deleteResult.success) {
+                    alert(deleteResult.message);
+                    return;
+                } else {
+                    setFormData({ ...formData, ledger_record_id: '00000000-0000-0000-0000-000000000000' });
+                    setMessageBoxText('Документ распроведен.');
+                }
+            } catch (error) {
+                setMessageBoxText('Документ не распроведен! :' + String(error));
+            }
+            setIsShowMessageBoxCancel(false);
+            setIsMessageBoxOpen(true);
+            return;
+        }
+        const period = await getPeriodByDate(new Date(formData.date));
+        if (!period) {
+            alert('Период не определен!');
+            return;
+        }
+        const ledgerRecord: LedgerRecord = {
+            id: '00000000-0000-0000-0000-000000000000',
+            doc_id: formData.id,
+            doc_type: 'vat_invoice',
+            section_id: formData.section_id,
+            tenant_id: formData.tenant_id,
+            record_date: formData.date,
+            record_text: "Реализация товаров и услуг",
+        };
+        const stockMovements: StockMovement[] = [];
+        for (const vat_invoice_good of vat_invoice_goods) {
+            const stockMovement: StockMovement = {
+                id: '00000000-0000-0000-0000-000000000000',
+                doc_id: formData.id,
+                doc_type: ledgerRecord.doc_type,
+                section_id: ledgerRecord.section_id,
+                tenant_id: ledgerRecord.tenant_id,
+                record_date: ledgerRecord.record_date,
+                record_text: ledgerRecord.record_text,
+                good_id: vat_invoice_good.good_id,
+                user_id: useDocumentStore.getState().sessionUser.id,
+                period_id: period.id,
+                record_in_out: 'out' as InOutType,
+                quantity: vat_invoice_good.quantity,
+                amount: vat_invoice_good.amount,
+                warehouse_id: formData.warehouse_id,
+                editing_by_user_id: null,
+                editing_since: null,
+                movement_status: 'active',
+            };
+            stockMovements.push(stockMovement);
+        }
+        try {
+            //   if (formData.id === 'new') {
+            const res = await createStockMovements(ledgerRecord, stockMovements);
+            if (res.success) setFormData({ ...formData, ledger_record_id: res.ledgerId });
+            // setTimeout(() => {
+            //   router.push('/ledger/stock');
+            // }, 2000);
+            //   } else {
+            //     const res = await updateStockMovement(data);
+            //   }
+            //   setIsDocumentChanged(false);
+            setMessageBoxText('Документ проведен.');
+        } catch (error) {
+            setMessageBoxText('Документ не проведен! :' + String(error));
+        }
+        setIsShowMessageBoxCancel(false);
+        setIsMessageBoxOpen(true);
+    };
 
     return (
         <div>
@@ -387,6 +483,18 @@ export default function VatInvoiceEditForm(props: IEditFormProps) {
                                 refBook={<BtnLegalEntitiesRef handleSelectLegalEntity={handleSelectCustomer} legalEntities={props.customers} elementIdPrefix="customer" />}
                                 readonly={props.readonly}
                                 errors={errors?.customer_name?._errors as string[] | undefined}
+                            />
+                            {/* warehouse_name */}
+                            <InputField
+                                name="warehouse_name"
+                                value={formData.warehouse_name}
+                                label="Склад:"
+                                type="text"
+                                w={["w-6/16", "w-11/16"]}
+                                onChange={() => { }}
+                                refBook={<BtnWarehousesRef handleSelectWarehouse={handleSelectWarehouse} warehouses={props.warehouses} />}
+                                readonly={props.readonly}
+                                errors={errors?.warehouse_name?._errors as string[] | undefined}
                             />
                             {/* SetApprovedButton & approved_date */}
                             <div className="flex justify-between h-1/4 md:w-full">
@@ -494,12 +602,19 @@ export default function VatInvoiceEditForm(props: IEditFormProps) {
 
                         </div>
                     </div>
-
+                    <div id="form-error" aria-live="polite" aria-atomic="true">
+                        {errors &&
+                            <p className="mt-2 text-sm text-red-500" key={'form_errors'}>
+                                {JSON.stringify(errors)}
+                            </p>
+                        }
+                    </div>
                     {props.vat_invoice_goods && (
                         <VatInvoiceGoodsTable
                             readonly={props.readonly}
                             onDocumentChanged={docChanged}
                             vatInvoiceId={formData.id}
+                            goods={props.goods}
                             sectionId={formData.section_id}
                         />
                     )}
@@ -536,6 +651,16 @@ export default function VatInvoiceEditForm(props: IEditFormProps) {
                                         Открыть PDF
                                     </button>
                                 </div>
+                                {props.vat_invoice_goods && <div className="w-full md:w-1/2">
+                                    <button
+                                        type='button'
+                                        onClick={(e) => handleCreateDeleteStockMovements(props.vat_invoice_goods ?? [], formData)}
+                                        className="bg-green-400 text-white w-full rounded-md border p-2 hover:bg-green-100 hover:text-gray-500 cursor-pointer"
+                                    >
+                                        {formData.ledger_record_id === '00000000-0000-0000-0000-000000000000' ? 'Провести документ' : 'Отменить проведение'}
+                                    </button>
+                                    <h3 className="text-xs font-medium text-gray-400">проведено: {formData.ledger_record_id}</h3>
+                                </div>}
                             </div>
                         </div>
                     </div>

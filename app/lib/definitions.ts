@@ -9,6 +9,17 @@ export type DocStatus = "draft" | "active" | "deleted";
 export type Priority = "высокий" | "низкий";
 export type MachineStatus = "норма" | "ремонт" | "ожидание" | "неизвестно";
 
+export type LedgerRecord = {
+  id: string;
+  doc_id: string;
+  doc_type: string;
+  section_id: string;
+  tenant_id: string;
+  record_date: string;
+  record_text: string;
+  timestamptz?: string;
+};
+
 export type Period = {
   id: string;
   name: string;
@@ -56,12 +67,14 @@ export type StockBalance = {
 
 export type VATInvoice = {
   id: string;
+  ledger_record_id: string;
   name: string;
   date: string | null;
   number: string | null;
   description: string | null;
   customer_id: string;
   our_legal_entity_id: string;
+  warehouse_id: string;
   amount_incl_vat: number;
   amount_excl_vat: number;
   vat_rate: number;
@@ -83,39 +96,13 @@ export type VATInvoice = {
   access_tags: string[] | null;
   user_tags: string[] | null;
 };
-export type VATInvoiceForm = {
-  id: string;
-  name: string;
-  date: string | null;
-  number: string | null;
-  description: string | null;
-  customer_id: string;
+export type VATInvoiceForm = VATInvoice & {
   customer_name: string;
-  our_legal_entity_id: string;
   our_legal_entity_name: string;
-  amount_incl_vat: number;
-  amount_excl_vat: number;
-  vat_rate: number;
-  vat_amount: number;
-  doc_status: DocStatus;
-  approved_date?: string | null;
-  approved_by_person_id: string | null;
+  warehouse_name: string;
   approved_by_person_name: string | null;
-  accepted_date?: string | null;
-  accepted_by_person_id: string | null;
   accepted_by_person_name: string | null;
-  section_id: string;
   section_name: string;
-  tenant_id: string;
-  username?: string;
-  author_id: string;
-  editor_id: string;
-  timestamptz?: string;
-  date_created?: Date;
-  editing_by_user_id: string | null;
-  editing_since: string | null;
-  access_tags: string[] | null;
-  user_tags: string[] | null;
 };
 export type VatInvoiceGoodsForm = {
   id: string;

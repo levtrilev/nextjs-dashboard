@@ -20,6 +20,7 @@ export async function createVatInvoice(invoice: VATInvoice) {
     description,
     customer_id,
     our_legal_entity_id,
+    warehouse_id,
     amount_incl_vat,
     amount_excl_vat,
     vat_rate,
@@ -44,6 +45,7 @@ export async function createVatInvoice(invoice: VATInvoice) {
         description,
         customer_id,
         our_legal_entity_id,
+        warehouse_id,
         amount_incl_vat,
         amount_excl_vat,
         vat_rate,
@@ -54,7 +56,7 @@ export async function createVatInvoice(invoice: VATInvoice) {
         timestamptz,
         tenant_id,
         author_id
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
       `,
       [
         name,
@@ -63,6 +65,7 @@ export async function createVatInvoice(invoice: VATInvoice) {
         description,
         customer_id,
         our_legal_entity_id,
+        warehouse_id,
         amount_incl_vat,
         amount_excl_vat,
         vat_rate,
@@ -99,6 +102,7 @@ export async function updateVatInvoice(invoice: VATInvoice) {
     description,
     customer_id,
     our_legal_entity_id,
+    warehouse_id,
     amount_incl_vat,
     amount_excl_vat,
     vat_rate,
@@ -123,19 +127,20 @@ export async function updateVatInvoice(invoice: VATInvoice) {
         description = $5,
         customer_id = $6,
         our_legal_entity_id = $7,
-        amount_incl_vat = $8,
-        amount_excl_vat = $9,
-        vat_rate = $10,
-        vat_amount = $11,
-        doc_status = $12,
-        approved_date = $13,
-        approved_by_person_id = $14,
-        accepted_date = $15,
-        accepted_by_person_id = $16,
-        username = $17,
-        section_id = $18,
-        tenant_id = $19,
-        author_id = $20,
+        warehouse_id = $8,
+        amount_incl_vat = $9,
+        amount_excl_vat = $10,
+        vat_rate = $11,
+        vat_amount = $12,
+        doc_status = $13,
+        approved_date = $14,
+        approved_by_person_id = $15,
+        accepted_date = $16,
+        accepted_by_person_id = $17,
+        username = $18,
+        section_id = $19,
+        tenant_id = $20,
+        author_id = $21,
         timestamptz = now()
       WHERE id = $1
       `,
@@ -147,6 +152,7 @@ export async function updateVatInvoice(invoice: VATInvoice) {
         description,
         customer_id,
         our_legal_entity_id,
+        warehouse_id,
         amount_incl_vat,
         amount_excl_vat,
         vat_rate,
@@ -210,6 +216,7 @@ export async function fetchVatInvoiceForm(
       WITH your_vat_invoices AS ( SELECT * FROM "vat_invoices" WHERE section_id = ANY ($1::uuid[]))
       SELECT
         v.id,
+        v.ledger_record_id,
         v.name,
         v.date,
         TO_CHAR(v.date, 'YYYY-MM-DD') AS date,
@@ -217,6 +224,7 @@ export async function fetchVatInvoiceForm(
         v.description,
         v.customer_id,
         v.our_legal_entity_id,
+        v.warehouse_id,
         v.amount_incl_vat,
         v.amount_excl_vat,
         v.vat_rate,
@@ -239,12 +247,14 @@ export async function fetchVatInvoiceForm(
         v.user_tags,
         COALESCE(customers.name, '') AS customer_name,
         COALESCE(our_legal_entity.name, '') AS our_legal_entity_name,
+        COALESCE(warehouses.name, '') AS warehouse_name,
         COALESCE(approved_persons.name, '') AS approved_by_person_name,
         COALESCE(accepted_persons.name, '') AS accepted_by_person_name,
         COALESCE(sections.name, '') AS section_name
       FROM your_vat_invoices v
       LEFT JOIN legal_entities customers ON v.customer_id = customers.id
       LEFT JOIN legal_entities our_legal_entity ON v.our_legal_entity_id = customers.id
+      LEFT JOIN warehouses ON v.warehouse_id = warehouses.id
       LEFT JOIN persons approved_persons ON v.approved_by_person_id = approved_persons.id
       LEFT JOIN persons accepted_persons ON v.accepted_by_person_id = accepted_persons.id
       LEFT JOIN sections ON v.section_id = sections.id
@@ -282,12 +292,14 @@ export async function fetchVatInvoicesForm(current_sections: string) {
       WITH your_vat_invoices AS ( SELECT * FROM "vat_invoices" WHERE section_id = ANY ($1::uuid[]))
       SELECT
         v.id,
+        v.ledger_record_id,
         v.name,
         v.date,
         v.number,
         v.description,
         v.customer_id,
         v.our_legal_entity_id,
+        v.warehouse_id,
         v.amount_incl_vat,
         v.amount_excl_vat,
         v.vat_rate,
@@ -310,12 +322,14 @@ export async function fetchVatInvoicesForm(current_sections: string) {
         v.user_tags,
         COALESCE(customers.name, '') AS customer_name,
         COALESCE(our_legal_entity.name, '') AS our_legal_entity_name,
+        COALESCE(warehouses.name, '') AS warehouse_name,
         COALESCE(approved_persons.name, '') AS approved_by_person_name,
         COALESCE(accepted_persons.name, '') AS accepted_by_person_name,
         COALESCE(sections.name, '') AS section_name
       FROM your_vat_invoices v
       LEFT JOIN legal_entities customers ON v.customer_id = customers.id
       LEFT JOIN legal_entities our_legal_entity ON v.our_legal_entity_id = customers.id
+      LEFT JOIN warehouses ON v.warehouse_id = warehouses.id
       LEFT JOIN persons approved_persons ON v.approved_by_person_id = approved_persons.id
       LEFT JOIN persons accepted_persons ON v.accepted_by_person_id = accepted_persons.id
       LEFT JOIN sections ON v.section_id = sections.id
@@ -344,12 +358,14 @@ export async function fetchFilteredVatInvoices(
       WITH your_vat_invoices AS ( SELECT * FROM "vat_invoices" WHERE section_id = ANY ($1::uuid[]))
       SELECT
         v.id,
+        v.ledger_record_id,
         v.name,
         v.date,
         v.number,
         v.description,
         v.customer_id,
         v.our_legal_entity_id,
+        v.warehouse_id,
         v.amount_incl_vat,
         v.amount_excl_vat,
         v.vat_rate,
@@ -372,12 +388,14 @@ export async function fetchFilteredVatInvoices(
         v.user_tags,
         COALESCE(customers.name, '') AS customer_name,
         COALESCE(our_legal_entity.name, '') AS our_legal_entity_name,
+        COALESCE(warehouses.name, '') AS warehouse_name,
         COALESCE(approved_persons.name, '') AS approved_by_person_name,
         COALESCE(accepted_persons.name, '') AS accepted_by_person_name,
         COALESCE(sections.name, '') AS section_name
       FROM your_vat_invoices v
       LEFT JOIN legal_entities customers ON v.customer_id = customers.id
       LEFT JOIN legal_entities our_legal_entity ON v.our_legal_entity_id = our_legal_entity.id
+      LEFT JOIN warehouses ON v.warehouse_id = warehouses.id
       LEFT JOIN persons approved_persons ON v.approved_by_person_id = approved_persons.id
       LEFT JOIN persons accepted_persons ON v.accepted_by_person_id = accepted_persons.id
       LEFT JOIN sections ON v.section_id = sections.id
