@@ -44,6 +44,7 @@ export default async function Page() {
     customer_name: "",
     our_legal_entity_id: "00000000-0000-0000-0000-000000000000",
     our_legal_entity_name: "",
+    trade_in_out: "out",
     warehouse_id: "00000000-0000-0000-0000-000000000000",
     warehouse_name: "",
     amount_incl_vat: 0,

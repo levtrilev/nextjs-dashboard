@@ -2,7 +2,7 @@
 // These types may be generated automatically if you're using an ORM such as Prisma.
 
 import { DateTime } from "next-auth/providers/kakao";
-import { number } from "zod";
+import { z, number } from "zod";
 
 export type InOutType = 'in' | 'out';
 export type DocStatus = "draft" | "active" | "deleted";
@@ -75,6 +75,7 @@ export type VATInvoice = {
   customer_id: string;
   our_legal_entity_id: string;
   warehouse_id: string;
+  trade_in_out: InOutType;
   amount_incl_vat: number;
   amount_excl_vat: number;
   vat_rate: number;

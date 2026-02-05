@@ -63,7 +63,7 @@ export default async function Page(props: {
         initialEffectiveSections={effective_sections_array.map((s) => s.id)}
       /> */}
       <div className="flex w-full items-center justify-between">
-        <h1 className={`${lusitana.className} text-2xl`}>Счета-фактуры</h1>
+        <h1 className={`${lusitana.className} text-2xl`}>Счета-заказы</h1>
       </div>
       <div className="mt-4 flex items-center justify-between gap-2 md:mt-8">
         <Search placeholder="Найти счет-фактуру..." />

@@ -78,7 +78,7 @@ async function Page(props: { params: Promise<{ id: string }> }) {
   return (
     <div className="w-full">
       <div className="flex w-full items-center justify-between">
-        <h1 className={`${lusitana.className} text-2xl`}>Счет-фактура</h1>
+        <h1 className={`${lusitana.className} text-2xl`}>Счет-заказ</h1>
         {readonly && (
           <span className="text-xs font-medium text-gray-400">
             только чтение для пользователя: {user?.email}

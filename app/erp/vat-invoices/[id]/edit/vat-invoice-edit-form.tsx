@@ -39,6 +39,7 @@ import VatInvoicePdfDocument from "./vat-invoice-pdf-document";
 import CreateStockMovementButton from "@/app/ledger/stock/movements/create/page";
 import { createStockMovement, createStockMovements, deleteLedgerRecordWithMovements, getPeriodByDate } from "@/app/ledger/stock/lib/stock-actions";
 import BtnWarehousesRef from "@/app/erp/warehouses/lib/btn-warehouses-ref";
+import { TradeInOutToggle } from "@/app/lib/trade-inout-toggle";
 
 interface IEditFormProps {
     invoice: VATInvoiceForm;
@@ -53,6 +54,7 @@ interface IEditFormProps {
 }
 
 const DocStatusSchema = z.enum(['draft', 'active', 'deleted']);
+const inOutTypeSchema = z.enum(['in', 'out']);
 const VatInvoiceFormSchemaFull = z.object({
     id: z.string().uuid(),
     ledger_record_id: z.string().uuid(),
@@ -78,6 +80,7 @@ const VatInvoiceFormSchemaFull = z.object({
     }),
     our_legal_entity_id: z.string().uuid(),
     our_legal_entity_name: z.string(),
+    trade_in_out: inOutTypeSchema.default('out'),
     warehouse_id: z.string().uuid(),
     warehouse_name: z.string().min(1, {
         message: "Поле Склад должно быть заполнено.",
@@ -387,7 +390,7 @@ export default function VatInvoiceEditForm(props: IEditFormProps) {
             section_id: formData.section_id,
             tenant_id: formData.tenant_id,
             record_date: formData.date,
-            record_text: "Реализация товаров и услуг",
+            record_text: formData.description ?? formData.trade_in_out === 'out' ? 'Реализация товаров и услуг' : 'Закупка товаров',
         };
         const stockMovements: StockMovement[] = [];
         for (const vat_invoice_good of vat_invoice_goods) {
@@ -402,7 +405,7 @@ export default function VatInvoiceEditForm(props: IEditFormProps) {
                 good_id: vat_invoice_good.good_id,
                 user_id: useDocumentStore.getState().sessionUser.id,
                 period_id: period.id,
-                record_in_out: 'out' as InOutType,
+                record_in_out: formData.trade_in_out,
                 quantity: vat_invoice_good.quantity,
                 amount: vat_invoice_good.amount,
                 warehouse_id: formData.warehouse_id,
@@ -438,16 +441,24 @@ export default function VatInvoiceEditForm(props: IEditFormProps) {
                     <div className="flex flex-col md:flex-row gap-4 w-full">
                         {/* первая колонка */}
                         <div className="flex flex-col gap-4 w-full md:w-1/2">
-                            <InputField
-                                name="number"
-                                value={formData.number || ""}
-                                label="Номер:"
-                                type="text"
-                                w={["w-4/16", "w-13/16"]}
-                                onChange={(value) => handleInputChange('number', value)}
-                                readonly={props.readonly}
-                                errors={errors?.number?._errors as string[] | undefined}
-                            />
+                            <div className="flex flex-1 justify-between">
+                                {/* number */}
+                                <InputField
+                                    name="number"
+                                    value={formData.number || ""}
+                                    label="Номер:"
+                                    type="text"
+                                    w={["w-4/16", "w-13/16"]}
+                                    onChange={(value) => handleInputChange('number', value)}
+                                    readonly={props.readonly}
+                                    errors={errors?.number?._errors as string[] | undefined}
+                                />
+                                <TradeInOutToggle
+                                    value={formData.trade_in_out}
+                                    onChange={(value) => { handleInputChange('trade_in_out', value); docChanged() }}
+                                    size="md"
+                                />
+                            </div>
                             {/* date */}
                             <div className="flex-2 flex items-center">
                                 <label
@@ -544,6 +555,17 @@ export default function VatInvoiceEditForm(props: IEditFormProps) {
                                 readonly={props.readonly}
                                 errors={errors?.name?._errors as string[] | undefined}
                             />
+                            {/* description */}
+                            <InputField
+                                name="description"
+                                value={formData.description ?? "Реализация товаров и услуг"}
+                                label="Описание:"
+                                type="text"
+                                w={["w-4/16", "w-13/16"]}
+                                onChange={(value) => handleInputChange('description', value)}
+                                readonly={props.readonly}
+                                errors={errors?.description?._errors as string[] | undefined}
+                            />
                             {/* customer_name */}
                             <InputField
                                 name="our_legal_entity_name"
@@ -567,6 +589,7 @@ export default function VatInvoiceEditForm(props: IEditFormProps) {
                                 readonly={props.readonly}
                                 errors={errors?.section_name?._errors as string[] | undefined}
                             />
+
                             {/* SetAcceptedButton & accepted_date */}
                             <div className="flex justify-between h-1/4 md:w-full">
 
