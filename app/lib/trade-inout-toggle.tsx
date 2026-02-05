@@ -4,13 +4,15 @@ import { InOutType } from './definitions';
 interface TradeToggleProps {
   value?: InOutType;
   onChange?: (value: InOutType) => void;
+  readonly?: boolean;
   size?: 'sm' | 'md' | 'lg';
 }
 
-export function TradeInOutToggle({ 
-  value, 
-  onChange, 
-  size = 'md' 
+export function TradeInOutToggle({
+  value,
+  onChange,
+  readonly = false,
+  size = 'md'
 }: TradeToggleProps) {
   const [internalValue, setInternalValue] = useState<InOutType>('out');
   const currentValue = value ?? internalValue;
@@ -32,11 +34,13 @@ export function TradeInOutToggle({
     <div className="inline-flex rounded-lg bg-gray-100 p-1">
       <button
         type="button"
+        disabled={readonly}
         onClick={() => handleChange('in')}
-        className={`flex items-center space-x-2 font-medium transition-all duration-300 rounded-md ${
-          currentValue === 'in'
-            ? 'bg-gradient-to-r from-blue-400 to-blue-600 text-white shadow-md'
-            : 'text-gray-700 hover:bg-white'
+        className={`flex items-center space-x-2 font-medium transition-all duration-300 rounded-md 
+          ${currentValue === 'in'? readonly
+            ? 'bg-gradient-to-r from-gray-300 to-gray-500 text-white shadow-md'
+            : 'bg-gradient-to-r from-blue-400 to-blue-600 text-white shadow-md'
+              : 'text-gray-700 hover:bg-white'
         } ${sizes[size]}`}
       >
         <span>📥</span>
@@ -45,12 +49,14 @@ export function TradeInOutToggle({
 
       <button
         type="button"
+        disabled={readonly}
         onClick={() => handleChange('out')}
-        className={`flex items-center space-x-2 font-medium transition-all duration-300 rounded-md ${
-          currentValue === 'out'
-            ? 'bg-gradient-to-r from-blue-400 to-blue-600 text-white shadow-md'
+        className={`flex items-center space-x-2 font-medium transition-all duration-300 rounded-md 
+          ${currentValue === 'out' ? readonly
+            ? 'bg-gradient-to-r from-gray-300 to-gray-500 text-white shadow-md'
+            : 'bg-gradient-to-r from-blue-400 to-blue-600 text-white shadow-md'
             : 'text-gray-700 hover:bg-white'
-        } ${sizes[size]}`}
+          } ${sizes[size]}`}
       >
         <span>📤</span>
         <span>Продажа</span>

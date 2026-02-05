@@ -27,8 +27,8 @@ const links = [
   // { name: 'Lesson', href: '/dashboard/lesson', icon: HomeIcon },
 ];
 const subMenu = [
-  { mainItem: 'Продажи', name: 'Счета-фактуры', href: '/erp/vat-invoices' },
-  { mainItem: 'Продажи', name: 'Счета к получению', href: '/erp/invoices' },
+  { mainItem: 'Продажи', name: 'Заказы', href: '/erp/vat-invoices' },
+  // { mainItem: 'Продажи', name: 'Счета к получению', href: '/erp/invoices' },
   { mainItem: 'Продажи', name: 'Остатки товаров', href: '/ledger/stock' },
   { mainItem: 'Администрирование', name: 'Пользователи', href: '/admin/users' },
   { mainItem: 'Администрирование', name: 'Организации', href: '/admin/tenants' },

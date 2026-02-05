@@ -210,7 +210,6 @@ export default function VatInvoiceEditForm(props: IEditFormProps) {
         }
         return res.error.format();
     };
-
     const handleSubmit = async (e: React.MouseEvent<HTMLFormElement>) => {
         e.preventDefault();
         const errors = validate();
@@ -454,12 +453,13 @@ export default function VatInvoiceEditForm(props: IEditFormProps) {
                                     type="text"
                                     w={["w-4/16", "w-13/16"]}
                                     onChange={(value) => handleInputChange('number', value)}
-                                    readonly={props.readonly}
+                                    readonly={props.readonly || formData.ledger_record_id !== '00000000-0000-0000-0000-000000000000'}
                                     errors={errors?.number?._errors as string[] | undefined}
                                 />
                                 <TradeInOutToggle
                                     value={formData.trade_in_out}
                                     onChange={(value) => { handleInputChange('trade_in_out', value); docChanged() }}
+                                    readonly={props.readonly || formData.ledger_record_id !== '00000000-0000-0000-0000-000000000000'}
                                     size="md"
                                 />
                             </div>
@@ -475,7 +475,7 @@ export default function VatInvoiceEditForm(props: IEditFormProps) {
                                     type="date"
                                     className="w-5/16 disabled:text-gray-400 disabled:bg-gray-100 break-words control rounded-md border border-gray-200 p-2"
                                     onChange={(e) => handleDateChange(String(e.target.value))}
-                                    disabled={props.readonly}
+                                    disabled={props.readonly || formData.ledger_record_id !== '00000000-0000-0000-0000-000000000000'}
                                 />
                                 {/* Блок с выводом ошибок */}
                                 <div id={"date-error"} aria-live="polite" aria-atomic="true">
@@ -496,7 +496,7 @@ export default function VatInvoiceEditForm(props: IEditFormProps) {
                                 w={["w-6/16", "w-11/16"]}
                                 onChange={() => { }}
                                 refBook={<BtnLegalEntitiesRef handleSelectLegalEntity={handleSelectCustomer} legalEntities={props.customers} elementIdPrefix="customer" />}
-                                readonly={props.readonly}
+                                readonly={props.readonly || formData.ledger_record_id !== '00000000-0000-0000-0000-000000000000'}
                                 errors={errors?.customer_name?._errors as string[] | undefined}
                             />
                             {/* warehouse_name */}
@@ -508,7 +508,7 @@ export default function VatInvoiceEditForm(props: IEditFormProps) {
                                 w={["w-6/16", "w-11/16"]}
                                 onChange={() => { }}
                                 refBook={<BtnWarehousesRef handleSelectWarehouse={handleSelectWarehouse} warehouses={props.warehouses} />}
-                                readonly={props.readonly}
+                                readonly={props.readonly || formData.ledger_record_id !== '00000000-0000-0000-0000-000000000000'}
                                 errors={errors?.warehouse_name?._errors as string[] | undefined}
                             />
                             {/* SetApprovedButton & approved_date */}
@@ -517,8 +517,8 @@ export default function VatInvoiceEditForm(props: IEditFormProps) {
                                 {!props.readonly && <button
                                     type="button"
                                     onClick={() => handleSetApproved()}
-                                    disabled={props.readonly}
-                                    className={`w-10/16 h-10 mt-1 rounded-md border p-2 ${props.readonly
+                                    disabled={props.readonly || formData.ledger_record_id !== '00000000-0000-0000-0000-000000000000'}
+                                    className={`w-10/16 h-10 mt-1 rounded-md border p-2 ${(props.readonly || formData.ledger_record_id !== '00000000-0000-0000-0000-000000000000')
                                         ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                         : 'bg-blue-400 text-white hover:bg-blue-100 hover:text-gray-500 cursor-pointer'
                                         }`}
@@ -529,7 +529,7 @@ export default function VatInvoiceEditForm(props: IEditFormProps) {
                                 <InputField name="approved_date" value={utcISOToLocalDateTimeInput(formData.approved_date)}
                                     label="" type="datetime-local" w={["w-1/16", "w-16/16"]}
                                     onChange={(value) => handleInputChange('approved_date', String(value))}
-                                    readonly={props.readonly}
+                                    readonly={props.readonly || formData.ledger_record_id !== '00000000-0000-0000-0000-000000000000'}
                                     errors={errors?.approved_date?._errors as string[] | undefined}
                                 />
                             </div>
@@ -542,7 +542,7 @@ export default function VatInvoiceEditForm(props: IEditFormProps) {
                                 w={["w-6/16", "w-11/16"]}
                                 onChange={() => { }}
                                 refBook={<BtnPersonsRef handleSelectPerson={handleSelectApprovedPerson} persons={props.persons} />}
-                                readonly={props.readonly}
+                                readonly={props.readonly || formData.ledger_record_id !== '00000000-0000-0000-0000-000000000000'}
                             />
                         </div>
 
@@ -556,7 +556,7 @@ export default function VatInvoiceEditForm(props: IEditFormProps) {
                                 type="text"
                                 w={["w-4/16", "w-13/16"]}
                                 onChange={(value) => handleInputChange('name', value)}
-                                readonly={props.readonly}
+                                readonly={props.readonly || formData.ledger_record_id !== '00000000-0000-0000-0000-000000000000'}
                                 errors={errors?.name?._errors as string[] | undefined}
                             />
                             {/* description */}
@@ -567,7 +567,7 @@ export default function VatInvoiceEditForm(props: IEditFormProps) {
                                 type="text"
                                 w={["w-4/16", "w-13/16"]}
                                 onChange={(value) => handleInputChange('description', value)}
-                                readonly={props.readonly}
+                                readonly={props.readonly || formData.ledger_record_id !== '00000000-0000-0000-0000-000000000000'}
                                 errors={errors?.description?._errors as string[] | undefined}
                             />
                             {/* customer_name */}
@@ -579,7 +579,7 @@ export default function VatInvoiceEditForm(props: IEditFormProps) {
                                 w={["w-6/16", "w-11/16"]}
                                 onChange={() => { }}
                                 refBook={<BtnLegalEntitiesRef handleSelectLegalEntity={handleSelectOurLegalEntity} legalEntities={props.customers} elementIdPrefix="our_legal_entity" />}
-                                readonly={props.readonly}
+                                readonly={props.readonly || formData.ledger_record_id !== '00000000-0000-0000-0000-000000000000'}
                                 errors={errors?.our_legal_entity_name?._errors as string[] | undefined}
                             />
                             <InputField
@@ -590,29 +590,30 @@ export default function VatInvoiceEditForm(props: IEditFormProps) {
                                 w={["w-6/16", "w-11/16"]}
                                 onChange={() => { }}
                                 refBook={<BtnSectionsRef handleSelectSection={handleSelectSection} />}
-                                readonly={props.readonly}
+                                readonly={props.readonly || formData.ledger_record_id !== '00000000-0000-0000-0000-000000000000'}
                                 errors={errors?.section_name?._errors as string[] | undefined}
                             />
 
                             {/* SetAcceptedButton & accepted_date */}
                             <div className="flex justify-between h-1/4 md:w-full">
 
-                                {!props.readonly && <button
-                                    type="button"
-                                    onClick={() => handleSetAccepted()}
-                                    disabled={props.readonly}
-                                    className={`w-10/16 h-10 mt-1 rounded-md border p-2 ${props.readonly
-                                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                        : 'bg-blue-400 text-white hover:bg-blue-100 hover:text-gray-500 cursor-pointer'
-                                        }`}
-                                >
-                                    Подписал
-                                </button>}
+                                {!props.readonly &&
+                                    <button
+                                        type="button"
+                                        onClick={() => handleSetAccepted()}
+                                        disabled={props.readonly || formData.ledger_record_id !== '00000000-0000-0000-0000-000000000000'}
+                                        className={`w-10/16 h-10 mt-1 rounded-md border p-2 ${(props.readonly || formData.ledger_record_id !== '00000000-0000-0000-0000-000000000000')
+                                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                            : 'bg-blue-400 text-white hover:bg-blue-100 hover:text-gray-500 cursor-pointer'
+                                            }`}
+                                    >
+                                        Подписал
+                                    </button>}
                                 {/* accepted_date */}
                                 <InputField name="accepted_date" value={utcISOToLocalDateTimeInput(formData.accepted_date)}
                                     label="" type="datetime-local" w={["w-1/16", "w-16/16"]}
                                     onChange={(value) => handleInputChange('accepted_date', String(value))}
-                                    readonly={props.readonly}
+                                    readonly={props.readonly || formData.ledger_record_id !== '00000000-0000-0000-0000-000000000000'}
                                     errors={errors?.accepted_date?._errors as string[] | undefined}
                                 />
                             </div>
@@ -624,7 +625,7 @@ export default function VatInvoiceEditForm(props: IEditFormProps) {
                                 w={["w-6/16", "w-11/16"]}
                                 onChange={() => { }}
                                 refBook={<BtnPersonsRef handleSelectPerson={handleSelectAcceptedPerson} persons={props.persons} />}
-                                readonly={props.readonly}
+                                readonly={props.readonly || formData.ledger_record_id !== '00000000-0000-0000-0000-000000000000'}
                             />
 
                         </div>
@@ -638,7 +639,7 @@ export default function VatInvoiceEditForm(props: IEditFormProps) {
                     </div>
                     {props.vat_invoice_goods && (
                         <VatInvoiceGoodsTable
-                            readonly={props.readonly}
+                            readonly={props.readonly || formData.ledger_record_id !== '00000000-0000-0000-0000-000000000000'}
                             onDocumentChanged={docChanged}
                             vatInvoiceId={formData.id}
                             goods={props.goods}
@@ -651,8 +652,8 @@ export default function VatInvoiceEditForm(props: IEditFormProps) {
                             <div className="flex w-full md:w-3/4">
                                 <div className="w-full md:w-1/2">
                                     <button
-                                        disabled={props.readonly}
-                                        className={`w-full rounded-md border p-2 ${props.readonly
+                                        disabled={props.readonly || formData.ledger_record_id !== '00000000-0000-0000-0000-000000000000'}
+                                        className={`w-full rounded-md border p-2 ${(props.readonly || formData.ledger_record_id !== '00000000-0000-0000-0000-000000000000')
                                             ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                             : 'bg-blue-400 text-white hover:bg-blue-100 hover:text-gray-500 cursor-pointer'
                                             }`}
@@ -673,7 +674,7 @@ export default function VatInvoiceEditForm(props: IEditFormProps) {
                                     <button
                                         type="button"
                                         onClick={handleShowPDF}
-                                        className="bg-green-400 text-white w-full rounded-md border p-2 hover:bg-green-100 hover:text-gray-500 cursor-pointer"
+                                        className="bg-blue-400 text-white w-full rounded-md border p-2 hover:bg-green-100 hover:text-gray-500 cursor-pointer"
                                     >
                                         Открыть PDF
                                     </button>
@@ -685,7 +686,7 @@ export default function VatInvoiceEditForm(props: IEditFormProps) {
                                         onClick={(e) => handleCreateDeleteStockMovements(vat_invoice_goods ?? [], formData)}
                                         className={`text-white w-full border p-2 ${(props.readonly || isDocumentChanged)
                                             ? 'bg-gray-300 cursor-not-allowed'
-                                            : 'bg-green-400  rounded-md hover:bg-green-100 hover:text-gray-500 cursor-pointer'}
+                                            : 'bg-blue-400  rounded-md hover:bg-green-100 hover:text-gray-500 cursor-pointer'}
                                             `}
                                     >
                                         {formData.ledger_record_id === '00000000-0000-0000-0000-000000000000' ? 'Провести документ' : 'Отменить проведение'}

@@ -27,7 +27,11 @@ export default async function VatInvoicesTable({
               <table className="table-fixed hidden w-full rounded-md text-gray-900 md:table">
                 <thead className="rounded-md bg-gray-50 text-left text-sm font-normal">
                   <tr>
-                    <th scope="col" className="w-4/12 px-4 py-5 font-medium sm:pl-6">Название</th>
+                    <th scope="col" className="w-4/12 px-4 py-5 font-medium sm:pl-6">Счет-заказ</th>
+                    <th scope="col" className="w-4/12 px-4 py-5 font-medium sm:pl-6">Дата</th>
+                    <th scope="col" className="w-4/12 px-4 py-5 font-medium sm:pl-6">Покупка/Продажа</th>
+                    <th scope="col" className="w-4/12 px-4 py-5 font-medium sm:pl-6">Контрагент</th>
+                    <th scope="col" className="w-4/12 px-4 py-5 font-medium sm:pl-6">Склад</th>
                     <th scope="col" className="w-1/12 px-4 py-5 font-medium"></th>
                   </tr>
                 </thead>
@@ -41,6 +45,18 @@ export default async function VatInvoicesTable({
                         >
                           {invoice.name}
                         </a>
+                      </td>
+                      <td className="w-4/12 overflow-hidden whitespace-nowrap bg-white py-2 pl-6 pr-3 text-sm text-black">
+                        {new Date(invoice.date as string).toLocaleDateString('ru-RU')}
+                      </td>
+                      <td className="w-4/12 overflow-hidden whitespace-nowrap bg-white py-2 pl-6 pr-3 text-sm text-black">
+                        {invoice.trade_in_out === 'in' ? 'Покупка' : 'Продажа'}
+                      </td>
+                      <td className="w-4/12 overflow-hidden whitespace-nowrap bg-white py-2 pl-6 pr-3 text-sm text-black">
+                        {invoice.customer_name}
+                      </td>
+                      <td className="w-4/12 overflow-hidden whitespace-nowrap bg-white py-2 pl-6 pr-3 text-sm text-black">
+                        {invoice.warehouse_name}
                       </td>
                       <td className="w-1/12 whitespace-nowrap py-2 pr-3">
                         <div className="flex justify-end gap-3">

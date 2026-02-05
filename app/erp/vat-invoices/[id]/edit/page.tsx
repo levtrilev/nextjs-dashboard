@@ -69,6 +69,7 @@ async function Page(props: { params: Promise<{ id: string }> }) {
     : { editing_by_user_id: '', editing_by_user_email: '', };
   const editingByCurrentUser = freshRecord.editing_by_user_id === user.id;
   const readonly = readonly_permission ? readonly_permission : !editingByCurrentUser;
+
   //#endregion
 
   const customers = readonly ? [] : await fetchLegalEntitiesForm(current_sections);
@@ -82,6 +83,11 @@ async function Page(props: { params: Promise<{ id: string }> }) {
         {readonly && (
           <span className="text-xs font-medium text-gray-400">
             только чтение для пользователя: {user?.email}
+          </span>
+        )}
+        {!readonly && invoice.ledger_record_id !== "00000000-0000-0000-0000-000000000000" && (
+          <span className="text-xs font-medium text-blue-500">
+            для редактирования необходимо отменить проведение документа
           </span>
         )}
         {!readonly && (
