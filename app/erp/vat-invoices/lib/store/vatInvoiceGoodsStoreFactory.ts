@@ -20,6 +20,8 @@ export interface VatInvoiceGoodItem {
   amount: string; // вычисляется как quantity * price * (1 - discount / 100)
   isEditing: boolean;
   isToBeDeleted: boolean;
+  vat_invoice_id?: string;
+  section_id?: string;
 }
 
 interface VatInvoiceGoodsStore {
@@ -112,10 +114,10 @@ export const createVatInvoiceGoodsStore = (initialGoods: VatInvoiceGoodItem[] = 
         (g) => !g.id.startsWith('temp-') && g.id.length < 36 // предполагаем, что временные ID не UUID
       );
       // На практике лучше использовать флаг isPersisted, но для простоты — по длине ID
-      // В данном случае все новые строки имеют временный ID от uuidv4(), который тоже UUID.
+      // В данном случае все новые строки имеют временный ID.
       // Поэтому корректнее: сохраняем только те, у которых isToBeDeleted === false и id не соответствует UUID из БД.
       // Но в нашем случае при создании формы мы получаем уже существующие записи с настоящими UUID.
-      // А новые — с временными UUID от uuidv4().
+      // А новые — с временными UUID.
       // Чтобы отличить, можно добавить флаг isPersisted, но для упрощения примем:
       // если id не был в исходных данных — это новая запись.
       // Однако в текущей реализации мы не храним "исходные", поэтому будем считать:

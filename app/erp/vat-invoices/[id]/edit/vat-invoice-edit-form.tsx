@@ -165,7 +165,7 @@ export default function VatInvoiceEditForm(props: IEditFormProps) {
         deleteMarkedGoodsFromDB,
         setInitialGoods,
     } = useCurrentVatInvoiceGoodsStore();
-
+    type VatInvoiceGoodItem = typeof vat_invoice_goods[number];
     useEffect(() => {
         return () => {
             destroyVatInvoiceGoodsStore(formData.id);
@@ -360,7 +360,7 @@ export default function VatInvoiceEditForm(props: IEditFormProps) {
         docChanged();
     }
     const errors = showErrors ? validate() : undefined;
-    const handleCreateDeleteStockMovements = async (vat_invoice_goods: VatInvoiceGoodsForm[], formData: FormData) => {
+    const handleCreateDeleteStockMovements = async (vat_invoice_goods: VatInvoiceGoodItem[], formData: FormData) => {
         if (formData.ledger_record_id !== '00000000-0000-0000-0000-000000000000') {
             try {
                 const deleteResult = await deleteLedgerRecordWithMovements(formData.ledger_record_id, formData.id);
@@ -393,7 +393,11 @@ export default function VatInvoiceEditForm(props: IEditFormProps) {
             record_text: formData.description ?? formData.trade_in_out === 'out' ? 'Реализация товаров и услуг' : 'Закупка товаров',
         };
         const stockMovements: StockMovement[] = [];
-        for (const vat_invoice_good of vat_invoice_goods) {
+        const newGoods = vat_invoice_goods.filter(
+            (g) => !g.id.startsWith('temp-') && g.id.length < 36 // предполагаем, что временные ID не UUID
+        );
+
+        for (const vat_invoice_good of vat_invoice_goods.filter((g) => !g.isToBeDeleted)) {
             const stockMovement: StockMovement = {
                 id: '00000000-0000-0000-0000-000000000000',
                 doc_id: formData.id,
@@ -406,8 +410,8 @@ export default function VatInvoiceEditForm(props: IEditFormProps) {
                 user_id: useDocumentStore.getState().sessionUser.id,
                 period_id: period.id,
                 record_in_out: formData.trade_in_out,
-                quantity: vat_invoice_good.quantity,
-                amount: vat_invoice_good.amount,
+                quantity: parseFloat(vat_invoice_good.quantity),
+                amount: parseFloat(vat_invoice_good.amount),
                 warehouse_id: formData.warehouse_id,
                 editing_by_user_id: null,
                 editing_since: null,
@@ -676,9 +680,13 @@ export default function VatInvoiceEditForm(props: IEditFormProps) {
                                 </div>
                                 {props.vat_invoice_goods && <div className="w-full md:w-1/2">
                                     <button
+                                        disabled={props.readonly || isDocumentChanged}
                                         type='button'
-                                        onClick={(e) => handleCreateDeleteStockMovements(props.vat_invoice_goods ?? [], formData)}
-                                        className="bg-green-400 text-white w-full rounded-md border p-2 hover:bg-green-100 hover:text-gray-500 cursor-pointer"
+                                        onClick={(e) => handleCreateDeleteStockMovements(vat_invoice_goods ?? [], formData)}
+                                        className={`text-white w-full border p-2 ${(props.readonly || isDocumentChanged)
+                                            ? 'bg-gray-300 cursor-not-allowed'
+                                            : 'bg-green-400  rounded-md hover:bg-green-100 hover:text-gray-500 cursor-pointer'}
+                                            `}
                                     >
                                         {formData.ledger_record_id === '00000000-0000-0000-0000-000000000000' ? 'Провести документ' : 'Отменить проведение'}
                                     </button>
