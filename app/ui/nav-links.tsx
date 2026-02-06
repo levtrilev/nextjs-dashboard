@@ -20,16 +20,17 @@ const links = [
   { name: 'Ремонт', href: '#', icon: HomeIcon },
   { name: 'Главное', href: '/erp', icon: MapPinIcon },
   { name: 'Руководителю', href: '/dashboard', icon: ArrowRightCircleIcon },
-  { name: 'Продажи', href: '#', icon: SparklesIcon },
+  { name: 'Торговля', href: '#', icon: SparklesIcon },
   { name: 'Справочники', href: '#', icon: BookOpenIcon },
   { name: 'Помещения', href: '#', icon: BuildingOfficeIcon }, //premise
   { name: 'Администрирование', href: '/admin', icon: UserGroupIcon },
   // { name: 'Lesson', href: '/dashboard/lesson', icon: HomeIcon },
 ];
 const subMenu = [
-  { mainItem: 'Продажи', name: 'Заказы', href: '/erp/vat-invoices' },
+  { mainItem: 'Торговля', name: 'Заказы', href: '/erp/vat-invoices' },
   // { mainItem: 'Продажи', name: 'Счета к получению', href: '/erp/invoices' },
-  { mainItem: 'Продажи', name: 'Остатки товаров', href: '/ledger/stock' },
+  { mainItem: 'Торговля', name: 'Остатки товаров', href: '/ledger/stock' },
+  { mainItem: 'Торговля', name: 'Оборот товаров', href: '/ledger/stock/turns' },
   { mainItem: 'Администрирование', name: 'Пользователи', href: '/admin/users' },
   { mainItem: 'Администрирование', name: 'Организации', href: '/admin/tenants' },
   { mainItem: 'Администрирование', name: 'Разделы', href: '/admin/sections' },

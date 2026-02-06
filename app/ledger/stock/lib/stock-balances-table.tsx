@@ -7,6 +7,7 @@ import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { Period, StockBalanceForm } from './stock-types';
 import { GoodForm, WarehouseForm } from '@/app/lib/definitions';
+import { formatDate, formatNumber, formatCurrencyRUB } from '@/app/lib/common-utils'
 
 interface StockBalancesTableProps {
   balances: StockBalanceForm[];
@@ -74,34 +75,6 @@ export default function StockBalancesTable({
     const startIndex = (currentPage - 1) * itemsPerPage;
     return sortedBalances.slice(startIndex, startIndex + itemsPerPage);
   }, [sortedBalances, currentPage]);
-
-  // ===== Форматирование =====
-  const formatNumber = (value: string | number): string => {
-    const num = typeof value === 'string' ? parseFloat(value) : value;
-    return num.toLocaleString('ru-RU', {
-      minimumFractionDigits: 3,
-      maximumFractionDigits: 3,
-    });
-  };
-
-  const formatCurrency = (value: string | number): string => {
-    const num = typeof value === 'string' ? parseFloat(value) : value;
-    return num.toLocaleString('ru-RU', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-      style: 'currency',
-      currency: 'RUB',
-    });
-  };
-
-  const formatDate = (date: Date | string): string => {
-    try {
-      const d = typeof date === 'string' ? new Date(date) : date;
-      return format(d, 'dd.MM.yyyy', { locale: ru });
-    } catch {
-      return String(date);
-    }
-  };
 
   // ===== Обработчики =====
   const handleSort = (key: keyof StockBalanceForm) => {
@@ -228,7 +201,7 @@ export default function StockBalancesTable({
                   {formatNumber(balance.balance_quantity)}
                 </TableCell>
                 <TableCell align="right" className="font-medium">
-                  {formatCurrency(balance.balance_amount)}
+                  {formatCurrencyRUB(balance.balance_amount)}
                 </TableCell>
               </tr>
             ))}

@@ -14,13 +14,14 @@ import { CalendarIcon, BuildingStorefrontIcon, CubeIcon, MagnifyingGlassIcon } f
 
 interface StockBalancesPageProps {
   current_sections: string;
+  initialFilterPeriod?: Period;
   warehouses: WarehouseForm[];
   goods: GoodForm[];
   periods: Period[];
 }
 
 export default function StockBalancesPage(
-  { current_sections, warehouses, goods, periods }: StockBalancesPageProps
+  { current_sections, initialFilterPeriod, warehouses, goods, periods }: StockBalancesPageProps
 ) {
   const [balances, setBalances] = useState<StockBalanceForm[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -33,10 +34,7 @@ export default function StockBalancesPage(
     id: '',
     name: 'Все товары',
   });
-  const [filterPeriod, setFilterPeriod] = useState<{ id: string, name: string }>({
-    id: '',
-    name: 'Все периоды',
-  });
+  const [filterPeriod, setFilterPeriod] = useState<{ id: string, name: string }>(initialFilterPeriod ?? { id: '', name: 'Все периоды' });
   const emptyGood = { ...goods[0], id: '', name: 'Все товары', product_code: '' };
   const goodsWithEmpty = useMemo(() => { return [emptyGood, ...goods] }, [goods]);
   const emptyWarehouse = { ...warehouses[0], id: '', name: 'Все склады' };

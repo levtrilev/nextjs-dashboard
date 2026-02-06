@@ -1,14 +1,14 @@
 'use server';
 
 import { auth, getUser } from "@/auth";
-import CreateStockMovementButton from "./movements/create/page";
+import CreateStockMovementButton from "../movements/create/page";
 import { getCurrentSections } from "@/app/lib/common-actions";
-import StockBalancesPage from "./stock-balances-page";
+// import StockBalancesPage from "./stock-balances-page";
 import { fetchGoodsForm } from "@/app/erp/goods/lib/goods-actions";
 import { fetchWarehousesForm } from "@/app/erp/warehouses/lib/warehouses-actions";
 import { fetchSectionsForm } from "@/app/admin/sections/lib/sections-actions";
-import { fetchPeriods, getPeriodByDate } from "./lib/stock-actions";
-import StockDashboard from "./turns/stock-dashboard";
+import { fetchPeriods, getPeriodByDate } from "../lib/stock-actions";
+import StockDashboard from "./stock-dashboard";
 
 export default async function Page() {
     const session = await auth();
@@ -35,19 +35,19 @@ export default async function Page() {
                 warehouses={warehouses}
                 sections={sections}
             />
-            <StockBalancesPage
+            {/* <StockBalancesPage
+                current_sections={current_sections}
+                warehouses={warehouses}
+                goods={goods}
+                periods={periods}
+            /> */}
+            <StockDashboard
                 current_sections={current_sections}
                 initialFilterPeriod={initialFilterPeriod ?? undefined}
                 warehouses={warehouses}
                 goods={goods}
                 periods={periods}
             />
-            {/* <StockDashboard
-                current_sections={current_sections}
-                warehouses={warehouses}
-                goods={goods}
-                periods={periods}
-            /> */}
         </>
     );
 }

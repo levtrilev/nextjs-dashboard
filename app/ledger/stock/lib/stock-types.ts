@@ -15,6 +15,25 @@ export interface StockBalanceForm extends StockBalance {
   period_name?: string;
 }
 
+export interface StockTurnover {
+  period_id: string
+  period_name: string
+  period_date_start: Date
+  period_date_end: Date
+  warehouse_id: string
+  warehouse_name: string
+  good_id: string
+  good_name: string
+  good_code: string | null
+  opening_quantity: number
+  opening_amount: number
+  incoming_quantity: number
+  incoming_amount: number
+  outgoing_quantity: number
+  outgoing_amount: number
+  closing_quantity: number
+  closing_amount: number
+}
 // interface StockBalance {
 //   warehouse_id: string;      // uuid → string
 //   good_id: string;           // uuid → string

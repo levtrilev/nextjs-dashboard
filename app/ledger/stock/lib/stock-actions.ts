@@ -1,8 +1,9 @@
 "use server";
 import pool from "@/db";
 import { revalidatePath } from "next/cache";
+import { unstable_cache } from 'next/cache'
 import { LedgerRecord, Period, StockMovement } from "@/app/lib/definitions";
-import { StockBalanceForm } from "./stock-types";
+import { StockBalanceForm, StockTurnover } from "./stock-types";
 
 export type StockMovementForm = StockMovement & {
   doc_name: string;
@@ -208,6 +209,7 @@ export async function getStockBalances(current_sections: string) {
 export async function getFullStockBalances(current_sections: string) {
   // console.log("getStockBalances current_sections", current_sections);
   const date_end_of_report = new Date();
+  date_end_of_report.setDate(date_end_of_report.getDate() + 31);
   try {
     const result = await pool.query<StockBalanceForm>(
       `
@@ -566,4 +568,154 @@ export async function deleteLedgerRecordWithMovements(ledgerRecordId: string, va
       message: error instanceof Error ? error.message : "Неизвестная ошибка",
     };
   }
-}
+};
+
+
+export async function getStockTurnovers(
+  current_sections: string,
+  filterPeriodId?: string,
+  filterWarehouseId?: string,
+  filterGoodId?: string
+): Promise<StockTurnover[]> {
+  const cacheKey = `stock-turnovers-${current_sections}-${filterPeriodId || 'all'}-${filterWarehouseId || 'all'}-${filterGoodId || 'all'}`
+
+  const cachedFn = unstable_cache(
+    async () => {
+      // Сначала получаем все периоды, склады и товары для расчёта
+      const query = `
+        WITH 
+    your_stock_movements AS (
+      SELECT * 
+      FROM stock_movements 
+      WHERE section_id = ANY($1::uuid[])
+        AND movement_status = 'active'
+    ),
+        period_boundaries AS (
+          SELECT 
+            p.id as period_id,
+            p.name as period_name,
+            p.date_start,
+            p.date_end
+          FROM periods p
+            ${filterPeriodId ? 'WHERE p.id = $2' : ''}
+        ),
+        movements_filtered AS (
+          SELECT 
+            sm.period_id,
+            sm.warehouse_id,
+            sm.good_id,
+            sm.record_in_out,
+            sm.quantity,
+            sm.amount
+          FROM your_stock_movements sm
+          WHERE sm.movement_status = 'active'
+            ${filterWarehouseId ? 'AND sm.warehouse_id = $' + (filterPeriodId ? '3' : '2') : ''}
+            ${filterGoodId ? 'AND sm.good_id = $' + (filterPeriodId && filterWarehouseId ? '4' : filterPeriodId || filterWarehouseId ? '3' : '2') : ''}
+        ),
+        turnover_calculation AS (
+          SELECT 
+            pb.period_id,
+            pb.period_name,
+            pb.date_start as period_date_start,
+            pb.date_end as period_date_end,
+            w.id as warehouse_id,
+            w.name as warehouse_name,
+            g.id as good_id,
+            g.name as good_name,
+            g.product_code as good_code,
+            
+            -- Остаток на начало периода
+            COALESCE(SUM(CASE 
+              WHEN sm_before.record_in_out = 'in' THEN sm_before.quantity
+              WHEN sm_before.record_in_out = 'out' THEN -sm_before.quantity
+              ELSE 0 
+            END), 0) as opening_quantity,
+            
+            COALESCE(SUM(CASE 
+              WHEN sm_before.record_in_out = 'in' THEN sm_before.amount
+              WHEN sm_before.record_in_out = 'out' THEN -sm_before.amount
+              ELSE 0 
+            END), 0) as opening_amount,
+            
+            -- Поступления за период
+            COALESCE(SUM(CASE 
+              WHEN sm_curr.record_in_out = 'in' AND sm_curr.period_id = pb.period_id THEN sm_curr.quantity
+              ELSE 0 
+            END), 0) as incoming_quantity,
+            
+            COALESCE(SUM(CASE 
+              WHEN sm_curr.record_in_out = 'in' AND sm_curr.period_id = pb.period_id THEN sm_curr.amount
+              ELSE 0 
+            END), 0) as incoming_amount,
+            
+            -- Выбытия за период
+            COALESCE(SUM(CASE 
+              WHEN sm_curr.record_in_out = 'out' AND sm_curr.period_id = pb.period_id THEN sm_curr.quantity
+              ELSE 0 
+            END), 0) as outgoing_quantity,
+            
+            COALESCE(SUM(CASE 
+              WHEN sm_curr.record_in_out = 'out' AND sm_curr.period_id = pb.period_id THEN sm_curr.amount
+              ELSE 0 
+            END), 0) as outgoing_amount
+            
+          FROM period_boundaries pb
+          CROSS JOIN warehouses w
+          CROSS JOIN goods g
+          LEFT JOIN movements_filtered sm_before ON 
+            sm_before.warehouse_id = w.id 
+            AND sm_before.good_id = g.id
+            AND sm_before.period_id IN (
+              SELECT id FROM periods 
+              WHERE date_start < pb.date_start
+            )
+          LEFT JOIN movements_filtered sm_curr ON 
+            sm_curr.warehouse_id = w.id 
+            AND sm_curr.good_id = g.id
+            AND sm_curr.period_id = pb.period_id
+          WHERE w.tenant_id <> '00000000-0000-0000-0000-000000000000'
+            ${filterWarehouseId ? '' : 'AND w.id IN (SELECT DISTINCT warehouse_id FROM movements_filtered)'}
+            ${filterGoodId ? '' : 'AND g.id IN (SELECT DISTINCT good_id FROM movements_filtered)'}
+          GROUP BY 
+            pb.period_id, pb.period_name, pb.date_start, pb.date_end,
+            w.id, w.name,
+            g.id, g.name, g.product_code
+        )
+        
+        SELECT 
+          *,
+          opening_quantity + incoming_quantity - outgoing_quantity as closing_quantity,
+          opening_amount + incoming_amount - outgoing_amount as closing_amount
+        FROM turnover_calculation
+        WHERE 
+          -- Показываем только те строки, где есть остатки или обороты
+          opening_quantity <> 0 
+          OR opening_amount <> 0
+          OR incoming_quantity <> 0
+          OR incoming_amount <> 0
+          OR outgoing_quantity <> 0
+          OR outgoing_amount <> 0
+        ORDER BY 
+          period_date_start DESC,
+          warehouse_name,
+          good_name
+      `
+
+      const params: any[] = [current_sections]
+      if (filterPeriodId) params.push(filterPeriodId)
+      if (filterWarehouseId) params.push(filterWarehouseId)
+      if (filterGoodId) params.push(filterGoodId)
+
+      const result = await pool.query(query, params)
+      
+      return result.rows as StockTurnover[]
+    },
+    [cacheKey],
+    {
+      revalidate: 60, // 1 минута
+      tags: ['stock-turnovers']
+    }
+  )
+
+  return cachedFn()
+};

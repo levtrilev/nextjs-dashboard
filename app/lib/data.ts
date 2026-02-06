@@ -10,7 +10,7 @@ import {
   Revenue,
   UserForm,
 } from "./definitions";
-import { formatCurrency } from "./common-utils";
+import { formatCurrencyUSD } from "./common-utils";
 
 //#region Dashboard
 
@@ -33,7 +33,7 @@ export async function fetchLatestInvoices() {
     ) as { rows: LatestInvoiceRaw[] };
     return data.rows.map((invoice) => ({
       ...invoice,
-      amount: formatCurrency(invoice.amount),
+      amount: formatCurrencyUSD(invoice.amount),
     }));
   } catch (error) {
     console.error("Database Error:", error);
@@ -60,8 +60,8 @@ export async function fetchCardData() {
 
     const numberOfInvoices = Number(responses[0].rows[0].count ?? "0");
     const numberOfCustomers = Number(responses[1].rows[0].count ?? "0");
-    const totalPaidInvoices = formatCurrency(responses[2].rows[0].paid ?? "0");
-    const totalPendingInvoices = formatCurrency(responses[2].rows[0].pending ?? "0");
+    const totalPaidInvoices = formatCurrencyUSD(responses[2].rows[0].paid ?? "0");
+    const totalPendingInvoices = formatCurrencyUSD(responses[2].rows[0].pending ?? "0");
 
     return {
       numberOfCustomers,
@@ -196,8 +196,8 @@ export async function fetchFilteredCustomers(query: string) {
 
     return data.rows.map((customer) => ({
       ...customer,
-      total_pending: formatCurrency(customer.total_pending),
-      total_paid: formatCurrency(customer.total_paid),
+      total_pending: formatCurrencyUSD(customer.total_pending),
+      total_paid: formatCurrencyUSD(customer.total_paid),
     }));
   } catch (err) {
     console.error("Database Error:", err);
