@@ -104,7 +104,7 @@ export default function StockDashboard({
     }
 
     return (
-        <div className="container mx-auto p-6 max-w-7xl">
+        <div className="container mt-5 w-full">
             {/* Фильтры */}
             <div className="bg-white rounded-xl shadow-lg p-6 mb-6 border border-gray-200">
                 <div className="flex flex-wrap gap-4">
