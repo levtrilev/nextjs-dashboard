@@ -8,8 +8,39 @@ export type InOutType = 'in' | 'out';
 export type DocStatus = "draft" | "active" | "deleted";
 export type Priority = "высокий" | "низкий";
 export type MachineStatus = "норма" | "ремонт" | "ожидание" | "неизвестно";
+export type CarStatus = "норма" | "ремонт" | "ожидание" | "неизвестно";
 
-export type LedgerRecord = {
+export type Car = {
+  id: string;
+  name: string;
+  unit_id: string;
+  location_id: string;
+  gos_number: string;
+  make: string;
+  model: string;
+  vin: string;
+  year: string;
+  customer_id: string;
+  car_status: CarStatus;
+  section_id: string;
+  tenant_id: string;
+  username?: string;
+  author_id: string;
+  editor_id: string;
+  doc_status: DocStatus;
+  timestamptz?: string;
+  date_created?: Date;
+  editing_by_user_id: string | null;
+  editing_since: string | null;
+};
+export type CarForm =  Car & {
+  customer_name: string;
+  unit_name: string;
+  location_name: string;
+  section_name: string;
+};
+
+export type LedgerRecord ={
   id: string;
   doc_id: string;
   doc_type: string;
